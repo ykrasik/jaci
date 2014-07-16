@@ -1,0 +1,48 @@
+sourceCompatibility = 1.7
+version = '1.0'
+
+buildscript {
+    ext {
+        gdxVersion = '1.2.0'
+        junitVersion = '4.11'
+    }
+}
+
+allprojects {
+    apply plugin: "java"
+
+    repositories {
+        mavenCentral()
+    }
+}
+
+project("jerminal-core") {
+    description "Jerminal core module"
+
+    dependencies {
+        testCompile "junit:junit:$junitVersion"
+    }
+}
+
+project("jerminal-libgdx") {
+    description "Jerminal libGdx integration"
+
+    apply plugin: "application"
+
+    dependencies {
+        compile project(":jerminal-core")
+        compile "com.badlogicgames.gdx:gdx:$gdxVersion"
+    }
+}
+
+project("jerminal-tests") {
+    dependencies {
+        compile project(":jerminal-core")
+        compile project(":jerminal-libgdx")
+
+        compile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
+        compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+
+        compile 'junit:junit:4.11'
+    }
+}
