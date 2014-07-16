@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.rawcod.jerminal.shell.Shell;
 import com.rawcod.jerminal.shell.ShellManager;
 
@@ -99,7 +98,7 @@ public class LibGdxConsole implements InputProcessor {
     }
 
     public void resize(int width, int height) {
-        terminal.setViewport(new FitViewport(width, height));
+        terminal.setViewport(width, height);
     }
 
     @Override

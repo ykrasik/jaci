@@ -3,7 +3,7 @@ version = '1.0'
 
 buildscript {
     ext {
-        gdxVersion = '1.2.0'
+        gdxVersion = '0.9.9'
         junitVersion = '4.11'
     }
 }
@@ -43,6 +43,6 @@ project("jerminal-tests") {
         compile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
 
-        compile 'junit:junit:4.11'
+        compile "junit:junit:$junitVersion"
     }
 }

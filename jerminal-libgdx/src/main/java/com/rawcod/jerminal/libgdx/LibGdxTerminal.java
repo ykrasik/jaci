@@ -5,7 +5,6 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.rawcod.jerminal.Terminal;
 import com.rawcod.jerminal.shell.entry.directory.ShellTree;
 
@@ -32,7 +31,7 @@ public class LibGdxTerminal extends Stage implements Terminal {
                           int maxBufferEntries,
                           LibGdxConsoleWidgetFactory widgetFactory,
                           final LibGdxConsole console) {
-        super(new ScreenViewport());
+        super(width, height, true);
 
         // The buffer will show all the messages we got.
         buffer = createBuffer(maxBufferEntries, widgetFactory);
