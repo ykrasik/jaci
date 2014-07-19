@@ -2,9 +2,9 @@ package com.rawcod.jerminal.shell.parser;
 
 import com.rawcod.jerminal.collections.trie.TrieFilter;
 import com.rawcod.jerminal.collections.trie.TrieFilter.NoTrieFilter;
-import com.rawcod.jerminal.shell.entry.ShellAutoComplete;
-import com.rawcod.jerminal.shell.returnvalue.ShellAutoCompleteReturnValue;
-import com.rawcod.jerminal.shell.returnvalue.ShellParseReturnValue;
+import com.rawcod.jerminal.returnvalue.parse.flow.ParseReturnValue;
+import com.rawcod.jerminal.filesystem.entry.ShellAutoComplete;
+import com.rawcod.jerminal.returnvalue.autocomplete.flow.AutoCompleteReturnValue;
 
 import java.util.List;
 
@@ -37,46 +37,46 @@ public class ShellStringParser<V> {
         return wordContainer.getAllValues();
     }
 
-    public ShellParseReturnValue<V> parse(String arg) {
+    public ParseReturnValue<V> parse(String arg) {
         return parse(arg, NO_FILTER);
     }
 
-    public ShellParseReturnValue<V> parse(String arg, TrieFilter<V> filter) {
+    public ParseReturnValue<V> parse(String arg, TrieFilter<V> filter) {
         final V entry = wordContainer.get(arg);
         if (entry != null && !filter.shouldFilter(entry)) {
-            return ShellParseReturnValue.success(entry);
+            return ParseReturnValue.success(entry);
         }
 
-        final ShellAutoCompleteReturnValue returnValue = doAutoComplete(arg, filter, true);
-        return ShellParseReturnValue.failure(returnValue.getErrorCode(),
-                                             returnValue.getErrorMessage(),
-                                             returnValue.getAutoComplete());
+        final AutoCompleteReturnValue returnValue = doAutoComplete(arg, filter, true);
+        return ParseReturnValue.failure(returnValue.getErrorCode(),
+            returnValue.getErrorMessage(),
+            returnValue.getAutoComplete());
     }
 
-    public ShellAutoCompleteReturnValue autoComplete(String arg) {
+    public AutoCompleteReturnValue autoComplete(String arg) {
         return autoComplete(arg, NO_FILTER);
     }
 
-    public ShellAutoCompleteReturnValue autoComplete(String arg, TrieFilter<V> filter) {
+    public AutoCompleteReturnValue autoComplete(String arg, TrieFilter<V> filter) {
         return doAutoComplete(arg, filter, false);
     }
 
-    private ShellAutoCompleteReturnValue doAutoComplete(String arg, TrieFilter<V> filter, boolean eager) {
+    private AutoCompleteReturnValue doAutoComplete(String arg, TrieFilter<V> filter, boolean eager) {
         final ShellAutoComplete autoComplete = wordContainer.autoComplete(arg, filter);
         final List<String> suggestions = autoComplete.getSuggestions();
 
         // Couldn't match any child entry.
         if (suggestions.isEmpty()) {
             final String errorMessage = String.format(autoCompleteErrorFormat, arg);
-            return ShellAutoCompleteReturnValue.failureInvalidArgument(errorMessage, autoComplete);
+            return AutoCompleteReturnValue.failureInvalidArgument(errorMessage, autoComplete);
         } else {
             if (!eager) {
                 // Non-eager parsing - can be autoCompleted
-                return ShellAutoCompleteReturnValue.success(autoComplete);
+                return AutoCompleteReturnValue.success(autoComplete);
             } else {
                 // Eager parsing - it was expected to find an entry named 'arg' (exactly)
                 final String errorMessage = String.format(parseErrorFormat, arg);
-                return ShellAutoCompleteReturnValue.failureInvalidArgument(errorMessage, autoComplete);
+                return AutoCompleteReturnValue.failureInvalidArgument(errorMessage, autoComplete);
             }
         }
     }

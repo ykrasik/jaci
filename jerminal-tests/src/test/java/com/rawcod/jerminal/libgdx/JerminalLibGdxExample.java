@@ -7,15 +7,15 @@ import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.rawcod.jerminal.command.CommandExecutor;
+import com.rawcod.jerminal.returnvalue.execute.ExecuteReturnValue;
 import com.rawcod.jerminal.shell.ShellManager;
-import com.rawcod.jerminal.shell.entry.command.ShellCommand;
-import com.rawcod.jerminal.shell.entry.command.ShellCommandArgs;
-import com.rawcod.jerminal.shell.entry.command.ShellCommandExecutor;
-import com.rawcod.jerminal.shell.entry.directory.ShellDirectory;
-import com.rawcod.jerminal.shell.entry.parameters.ShellParam;
-import com.rawcod.jerminal.shell.entry.parameters.bool.OptionalBoolShellParam;
-import com.rawcod.jerminal.shell.entry.parameters.integer.IntShellParam;
-import com.rawcod.jerminal.shell.returnvalue.ShellExecuteReturnValue;
+import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
+import com.rawcod.jerminal.filesystem.entry.command.ShellCommandArgs;
+import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
+import com.rawcod.jerminal.command.param.ShellParam;
+import com.rawcod.jerminal.filesystem.entry.parameters.bool.OptionalBoolShellParam;
+import com.rawcod.jerminal.filesystem.entry.parameters.integer.IntShellParam;
 
 import java.util.Set;
 
@@ -95,9 +95,9 @@ public class JerminalLibGdxExample extends ApplicationAdapter {
                     new IntShellParam("mandatoryInt"),
                     new OptionalBoolShellParam("optionalBool", false)
                 },
-                new ShellCommandExecutor() {
+                new CommandExecutor() {
                     @Override
-                    protected ShellExecuteReturnValue doExecute(ShellCommandArgs args, Set<String> flags) {
+                    protected ExecuteReturnValue doExecute(ShellCommandArgs args, Set<String> flags) {
                         final int integer = args.popInt();
                         final boolean bool = args.popBool();
                         return success("yay: int = %d, bool = %s", integer, bool);

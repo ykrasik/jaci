@@ -1,14 +1,13 @@
 package com.rawcod.jerminal.command;
 
 import com.rawcod.jerminal.TestTerminal;
-import com.rawcod.jerminal.shell.Shell;
+import com.rawcod.jerminal.returnvalue.execute.ExecuteReturnValue;
+import com.rawcod.jerminal.Shell;
 import com.rawcod.jerminal.shell.ShellManager;
-import com.rawcod.jerminal.shell.returnvalue.ShellExecuteReturnValue;
-import com.rawcod.jerminal.shell.entry.command.ShellCommand;
-import com.rawcod.jerminal.shell.entry.command.ShellCommandArgs;
-import com.rawcod.jerminal.shell.entry.command.ShellCommandExecutor;
-import com.rawcod.jerminal.shell.entry.parameters.ShellParam;
-import com.rawcod.jerminal.shell.entry.parameters.string.StringShellParam;
+import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
+import com.rawcod.jerminal.filesystem.entry.command.ShellCommandArgs;
+import com.rawcod.jerminal.command.param.ShellParam;
+import com.rawcod.jerminal.filesystem.entry.parameters.string.StringShellParam;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -233,9 +232,9 @@ public class CommandSingleStringParamAutoCompleteTest {
 
     private void setParams(ShellParam... params) {
         manager.addEntry(
-            new ShellCommand("cmd", "cmd", params, new ShellCommandExecutor() {
+            new ShellCommand("cmd", "cmd", params, new CommandExecutor() {
                 @Override
-                protected ShellExecuteReturnValue doExecute(ShellCommandArgs args, Set<String> flags) {
+                protected ExecuteReturnValue doExecute(ShellCommandArgs args, Set<String> flags) {
                     return success("Executed");
                 }
             })

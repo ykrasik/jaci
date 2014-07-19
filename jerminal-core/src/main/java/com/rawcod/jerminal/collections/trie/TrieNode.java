@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 public class TrieNode<V> {
-    private static final TrieFilter NO_FILTER = new NoTrieFilter<>();
+    static final TrieFilter<?> NO_FILTER = new NoTrieFilter<>();
 
     private final Map<Character, TrieNode<V>> children;
     private final TrieNode<V> parent;
@@ -68,8 +68,9 @@ public class TrieNode<V> {
         return child;
     }
 
+    @SuppressWarnings("unchecked")
     public List<String> getAllWords() {
-        return getWordsByFilter(NO_FILTER);
+        return getWordsByFilter((TrieFilter<V>) NO_FILTER);
     }
 
     public List<String> getWordsByFilter(TrieFilter<V> filter) {
@@ -86,8 +87,9 @@ public class TrieNode<V> {
         return words;
     }
 
+    @SuppressWarnings("unchecked")
     public List<V> getAllValues() {
-        return getValuesByFilter(NO_FILTER);
+        return getValuesByFilter((TrieFilter<V>) NO_FILTER);
     }
 
     public List<V> getValuesByFilter(TrieFilter<V> filter) {
@@ -118,13 +120,13 @@ public class TrieNode<V> {
         return null;
     }
 
-    public void visitWords(TrieVisitor<V> visitor) {
-        if (isWord) {
+    public void visitWordsByFilter(TrieVisitor<V> visitor, TrieFilter<V> filter) {
+        if (isWord && !filter.shouldFilter(value)) {
             visitor.visit(toString(), value);
         }
 
         for (TrieNode<V> child : children.values()) {
-            child.visitWords(visitor);
+            child.visitWordsByFilter(visitor, filter);
         }
     }
 

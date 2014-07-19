@@ -5,8 +5,8 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.rawcod.jerminal.Terminal;
-import com.rawcod.jerminal.shell.entry.directory.ShellTree;
+import com.rawcod.jerminal.output.Terminal;
+import com.rawcod.jerminal.filesystem.entry.directory.ShellTree;
 
 import java.util.List;
 

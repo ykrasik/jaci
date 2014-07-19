@@ -4,7 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.rawcod.jerminal.shell.Shell;
+import com.rawcod.jerminal.Shell;
 import com.rawcod.jerminal.shell.ShellManager;
 
 /**

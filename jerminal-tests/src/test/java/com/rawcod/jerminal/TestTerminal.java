@@ -1,6 +1,7 @@
 package com.rawcod.jerminal;
 
-import com.rawcod.jerminal.shell.entry.directory.ShellTree;
+import com.rawcod.jerminal.output.Terminal;
+import com.rawcod.jerminal.filesystem.entry.directory.ShellTree;
 import org.junit.Assert;
 
 import java.util.List;

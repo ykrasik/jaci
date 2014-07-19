@@ -3,6 +3,7 @@ version = '1.0'
 
 buildscript {
     ext {
+        guavaVersion = '17.0'
         gdxVersion = '0.9.9'
         junitVersion = '4.11'
     }
@@ -20,6 +21,7 @@ project("jerminal-core") {
     description "Jerminal core module"
 
     dependencies {
+        compile "com.google.guava:guava:$guavaVersion"
         testCompile "junit:junit:$junitVersion"
     }
 }

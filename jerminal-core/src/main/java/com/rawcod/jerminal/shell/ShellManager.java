@@ -1,20 +1,20 @@
 package com.rawcod.jerminal.shell;
 
-import com.rawcod.jerminal.Terminal;
-import com.rawcod.jerminal.shell.entry.ShellEntry;
-import com.rawcod.jerminal.shell.entry.command.ShellCommand;
-import com.rawcod.jerminal.shell.entry.command.ShellCommandArgs;
-import com.rawcod.jerminal.shell.entry.command.ShellCommandExecutor;
-import com.rawcod.jerminal.shell.entry.directory.ShellDirectory;
-import com.rawcod.jerminal.shell.entry.directory.ShellTree;
-import com.rawcod.jerminal.shell.entry.parameters.ShellParam;
-import com.rawcod.jerminal.shell.entry.parameters.directory.OptionalShellDirectoryParam;
-import com.rawcod.jerminal.shell.entry.parameters.directory.ShellDirectoryParam;
-import com.rawcod.jerminal.shell.entry.parameters.file.ShellFileParam;
+import com.rawcod.jerminal.command.CommandExecutor;
+import com.rawcod.jerminal.output.Terminal;
+import com.rawcod.jerminal.returnvalue.execute.ExecuteReturnValue;
+import com.rawcod.jerminal.filesystem.entry.ShellEntry;
+import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
+import com.rawcod.jerminal.filesystem.entry.command.ShellCommandArgs;
+import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
+import com.rawcod.jerminal.filesystem.entry.directory.ShellTree;
+import com.rawcod.jerminal.command.param.ShellParam;
+import com.rawcod.jerminal.filesystem.entry.parameters.directory.OptionalShellDirectoryParam;
+import com.rawcod.jerminal.filesystem.entry.parameters.directory.ShellDirectoryParam;
+import com.rawcod.jerminal.filesystem.entry.parameters.file.ShellFileParam;
 import com.rawcod.jerminal.shell.parser.ShellCommandParser;
-import com.rawcod.jerminal.shell.returnvalue.ShellAutoCompleteReturnValue;
-import com.rawcod.jerminal.shell.returnvalue.ShellExecuteReturnValue;
-import com.rawcod.jerminal.shell.returnvalue.ShellParseReturnValue;
+import com.rawcod.jerminal.returnvalue.autocomplete.flow.AutoCompleteReturnValue;
+import com.rawcod.jerminal.returnvalue.parse.flow.ParseReturnValue;
 
 import java.util.List;
 import java.util.Queue;
@@ -47,9 +47,9 @@ public class ShellManager {
         final ShellParam[] params = {
             new ShellDirectoryParam("dir")
         };
-        return new ShellCommand("cd", "Change directory", params, new ShellCommandExecutor() {
+        return new ShellCommand("cd", "Change directory", params, new CommandExecutor() {
             @Override
-            protected ShellExecuteReturnValue doExecute(ShellCommandArgs args, Set<String> flags) {
+            protected ExecuteReturnValue doExecute(ShellCommandArgs args, Set<String> flags) {
                 final ShellDirectory directory = args.popDirectory();
                 currentDirectory = directory;
                 final List<String> path = directory.getPath();
@@ -58,7 +58,7 @@ public class ShellManager {
                     path.remove(0);
                 }
                 terminal.setCurrentPath(path);
-                return ShellExecuteReturnValue.successNoMessage();
+                return ExecuteReturnValue.successNoMessage();
             }
         });
     }
@@ -67,14 +67,14 @@ public class ShellManager {
         final ShellParam[] params = {
             new OptionalShellDirectoryParam("dir")
         };
-        return new ShellCommand("ls", "List directory", params, new ShellCommandExecutor() {
+        return new ShellCommand("ls", "List directory", params, new CommandExecutor() {
             @Override
-            protected ShellExecuteReturnValue doExecute(ShellCommandArgs args, Set<String> flags) {
+            protected ExecuteReturnValue doExecute(ShellCommandArgs args, Set<String> flags) {
                 final ShellDirectory directory = args.popDirectory();
                 final boolean recursive = flags.contains("-r");
                 final ShellTree shellTree = directory.listContent(recursive);
                 terminal.displayShellTree(shellTree);
-                return ShellExecuteReturnValue.successNoMessage();
+                return ExecuteReturnValue.successNoMessage();
             }
         });
     }
@@ -83,9 +83,9 @@ public class ShellManager {
         final ShellParam[] params = {
             new ShellFileParam("command")
         };
-        return new ShellCommand("man", "Describe command", params, new ShellCommandExecutor() {
+        return new ShellCommand("man", "Describe command", params, new CommandExecutor() {
             @Override
-            protected ShellExecuteReturnValue doExecute(ShellCommandArgs args, Set<String> flags) {
+            protected ExecuteReturnValue doExecute(ShellCommandArgs args, Set<String> flags) {
                 final ShellCommand command = args.popFile();
                 final StringBuilder sb = new StringBuilder();
                 sb.append(command.getName());
@@ -93,7 +93,7 @@ public class ShellManager {
                 sb.append(command.getDescription());
                 sb.append('\n');
                 terminal.displayUsage(command.getUsage());
-                return ShellExecuteReturnValue.success(sb.toString());
+                return ExecuteReturnValue.success(sb.toString());
             }
         });
     }
@@ -119,7 +119,7 @@ public class ShellManager {
         shellCommandParser.addGlobalCommand(command);
     }
 
-    public ShellAutoCompleteReturnValue autoComplete(Queue<String> args) {
+    public AutoCompleteReturnValue autoComplete(Queue<String> args) {
         final String commandArg = args.poll();
 
         if (args.isEmpty()) {
@@ -128,10 +128,10 @@ public class ShellManager {
         }
 
         // The first arg is not the only arg on the commandLine, it is expected to be a valid command.
-        final ShellParseReturnValue<ShellCommand> returnValue = shellCommandParser.parse(commandArg);
+        final ParseReturnValue<ShellCommand> returnValue = shellCommandParser.parse(commandArg);
         if (!returnValue.isSuccess()) {
             // Couldn't parse the command successfully.
-            return ShellAutoCompleteReturnValue.from(returnValue);
+            return AutoCompleteReturnValue.from(returnValue);
         }
 
         // Let the command autoComplete the args.
@@ -139,10 +139,10 @@ public class ShellManager {
         return command.autoComplete(args);
     }
 
-    public ShellParseReturnValue<?> parse(Queue<String> args, Queue<Object> parsedArgs, Set<String> flags) {
+    public ParseReturnValue<?> parse(Queue<String> args, Queue<Object> parsedArgs, Set<String> flags) {
         final String commandArg = args.poll();
 
-        final ShellParseReturnValue<ShellCommand> returnValue = shellCommandParser.parse(commandArg);
+        final ParseReturnValue<ShellCommand> returnValue = shellCommandParser.parse(commandArg);
         if (!returnValue.isSuccess()) {
             // Couldn't parse the command successfully.
             return returnValue;
@@ -156,9 +156,9 @@ public class ShellManager {
         return command.parse(args, parsedArgs, flags);
     }
 
-    public ShellExecuteReturnValue execute(Queue<Object> parsedArgs, Set<String> flags) {
+    public ExecuteReturnValue execute(Queue<Object> parsedArgs, Set<String> flags) {
         if (parsedArgs.isEmpty()) {
-            return ShellExecuteReturnValue.failure("No command provided!");
+            return ExecuteReturnValue.failure("No command provided!");
         }
 
         // The first arg is the command.

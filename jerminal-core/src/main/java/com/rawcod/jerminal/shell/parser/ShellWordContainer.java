@@ -1,8 +1,8 @@
 package com.rawcod.jerminal.shell.parser;
 
-import com.rawcod.jerminal.collections.trie.Trie;
+import com.rawcod.jerminal.collections.trie.TrieImpl;
 import com.rawcod.jerminal.collections.trie.TrieFilter;
-import com.rawcod.jerminal.shell.entry.ShellAutoComplete;
+import com.rawcod.jerminal.filesystem.entry.ShellAutoComplete;
 
 import java.util.List;
 
@@ -11,10 +11,10 @@ import java.util.List;
  * Date: 14/01/14
  */
 public class ShellWordContainer<V> {
-    private final Trie<V> words;
+    private final TrieImpl<V> words;
 
     public ShellWordContainer() {
-        this.words = new Trie<>();
+        this.words = new TrieImpl<>();
     }
 
     public void addWord(String name, V value) {
