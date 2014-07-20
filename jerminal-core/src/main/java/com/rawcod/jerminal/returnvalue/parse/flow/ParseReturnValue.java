@@ -1,55 +1,72 @@
 package com.rawcod.jerminal.returnvalue.parse.flow;
 
+import com.google.common.base.Objects;
 import com.rawcod.jerminal.command.args.CommandArgs;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
 import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
 import com.rawcod.jerminal.returnvalue.Failable;
 import com.rawcod.jerminal.returnvalue.ReturnValueImpl;
-import com.rawcod.jerminal.returnvalue.parse.ParseError;
-import com.rawcod.jerminal.returnvalue.parse.args.ParseCommandArgsReturnValueFailure;
-import com.rawcod.jerminal.returnvalue.parse.entry.ParseEntryReturnValueFailure;
-import com.rawcod.jerminal.returnvalue.parse.path.ParsePathReturnValueFailure;
+import com.rawcod.jerminal.returnvalue.parse.ParseReturnValueFailure;
+import com.rawcod.jerminal.returnvalue.parse.flow.ParseReturnValue.ParseReturnValueSuccess;
 
+import java.util.Collections;
 import java.util.List;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * User: ykrasik
  * Date: 14/01/14
  */
 public class ParseReturnValue extends ReturnValueImpl<ParseReturnValueSuccess, ParseReturnValueFailure> {
-    ParseReturnValue(Failable returnValue) {
+    private ParseReturnValue(Failable returnValue) {
         super(returnValue);
     }
+
 
     public static ParseReturnValue success(List<ShellDirectory> path,
                                            ShellCommand command,
                                            CommandArgs args) {
-        final ParseReturnValueSuccess success = new ParseReturnValueSuccess(path, command, args);
-        return new ParseReturnValue(success);
+        return new ParseReturnValue(new ParseReturnValueSuccess(path, command, args));
     }
 
-    public static ParseReturnValueFailure.Builder failureBuilder(ParseError error) {
-        return new ParseReturnValueFailure.Builder(error);
+    public static ParseReturnValue failure(ParseReturnValueFailure failure) {
+        return new ParseReturnValue(failure);
     }
 
-    public static ParseReturnValue failureFrom(ParseEntryReturnValueFailure failure) {
-        return failureBuilder(failure.getError())
-            .setMessage(failure.getMessage())
-            .setSuggestion(failure.getSuggestion())
-            .build();
-    }
 
-    public static ParseReturnValue failureFrom(ParsePathReturnValueFailure failure) {
-        return failureBuilder(failure.getError())
-            .setMessage(failure.getMessage())
-            .setSuggestion(failure.getSuggestion())
-            .build();
-    }
+    public static class ParseReturnValueSuccess extends SuccessImpl {
+        private final List<ShellDirectory> path;
+        private final ShellCommand command;
+        private final CommandArgs args;
 
-    public static ParseReturnValue failureFrom(ParseCommandArgsReturnValueFailure failure) {
-        return failureBuilder(failure.getError())
-            .setMessage(failure.getMessage())
-            .setSuggestion(failure.getSuggestion())
-            .build();
+        private ParseReturnValueSuccess(List<ShellDirectory> path,
+                                        ShellCommand command,
+                                        CommandArgs args) {
+            this.path = Collections.unmodifiableList(checkNotNull(path, "path is null!"));
+            this.command = checkNotNull(command, "command is null!");
+            this.args = checkNotNull(args, "args is null!");
+        }
+
+        public List<ShellDirectory> getPath() {
+            return path;
+        }
+
+        public ShellCommand getCommand() {
+            return command;
+        }
+
+        public CommandArgs getArgs() {
+            return args;
+        }
+
+        @Override
+        public String toString() {
+            return Objects.toStringHelper(this)
+                .add("path", path)
+                .add("command", command)
+                .add("args", args)
+                .toString();
+        }
     }
 }

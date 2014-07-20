@@ -18,7 +18,7 @@ public class ShellWordContainer<V> {
     }
 
     public void addWord(String name, V value) {
-        words.addWord(name, value);
+        words.set(name, value);
     }
 
     public V get(String name) {

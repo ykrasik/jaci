@@ -17,15 +17,15 @@ public final class TrieFilters {
 
     public static final TrieFilter<ShellEntry> FILE_FILTER = new TrieFilter<ShellEntry>() {
         @Override
-        public boolean shouldFilter(ShellEntry value) {
-            return value.isDirectory();
+        public boolean shouldKeep(ShellEntry value) {
+            return !value.isDirectory();
         }
     };
 
     public static final TrieFilter<ShellEntry> DIRECTORY_FILTER = new TrieFilter<ShellEntry>() {
         @Override
-        public boolean shouldFilter(ShellEntry value) {
-            return !value.isDirectory();
+        public boolean shouldKeep(ShellEntry value) {
+            return value.isDirectory();
         }
     };
 }

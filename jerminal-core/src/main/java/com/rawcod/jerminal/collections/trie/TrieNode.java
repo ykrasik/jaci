@@ -29,6 +29,10 @@ public class TrieNode<V> {
         this.character = character;
     }
 
+    public int size() {
+        return children.size();
+    }
+
     public boolean isEmpty() {
         return children.isEmpty();
     }
@@ -76,7 +80,7 @@ public class TrieNode<V> {
     public List<String> getWordsByFilter(TrieFilter<V> filter) {
         final List<String> words = new ArrayList<>();
 
-        if (isWord && !filter.shouldFilter(value)) {
+        if (isWord && filter.shouldKeep(value)) {
             words.add(toString());
         }
 
@@ -85,11 +89,6 @@ public class TrieNode<V> {
         }
 
         return words;
-    }
-
-    @SuppressWarnings("unchecked")
-    public List<V> getAllValues() {
-        return getValuesByFilter((TrieFilter<V>) NO_FILTER);
     }
 
     public List<V> getValuesByFilter(TrieFilter<V> filter) {

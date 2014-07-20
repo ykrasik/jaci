@@ -53,7 +53,7 @@ public class CommandParamManager {
     private Trie<ShellParam> createParamNamesTrie(List<ShellParam> params) {
         final Trie<ShellParam> trie = new TrieImpl<>();
         for (ShellParam param : params) {
-            trie.addWord(param.getName(), param);
+            trie.set(param.getName(), param);
         }
         return trie;
     }

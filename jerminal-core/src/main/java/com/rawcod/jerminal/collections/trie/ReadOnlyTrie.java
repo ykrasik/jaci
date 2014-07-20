@@ -8,21 +8,22 @@ import java.util.List;
  * Time: 10:50
  */
 public interface ReadOnlyTrie<V> {
+    int size();
     boolean isEmpty();
 
     V get(String word);
 
-    List<String> getWords(String prefix);
-    List<String> getWordsByFilter(String prefix, TrieFilter<V> filter);
-
     List<String> getAllWords();
     List<String> getAllWordsByFilter(TrieFilter<V> filter);
 
-    List<V> getValues(String prefix);
-    List<V> getValuesByFilter(String prefix, TrieFilter<V> filter);
+    List<String> getWords(String prefix);
+    List<String> getWordsByFilter(String prefix, TrieFilter<V> filter);
 
     List<V> getAllValues();
     List<V> getAllValuesByFilter(TrieFilter<V> filter);
+
+    List<V> getValues(String prefix);
+    List<V> getValuesByFilter(String prefix, TrieFilter<V> filter);
 
     String getLongestPrefix(String prefix);
     String getLongestExistingPrefix(String word);

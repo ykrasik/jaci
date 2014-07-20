@@ -2,6 +2,7 @@ package com.rawcod.jerminal.filesystem.entry.directory;
 
 import com.rawcod.jerminal.collections.trie.ReadOnlyTrie;
 import com.rawcod.jerminal.filesystem.entry.ShellEntry;
+import com.rawcod.jerminal.manager.DirectoryEntryManager;
 import com.rawcod.jerminal.shell.parser.ShellStringParser;
 
 import java.util.ArrayList;
@@ -14,6 +15,9 @@ import java.util.List;
  * Date: 06/01/14
  */
 public class ShellDirectory implements ShellEntry {
+    public static final String THIS = ".";
+    public static final String PARENT = "..";
+
     private static final DebugEntryComparator COMPARATOR = new DebugEntryComparator();
 
     private final String name;
@@ -45,6 +49,10 @@ public class ShellDirectory implements ShellEntry {
     }
 
     public ReadOnlyTrie<ShellEntry> getChildren() {
+
+    }
+
+    public DirectoryEntryManager getEntryManager() {
 
     }
 

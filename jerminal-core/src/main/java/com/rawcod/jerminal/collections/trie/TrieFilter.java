@@ -5,12 +5,12 @@ package com.rawcod.jerminal.collections.trie;
  * Date: 11/01/14
  */
 public interface TrieFilter<T> {
-    boolean shouldFilter(T value);
+    boolean shouldKeep(T value);
 
     class NoTrieFilter<T> implements TrieFilter<T> {
         @Override
-        public boolean shouldFilter(T value) {
-            return false;
+        public boolean shouldKeep(T value) {
+            return true;
         }
     }
 }

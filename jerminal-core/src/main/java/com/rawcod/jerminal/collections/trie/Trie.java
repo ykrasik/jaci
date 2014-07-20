@@ -6,5 +6,7 @@ package com.rawcod.jerminal.collections.trie;
  * Time: 10:52
  */
 public interface Trie<V> extends ReadOnlyTrie<V> {
-    void addWord(String word, V value);
+    void set(String word, V value);
+
+    V remove(String word);
 }

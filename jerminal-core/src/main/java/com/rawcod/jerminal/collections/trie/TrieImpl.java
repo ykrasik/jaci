@@ -11,13 +11,18 @@ public class TrieImpl<V> implements Trie<V> {
     }
 
     @Override
-    public void addWord(String word, V value) {
+    public void set(String word, V value) {
         root.addWord(word, value);
     }
 
     @Override
+    public int size() {
+        return root.size();
+    }
+
+    @Override
     public boolean isEmpty() {
-        return root.isEmpty();
+        return size() == 0;
     }
 
     @Override
@@ -27,6 +32,16 @@ public class TrieImpl<V> implements Trie<V> {
             return null;
         }
         return node.getValue();
+    }
+
+    @Override
+    public List<String> getAllWords() {
+        return root.getAllWords();
+    }
+
+    @Override
+    public List<String> getAllWordsByFilter(TrieFilter<V> filter) {
+        return root.getWordsByFilter(filter);
     }
 
     @SuppressWarnings("unchecked")
@@ -44,14 +59,15 @@ public class TrieImpl<V> implements Trie<V> {
         return node.getWordsByFilter(filter);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public List<String> getAllWords() {
-        return root.getAllWords();
+    public List<V> getAllValues() {
+        return getAllValuesByFilter((TrieFilter<V>) TrieNode.NO_FILTER);
     }
 
     @Override
-    public List<String> getAllWordsByFilter(TrieFilter<V> filter) {
-        return root.getWordsByFilter(filter);
+    public List<V> getAllValuesByFilter(TrieFilter<V> filter) {
+        return root.getValuesByFilter(filter);
     }
 
     @SuppressWarnings("unchecked")
@@ -67,17 +83,6 @@ public class TrieImpl<V> implements Trie<V> {
             return Collections.emptyList();
         }
         return node.getValuesByFilter(filter);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<V> getAllValues() {
-        return root.getAllValues();
-    }
-
-    @Override
-    public List<V> getAllValuesByFilter(TrieFilter<V> filter) {
-        return root.getValuesByFilter(filter);
     }
 
     @Override

@@ -1,42 +1,50 @@
 package com.rawcod.jerminal.returnvalue.parse.args;
 
+import com.google.common.base.Objects;
 import com.rawcod.jerminal.command.args.CommandArgs;
 import com.rawcod.jerminal.returnvalue.Failable;
 import com.rawcod.jerminal.returnvalue.ReturnValueImpl;
-import com.rawcod.jerminal.returnvalue.parse.ParseError;
-import com.rawcod.jerminal.returnvalue.parse.argspartial.ParsePartialCommandArgsReturnValueFailure;
-import com.rawcod.jerminal.returnvalue.parse.param.ParseParamReturnValueFailure;
+import com.rawcod.jerminal.returnvalue.parse.ParseReturnValueFailure;
+import com.rawcod.jerminal.returnvalue.parse.args.ParseCommandArgsReturnValue.ParseCommandArgsReturnValueSuccess;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * User: ykrasik
  * Date: 19/07/2014
  * Time: 14:06
  */
-public class ParseCommandArgsReturnValue extends ReturnValueImpl<ParseCommandArgsReturnValueSuccess, ParseCommandArgsReturnValueFailure> {
-    ParseCommandArgsReturnValue(Failable returnValue) {
+public class ParseCommandArgsReturnValue extends ReturnValueImpl<ParseCommandArgsReturnValueSuccess, ParseReturnValueFailure> {
+    private ParseCommandArgsReturnValue(Failable returnValue) {
         super(returnValue);
     }
 
+
     public static ParseCommandArgsReturnValue success(CommandArgs args) {
-        final ParseCommandArgsReturnValueSuccess success = new ParseCommandArgsReturnValueSuccess(args);
-        return new ParseCommandArgsReturnValue(success);
+        return new ParseCommandArgsReturnValue(new ParseCommandArgsReturnValueSuccess(args));
     }
 
-    public static ParseCommandArgsReturnValueFailure.Builder failureBuilder(ParseError error) {
-        return new ParseCommandArgsReturnValueFailure.Builder(error);
+    public static ParseCommandArgsReturnValue failure(ParseReturnValueFailure failure) {
+        return new ParseCommandArgsReturnValue(failure);
     }
 
-    public static ParseCommandArgsReturnValue failureFrom(ParseParamReturnValueFailure failure) {
-        return failureBuilder(failure.getError())
-            .setMessage(failure.getMessage())
-            .setSuggestion(failure.getSuggestion())
-            .build();
-    }
 
-    public static ParseCommandArgsReturnValue failureFrom(ParsePartialCommandArgsReturnValueFailure failure) {
-        return failureBuilder(failure.getError())
-            .setMessage(failure.getMessage())
-            .setSuggestion(failure.getSuggestion())
-            .build();
+    public static class ParseCommandArgsReturnValueSuccess extends SuccessImpl {
+        private final CommandArgs args;
+
+        private ParseCommandArgsReturnValueSuccess(CommandArgs args) {
+            this.args = checkNotNull(args, "args is null!");
+        }
+
+        public CommandArgs getArgs() {
+            return args;
+        }
+
+        @Override
+        public String toString() {
+            return Objects.toStringHelper(this)
+                .add("args", args)
+                .toString();
+        }
     }
 }

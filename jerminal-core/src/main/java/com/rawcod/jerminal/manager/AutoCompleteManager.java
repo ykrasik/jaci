@@ -38,7 +38,7 @@ public class AutoCompleteManager {
         }
 
         // The first arg is not the only arg on the commandLine, it is expected to be a valid command.
-        final ParsePathReturnValue returnValue = fileSystemManager.parseCommandFromPath(commandArg, currentDirectory);
+        final ParsePathReturnValue returnValue = fileSystemManager.parsePathToCommand(commandArg, currentDirectory);
         if (returnValue.isFailure()) {
             // Couldn't parse the command successfully.
             return AutoCompleteReturnValue.failureFrom(returnValue.getFailure());
@@ -54,7 +54,7 @@ public class AutoCompleteManager {
 
     @SuppressWarnings("unchecked")
     private AutoCompleteReturnValue autoCompleteCommand(String commandArg, ShellDirectory currentDirectory) {
-        final AutoCompletePathReturnValue returnValue = fileSystemManager.autoCompleteCommandFromPath(commandArg, currentDirectory);
+        final AutoCompletePathReturnValue returnValue = fileSystemManager.autoCompletePathToCommand(commandArg, currentDirectory);
         if (returnValue.isFailure()) {
             return AutoCompleteReturnValue.failureFrom(returnValue.getFailure());
         }

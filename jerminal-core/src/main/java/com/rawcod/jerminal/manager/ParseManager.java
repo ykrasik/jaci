@@ -30,7 +30,7 @@ public class ParseManager {
         final String commandArg = commandLine.get(0);
 
         // Parse the command.
-        final ParsePathReturnValue parseCommandReturnValue = fileSystemManager.parseCommandFromPath(commandArg, currentDirectory);
+        final ParsePathReturnValue parseCommandReturnValue = fileSystemManager.parsePathToCommand(commandArg, currentDirectory);
         if (parseCommandReturnValue.isFailure()) {
             // Failed to parse the command.
             return ParseReturnValue.failureFrom(parseCommandReturnValue.getFailure());
