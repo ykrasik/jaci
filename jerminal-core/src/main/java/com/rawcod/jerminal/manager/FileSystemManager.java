@@ -6,12 +6,12 @@ import com.rawcod.jerminal.filesystem.ShellFileSystem;
 import com.rawcod.jerminal.filesystem.entry.ShellEntry;
 import com.rawcod.jerminal.filesystem.entry.TrieFilters;
 import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
-import com.rawcod.jerminal.returnvalue.autocomplete.entry.AutoCompleteEntryReturnValue;
-import com.rawcod.jerminal.returnvalue.autocomplete.entry.AutoCompleteEntryReturnValue.AutoCompleteEntryReturnValueSuccess;
-import com.rawcod.jerminal.returnvalue.autocomplete.path.AutoCompletePathReturnValue;
+import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
+import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue.AutoCompleteReturnValueSuccess;
+import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValueFailure;
 import com.rawcod.jerminal.returnvalue.parse.entry.ParseEntryReturnValue;
-import com.rawcod.jerminal.returnvalue.parse.path.ParsePathReturnValue;
-import com.rawcod.jerminal.returnvalue.parse.path.ParsePathReturnValue.ParsePathReturnValueSuccess;
+import com.rawcod.jerminal.returnvalue.parse.entry.ParsePathReturnValue;
+import com.rawcod.jerminal.returnvalue.parse.entry.ParsePathReturnValue.ParsePathReturnValueSuccess;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,29 +31,29 @@ public class FileSystemManager {
         this.fileSystem = fileSystem;
     }
 
-    public ParsePathReturnValue parsePathToCommand(String path, ShellDirectory currentDirectory) {
-        return parsePath(path, currentDirectory, TrieFilters.FILE_FILTER);
+    public ParsePathReturnValue parsePathToCommand(String rawPath, ShellDirectory currentDirectory) {
+        return parsePath(rawPath, currentDirectory, TrieFilters.FILE_FILTER);
     }
 
-    public ParsePathReturnValue parsePathToDirectory(String path, ShellDirectory currentDirectory) {
-        return parsePath(path, currentDirectory, TrieFilters.DIRECTORY_FILTER);
+    public ParsePathReturnValue parsePathToDirectory(String rawPath, ShellDirectory currentDirectory) {
+        return parsePath(rawPath, currentDirectory, TrieFilters.DIRECTORY_FILTER);
     }
 
-    public ParsePathReturnValue parsePath(String path, ShellDirectory currentDirectory) {
-        return parsePath(path, currentDirectory, TrieFilters.NO_FILTER);
+    public ParsePathReturnValue parsePath(String rawPath, ShellDirectory currentDirectory) {
+        return parsePath(rawPath, currentDirectory, TrieFilters.NO_FILTER);
     }
 
-    public ParsePathReturnValue parsePath(String path,
+    public ParsePathReturnValue parsePath(String rawPath,
                                           ShellDirectory currentDirectory,
                                           TrieFilter<ShellEntry> filter) {
         final String pathToSplit;
         final ShellDirectory startDir;
-        final boolean startsFromRoot = !path.isEmpty() && path.charAt(0) == DELIMITER;
+        final boolean startsFromRoot = !rawPath.isEmpty() && rawPath.charAt(0) == DELIMITER;
         if (startsFromRoot) {
-            pathToSplit = path.substring(1);
+            pathToSplit = rawPath.substring(1);
             startDir = fileSystem.getRoot();
         } else {
-            pathToSplit = path;
+            pathToSplit = rawPath;
             startDir = currentDirectory;
         }
 
@@ -92,72 +92,90 @@ public class FileSystemManager {
         return ParsePathReturnValue.success(parsedPath, entry);
     }
 
-    public AutoCompletePathReturnValue autoCompletePathToCommand(String path, ShellDirectory currentDirectory) {
-        return autoCompletePath(path, currentDirectory, TrieFilters.FILE_FILTER);
+    public AutoCompleteReturnValue autoCompletePathToCommand(String rawPath, ShellDirectory currentDirectory) {
+        return autoCompletePath(rawPath, currentDirectory, TrieFilters.FILE_FILTER);
     }
 
-    public AutoCompletePathReturnValue autoCompletePathToDirectory(String path, ShellDirectory currentDirectory) {
-        return autoCompletePath(path, currentDirectory, TrieFilters.DIRECTORY_FILTER);
+    public AutoCompleteReturnValue autoCompletePathToDirectory(String rawPath, ShellDirectory currentDirectory) {
+        return autoCompletePath(rawPath, currentDirectory, TrieFilters.DIRECTORY_FILTER);
     }
 
-    public AutoCompletePathReturnValue autoCompletePath(String path, ShellDirectory currentDirectory) {
-        return autoCompletePath(path, currentDirectory, TrieFilters.NO_FILTER);
+    public AutoCompleteReturnValue autoCompletePath(String rawPath, ShellDirectory currentDirectory) {
+        return autoCompletePath(rawPath, currentDirectory, TrieFilters.NO_FILTER);
     }
 
-    public AutoCompletePathReturnValue autoCompletePath(String path,
-                                                        ShellDirectory currentDirectory,
-                                                        TrieFilter<ShellEntry> filter) {
+    public AutoCompleteReturnValue autoCompletePath(String rawPath,
+                                                    ShellDirectory currentDirectory,
+                                                    TrieFilter<ShellEntry> filter) {
         // Parse the path until the last delimiter, after which we autoComplete the remaining arg.
-        int lastIndexOfDelimiter = path.lastIndexOf(DELIMITER);
+        int lastIndexOfDelimiter = rawPath.lastIndexOf(DELIMITER);
         if (lastIndexOfDelimiter == -1) {
             // Use the whole string for autoCompletion if no delimiter present.
             lastIndexOfDelimiter = 0;
         }
 
-        final String pathToParse = path.substring(0, lastIndexOfDelimiter);
-        final String autoCompleteArg = path.substring(lastIndexOfDelimiter);
+        final String pathToParse = rawPath.substring(0, lastIndexOfDelimiter);
+        final String autoCompleteArg = rawPath.substring(lastIndexOfDelimiter);
 
-        final ParsePathReturnValue parseReturnValue = parsePathToDirectory(pathToParse, currentDirectory);
-        if (parseReturnValue.isFailure()) {
-            return AutoCompletePathReturnValue.parseFailure(parseReturnValue.getFailure());
+        final ParsePathReturnValue parsePathReturnValue = parsePathToDirectory(pathToParse, currentDirectory);
+        if (parsePathReturnValue.isFailure()) {
+            return AutoCompleteReturnValue.parseFailure(parsePathReturnValue.getFailure());
         }
 
-        final ParsePathReturnValueSuccess parseSuccess = parseReturnValue.getSuccess();
-        final List<ShellDirectory> parsedPath = parseSuccess.getPath();
-        final ShellDirectory currentDir = (ShellDirectory) parseSuccess.getEntry();
-
-        // Let the last directory along the path autoComplete the arg.
-        final AutoCompleteEntryReturnValue returnValue = currentDir.getEntryManager().autoCompleteEntry(autoCompleteArg, filter);
-        if (returnValue.isFailure()) {
-            // It was impossible to autoComplete the entry, no suggestions available.
-            return AutoCompletePathReturnValue.failure(returnValue.getFailure());
-        }
-
-        final AutoCompleteEntryReturnValueSuccess success = returnValue.getSuccess();
-        return AutoCompletePathReturnValue.success(parsedPath, success.getSuggestion());
+        // AutoComplete the last entry along the path.
+        final ParsePathReturnValueSuccess parsePathSuccess = parsePathReturnValue.getSuccess();
+        final ShellDirectory lastDir = (ShellDirectory) parsePathSuccess.getLastEntry();
+        return autoCompleteEntry(lastDir, filter, autoCompleteArg);
     }
 
-    public String serializePath(List<ShellEntry> path, boolean endWithDelimiter) {
-        final ShellDirectory root = fileSystem.getRoot();
-        if (path.size() == 1 && path.get(0) == root) {
-            // If root is the only directory on the path.
-            if (endWithDelimiter) {
-                return String.valueOf(DELIMITER);
-            } else {
-                return "";
-            }
+    private AutoCompleteReturnValue autoCompleteEntry(ShellDirectory lastDir,
+                                                      TrieFilter<ShellEntry> filter,
+                                                      String autoCompleteArg) {
+        // Let the last directory along the path autoComplete the arg.
+        final AutoCompleteReturnValue returnValue = lastDir.getEntryManager().autoCompleteEntry(autoCompleteArg, filter);
+        if (returnValue.isFailure()) {
+            return AutoCompleteReturnValue.failure(returnValue.getFailure());
         }
 
-        final StringBuilder sb = new StringBuilder();
-        for (ShellEntry entry : path) {
-            if (entry != root) {
-                sb.append(entry.getName());
-                sb.append(DELIMITER);
-            }
+        // A successfull autoComplete either has 1 or more possibilities.
+        // 0 possibilities is considered a failed autoComplete.
+        final AutoCompleteReturnValueSuccess success = returnValue.getSuccess();
+        final List<String> possibilities = success.getPossibilities();
+
+        // Having an empty possibilities list here is an internal error.
+        if (possibilities.isEmpty()) {
+            return AutoCompleteReturnValue.failure(
+                AutoCompleteReturnValueFailure.internalError(
+                    "Internal error: AutoComplete succeeded, but returned no possibilities!"
+                )
+            );
         }
-        if (!endWithDelimiter && sb.length() > 0) {
-            sb.deleteCharAt(sb.length() - 1);
+
+        if (possibilities.size() > 1) {
+            // More then 1 possibility available, no further processing should be done here.
+            return returnValue;
         }
-        return sb.toString();
+
+        // There was only 1 way of autoCompleting the entry.
+        // Let's try to be as helpful as we can:
+        // * If it's a command, add a space after.
+        // * If it's a directory, add a delimiter after.
+        final String autoCompleteAddition = success.getAutoCompleteAddition();
+        final String autoCompletedArg = autoCompleteArg + autoCompleteAddition;
+        final ParseEntryReturnValue parseEntryReturnValue = lastDir.getEntryManager().parseEntry(autoCompletedArg);
+        if (parseEntryReturnValue.isFailure()) {
+            // AutoComplete returned a single autoCompleteAddition that, when added to the autoCompleteArg,
+            // gives us an invalid entry? Shouldn't happen.
+            return AutoCompleteReturnValue.failure(
+                AutoCompleteReturnValueFailure.internalError(
+                    "Internal error: AutoComplete suggested an invalid entry! entry='%s'", autoCompletedArg
+                )
+            );
+        }
+
+        // Return an updated autoCompleteAddition according to the entry type.
+        final ShellEntry entry = parseEntryReturnValue.getSuccess().getEntry();
+        final char autoCompleteSuffix = entry.isDirectory() ? DELIMITER : ' ';
+        return AutoCompleteReturnValue.successSingle(autoCompleteAddition + autoCompleteSuffix);
     }
 }

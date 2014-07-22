@@ -1,4 +1,4 @@
-package com.rawcod.jerminal.returnvalue.parse.path;
+package com.rawcod.jerminal.returnvalue.parse.entry;
 
 import com.google.common.base.Objects;
 import com.rawcod.jerminal.filesystem.entry.ShellEntry;
@@ -6,7 +6,7 @@ import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
 import com.rawcod.jerminal.returnvalue.Failable;
 import com.rawcod.jerminal.returnvalue.ReturnValueImpl;
 import com.rawcod.jerminal.returnvalue.parse.ParseReturnValueFailure;
-import com.rawcod.jerminal.returnvalue.parse.path.ParsePathReturnValue.ParsePathReturnValueSuccess;
+import com.rawcod.jerminal.returnvalue.parse.entry.ParsePathReturnValue.ParsePathReturnValueSuccess;
 
 import java.util.List;
 
@@ -23,8 +23,8 @@ public class ParsePathReturnValue extends ReturnValueImpl<ParsePathReturnValueSu
     }
 
 
-    public static ParsePathReturnValue success(List<ShellDirectory> path, ShellEntry entry) {
-        return new ParsePathReturnValue(new ParsePathReturnValueSuccess(path, entry));
+    public static ParsePathReturnValue success(List<ShellDirectory> path, ShellEntry lastEntry) {
+        return new ParsePathReturnValue(new ParsePathReturnValueSuccess(path, lastEntry));
     }
 
     public static ParsePathReturnValue failure(ParseReturnValueFailure failure) {
@@ -34,26 +34,26 @@ public class ParsePathReturnValue extends ReturnValueImpl<ParsePathReturnValueSu
 
     public static class ParsePathReturnValueSuccess extends SuccessImpl {
         private final List<ShellDirectory> path;
-        private final ShellEntry entry;
+        private final ShellEntry lastEntry;
 
-        private ParsePathReturnValueSuccess(List<ShellDirectory> path, ShellEntry entry) {
+        private ParsePathReturnValueSuccess(List<ShellDirectory> path, ShellEntry lastEntry) {
             this.path = checkNotNull(path, "path is null!");
-            this.entry = checkNotNull(entry, "entry is null!");
+            this.lastEntry = checkNotNull(lastEntry, "lastEntry is null!");
         }
 
         public List<ShellDirectory> getPath() {
             return path;
         }
 
-        public ShellEntry getEntry() {
-            return entry;
+        public ShellEntry getLastEntry() {
+            return lastEntry;
         }
 
         @Override
         public String toString() {
             return Objects.toStringHelper(this)
                 .add("path", path)
-                .add("entry", entry)
+                .add("lastEntry", lastEntry)
                 .toString();
         }
     }

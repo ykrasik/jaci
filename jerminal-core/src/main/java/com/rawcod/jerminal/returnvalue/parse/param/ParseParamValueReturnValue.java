@@ -1,10 +1,10 @@
-package com.rawcod.jerminal.returnvalue.parse.paramvalue;
+package com.rawcod.jerminal.returnvalue.parse.param;
 
 import com.google.common.base.Objects;
 import com.rawcod.jerminal.returnvalue.Failable;
 import com.rawcod.jerminal.returnvalue.ReturnValueImpl;
 import com.rawcod.jerminal.returnvalue.parse.ParseReturnValueFailure;
-import com.rawcod.jerminal.returnvalue.parse.paramvalue.ParseParamValueReturnValue.ParseParamValueReturnValueSuccess;
+import com.rawcod.jerminal.returnvalue.parse.param.ParseParamValueReturnValue.ParseParamValueReturnValueSuccess;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

@@ -8,20 +8,20 @@ import com.rawcod.jerminal.collections.trie.TrieImpl;
 import com.rawcod.jerminal.command.args.CommandArgs;
 import com.rawcod.jerminal.command.param.ParamParseContext;
 import com.rawcod.jerminal.command.param.ShellParam;
-import com.rawcod.jerminal.filesystem.entry.ShellSuggestion;
+import com.rawcod.jerminal.exception.ShellException;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteError;
+import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
+import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue.AutoCompleteReturnValueSuccess;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValueFailure;
-import com.rawcod.jerminal.returnvalue.autocomplete.flow.AutoCompleteReturnValue;
-import com.rawcod.jerminal.returnvalue.autocomplete.param.AutoCompleteParamValueReturnValue;
-import com.rawcod.jerminal.returnvalue.autocomplete.param.AutoCompleteParamValueReturnValue.AutoCompleteParamValueReturnValueSuccess;
 import com.rawcod.jerminal.returnvalue.parse.ParseError;
 import com.rawcod.jerminal.returnvalue.parse.ParseReturnValueFailure;
+import com.rawcod.jerminal.returnvalue.parse.args.ParseBoundParamsReturnValue;
+import com.rawcod.jerminal.returnvalue.parse.args.ParseBoundParamsReturnValue.ParseBoundParamsReturnValueSuccess;
 import com.rawcod.jerminal.returnvalue.parse.args.ParseCommandArgsReturnValue;
-import com.rawcod.jerminal.returnvalue.parse.argspartial.ParsePartialCommandArgsReturnValue;
-import com.rawcod.jerminal.returnvalue.parse.argspartial.ParsePartialCommandArgsReturnValue.ParsePartialCommandArgsReturnValueSuccess;
 import com.rawcod.jerminal.returnvalue.parse.param.ParseParamReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.param.ParseParamReturnValue.ParseParamReturnValueSuccess;
-import com.rawcod.jerminal.returnvalue.parse.paramvalue.ParseParamValueReturnValue;
+import com.rawcod.jerminal.returnvalue.parse.param.ParseParamValueReturnValue;
+import com.rawcod.jerminal.util.AutoCompleteUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,8 +49,7 @@ public class CommandParamManager {
         for (ShellParam param : params) {
             final String paramName = param.getName();
             if (allParamsMap.containsKey(paramName)) {
-                final String message = String.format("Duplicate paramNames detected: '%s'", paramName);
-                throw new RuntimeException(message);
+                throw new ShellException("Duplicate param detected: '%s'", paramName);
             }
 
             allParamsMap.put(paramName, param);
@@ -61,40 +60,35 @@ public class CommandParamManager {
         }
     }
 
-    public ParseCommandArgsReturnValue parseArgs(List<String> args, ParamParseContext context) {
+    public ParseCommandArgsReturnValue parseCommandArgs(List<String> args, ParamParseContext context) {
         // Parse all args that have been passed.
-        // Keep track of all params that are unbound.
-        final ParsePartialCommandArgsReturnValue parsePartialReturnValue = parsePartialArgs(args, context);
-        if (parsePartialReturnValue.isFailure()) {
-            return ParseCommandArgsReturnValue.failure(parsePartialReturnValue.getFailure());
+        final ParseBoundParamsReturnValue parseBoundParams = parseBoundParams(args, context);
+        if (parseBoundParams.isFailure()) {
+            return ParseCommandArgsReturnValue.failure(parseBoundParams.getFailure());
         }
 
-        final ParsePartialCommandArgsReturnValueSuccess success = parsePartialReturnValue.getSuccess();
+        final ParseBoundParamsReturnValueSuccess success = parseBoundParams.getSuccess();
         final Map<String, Object> parsedArgs = success.getParsedArgs();
         final Map<String, ShellParam> unboundParams = success.getUnboundParams();
 
-        // Make sure all mandatory params are bound to values
-        // and bind optional args to their default values (if unbound).
+        // Try to bind all params that haven't been bound yet.
         for (ShellParam unboundParam : unboundParams.values()) {
-            final String paramName = unboundParam.getName();
-            if (!unboundParam.isOptional()) {
-                return ParseCommandArgsReturnValue.failure(
-                    ParseReturnValueFailure.from(
-                        ParseError.PARAM_NOT_BOUND,
-                        "Parse error: Mandatory param '%s' is not bound to a value!", paramName
-                    )
-                );
+            // Let the unbound param parse an empty value.
+            // It is up to the param to decide if this is legal or not.
+            final ParseParamValueReturnValue parseParamValue = unboundParam.parse(Optional.<String>absent(), context);
+            if (parseParamValue.isFailure()) {
+                return ParseCommandArgsReturnValue.failure(parseParamValue.getFailure());
             }
 
-            final Object defaultValue = unboundParam.getDefaultValue();
-            parsedArgs.put(paramName, defaultValue);
+            final Object value = parseParamValue.getSuccess().getValue();
+            parsedArgs.put(unboundParam.getName(), value);
         }
 
         final CommandArgs commandArgs = new CommandArgs(parsedArgs);
         return ParseCommandArgsReturnValue.success(commandArgs);
     }
 
-    private ParsePartialCommandArgsReturnValue parsePartialArgs(List<String> args, ParamParseContext context) {
+    private ParseBoundParamsReturnValue parseBoundParams(List<String> args, ParamParseContext context) {
         // Parse all args that have been passed.
         // Keep track of all params that are unbound.
         final Map<String, Object> parsedArgs = new HashMap<>(args.size());
@@ -102,7 +96,7 @@ public class CommandParamManager {
         for (String arg : args) {
             final ParseParamReturnValue returnValue = parseParam(arg, context);
             if (returnValue.isFailure()) {
-                return ParsePartialCommandArgsReturnValue.failure(returnValue.getFailure());
+                return ParseBoundParamsReturnValue.failure(returnValue.getFailure());
             }
 
             final ParseParamReturnValueSuccess success = returnValue.getSuccess();
@@ -110,7 +104,7 @@ public class CommandParamManager {
             final Object value = success.getValue();
 
             if (parsedArgs.containsKey(paramName)) {
-                return ParsePartialCommandArgsReturnValue.failure(
+                return ParseBoundParamsReturnValue.failure(
                     ParseReturnValueFailure.from(
                         ParseError.PARAM_ALREADY_BOUND,
                         "Parse error: Param '%s' is already bound to a value: %s", paramName, parsedArgs.get(paramName)
@@ -118,13 +112,13 @@ public class CommandParamManager {
                 );
             }
 
-            // Param has been parsed.
-            // Save the parsed value and mark it as bound.
+            // Arg has been parsed.
+            // Save the parsed value and mark the param as bound.
             parsedArgs.put(paramName, value);
             unboundParams.remove(paramName);
         }
 
-        return ParsePartialCommandArgsReturnValue.success(parsedArgs, unboundParams);
+        return ParseBoundParamsReturnValue.success(parsedArgs, unboundParams);
     }
 
     private ParseParamReturnValue parseParam(String rawArg, ParamParseContext context) {
@@ -140,29 +134,24 @@ public class CommandParamManager {
         final Optional<String> rawValue;
         ShellParam param = allParamsMap.get(paramName);
         if (param == null) {
-            // There are special convenience cases, where the param name can be ommitted:
+            // There are special convenience cases, where the param name can be omitted:
             // 1. If the command has only 1 mandatory param and any number of optional params.
             // 2. If the command has only 1 param, either mandatory or optional.
             if (mandatoryParams.size() == 1) {
-                // 1 - Use the paramName as the value.
+                // 1 - Assume the paramName is omitted and use rawArg as the value.
                 param = mandatoryParams.get(0);
                 rawValue = fromPossiblyEmptyString(rawArg);
             } else if (allParamsMap.size() == 1) {
-                // 2 - Use the paramName as the value.
+                // 2 - Assume the paramName is omitted and use rawArg as the value.
                 param = new ArrayList<>(allParamsMap.values()).get(0);
                 rawValue = fromPossiblyEmptyString(rawArg);
             } else {
-                return ParseParamReturnValue.failure(
-                    ParseReturnValueFailure.from(
-                        ParseError.INVALID_PARAM,
-                        "Parse error: Invalid param: '%s'", paramName
-                    )
-                );
+                return ParseParamReturnValue.failure(ParseReturnValueFailure.invalidParam(paramName));
             }
         } else {
             // Use the rest of the rawArg as the value.
             final String valuePart = rawArg.substring(indexOfDelimiter);
-            rawValue = Optional.fromNullable(Strings.emptyToNull(valuePart));
+            rawValue = fromPossiblyEmptyString(valuePart);
         }
 
         final ParseParamValueReturnValue returnValue = param.parse(rawValue, context);
@@ -177,30 +166,63 @@ public class CommandParamManager {
     public AutoCompleteReturnValue autoCompleteArgs(List<String> args, ParamParseContext context) {
         // Only the last arg is up for autoCompletion, the rest are expected to be valid args.
         final List<String> argsToBeParsed = args.subList(0, args.size() - 1);
+        final String autoCompleteArg = args.get(args.size() - 1);
 
         // Parse all args that have been passed.
         // Keep track of all params that are unbound.
-        final ParsePartialCommandArgsReturnValue parsePartialReturnValue = parsePartialArgs(argsToBeParsed, context);
-        if (parsePartialReturnValue.isFailure()) {
-            return AutoCompleteReturnValue.parseFailure(parsePartialReturnValue.getFailure());
+        final ParseBoundParamsReturnValue parseBoundParams = parseBoundParams(argsToBeParsed, context);
+        if (parseBoundParams.isFailure()) {
+            return AutoCompleteReturnValue.parseFailure(parseBoundParams.getFailure());
         }
 
-        final ParsePartialCommandArgsReturnValueSuccess success = parsePartialReturnValue.getSuccess();
-        final Map<String, ShellParam> unboundParams = success.getUnboundParams();
-        final Map<String, Object> parsedArgs = success.getParsedArgs();
+        final ParseBoundParamsReturnValueSuccess parseBoundParamsSuccess = parseBoundParams.getSuccess();
+        final Map<String, ShellParam> unboundParams = parseBoundParamsSuccess.getUnboundParams();
+        final Map<String, Object> parsedArgs = parseBoundParamsSuccess.getParsedArgs();
+        final AutoCompleteReturnValue returnValue = autoCompleteArg(autoCompleteArg, unboundParams, parsedArgs, context);
+        if (returnValue.isFailure()) {
+            return returnValue;
+        }
 
+        // A successful autoComplete either has 1 or more possibilities.
+        // 0 possibilities is considered a failed autoComplete.
+        final AutoCompleteReturnValueSuccess success = returnValue.getSuccess();
+        final List<String> possibilities = success.getPossibilities();
+
+        // Having an empty possibilities list here is an internal error.
+        if (possibilities.isEmpty()) {
+            return AutoCompleteReturnValue.failure(
+                AutoCompleteReturnValueFailure.internalError(
+                    "Internal error: AutoComplete succeeded, but returned no possibilities!"
+                )
+            );
+        }
+
+        if (possibilities.size() > 1) {
+            // More then 1 possibility available, no further processing should be done here.
+            return returnValue;
+        }
+
+        // There was only 1 way of autoCompleting the arg.
+        // Let's try to be as helpful as we can: Let's add a space!
+        final String autoCompleteAddition = success.getAutoCompleteAddition();
+        return AutoCompleteReturnValue.successSingle(autoCompleteAddition + ' ');
+    }
+
+    private AutoCompleteReturnValue autoCompleteArg(String autoCompleteArg,
+                                                    Map<String, ShellParam> unboundParams,
+                                                    Map<String, Object> parsedArgs,
+                                                    ParamParseContext context) {
         // We are either autoCompleting a param name, or it's value. Determine which.
         // autoCompleteArg is expected to be from the form "{name}={value}".
         // The "={value}" part is optional for some params (for example, flags).
-        final String autoCompleteArg = args.get(args.size() - 1);
         final int indexOfDelimiter = getIndexOfDelimiter(autoCompleteArg);
-        final String paramName = autoCompleteArg.substring(0, indexOfDelimiter);
+        final String rawParamName = autoCompleteArg.substring(0, indexOfDelimiter);
         if (indexOfDelimiter != autoCompleteArg.length()) {
             // autoCompleteArg had a '=', we are autoCompleting the param value.
             // The paramName is expected to be valid and unbound.
-            final ShellParam param = paramNamesTrie.get(paramName);
+            final ShellParam param = allParamsMap.get(rawParamName);
             if (param == null) {
-                return AutoCompleteReturnValue.parseFailure(ParseReturnValueFailure.invalidParam(paramName));
+                return AutoCompleteReturnValue.parseFailure(ParseReturnValueFailure.invalidParam(rawParamName));
             }
 
             final String valuePart = autoCompleteArg.substring(indexOfDelimiter);
@@ -208,21 +230,25 @@ public class CommandParamManager {
             return autoCompleteParamValue(param, rawValue, unboundParams, parsedArgs, context);
         } else {
             // No '=' in the arg, we are autoCompleting the param name.
-            // There are special convenience cases, where the param name can be ommitted:
+            // There are special convenience cases, where the param name can be omitted:
             // 1. If the command has only 1 mandatory param and any number of optional params.
             // 2. If the command has only 1 param, either mandatory or optional.
             if (mandatoryParams.size() == 1) {
-                // 1 - Use the paramName as the value.
+                // 1 - Assume the paramName is omitted and try to autoComplete the value.
+                // FIXME: This is limiting. Should offer autoComplete for both the name and value.
+                // FIXME: Use a Trie join.
                 final ShellParam param = mandatoryParams.get(0);
                 final Optional<String> rawValue = fromPossiblyEmptyString(autoCompleteArg);
                 return autoCompleteParamValue(param, rawValue, unboundParams, parsedArgs, context);
             } else if (allParamsMap.size() == 1) {
-                // 2 - Use the paramName as the value.
+                // 2 - Assume the paramName is omitted and try to autoComplete the value.
+                // FIXME: This is limiting. Should offer autoComplete for both the name and value.
+                // FIXME: Use a Trie join.
                 final ShellParam param = new ArrayList<>(allParamsMap.values()).get(0);
                 final Optional<String> rawValue = fromPossiblyEmptyString(autoCompleteArg);
                 return autoCompleteParamValue(param, rawValue, unboundParams, parsedArgs, context);
             } else {
-                return autoCompleteParamName(paramName, unboundParams);
+                return autoCompleteParamName(rawParamName, unboundParams);
             }
         }
     }
@@ -247,14 +273,14 @@ public class CommandParamManager {
             // The autoCompleteAddition is the difference between the single possible paramName
             // and the raw paramName. Also add a '=' after.
             final String possibility = possibleParamNames.get(0);
-            final String autoCompleteAddition = possibility.substring(rawParamName.length()) + ARG_VALUE_DELIMITER;
+            final String autoCompleteAddition = AutoCompleteUtils.getAutoCompleteAddition(rawParamName, possibility) + ARG_VALUE_DELIMITER;
             return AutoCompleteReturnValue.successSingle(autoCompleteAddition);
         } else {
             // Multiple possible paramNames.
             // The autoCompleteAddition is the difference between the longest possible prefix
             // and the raw paramName. Don't add a '=' after.
             final String longestPrefix = paramNamesTrie.getLongestPrefix(rawParamName);
-            final String autoCompleteAddition = longestPrefix.substring(rawParamName.length());
+            final String autoCompleteAddition = AutoCompleteUtils.getAutoCompleteAddition(rawParamName, longestPrefix);
             return AutoCompleteReturnValue.successMultiple(autoCompleteAddition, possibleParamNames);
         }
     }
@@ -274,37 +300,7 @@ public class CommandParamManager {
         }
 
         // AutoComplete param values.
-        final AutoCompleteParamValueReturnValue returnValue = param.autoComplete(rawValue, context);
-        if (returnValue.isFailure()) {
-            return AutoCompleteReturnValue.failure(returnValue.getFailure());
-        }
-
-        final AutoCompleteParamValueReturnValueSuccess success = returnValue.getSuccess();
-        final ShellSuggestion suggestion = success.getSuggestion();
-        final List<String> possibilities = suggestion.getPossibilities();
-        if (possibilities.isEmpty()) {
-            return AutoCompleteReturnValue.failure(
-                AutoCompleteReturnValueFailure.internalError(
-                    "Internal error: AutoComplete did not fail, but possibilities are empty!"
-                )
-            );
-        }
-
-        if (possibilities.size() == 1) {
-            // Only 1 possible value, we can use it.
-            // The autoCompleteAddition is the difference between the single possible value
-            // and the raw value. Also add a space after.
-            final String possibility = possibilities.get(0);
-            final String autoCompleteAddition = possibility.substring(possibility.length()) + ' ';
-            return AutoCompleteReturnValue.successSingle(autoCompleteAddition);
-        } else {
-            // Multiple possible values.
-            // The autoCompleteAddition is the difference between the longest possible prefix
-            // and the raw value. Don't add a space after.
-            final String longestPrefix = suggestion.getLongestPrefix();
-            final String autoCompleteAddition = longestPrefix.substring(rawValue.or("").length());
-            return AutoCompleteReturnValue.successMultiple(autoCompleteAddition, possibilities);
-        }
+        return param.autoComplete(rawValue, context);
     }
 
     private int getIndexOfDelimiter(String arg) {

@@ -1,11 +1,11 @@
-package com.rawcod.jerminal.returnvalue.autocomplete.flow;
+package com.rawcod.jerminal.returnvalue.autocomplete;
 
 import com.google.common.base.Objects;
 import com.rawcod.jerminal.returnvalue.Failable;
 import com.rawcod.jerminal.returnvalue.ReturnValueImpl;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValueFailure;
-import com.rawcod.jerminal.returnvalue.autocomplete.flow.AutoCompleteReturnValue.AutoCompleteReturnValueSuccess;
+import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue.AutoCompleteReturnValueSuccess;
 import com.rawcod.jerminal.returnvalue.parse.ParseReturnValueFailure;
+import com.rawcod.jerminal.util.AutoCompleteUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -14,7 +14,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * User: ykrasik
- * Date: 08/01/14
+ * Date: 22/07/2014
+ * Time: 20:44
  */
 public class AutoCompleteReturnValue extends ReturnValueImpl<AutoCompleteReturnValueSuccess, AutoCompleteReturnValueFailure> {
     private AutoCompleteReturnValue(Failable returnValue) {
@@ -22,12 +23,25 @@ public class AutoCompleteReturnValue extends ReturnValueImpl<AutoCompleteReturnV
     }
 
 
-    public static AutoCompleteReturnValue successSingle(String newPath) {
-        return successMultiple(newPath, Collections.<String>emptyList());
+    public static AutoCompleteReturnValue successSingle(String rawArg, String autoCompletedArg) {
+        final String autoCompleteAddition = AutoCompleteUtils.getAutoCompleteAddition(rawArg, autoCompletedArg);
+        return successSingle(autoCompleteAddition);
     }
 
-    public static AutoCompleteReturnValue successMultiple(String newPath, List<String> possibilities) {
-        return new AutoCompleteReturnValue(new AutoCompleteReturnValueSuccess(newPath, possibilities));
+    public static AutoCompleteReturnValue successSingle(String autoCompleteAddition) {
+        return new AutoCompleteReturnValue(new AutoCompleteReturnValueSuccess(autoCompleteAddition, Collections.singletonList(autoCompleteAddition)));
+    }
+
+    public static AutoCompleteReturnValue successMultiple(String rawArg, String autoCompletedArg, List<String> possibilities) {
+        final String autoCompleteAddition = AutoCompleteUtils.getAutoCompleteAddition(rawArg, autoCompletedArg);
+        return successMultiple(autoCompleteAddition, possibilities);
+    }
+
+    public static AutoCompleteReturnValue successMultiple(String autoCompleteAddition, List<String> possibilities) {
+        if (possibilities.size() < 2) {
+            throw new IllegalArgumentException("Multiple autoComplete must have at least 2 possibilities!");
+        }
+        return new AutoCompleteReturnValue(new AutoCompleteReturnValueSuccess(autoCompleteAddition, possibilities));
     }
 
     public static AutoCompleteReturnValue failure(AutoCompleteReturnValueFailure failure) {

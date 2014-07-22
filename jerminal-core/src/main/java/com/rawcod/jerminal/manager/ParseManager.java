@@ -5,7 +5,7 @@ import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
 import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
 import com.rawcod.jerminal.returnvalue.parse.args.ParseCommandArgsReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.flow.ParseReturnValue;
-import com.rawcod.jerminal.returnvalue.parse.path.ParsePathReturnValue;
+import com.rawcod.jerminal.returnvalue.parse.entry.ParsePathReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.path.ParsePathReturnValueSuccess;
 
 import java.util.List;

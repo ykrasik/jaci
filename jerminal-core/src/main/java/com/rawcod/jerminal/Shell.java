@@ -1,20 +1,23 @@
 package com.rawcod.jerminal;
 
 import com.google.common.base.Optional;
+import com.rawcod.jerminal.command.param.ParamParseContext;
 import com.rawcod.jerminal.filesystem.ShellFileSystem;
 import com.rawcod.jerminal.filesystem.entry.ShellAutoComplete;
+import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
 import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
 import com.rawcod.jerminal.manager.AutoCompleteManager;
 import com.rawcod.jerminal.manager.ExecuteManager;
 import com.rawcod.jerminal.manager.FileSystemManager;
 import com.rawcod.jerminal.output.OutputProcessor;
-import com.rawcod.jerminal.returnvalue.autocomplete.flow.AutoCompleteReturnValue;
-import com.rawcod.jerminal.returnvalue.autocomplete.flow.AutoCompleteReturnValueFailure;
-import com.rawcod.jerminal.returnvalue.autocomplete.flow.AutoCompleteReturnValueSuccess;
+import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
+import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue.AutoCompleteReturnValueSuccess;
+import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValueFailure;
 import com.rawcod.jerminal.returnvalue.execute.ExecuteReturnValue;
 import com.rawcod.jerminal.returnvalue.execute.ExecuteReturnValueFailure;
 import com.rawcod.jerminal.returnvalue.execute.ExecuteReturnValueSuccess;
 import com.rawcod.jerminal.returnvalue.parse.flow.ParseReturnValue;
+import com.rawcod.jerminal.returnvalue.parse.entry.ParsePathReturnValue;
 import com.rawcod.jerminal.shell.ShellCommandHistory;
 
 import java.util.*;
@@ -24,7 +27,7 @@ import java.util.*;
 * Date: 05/01/14
 */
 public class Shell {
-
+    private final FileSystemManager fileSystemManager;
     private final AutoCompleteManager autoCompleteManager;
     private final ExecuteManager executeManager;
     private final ShellCommandHistory commandHistory;
@@ -34,7 +37,7 @@ public class Shell {
     private ShellDirectory currentDirectory;
 
     public Shell(ShellFileSystem fileSystem, int maxCommandHistory) {
-        final FileSystemManager fileSystemManager = new FileSystemManager(fileSystem);
+        this.fileSystemManager = new FileSystemManager(fileSystem);
         this.autoCompleteManager = new AutoCompleteManager(fileSystemManager, commandManager);
         this.executeManager = new ExecuteManager(fileSystemManager, parseManager);
         this.commandHistory = new ShellCommandHistory(maxCommandHistory);
@@ -79,10 +82,12 @@ public class Shell {
         }
     }
 
-    public void autoComplete(String commandLine) {
-        final List<String> splitCommandLine = CommandLineSplitter.splitCommandLineForAutoComplete(commandLine);
+    public void autoComplete(String rawCommandLine) {
+        // Split the commandLine for autoComplete
+        final List<String> commandLine = CommandLineSplitter.splitCommandLineForAutoComplete(rawCommandLine);
 
-        final AutoCompleteReturnValue returnValue = autoCompleteManager.autoComplete(splitCommandLine, currentDirectory);
+        // Do the actual autoCompletion
+        final AutoCompleteReturnValue returnValue = doAutoComplete(commandLine);
         if (returnValue.isSuccess()) {
             final AutoCompleteReturnValueSuccess success = returnValue.getSuccess();
             handleAutoCompleteSuccess(success);
@@ -90,16 +95,33 @@ public class Shell {
             final AutoCompleteReturnValueFailure failure = returnValue.getFailure();
             handleAutoCompleteFailure(failure);
         }
+    }
 
-        final AutoCompleteReturnValue returnValue = manager.autoComplete(args);
-        final ShellAutoComplete autoComplete = returnValue.getAutoComplete();
-        if (returnValue.isSuccess()) {
-            handleAutoComplete(commandLine, splitCommandLine, returnValue);
-        } else {
-            displayError(returnValue.getErrorMessage());
-            displayUsage(returnValue.getUsage());
-            displaySuggestions(autoComplete);
+    private AutoCompleteReturnValue doAutoComplete(List<String> commandLine) {
+        // The first arg of the commandLine must be a path to a command.
+        final String rawPath = commandLine.get(0);
+
+        // If we only have 1 arg, we are trying to autoComplete a path to a command.
+        // Otherwise, the first arg is expected to be a valid command and we are autoCompleting its' args.
+        if (commandLine.size() == 1) {
+            // The first arg is the only arg on the commandLine, autoComplete path to command.
+            return fileSystemManager.autoCompletePath(rawPath, currentDirectory);
         }
+
+        // The first arg is not the only arg on the commandLine,
+        // it is expected to be a valid path to a command.
+        final ParsePathReturnValue returnValue = fileSystemManager.parsePathToCommand(rawPath, currentDirectory);
+        if (returnValue.isFailure()) {
+            // Couldn't parse the command successfully.
+            return AutoCompleteReturnValue.parseFailure(returnValue.getFailure());
+        }
+
+        // AutoComplete the command args.
+        // The args start from the 2nd commandLine element (the first was the command).
+        final ParamParseContext context = new ParamParseContext(fileSystemManager);
+        final ShellCommand command = (ShellCommand) returnValue.getSuccess().getLastEntry();
+        final List<String> args = commandLine.subList(1, commandLine.size());
+        return command.getParamManager().autoCompleteArgs(args, context);
     }
 
     public void execute(String commandLine) {
