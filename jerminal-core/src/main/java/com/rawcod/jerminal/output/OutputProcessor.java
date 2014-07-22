@@ -1,9 +1,10 @@
 package com.rawcod.jerminal.output;
 
-import com.rawcod.jerminal.returnvalue.autocomplete.flow.AutoCompleteReturnValueFailure;
-import com.rawcod.jerminal.returnvalue.autocomplete.flow.AutoCompleteReturnValueSuccess;
+import com.google.common.base.Optional;
+import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValueFailure;
 import com.rawcod.jerminal.returnvalue.execute.ExecuteReturnValueFailure;
-import com.rawcod.jerminal.returnvalue.execute.ExecuteReturnValueSuccess;
+
+import java.util.List;
 
 /**
  * User: ykrasik
@@ -14,9 +15,11 @@ public interface OutputProcessor {
     void clearCommandLine();
     void setCommandLine(String commandLine);
 
-    void processAutoCompleteSuccess(AutoCompleteReturnValueSuccess returnValue);
+    void println(String message);
+
+    void processAutoCompleteSuccess(String newCommandLine, List<String> possibilities);
     void processAutoCompleteFailure(AutoCompleteReturnValueFailure returnValue);
 
-    void processExecuteOutputSuccess(ExecuteReturnValueSuccess returnValue);
+    void processExecuteOutputSuccess(String output, Optional<Object> returnValue);
     void processExecuteOutputFailure(ExecuteReturnValueFailure returnValue);
 }

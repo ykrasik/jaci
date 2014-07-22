@@ -2,8 +2,8 @@ package com.rawcod.jerminal.manager;
 
 import com.rawcod.jerminal.collections.trie.Trie;
 import com.rawcod.jerminal.collections.trie.TrieFilter;
+import com.rawcod.jerminal.filesystem.entry.EntryFilters;
 import com.rawcod.jerminal.filesystem.entry.ShellEntry;
-import com.rawcod.jerminal.filesystem.entry.TrieFilters;
 import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteError;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
@@ -34,15 +34,15 @@ public class DirectoryEntryManager {
     }
 
     public ParseEntryReturnValue parseCommand(String rawCommand) {
-        return parseEntry(rawCommand, TrieFilters.FILE_FILTER);
+        return parseEntry(rawCommand, EntryFilters.FILE_FILTER);
     }
 
     public ParseEntryReturnValue parseDirectory(String rawDirectory) {
-        return parseEntry(rawDirectory, TrieFilters.DIRECTORY_FILTER);
+        return parseEntry(rawDirectory, EntryFilters.DIRECTORY_FILTER);
     }
 
     public ParseEntryReturnValue parseEntry(String rawEntry) {
-        return parseEntry(rawEntry, TrieFilters.NO_FILTER);
+        return parseEntry(rawEntry, EntryFilters.NO_FILTER);
     }
 
     public ParseEntryReturnValue parseEntry(String rawEntry, TrieFilter<ShellEntry> filter) {
@@ -83,15 +83,15 @@ public class DirectoryEntryManager {
     }
 
     public AutoCompleteReturnValue autoCompleteCommand(String rawCommand) {
-        return autoCompleteEntry(rawCommand, TrieFilters.FILE_FILTER);
+        return autoCompleteEntry(rawCommand, EntryFilters.FILE_FILTER);
     }
 
     public AutoCompleteReturnValue autoCompleteDirectory(String rawDirectory) {
-        return autoCompleteEntry(rawDirectory, TrieFilters.DIRECTORY_FILTER);
+        return autoCompleteEntry(rawDirectory, EntryFilters.DIRECTORY_FILTER);
     }
 
     public AutoCompleteReturnValue autoCompleteEntry(String rawEntry) {
-        return autoCompleteEntry(rawEntry, TrieFilters.NO_FILTER);
+        return autoCompleteEntry(rawEntry, EntryFilters.NO_FILTER);
     }
 
     public AutoCompleteReturnValue autoCompleteEntry(String rawEntry, TrieFilter<ShellEntry> filter) {

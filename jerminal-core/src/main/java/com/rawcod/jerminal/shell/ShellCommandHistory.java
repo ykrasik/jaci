@@ -1,5 +1,7 @@
 package com.rawcod.jerminal.shell;
 
+import com.google.common.base.Optional;
+
 import java.util.ArrayDeque;
 import java.util.Deque;
 
@@ -19,7 +21,7 @@ public class ShellCommandHistory {
         this.nextCommands = new ArrayDeque<>(maxCommandsHistory);
     }
 
-    public String getPrevCommand() {
+    public Optional<String> getPrevCommand() {
         if (prevCommands.isEmpty()) {
             return null;
         }
@@ -32,7 +34,7 @@ public class ShellCommandHistory {
         return prevCommand;
     }
 
-    public String getNextCommand() {
+    public Optional<String>  getNextCommand() {
         if (nextCommands.isEmpty()) {
             return null;
         }

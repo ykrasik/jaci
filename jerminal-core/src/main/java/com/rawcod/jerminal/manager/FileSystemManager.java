@@ -3,8 +3,8 @@ package com.rawcod.jerminal.manager;
 import com.google.common.base.Splitter;
 import com.rawcod.jerminal.collections.trie.TrieFilter;
 import com.rawcod.jerminal.filesystem.ShellFileSystem;
+import com.rawcod.jerminal.filesystem.entry.EntryFilters;
 import com.rawcod.jerminal.filesystem.entry.ShellEntry;
-import com.rawcod.jerminal.filesystem.entry.TrieFilters;
 import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue.AutoCompleteReturnValueSuccess;
@@ -32,15 +32,15 @@ public class FileSystemManager {
     }
 
     public ParsePathReturnValue parsePathToCommand(String rawPath, ShellDirectory currentDirectory) {
-        return parsePath(rawPath, currentDirectory, TrieFilters.FILE_FILTER);
+        return parsePath(rawPath, currentDirectory, EntryFilters.FILE_FILTER);
     }
 
     public ParsePathReturnValue parsePathToDirectory(String rawPath, ShellDirectory currentDirectory) {
-        return parsePath(rawPath, currentDirectory, TrieFilters.DIRECTORY_FILTER);
+        return parsePath(rawPath, currentDirectory, EntryFilters.DIRECTORY_FILTER);
     }
 
     public ParsePathReturnValue parsePath(String rawPath, ShellDirectory currentDirectory) {
-        return parsePath(rawPath, currentDirectory, TrieFilters.NO_FILTER);
+        return parsePath(rawPath, currentDirectory, EntryFilters.NO_FILTER);
     }
 
     public ParsePathReturnValue parsePath(String rawPath,
@@ -93,15 +93,15 @@ public class FileSystemManager {
     }
 
     public AutoCompleteReturnValue autoCompletePathToCommand(String rawPath, ShellDirectory currentDirectory) {
-        return autoCompletePath(rawPath, currentDirectory, TrieFilters.FILE_FILTER);
+        return autoCompletePath(rawPath, currentDirectory, EntryFilters.FILE_FILTER);
     }
 
     public AutoCompleteReturnValue autoCompletePathToDirectory(String rawPath, ShellDirectory currentDirectory) {
-        return autoCompletePath(rawPath, currentDirectory, TrieFilters.DIRECTORY_FILTER);
+        return autoCompletePath(rawPath, currentDirectory, EntryFilters.DIRECTORY_FILTER);
     }
 
     public AutoCompleteReturnValue autoCompletePath(String rawPath, ShellDirectory currentDirectory) {
-        return autoCompletePath(rawPath, currentDirectory, TrieFilters.NO_FILTER);
+        return autoCompletePath(rawPath, currentDirectory, EntryFilters.NO_FILTER);
     }
 
     public AutoCompleteReturnValue autoCompletePath(String rawPath,

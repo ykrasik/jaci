@@ -2,7 +2,7 @@ package com.rawcod.jerminal.returnvalue.execute;
 
 import com.rawcod.jerminal.returnvalue.Failable;
 import com.rawcod.jerminal.returnvalue.ReturnValueImpl;
-import com.rawcod.jerminal.returnvalue.parse.flow.ParseReturnValueFailure;
+import com.rawcod.jerminal.returnvalue.parse.ParseReturnValueFailure;
 
 /**
  * User: ykrasik
@@ -19,6 +19,10 @@ public class ExecuteReturnValue extends ReturnValueImpl<ExecuteReturnValueSucces
 
     public static ExecuteReturnValueFailure.Builder failureBuilder(ExecuteError error) {
         return new ExecuteReturnValueFailure.Builder(error);
+    }
+
+    public static ExecuteReturnValue parseFailure(ParseReturnValueFailure failure) {
+
     }
 
     public static ExecuteReturnValue failureFrom(ParseReturnValueFailure failure) {

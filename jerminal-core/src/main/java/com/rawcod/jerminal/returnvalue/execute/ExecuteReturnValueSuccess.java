@@ -12,17 +12,20 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Time: 21:19
  */
 public class ExecuteReturnValueSuccess extends ReturnValueImpl.SuccessImpl {
-    private final Optional<String> message;
+    private final String output;
     private final Optional<Object> returnValue;
-    private final String commandOutput;
 
     private ExecuteReturnValueSuccess(Builder builder) {
         this.message = checkNotNull(builder.message, "Message is null!");
         this.returnValue = checkNotNull(builder.returnValue, "Return value is null!");
     }
 
-    public Optional<String> getMessage() {
-        return message;
+    public String getOutput() {
+        return output;
+    }
+
+    public Optional<Object> getReturnValue() {
+        return returnValue;
     }
 
     @Override

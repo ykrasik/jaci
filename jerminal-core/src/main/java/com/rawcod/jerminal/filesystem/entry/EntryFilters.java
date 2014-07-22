@@ -8,8 +8,8 @@ import com.rawcod.jerminal.collections.trie.TrieFilter;
  * Time: 23:37
  */
 @SuppressWarnings("unchecked")
-public final class TrieFilters {
-    private TrieFilters() {
+public final class EntryFilters {
+    private EntryFilters() {
 
     }
 

@@ -1,6 +1,7 @@
 package com.rawcod.jerminal.filesystem.entry.command;
 
 import com.rawcod.jerminal.command.CommandExecutor;
+import com.rawcod.jerminal.command.args.CommandArgs;
 import com.rawcod.jerminal.manager.CommandParamManager;
 import com.rawcod.jerminal.returnvalue.execute.ExecuteReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.flow.ParseReturnValue;
@@ -89,11 +90,7 @@ public class ShellCommand implements ShellEntry {
 
     }
 
-    public Map<String, ShellParam> getParams() {
-
-    }
-
-    public CommandExecutor getExecutor() {
+    public ExecuteReturnValue execute(CommandArgs args) {
 
     }
 
