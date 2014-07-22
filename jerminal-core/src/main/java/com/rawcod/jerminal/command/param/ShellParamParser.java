@@ -1,6 +1,6 @@
 package com.rawcod.jerminal.command.param;
 
-import com.rawcod.jerminal.returnvalue.autocomplete.param.AutoCompleteParamReturnValue;
+import com.rawcod.jerminal.returnvalue.autocomplete.param.AutoCompleteParamValueReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.param.ParseParamReturnValue;
 
 /**
@@ -12,6 +12,6 @@ public interface ShellParamParser {
     String getName();
     String getDescription();
 
-    AutoCompleteParamReturnValue autoComplete(String arg, ParamParseContext context);
+    AutoCompleteParamValueReturnValue autoComplete(String arg, ParamParseContext context);
     ParseParamReturnValue parse(String arg, ParamParseContext context);
 }

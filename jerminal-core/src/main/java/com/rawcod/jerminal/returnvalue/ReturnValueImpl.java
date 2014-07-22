@@ -5,6 +5,7 @@ import com.rawcod.jerminal.returnvalue.ReturnValue.Failure;
 import com.rawcod.jerminal.returnvalue.ReturnValue.Success;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * User: ykrasik
@@ -15,7 +16,7 @@ public class ReturnValueImpl<S extends Success, F extends Failure> implements Re
     private final Failable returnValue;
 
     public ReturnValueImpl(Failable returnValue) {
-        this.returnValue = returnValue;
+        this.returnValue = checkNotNull(returnValue, "returnValue is null!");
     }
 
     @Override
@@ -31,15 +32,35 @@ public class ReturnValueImpl<S extends Success, F extends Failure> implements Re
     @SuppressWarnings("unchecked")
     @Override
     public S getSuccess() {
-        checkArgument(isSuccess(), "Trying to call getSuccess on a failure returnValue: %s", returnValue);
+        assertSuccess();
         return (S) returnValue;
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public F getFailure() {
-        checkArgument(!isSuccess(), "Trying to call getFailure on a success returnValue: %s", returnValue);
+        assertFailure();
         return (F) returnValue;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <F2 extends Failure> ReturnValueImpl<S, F2> toSuccess() {
+        assertSuccess();
+        return (ReturnValueImpl<S, F2>) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <S2 extends Success> ReturnValueImpl<S2, F> toFailure() {
+        assertFailure();
+        return (ReturnValueImpl<S2, F>) this;
+    }
+
+    private void assertSuccess() {
+        checkArgument(isSuccess(), "Trying to use a failure returnValue as success: %s", returnValue);
+    }
+
+    private void assertFailure() {
+        checkArgument(!isSuccess(), "Trying to use a success returnValue as failure: %s", returnValue);
     }
 
     @Override

@@ -75,4 +75,8 @@ public class AutoCompleteReturnValueFailure extends ReturnValueImpl.FailureImpl 
             failure.getSuggestion()
         );
     }
+
+    public static AutoCompleteReturnValueFailure internalError(String format, Object... args) {
+        return from(AutoCompleteError.INTERNAL_ERROR, format, args);
+    }
 }

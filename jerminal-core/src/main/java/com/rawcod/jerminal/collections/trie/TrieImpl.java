@@ -11,7 +11,7 @@ public class TrieImpl<V> implements Trie<V> {
     }
 
     @Override
-    public void set(String word, V value) {
+    public void put(String word, V value) {
         root.addWord(word, value);
     }
 

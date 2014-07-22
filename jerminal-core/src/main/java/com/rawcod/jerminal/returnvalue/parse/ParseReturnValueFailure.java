@@ -53,6 +53,23 @@ public class ParseReturnValueFailure extends ReturnValueImpl.FailureImpl {
     }
 
     public static ParseReturnValueFailure emptyDirectory(String directoryName) {
-        return from(ParseError.EMPTY_DIRECTORY, "Parse error: Directory '%s' is empty.", directoryName);
+        return from(
+            ParseError.EMPTY_DIRECTORY,
+            "Parse error: Directory '%s' is empty.", directoryName
+        );
+    }
+
+    public static ParseReturnValueFailure invalidParam(String paramName) {
+        return from(
+            ParseError.INVALID_PARAM,
+            "Parse error: Invalid param: '%s'", paramName
+        );
+    }
+
+    public static ParseReturnValueFailure paramAlreadyBound(String paramName, Object value) {
+        return from(
+            ParseError.PARAM_ALREADY_BOUND,
+            "Parse error: Param '%s' is already bound to a value: '%s", paramName, value
+        );
     }
 }
