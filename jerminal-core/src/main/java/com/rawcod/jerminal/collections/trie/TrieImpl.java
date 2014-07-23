@@ -4,6 +4,7 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.rawcod.jerminal.collections.trie.node.TrieNode;
 import com.rawcod.jerminal.collections.trie.node.TrieNodeImpl;
+import com.rawcod.jerminal.collections.trie.node.UnionTrieNodeImpl;
 import com.rawcod.jerminal.collections.trie.visitor.TrieVisitor;
 import com.rawcod.jerminal.collections.trie.visitor.ValueCollectorTrieVisitor;
 import com.rawcod.jerminal.collections.trie.visitor.WordCollectorTrieVisitor;
@@ -130,7 +131,9 @@ public class TrieImpl<T> implements Trie<T> {
 
     @Override
     public ReadOnlyTrie<T> union(ReadOnlyTrie<T> other) {
-        return null;
+        // I couldn't find a better solution other then this downcasting...
+        final TrieNode<T> unionRoot = new UnionTrieNodeImpl<>(root, ((TrieImpl<T>) other).root);
+        return new TrieImpl<>(unionRoot);
     }
 
     @Override
@@ -142,12 +145,26 @@ public class TrieImpl<T> implements Trie<T> {
         TrieNode<T> currentNode = root;
         for (int i = 0; i < word.length(); i++) {
             final char c = word.charAt(i);
-            currentNode = currentNode.getOrCreateChild(c);
+            TrieNode<T> child = currentNode.getChild(c);
+            if (child == null) {
+                child = new TrieNodeImpl<>(c, currentNode);
+                currentNode.setChild(c, child);
+            }
+            currentNode = child;
         }
 
         final T oldValue = currentNode.setValue(value);
         checkState(oldValue == null, "Word '%s' already has a value: '%s'", word, oldValue);
         numWords++;
+    }
+
+    @Override
+    public T remove(String word) {
+        // Get the node representing the word.
+        final TrieNode<T> node = getNode(word);
+        checkNotNull(node, "No node exists for word: '%s'", word);
+        checkArgument(node.isWord(), "Node '%s' is not a word!", word);
+        return node.setValue(null);
     }
 
     private TrieNode<T> getNode(String word) {

@@ -9,14 +9,15 @@ public interface TrieNode<T> {
     int numChildren();
     boolean isEmpty();
 
-    boolean isWord();
+    char getCharacter();
     String getPrefix();
 
+    boolean isWord();
     T getValue();
     T setValue(T value);
 
     TrieNode<T> getChild(char c);
-    TrieNode<T> getOrCreateChild(char c);
+    void setChild(char c, TrieNode<T> child);
 
     Iterable<TrieNode<T>> getChildren();
 }

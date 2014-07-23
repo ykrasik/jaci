@@ -3,6 +3,8 @@ package com.rawcod.jerminal.collections.trie.node;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 public class TrieNodeImpl<T> implements TrieNode<T> {
     private final Map<Character, TrieNode<T>> children;
     private final TrieNode<T> parent;
@@ -16,7 +18,7 @@ public class TrieNodeImpl<T> implements TrieNode<T> {
         this.character = (char) 0;
     }
 
-    private TrieNodeImpl(char character, TrieNode<T> parent) {
+    public TrieNodeImpl(char character, TrieNode<T> parent) {
         this.children = new HashMap<>(1);
         this.parent = parent;
         this.character = character;
@@ -33,8 +35,8 @@ public class TrieNodeImpl<T> implements TrieNode<T> {
     }
 
     @Override
-    public boolean isWord() {
-        return value != null;
+    public char getCharacter() {
+        return character;
     }
 
     @Override
@@ -44,6 +46,11 @@ public class TrieNodeImpl<T> implements TrieNode<T> {
         } else {
             return String.format("%s%c", parent.toString(), character);
         }
+    }
+
+    @Override
+    public boolean isWord() {
+        return value != null;
     }
 
     @Override
@@ -68,13 +75,9 @@ public class TrieNodeImpl<T> implements TrieNode<T> {
     }
 
     @Override
-    public TrieNode<T> getOrCreateChild(char c) {
-        TrieNode<T> child = getChild(c);
-        if (child == null) {
-            child = new TrieNodeImpl<>(c, this);
-            children.put(c, child);
-        }
-        return child;
+    public void setChild(char c, TrieNode<T> child) {
+        checkArgument(getChild(c) == null, "Node already has a child at '%c'", c);
+        children.put(c, child);
     }
 
     @Override
