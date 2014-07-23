@@ -1,6 +1,7 @@
 package com.rawcod.jerminal.filesystem.entry;
 
-import com.rawcod.jerminal.collections.trie.TrieFilter;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 
 /**
  * User: ykrasik
@@ -13,18 +14,18 @@ public final class EntryFilters {
 
     }
 
-    public static final TrieFilter<ShellEntry> NO_FILTER = new TrieFilter.NoTrieFilter();
+    public static final Predicate<ShellEntry> NO_FILTER = Predicates.alwaysTrue();
 
-    public static final TrieFilter<ShellEntry> FILE_FILTER = new TrieFilter<ShellEntry>() {
+    public static final Predicate<ShellEntry> FILE_FILTER = new Predicate<ShellEntry>() {
         @Override
-        public boolean shouldKeep(ShellEntry value) {
+        public boolean apply(ShellEntry value) {
             return !value.isDirectory();
         }
     };
 
-    public static final TrieFilter<ShellEntry> DIRECTORY_FILTER = new TrieFilter<ShellEntry>() {
+    public static final Predicate<ShellEntry> DIRECTORY_FILTER = new Predicate<ShellEntry>() {
         @Override
-        public boolean shouldKeep(ShellEntry value) {
+        public boolean apply(ShellEntry value) {
             return value.isDirectory();
         }
     };

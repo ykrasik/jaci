@@ -34,7 +34,7 @@ public class ShellWordContainer<V> {
     }
 
     public ShellAutoComplete autoComplete(String arg, TrieFilter<V> filter) {
-        final List<String> possibleValues = words.getWordsByFilter(arg, filter);
+        final List<String> possibleValues = words.getWordsFromPrefixWithFilter(arg, filter);
 
         // Couldn't match any child entry.
         if (possibleValues.isEmpty()) {

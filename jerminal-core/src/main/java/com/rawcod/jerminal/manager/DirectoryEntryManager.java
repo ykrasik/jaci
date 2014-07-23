@@ -1,7 +1,7 @@
 package com.rawcod.jerminal.manager;
 
+import com.google.common.base.Predicate;
 import com.rawcod.jerminal.collections.trie.Trie;
-import com.rawcod.jerminal.collections.trie.TrieFilter;
 import com.rawcod.jerminal.filesystem.entry.EntryFilters;
 import com.rawcod.jerminal.filesystem.entry.ShellEntry;
 import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
@@ -45,7 +45,7 @@ public class DirectoryEntryManager {
         return parseEntry(rawEntry, EntryFilters.NO_FILTER);
     }
 
-    public ParseEntryReturnValue parseEntry(String rawEntry, TrieFilter<ShellEntry> filter) {
+    public ParseEntryReturnValue parseEntry(String rawEntry, Predicate<ShellEntry> filter) {
         if (isParentAccepted(rawEntry, filter)) {
             return ParseEntryReturnValue.success(directory.getParent());
         }
@@ -70,7 +70,7 @@ public class DirectoryEntryManager {
         }
 
         // Child entry exists, check that it is allowed by the filter.
-        if (!filter.shouldKeep(parsedEntry)) {
+        if (!filter.apply(parsedEntry)) {
             return ParseEntryReturnValue.failure(
                 ParseReturnValueFailure.from(
                     ParseError.INVALID_ENTRY,
@@ -94,8 +94,8 @@ public class DirectoryEntryManager {
         return autoCompleteEntry(rawEntry, EntryFilters.NO_FILTER);
     }
 
-    public AutoCompleteReturnValue autoCompleteEntry(String rawEntry, TrieFilter<ShellEntry> filter) {
-        final List<String> possibleValues = children.getWordsByFilter(rawEntry, filter);
+    public AutoCompleteReturnValue autoCompleteEntry(String rawEntry, Predicate<ShellEntry> filter) {
+        final List<String> possibleValues = children.getWordsFromPrefixWithFilter(rawEntry, filter);
 
         // Couldn't match any child entry.
         if (possibleValues.isEmpty()) {
@@ -158,12 +158,12 @@ public class DirectoryEntryManager {
         return AutoCompleteReturnValue.successMultiple(autoCompleteAddition, possibilitiesWithSpecialCharacters);
     }
 
-    private boolean isParentAccepted(String entry, TrieFilter<ShellEntry> filter) {
-        return ShellDirectory.PARENT.equals(entry) && directory.getParent() != null && filter.shouldKeep(directory.getParent());
+    private boolean isParentAccepted(String entry, Predicate<ShellEntry> filter) {
+        return ShellDirectory.PARENT.equals(entry) && directory.getParent() != null && filter.apply(directory.getParent());
     }
 
-    private boolean isThisAccepted(String entry, TrieFilter<ShellEntry> filter) {
-        return ShellDirectory.THIS.equals(entry) && filter.shouldKeep(directory);
+    private boolean isThisAccepted(String entry, Predicate<ShellEntry> filter) {
+        return ShellDirectory.THIS.equals(entry) && filter.apply(directory);
     }
 
     private boolean canAddAllSpecialCharacters(String input) {

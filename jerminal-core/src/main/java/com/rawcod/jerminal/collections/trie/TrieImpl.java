@@ -1,23 +1,35 @@
 package com.rawcod.jerminal.collections.trie;
 
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+import com.rawcod.jerminal.collections.trie.node.TrieNode;
+import com.rawcod.jerminal.collections.trie.node.TrieNodeImpl;
+import com.rawcod.jerminal.collections.trie.visitor.TrieVisitor;
+import com.rawcod.jerminal.collections.trie.visitor.ValueCollectorTrieVisitor;
+import com.rawcod.jerminal.collections.trie.visitor.WordCollectorTrieVisitor;
+
 import java.util.Collections;
 import java.util.List;
 
-public class TrieImpl<V> implements Trie<V> {
-    private final TrieNode<V> root;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+
+public class TrieImpl<T> implements Trie<T> {
+    private final TrieNode<T> root;
+    private int numWords;
 
     public TrieImpl() {
-        root = new TrieNode<>();
+        this(new TrieNodeImpl<T>());
     }
 
-    @Override
-    public void put(String word, V value) {
-        root.addWord(word, value);
+    private TrieImpl(TrieNode<T> root) {
+        this.root = root;
     }
 
     @Override
     public int size() {
-        return root.size();
+        return numWords;
     }
 
     @Override
@@ -26,114 +38,153 @@ public class TrieImpl<V> implements Trie<V> {
     }
 
     @Override
-    public V get(String word) {
-        final TrieNode<V> node = getNode(word);
-        if (node == null || !node.isWord()) {
-            return null;
-        }
-        return node.getValue();
+    public T get(String word) {
+        final TrieNode<T> node = getNode(word);
+        return node != null ? node.getValue() : null;
     }
 
     @Override
     public List<String> getAllWords() {
-        return root.getAllWords();
+        return getAllWordsWithFilter(Predicates.<T>alwaysTrue());
     }
 
     @Override
-    public List<String> getAllWordsByFilter(TrieFilter<V> filter) {
-        return root.getWordsByFilter(filter);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<String> getWords(String prefix) {
-        return getWordsByFilter(prefix, (TrieFilter<V>) TrieNode.NO_FILTER);
+    public List<String> getAllWordsWithFilter(Predicate<T> filter) {
+        return getWordsFromPrefixWithFilter("", filter);
     }
 
     @Override
-    public List<String> getWordsByFilter(String prefix, TrieFilter<V> filter) {
-        final TrieNode<V> node = getNode(prefix);
+    public List<String> getWordsFromPrefix(String prefix) {
+        return getWordsFromPrefixWithFilter(prefix, Predicates.<T>alwaysTrue());
+    }
+
+    @Override
+    public List<String> getWordsFromPrefixWithFilter(String prefix, Predicate<T> filter) {
+        final TrieNode<T> node = getNode(prefix);
         if (node == null) {
             return Collections.emptyList();
         }
-        return node.getWordsByFilter(filter);
-    }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<V> getAllValues() {
-        return getAllValuesByFilter((TrieFilter<V>) TrieNode.NO_FILTER);
+        final WordCollectorTrieVisitor<T> wordCollector = new WordCollectorTrieVisitor<>();
+        visitWordsByFilterFromNode(node, filter, wordCollector);
+        return wordCollector.getWords();
     }
 
     @Override
-    public List<V> getAllValuesByFilter(TrieFilter<V> filter) {
-        return root.getValuesByFilter(filter);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<V> getValues(String prefix) {
-        return getValuesByFilter(prefix, (TrieFilter<V>) TrieNode.NO_FILTER);
+    public List<T> getAllValues() {
+        return getAllValuesWithFilter(Predicates.<T>alwaysTrue());
     }
 
     @Override
-    public List<V> getValuesByFilter(String prefix, TrieFilter<V> filter) {
-        final TrieNode<V> node = getNode(prefix);
+    public List<T> getAllValuesWithFilter(Predicate<T> filter) {
+        return getValuesByPrefixWithFilter("", filter);
+    }
+
+    @Override
+    public List<T> getValuesByPrefix(String prefix) {
+        return getValuesByPrefixWithFilter(prefix, Predicates.<T>alwaysTrue());
+    }
+
+    @Override
+    public List<T> getValuesByPrefixWithFilter(String prefix, Predicate<T> filter) {
+        final TrieNode<T> node = getNode(prefix);
         if (node == null) {
             return Collections.emptyList();
         }
-        return node.getValuesByFilter(filter);
+
+        final ValueCollectorTrieVisitor<T> valueCollector = new ValueCollectorTrieVisitor<>();
+        visitWordsByFilterFromNode(node, filter, valueCollector);
+        return valueCollector.getValues();
+    }
+
+    @Override
+    public void visitAllWords(TrieVisitor<T> visitor) {
+        visitWordsByFilter(visitor, Predicates.<T>alwaysTrue());
+    }
+
+    @Override
+    public void visitWordsByFilter(TrieVisitor<T> visitor, Predicate<T> filter) {
+        visitWordsByFilterFromNode(root, filter, visitor);
     }
 
     @Override
     public String getLongestPrefix(String prefix) {
-        final TrieNode<V> node = getNode(prefix);
+        // Get the node representing the prefix.
+        final TrieNode<T> node = getNode(prefix);
         if (node == null) {
+            // No node is reachable for this prefix, prefix is illegal.
             return "";
         }
-        return node.getLongestPrefix();
+
+        // Keep going down the tree, until a node has more then 1 children or is a word.
+        TrieNode<T> currentNode = node;
+        while (currentNode.numChildren() == 1 && !currentNode.isWord()) {
+            // currentNode only has 1 child and is not a word.
+            for (TrieNode<T> child : currentNode.getChildren()) {
+                // Move on to currentNode's only child.
+                currentNode = child;
+            }
+        }
+        return currentNode.getPrefix();
     }
 
     @Override
-    public String getLongestExistingPrefix(String word) {
-        TrieNode<V> lastNode = root;
+    public ReadOnlyTrie<T> union(ReadOnlyTrie<T> other) {
+        return null;
+    }
+
+    @Override
+    public void put(String word, T value) {
+        checkArgument(!word.isEmpty(), "Empty words are not allowed!");
+        checkNotNull(value, "Null values are not allowed!");
+
+        // Navigate the tree by the letters of the word, starting from the root.
+        TrieNode<T> currentNode = root;
         for (int i = 0; i < word.length(); i++) {
-            final TrieNode<V> child = lastNode.getNode(word.charAt(i));
-            if (child == null) {
-                return lastNode.toString();
-            }
-            lastNode = child;
+            final char c = word.charAt(i);
+            currentNode = currentNode.getOrCreateChild(c);
         }
 
-        return lastNode.getLongestPrefix();
+        final T oldValue = currentNode.setValue(value);
+        checkState(oldValue == null, "Word '%s' already has a value: '%s'", word, oldValue);
+        numWords++;
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public void visitAllWords(TrieVisitor<V> visitor) {
-        visitWordsByFilter(visitor, (TrieFilter<V>) TrieNode.NO_FILTER);
-    }
-
-    @Override
-    public void visitWordsByFilter(TrieVisitor<V> visitor, TrieFilter<V> filter) {
-        root.visitWordsByFilter(visitor, filter);
-    }
-
-    private TrieNode<V> getNode(String word) {
-        TrieNode<V> lastNode = root;
+    private TrieNode<T> getNode(String word) {
+        // Navigate the tree by the letters of the word, starting from the root.
+        TrieNode<T> currentNode = root;
         for (int i = 0; i < word.length(); i++) {
-            final TrieNode<V> child = lastNode.getNode(word.charAt(i));
-            if (child == null) {
+            final char c = word.charAt(i);
+            currentNode = currentNode.getChild(c);
+            if (currentNode == null) {
                 return null;
             }
-            lastNode = child;
         }
+        return currentNode;
+    }
 
-        return lastNode;
+    private void visitWordsByFilterFromNode(TrieNode<T> node,
+                                            Predicate<T> filter,
+                                            TrieVisitor<T> visitor) {
+        // Visit the node, if it is accepted.
+        visitIfNodeAccepted(node, filter, visitor);
+
+        // Visit all the node's children.
+        for (TrieNode<T> child : node.getChildren()) {
+            visitWordsByFilterFromNode(child, filter, visitor);
+        }
+    }
+
+    private void visitIfNodeAccepted(TrieNode<T> node, Predicate<T> filter, TrieVisitor<T> visitor) {
+        final T value = node.getValue();
+        if (node.isWord() && filter.apply(value)) {
+            final String word = node.getPrefix();
+            visitor.visit(word, value);
+        }
     }
 
     @Override
     public String toString() {
-        return root.getAllWords().toString();
+        return getAllWords().toString();
     }
 }

@@ -1,7 +1,7 @@
 package com.rawcod.jerminal.manager;
 
+import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
-import com.rawcod.jerminal.collections.trie.TrieFilter;
 import com.rawcod.jerminal.filesystem.ShellFileSystem;
 import com.rawcod.jerminal.filesystem.entry.EntryFilters;
 import com.rawcod.jerminal.filesystem.entry.ShellEntry;
@@ -45,7 +45,7 @@ public class FileSystemManager {
 
     public ParsePathReturnValue parsePath(String rawPath,
                                           ShellDirectory currentDirectory,
-                                          TrieFilter<ShellEntry> filter) {
+                                          Predicate<ShellEntry> filter) {
         final String pathToSplit;
         final ShellDirectory startDir;
         final boolean startsFromRoot = !rawPath.isEmpty() && rawPath.charAt(0) == DELIMITER;
@@ -106,7 +106,7 @@ public class FileSystemManager {
 
     public AutoCompleteReturnValue autoCompletePath(String rawPath,
                                                     ShellDirectory currentDirectory,
-                                                    TrieFilter<ShellEntry> filter) {
+                                                    Predicate<ShellEntry> filter) {
         // Parse the path until the last delimiter, after which we autoComplete the remaining arg.
         int lastIndexOfDelimiter = rawPath.lastIndexOf(DELIMITER);
         if (lastIndexOfDelimiter == -1) {
@@ -129,7 +129,7 @@ public class FileSystemManager {
     }
 
     private AutoCompleteReturnValue autoCompleteEntry(ShellDirectory lastDir,
-                                                      TrieFilter<ShellEntry> filter,
+                                                      Predicate<ShellEntry> filter,
                                                       String autoCompleteArg) {
         // Let the last directory along the path autoComplete the arg.
         final AutoCompleteReturnValue returnValue = lastDir.getEntryManager().autoCompleteEntry(autoCompleteArg, filter);

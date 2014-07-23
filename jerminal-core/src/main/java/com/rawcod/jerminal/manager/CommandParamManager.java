@@ -1,9 +1,9 @@
 package com.rawcod.jerminal.manager;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.rawcod.jerminal.collections.trie.Trie;
-import com.rawcod.jerminal.collections.trie.TrieFilter;
 import com.rawcod.jerminal.collections.trie.TrieImpl;
 import com.rawcod.jerminal.command.args.CommandArgs;
 import com.rawcod.jerminal.command.param.ParamParseContext;
@@ -256,7 +256,7 @@ public class CommandParamManager {
     private AutoCompleteReturnValue autoCompleteParamName(String rawParamName,
                                                           Map<String, ShellParam> unboundParams) {
         // Get all param names possible with this prefix, that haven't been bound yet.
-        final List<String> possibleParamNames = paramNamesTrie.getWordsByFilter(rawParamName, new BoundParamsTrieFilter(unboundParams));
+        final List<String> possibleParamNames = paramNamesTrie.getWordsFromPrefixWithFilter(rawParamName, new BoundParamsFilter(unboundParams));
 
         // Couldn't match any param names.
         if (possibleParamNames.isEmpty()) {
@@ -315,17 +315,17 @@ public class CommandParamManager {
     }
 
     /**
-     * A TrieFilter that filters all bound params.
+     * Filters all bound params.
      */
-    private static class BoundParamsTrieFilter implements TrieFilter<ShellParam> {
+    private static class BoundParamsFilter implements Predicate<ShellParam> {
         private final Map<String, ShellParam> unboundParams;
 
-        private BoundParamsTrieFilter(Map<String, ShellParam> unboundParams) {
+        private BoundParamsFilter(Map<String, ShellParam> unboundParams) {
             this.unboundParams = unboundParams;
         }
 
         @Override
-        public boolean shouldKeep(ShellParam value) {
+        public boolean apply(ShellParam value) {
             // If unboundParams doesn't contain the paramName, it is bound.
             return unboundParams.containsKey(value.getName());
         }
