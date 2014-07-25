@@ -1,7 +1,7 @@
 package com.rawcod.jerminal.returnvalue.parse.args;
 
 import com.google.common.base.Objects;
-import com.rawcod.jerminal.command.param.ShellParam;
+import com.rawcod.jerminal.command.parameters.CommandParam;
 import com.rawcod.jerminal.returnvalue.Failable;
 import com.rawcod.jerminal.returnvalue.ReturnValueImpl;
 import com.rawcod.jerminal.returnvalue.parse.ParseReturnValueFailure;
@@ -23,7 +23,7 @@ public class ParseBoundParamsReturnValue extends ReturnValueImpl<ParseBoundParam
 
 
     public static ParseBoundParamsReturnValue success(Map<String, Object> parsedArgs,
-                                                             Map<String, ShellParam> unboundParams) {
+                                                             Map<String, CommandParam> unboundParams) {
         return new ParseBoundParamsReturnValue(new ParseBoundParamsReturnValueSuccess(parsedArgs, unboundParams));
     }
 
@@ -34,10 +34,10 @@ public class ParseBoundParamsReturnValue extends ReturnValueImpl<ParseBoundParam
 
     public static class ParseBoundParamsReturnValueSuccess extends SuccessImpl {
         private final Map<String, Object> parsedArgs;
-        private final Map<String, ShellParam> unboundParams;
+        private final Map<String, CommandParam> unboundParams;
 
         private ParseBoundParamsReturnValueSuccess(Map<String, Object> parsedArgs,
-                                                   Map<String, ShellParam> unboundParams) {
+                                                   Map<String, CommandParam> unboundParams) {
             this.parsedArgs = checkNotNull(parsedArgs, "parsedArgs is null!");
             this.unboundParams = checkNotNull(unboundParams, "unboundParams is null!");
         }
@@ -46,7 +46,7 @@ public class ParseBoundParamsReturnValue extends ReturnValueImpl<ParseBoundParam
             return parsedArgs;
         }
 
-        public Map<String, ShellParam> getUnboundParams() {
+        public Map<String, CommandParam> getUnboundParams() {
             return unboundParams;
         }
 

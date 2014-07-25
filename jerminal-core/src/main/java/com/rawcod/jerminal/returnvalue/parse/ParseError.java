@@ -5,12 +5,14 @@ package com.rawcod.jerminal.returnvalue.parse;
  * Date: 12/01/14
  */
 public enum ParseError {
-    INVALID_ENTRY,
-    INVALID_PATH,
-
+    // Directory related
     EMPTY_DIRECTORY,
+    ENTRY_DOES_NOT_EXIST,
+    INVALID_ACCESS_TO_ENTRY,
 
+    // Param related
     INVALID_PARAM,
+    PARAM_VALUE_NOT_SPECIFIED,
     INVALID_PARAM_VALUE,
     PARAM_ALREADY_BOUND,
 

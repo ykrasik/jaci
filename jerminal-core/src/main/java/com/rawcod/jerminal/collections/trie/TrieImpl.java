@@ -117,7 +117,7 @@ public class TrieImpl<T> implements Trie<T> {
             return "";
         }
 
-        // Keep going down the tree, until a node has more then 1 children or is a word.
+        // Keep going down the tree, until a node has more than 1 children or is a word.
         TrieNode<T> currentNode = node;
         while (currentNode.numChildren() == 1 && !currentNode.isWord()) {
             // currentNode only has 1 child and is not a word.
@@ -153,8 +153,13 @@ public class TrieImpl<T> implements Trie<T> {
             currentNode = child;
         }
 
-        final T oldValue = currentNode.setValue(value);
-        checkState(oldValue == null, "Word '%s' already has a value: '%s'", word, oldValue);
+        final T currentValue = currentNode.getValue();
+        if (currentValue != null) {
+            final String message = String.format("Word '%s' already has a value: '%s'", word, currentValue);
+            throw new IllegalStateException(message);
+        }
+
+        currentNode.setValue(value);
         numWords++;
     }
 

@@ -14,6 +14,7 @@ public interface ReadOnlyTrie<T> {
     int size();
     boolean isEmpty();
 
+    boolean contains(String word);
     T get(String word);
 
     List<String> getAllWords();
@@ -32,6 +33,7 @@ public interface ReadOnlyTrie<T> {
     void visitWordsByFilter(TrieVisitor<T> visitor, Predicate<T> filter);
 
     String getLongestPrefix(String prefix);
+    String getLongestPrefixWithFilter(String prefix, Predicate<T> filter);
 
     ReadOnlyTrie<T> union(ReadOnlyTrie<T> other);
 }

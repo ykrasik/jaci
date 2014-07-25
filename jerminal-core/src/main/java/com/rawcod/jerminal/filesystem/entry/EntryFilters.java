@@ -8,7 +8,6 @@ import com.google.common.base.Predicates;
  * Date: 18/07/2014
  * Time: 23:37
  */
-@SuppressWarnings("unchecked")
 public final class EntryFilters {
     private EntryFilters() {
 

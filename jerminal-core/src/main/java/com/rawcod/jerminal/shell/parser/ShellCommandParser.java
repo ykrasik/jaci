@@ -1,8 +1,8 @@
 package com.rawcod.jerminal.shell.parser;
 
+import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
 import com.rawcod.jerminal.returnvalue.parse.flow.ParseReturnValue;
 import com.rawcod.jerminal.shell.ShellManager;
-import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
 import com.rawcod.jerminal.returnvalue.autocomplete.flow.AutoCompleteReturnValue;
 
 /**

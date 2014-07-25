@@ -6,6 +6,6 @@ package com.rawcod.jerminal.returnvalue.execute;
  * Time: 14:49
  */
 public enum ExecuteError {
-    PARSE_ERROR,
+    EXECUTION_FAILURE,
     INTERNAL_ERROR
 }

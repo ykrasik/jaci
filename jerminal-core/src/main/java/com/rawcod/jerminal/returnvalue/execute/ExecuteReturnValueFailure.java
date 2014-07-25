@@ -6,6 +6,8 @@ import com.rawcod.jerminal.filesystem.entry.ShellSuggestion;
 import com.rawcod.jerminal.returnvalue.ReturnValueImpl;
 import com.rawcod.jerminal.returnvalue.parse.ParseError;
 
+import java.util.List;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -14,54 +16,48 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Time: 21:19
  */
 public class ExecuteReturnValueFailure extends ReturnValueImpl.FailureImpl {
-    private final ExecuteError executeError;
-    private final Optional<ParseError> parseError;
-    private final Optional<String> message;
+    private final ExecuteError error;
+    private final String errorMessage;
     private final Optional<Exception> exception;
-    private final ShellSuggestion suggestion;
-    private final String commandOutput;
+    private final String output;
+    private final List<String> suggestions;
 
     private ExecuteReturnValueFailure(Builder builder) {
-        this.executeError = checkNotNull(builder.executeError, "executeError is null!");
-        this.parseError = checkNotNull(builder.parseError, "parseError is null!");
-        this.message = checkNotNull(builder.message, "message is null!");
+        this.error = checkNotNull(builder.executeError, "error is null!");
+        this.errorMessage = checkNotNull(builder.message, "errorMessage is null!");
         this.exception = checkNotNull(builder.exception, "exception is null!");
-        this.suggestion = checkNotNull(builder.suggestion, "suggestion is null!");
-        this.commandOutput = checkNotNull(builder.commandOutput, "commandOutput is null!");
+        this.output = checkNotNull(builder.commandOutput, "output is null!");
+        this.suggestions = checkNotNull(builder.suggestion, "suggestions is null!");
     }
 
-    public ExecuteError getExecuteError() {
-        return executeError;
+    public ExecuteError getError() {
+        return error;
     }
 
-    public Optional<ParseError> getParseError() {
-        return parseError;
-    }
-
-    public Optional<String> getMessage() {
-        return message;
+    public String getErrorMessage() {
+        return errorMessage;
     }
 
     public Optional<Exception> getException() {
         return exception;
     }
 
-    public ShellSuggestion getSuggestion() {
-        return suggestion;
+    public String getOutput() {
+        return output;
     }
 
-    public String getCommandOutput() {
-        return commandOutput;
+    public List<String> getSuggestions() {
+        return suggestions;
     }
 
     @Override
     public String toString() {
         return Objects.toStringHelper(this)
             .add("parseError", parseError)
-            .add("message", message)
+            .add("errorMessage", errorMessage)
             .add("exception", exception)
-            .add("suggestion", suggestion)
-            .add("commandOutput", commandOutput)
+            .add("output", output)
+            .add("suggestions", suggestions)
             .toString();
     }
 

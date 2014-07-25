@@ -1,17 +1,17 @@
 package com.rawcod.jerminal.shell;
 
 import com.rawcod.jerminal.command.CommandExecutor;
-import com.rawcod.jerminal.output.Terminal;
-import com.rawcod.jerminal.returnvalue.execute.ExecuteReturnValue;
+import com.rawcod.jerminal.command.parameters.entry.file.FileParam;
 import com.rawcod.jerminal.filesystem.entry.ShellEntry;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
-import com.rawcod.jerminal.filesystem.entry.command.ShellCommandArgs;
 import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
+import com.rawcod.jerminal.output.Terminal;
+import com.rawcod.jerminal.returnvalue.execute.ExecuteReturnValue;
+import com.rawcod.jerminal.filesystem.entry.command.ShellCommandArgs;
 import com.rawcod.jerminal.filesystem.entry.directory.ShellTree;
-import com.rawcod.jerminal.command.param.ShellParam;
-import com.rawcod.jerminal.filesystem.entry.parameters.directory.OptionalShellDirectoryParam;
-import com.rawcod.jerminal.filesystem.entry.parameters.directory.ShellDirectoryParam;
-import com.rawcod.jerminal.filesystem.entry.parameters.file.ShellFileParam;
+import com.rawcod.jerminal.command.parameters.CommandParam;
+import com.rawcod.jerminal.command.parameters.entry.directory.OptionalCommandDirectoryParam;
+import com.rawcod.jerminal.command.parameters.entry.directory.CommandDirectoryParam;
 import com.rawcod.jerminal.shell.parser.ShellCommandParser;
 import com.rawcod.jerminal.returnvalue.autocomplete.flow.AutoCompleteReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.flow.ParseReturnValue;
@@ -44,8 +44,8 @@ public class ShellManager {
     }
 
     private ShellCommand createChangeDirectoryShellCommand() {
-        final ShellParam[] params = {
-            new ShellDirectoryParam("dir")
+        final CommandParam[] params = {
+            new CommandDirectoryParam("dir")
         };
         return new ShellCommand("cd", "Change directory", params, new CommandExecutor() {
             @Override
@@ -64,8 +64,8 @@ public class ShellManager {
     }
 
     private ShellCommand createListDirectoryShellCommand() {
-        final ShellParam[] params = {
-            new OptionalShellDirectoryParam("dir")
+        final CommandParam[] params = {
+            new OptionalCommandDirectoryParam("dir")
         };
         return new ShellCommand("ls", "List directory", params, new CommandExecutor() {
             @Override
@@ -80,8 +80,8 @@ public class ShellManager {
     }
 
     private ShellCommand createDescribeShellCommand() {
-        final ShellParam[] params = {
-            new ShellFileParam("command")
+        final CommandParam[] params = {
+            new FileParam("command")
         };
         return new ShellCommand("man", "Describe command", params, new CommandExecutor() {
             @Override

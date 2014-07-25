@@ -1,7 +1,7 @@
 package com.rawcod.jerminal.returnvalue.parse.args;
 
 import com.google.common.base.Objects;
-import com.rawcod.jerminal.command.args.CommandArgs;
+import com.rawcod.jerminal.command.CommandArgs;
 import com.rawcod.jerminal.returnvalue.Failable;
 import com.rawcod.jerminal.returnvalue.ReturnValueImpl;
 import com.rawcod.jerminal.returnvalue.parse.ParseReturnValueFailure;

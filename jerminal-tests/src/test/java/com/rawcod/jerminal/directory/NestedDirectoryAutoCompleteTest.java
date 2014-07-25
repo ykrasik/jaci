@@ -2,8 +2,8 @@ package com.rawcod.jerminal.directory;
 
 import com.rawcod.jerminal.TestTerminal;
 import com.rawcod.jerminal.Shell;
-import com.rawcod.jerminal.shell.ShellManager;
 import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
+import com.rawcod.jerminal.shell.ShellManager;
 import org.junit.Before;
 import org.junit.Test;
 

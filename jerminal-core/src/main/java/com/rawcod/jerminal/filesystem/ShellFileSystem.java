@@ -11,7 +11,7 @@ public class ShellFileSystem {
     private final ShellDirectory root;
 
     public ShellFileSystem(ShellDirectory root) {
-        this.root = new ShellDirectory("", "Root dir");
+        this.root = new ShellDirectory("", "Root");
     }
 
     public ShellDirectory getRoot() {

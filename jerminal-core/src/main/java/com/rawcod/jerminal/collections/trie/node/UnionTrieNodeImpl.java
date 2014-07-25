@@ -103,11 +103,11 @@ public class UnionTrieNodeImpl<T> implements TrieNode<T> {
         final List<TrieNode<T>> commonNodes = checkChildren(node1.getChildren(), node2, unionChildren);
 
         // Avoid checking children that are present in both nodes twice.
-        final Set<TrieNode<T>> uncheckedNodes2 = Sets.newHashSet(node2.getChildren());
-        uncheckedNodes2.removeAll(commonNodes);
+        final Set<TrieNode<T>> uncheckedChildren2 = Sets.newHashSet(node2.getChildren());
+        uncheckedChildren2.removeAll(commonNodes);
 
         // Iterate over node2's still unchecked children
-        checkChildren(uncheckedNodes2, node1, unionChildren);
+        checkChildren(uncheckedChildren2, node1, unionChildren);
 
         return unionChildren;
     }

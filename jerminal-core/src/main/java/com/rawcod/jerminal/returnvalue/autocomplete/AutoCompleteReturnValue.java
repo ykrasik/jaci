@@ -5,7 +5,6 @@ import com.rawcod.jerminal.returnvalue.Failable;
 import com.rawcod.jerminal.returnvalue.ReturnValueImpl;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue.AutoCompleteReturnValueSuccess;
 import com.rawcod.jerminal.returnvalue.parse.ParseReturnValueFailure;
-import com.rawcod.jerminal.util.AutoCompleteUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -23,18 +22,8 @@ public class AutoCompleteReturnValue extends ReturnValueImpl<AutoCompleteReturnV
     }
 
 
-    public static AutoCompleteReturnValue successSingle(String rawArg, String autoCompletedArg) {
-        final String autoCompleteAddition = AutoCompleteUtils.getAutoCompleteAddition(rawArg, autoCompletedArg);
-        return successSingle(autoCompleteAddition);
-    }
-
     public static AutoCompleteReturnValue successSingle(String autoCompleteAddition) {
         return new AutoCompleteReturnValue(new AutoCompleteReturnValueSuccess(autoCompleteAddition, Collections.singletonList(autoCompleteAddition)));
-    }
-
-    public static AutoCompleteReturnValue successMultiple(String rawArg, String autoCompletedArg, List<String> possibilities) {
-        final String autoCompleteAddition = AutoCompleteUtils.getAutoCompleteAddition(rawArg, autoCompletedArg);
-        return successMultiple(autoCompleteAddition, possibilities);
     }
 
     public static AutoCompleteReturnValue successMultiple(String autoCompleteAddition, List<String> possibilities) {

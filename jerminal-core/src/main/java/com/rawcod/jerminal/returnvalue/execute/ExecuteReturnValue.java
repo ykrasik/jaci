@@ -30,7 +30,7 @@ public class ExecuteReturnValue extends ReturnValueImpl<ExecuteReturnValueSucces
             .setParseError(failure.getError())
             .setMessage(failure.getMessage())
             .setException(failure.getException())
-            .setSuggestion(failure.getSuggestion())
+            .setSuggestion(failure.getSuggestions())
             .build();
     }
 }

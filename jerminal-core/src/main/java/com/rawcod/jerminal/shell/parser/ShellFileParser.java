@@ -2,12 +2,12 @@ package com.rawcod.jerminal.shell.parser;
 
 import com.rawcod.jerminal.collections.trie.TrieFilter;
 import com.rawcod.jerminal.collections.trie.TrieFilter.NoTrieFilter;
-import com.rawcod.jerminal.returnvalue.parse.flow.ParseReturnValue;
-import com.rawcod.jerminal.shell.ShellManager;
-import com.rawcod.jerminal.filesystem.entry.ShellAutoComplete;
 import com.rawcod.jerminal.filesystem.entry.ShellEntry;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
 import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
+import com.rawcod.jerminal.returnvalue.parse.flow.ParseReturnValue;
+import com.rawcod.jerminal.shell.ShellManager;
+import com.rawcod.jerminal.filesystem.entry.ShellAutoComplete;
 import com.rawcod.jerminal.returnvalue.autocomplete.flow.AutoCompleteReturnValue;
 
 import java.util.List;

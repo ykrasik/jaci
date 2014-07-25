@@ -1,13 +1,12 @@
 package com.rawcod.jerminal.command;
 
 import com.rawcod.jerminal.TestTerminal;
+import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
 import com.rawcod.jerminal.returnvalue.execute.ExecuteReturnValue;
 import com.rawcod.jerminal.Shell;
 import com.rawcod.jerminal.shell.ShellManager;
-import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommandArgs;
-import com.rawcod.jerminal.command.param.ShellParam;
-import com.rawcod.jerminal.filesystem.entry.parameters.string.StringShellParam;
+import com.rawcod.jerminal.command.parameters.CommandParam;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -57,7 +56,7 @@ public class CommandSingleStringParamAutoCompleteTest {
 
     @Test
     public void singleStringParamNoPossibleValuesBlank() {
-        setParams(new StringShellParam("param"));
+        setParams(new StringCommandParam("param"));
         shell.autoComplete("cmd ");
         terminal
             .expectNoSuggestions()
@@ -67,7 +66,7 @@ public class CommandSingleStringParamAutoCompleteTest {
 
     @Test
     public void singleStringParamNoPossibleValuesSomeValue() {
-        setParams(new StringShellParam("param"));
+        setParams(new StringCommandParam("param"));
         shell.autoComplete("cmd someValue");
         terminal
             .expectNoSuggestions()
@@ -77,7 +76,7 @@ public class CommandSingleStringParamAutoCompleteTest {
 
     @Test
     public void singleStringParamNoPossibleValuesSomeValueForce() {
-        setParams(new StringShellParam("param"));
+        setParams(new StringCommandParam("param"));
         shell.autoComplete("cmd someValue ");
         terminal
             .expectNoSuggestions()
@@ -87,7 +86,7 @@ public class CommandSingleStringParamAutoCompleteTest {
 
     @Test
     public void singleStringParamSinglePossibleValuesBlank() {
-        setParams(new StringShellParam("param", "singlePossible"));
+        setParams(new StringCommandParam("param", "singlePossible"));
         shell.autoComplete("cmd ");
         terminal
             .expectNoSuggestions()
@@ -97,7 +96,7 @@ public class CommandSingleStringParamAutoCompleteTest {
 
     @Test
     public void singleStringParamSinglePossibleValuesPartiallyTyped() {
-        setParams(new StringShellParam("param", "singlePossible"));
+        setParams(new StringCommandParam("param", "singlePossible"));
         shell.autoComplete("cmd s");
         terminal
             .expectNoSuggestions()
@@ -107,7 +106,7 @@ public class CommandSingleStringParamAutoCompleteTest {
 
     @Test
     public void singleStringParamSinglePossibleValuesPartiallyTypedForceDecision() {
-        setParams(new StringShellParam("param", "singlePossible"));
+        setParams(new StringCommandParam("param", "singlePossible"));
         shell.autoComplete("cmd s ");
         terminal
             .expectError()
@@ -118,7 +117,7 @@ public class CommandSingleStringParamAutoCompleteTest {
 
     @Test
     public void singleStringParamSinglePossibleValuesFullyTyped() {
-        setParams(new StringShellParam("param", "singlePossible"));
+        setParams(new StringCommandParam("param", "singlePossible"));
         shell.autoComplete("cmd singlePossible");
         terminal
             .expectNoSuggestions()
@@ -129,7 +128,7 @@ public class CommandSingleStringParamAutoCompleteTest {
     @Test
     public void singleStringParamSinglePossibleValuesNoMoreArgs() {
         // Spaces after last param are ignored
-        setParams(new StringShellParam("param", "singlePossible"));
+        setParams(new StringCommandParam("param", "singlePossible"));
         shell.autoComplete("cmd singlePossible             ");
         terminal
             .expectNoSuggestions()
@@ -139,7 +138,7 @@ public class CommandSingleStringParamAutoCompleteTest {
 
     @Test
     public void singleStringParamSinglePossibleValuesNoMoreArgsTyped() {
-        setParams(new StringShellParam("param", "singlePossible"));
+        setParams(new StringCommandParam("param", "singlePossible"));
         shell.autoComplete("cmd singlePossible s");
         terminal
             .expectError()
@@ -150,7 +149,7 @@ public class CommandSingleStringParamAutoCompleteTest {
 
     @Test
     public void singleStringParamMultiplePossibleValuesBlank() {
-        setParams(new StringShellParam("param", "multiplePossible1", "multiplePossible2"));
+        setParams(new StringCommandParam("param", "multiplePossible1", "multiplePossible2"));
         shell.autoComplete("cmd ");
         terminal
             .expectSuggestions("multiplePossible1", "multiplePossible2")
@@ -160,7 +159,7 @@ public class CommandSingleStringParamAutoCompleteTest {
 
     @Test
     public void singleStringParamMultiplePossibleValuesPartiallyTyped() {
-        setParams(new StringShellParam("param", "multiplePossible1", "multiplePossible2"));
+        setParams(new StringCommandParam("param", "multiplePossible1", "multiplePossible2"));
         shell.autoComplete("cmd m");
         terminal
             .expectSuggestions("multiplePossible1", "multiplePossible2")
@@ -170,7 +169,7 @@ public class CommandSingleStringParamAutoCompleteTest {
 
     @Test
     public void singleStringParamMultiplePossibleValuesForceDecision() {
-        setParams(new StringShellParam("param", "multiplePossible1", "multiplePossible2"));
+        setParams(new StringCommandParam("param", "multiplePossible1", "multiplePossible2"));
         shell.autoComplete("cmd m ");
         terminal
             .expectError()
@@ -181,7 +180,7 @@ public class CommandSingleStringParamAutoCompleteTest {
 
     @Test
     public void singleStringParamMultiplePossibleValuesChooseFirst() {
-        setParams(new StringShellParam("param", "multiplePossible1", "multiplePossible2"));
+        setParams(new StringCommandParam("param", "multiplePossible1", "multiplePossible2"));
         shell.autoComplete("cmd multiplePossible1");
         terminal
             .expectNoSuggestions()
@@ -191,7 +190,7 @@ public class CommandSingleStringParamAutoCompleteTest {
 
     @Test
     public void singleStringParamMultiplePossibleValuesChooseSecond() {
-        setParams(new StringShellParam("param", "multiplePossible1", "multiplePossible2"));
+        setParams(new StringCommandParam("param", "multiplePossible1", "multiplePossible2"));
         shell.autoComplete("cmd multiplePossible2");
         terminal
             .expectNoSuggestions()
@@ -201,7 +200,7 @@ public class CommandSingleStringParamAutoCompleteTest {
 
     @Test
     public void singleStringParamMultiplePossibleValuesChooseSecondNoMoreArgs() {
-        setParams(new StringShellParam("param", "multiplePossible1", "multiplePossible2"));
+        setParams(new StringCommandParam("param", "multiplePossible1", "multiplePossible2"));
         shell.autoComplete("cmd multiplePossible2 ");
         terminal
             .expectNoSuggestions()
@@ -211,7 +210,7 @@ public class CommandSingleStringParamAutoCompleteTest {
 
     @Test
     public void singleStringParamMultiplePossibleValuesChooseSecondNoMoreArgsExtraSpaces() {
-        setParams(new StringShellParam("param", "multiplePossible1", "multiplePossible2"));
+        setParams(new StringCommandParam("param", "multiplePossible1", "multiplePossible2"));
         shell.autoComplete("cmd multiplePossible2              ");
         terminal
             .expectNoSuggestions()
@@ -221,7 +220,7 @@ public class CommandSingleStringParamAutoCompleteTest {
 
     @Test
     public void singleStringParamMultiplePossibleValuesChooseSecondNoMoreArgsForce() {
-        setParams(new StringShellParam("param", "multiplePossible1", "multiplePossible2"));
+        setParams(new StringCommandParam("param", "multiplePossible1", "multiplePossible2"));
         shell.autoComplete("cmd multiplePossible2 a");
         terminal
             .expectError()
@@ -230,7 +229,7 @@ public class CommandSingleStringParamAutoCompleteTest {
         terminal.assertExpected();
     }
 
-    private void setParams(ShellParam... params) {
+    private void setParams(CommandParam... params) {
         manager.addEntry(
             new ShellCommand("cmd", "cmd", params, new CommandExecutor() {
                 @Override

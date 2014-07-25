@@ -1,8 +1,10 @@
 package com.rawcod.jerminal.returnvalue.parse;
 
 import com.google.common.base.Objects;
-import com.rawcod.jerminal.filesystem.entry.ShellSuggestion;
 import com.rawcod.jerminal.returnvalue.ReturnValueImpl;
+
+import java.util.Collections;
+import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -14,12 +16,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class ParseReturnValueFailure extends ReturnValueImpl.FailureImpl {
     private final ParseError error;
     private final String message;
-    private final ShellSuggestion suggestion;
+    private final List<String> suggestions;
 
-    public ParseReturnValueFailure(ParseError error, String message, ShellSuggestion suggestion) {
+    public ParseReturnValueFailure(ParseError error, String message, List<String> suggestions) {
         this.error = checkNotNull(error, "error is null!");
         this.message = checkNotNull(message, "message is null!");
-        this.suggestion = checkNotNull(suggestion, "suggestion is null!");
+        this.suggestions = checkNotNull(suggestions, "suggestions is null!");
     }
 
     public ParseError getError() {
@@ -30,8 +32,8 @@ public class ParseReturnValueFailure extends ReturnValueImpl.FailureImpl {
         return message;
     }
 
-    public ShellSuggestion getSuggestion() {
-        return suggestion;
+    public List<String> getSuggestions() {
+        return suggestions;
     }
 
     @Override
@@ -39,17 +41,17 @@ public class ParseReturnValueFailure extends ReturnValueImpl.FailureImpl {
         return Objects.toStringHelper(this)
             .add("error", error)
             .add("message", message)
-            .add("suggestion", suggestion)
+            .add("suggestions", suggestions)
             .toString();
     }
 
     public static ParseReturnValueFailure from(ParseError error, String format, Object... args) {
-        return from(error, ShellSuggestion.none(), format, args);
+        return from(error, Collections.<String>emptyList(), format, args);
     }
 
-    public static ParseReturnValueFailure from(ParseError error, ShellSuggestion suggestion, String format, Object... args) {
+    public static ParseReturnValueFailure from(ParseError error, List<String> suggestions, String format, Object... args) {
         final String message = String.format(format, args);
-        return new ParseReturnValueFailure(error, message, suggestion);
+        return new ParseReturnValueFailure(error, message, suggestions);
     }
 
     public static ParseReturnValueFailure emptyDirectory(String directoryName) {
@@ -63,6 +65,20 @@ public class ParseReturnValueFailure extends ReturnValueImpl.FailureImpl {
         return from(
             ParseError.INVALID_PARAM,
             "Parse error: Invalid param: '%s'", paramName
+        );
+    }
+
+    public static ParseReturnValueFailure paramValueNotSpecified(String paramName) {
+        return from(
+            ParseError.PARAM_VALUE_NOT_SPECIFIED,
+            "Parse error: Value not specified for param: '%s'", paramName
+        );
+    }
+
+    public static ParseReturnValueFailure InvalidParamValue(String paramName, String value) {
+        return from(
+            ParseError.INVALID_PARAM_VALUE,
+            "Parse error: Invalid value for param '%s': '%s'", paramName, value
         );
     }
 

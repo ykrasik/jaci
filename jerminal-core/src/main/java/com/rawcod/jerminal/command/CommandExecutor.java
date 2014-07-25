@@ -1,6 +1,5 @@
 package com.rawcod.jerminal.command;
 
-import com.rawcod.jerminal.command.args.CommandArgs;
 import com.rawcod.jerminal.returnvalue.execute.ExecuteReturnValue;
 
 /**
@@ -8,15 +7,7 @@ import com.rawcod.jerminal.returnvalue.execute.ExecuteReturnValue;
  * Date: 04/01/14
  */
 public abstract class CommandExecutor {
-    public final ExecuteReturnValue execute(CommandArgs args) {
-        try {
-            return doExecute(args);
-        } catch (Exception e) {
-            return failure("Error running command: '%s'", e);
-        }
-    }
-
-    protected abstract ExecuteReturnValue doExecute(CommandArgs args);
+    public abstract ExecuteReturnValue execute(CommandArgs args, ExecutionContext context);
 
     protected ExecuteReturnValue successNoMessage() {
         return ExecuteReturnValue.successNoMessage();

@@ -1,7 +1,7 @@
 package com.rawcod.jerminal.returnvalue.parse.flow;
 
 import com.google.common.base.Objects;
-import com.rawcod.jerminal.command.args.CommandArgs;
+import com.rawcod.jerminal.command.CommandArgs;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
 import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
 import com.rawcod.jerminal.returnvalue.Failable;

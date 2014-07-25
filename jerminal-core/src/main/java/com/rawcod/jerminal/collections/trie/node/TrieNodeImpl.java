@@ -60,9 +60,7 @@ public class TrieNodeImpl<T> implements TrieNode<T> {
 
     @Override
     public T setValue(T value) {
-        final T oldValue = this.value;
         this.value = value;
-        return oldValue;
     }
 
     @Override
