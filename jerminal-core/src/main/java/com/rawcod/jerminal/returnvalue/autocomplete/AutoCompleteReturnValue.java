@@ -3,6 +3,7 @@ package com.rawcod.jerminal.returnvalue.autocomplete;
 import com.google.common.base.Objects;
 import com.rawcod.jerminal.returnvalue.Failable;
 import com.rawcod.jerminal.returnvalue.ReturnValueImpl;
+import com.rawcod.jerminal.returnvalue.SuccessImpl;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue.AutoCompleteReturnValueSuccess;
 
 import java.util.Collections;

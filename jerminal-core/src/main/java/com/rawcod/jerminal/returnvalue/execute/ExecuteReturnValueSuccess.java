@@ -2,7 +2,7 @@ package com.rawcod.jerminal.returnvalue.execute;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
-import com.rawcod.jerminal.returnvalue.ReturnValueImpl;
+import com.rawcod.jerminal.returnvalue.SuccessImpl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -11,7 +11,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Date: 16/07/2014
  * Time: 21:19
  */
-public class ExecuteReturnValueSuccess extends ReturnValueImpl.SuccessImpl {
+public class ExecuteReturnValueSuccess extends SuccessImpl {
     private final String output;
     private final Optional<Object> returnValue;
 

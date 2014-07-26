@@ -1,7 +1,7 @@
 package com.rawcod.jerminal.command.parameters.string;
 
 import com.rawcod.jerminal.collections.trie.Trie;
-import com.rawcod.jerminal.returnvalue.parse.ParseReturnValueFailure;
+import com.rawcod.jerminal.returnvalue.parse.ParseErrors;
 import com.rawcod.jerminal.returnvalue.parse.param.ParseParamValueReturnValue;
 
 /**
@@ -27,7 +27,7 @@ public class StringParamValueParser {
         // This string param is constrained by the values it can receive.
         // rawValue must be contained in the possible values trie.
         if (!values.contains(rawValue)) {
-            return ParseParamValueReturnValue.failure(ParseReturnValueFailure.InvalidParamValue(paramName, rawValue));
+            return ParseErrors.invalidParamValue(paramName, rawValue);
         }
 
         return ParseParamValueReturnValue.success(rawValue);

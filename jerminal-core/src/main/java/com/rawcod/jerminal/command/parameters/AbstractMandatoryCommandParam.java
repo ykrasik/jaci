@@ -1,8 +1,9 @@
 package com.rawcod.jerminal.command.parameters;
 
 import com.google.common.base.Optional;
+import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteErrors;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
-import com.rawcod.jerminal.returnvalue.parse.ParseReturnValueFailure;
+import com.rawcod.jerminal.returnvalue.parse.ParseErrors;
 import com.rawcod.jerminal.returnvalue.parse.param.ParseParamValueReturnValue;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -32,9 +33,14 @@ public abstract class AbstractMandatoryCommandParam implements CommandParam {
     }
 
     @Override
+    public ParamType getType() {
+        return ParamType.MANDATORY;
+    }
+
+    @Override
     public ParseParamValueReturnValue parse(Optional<String> rawValue, ParamParseContext context) {
         if (!rawValue.isPresent()) {
-            return ParseParamValueReturnValue.failure(ParseReturnValueFailure.paramValueNotSpecified(getName()));
+            return ParseErrors.paramNotBound(name);
         }
         return parse(rawValue.get(), context);
     }
@@ -42,7 +48,7 @@ public abstract class AbstractMandatoryCommandParam implements CommandParam {
     @Override
     public AutoCompleteReturnValue autoComplete(Optional<String> prefix, ParamParseContext context) {
         if (!prefix.isPresent()) {
-            return AutoCompleteReturnValue.parseFailure(ParseReturnValueFailure.paramValueNotSpecified(getName()));
+            return AutoCompleteErrors.paramNotBound(name);
         }
         return autoComplete(prefix.get(), context);
     }

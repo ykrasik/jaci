@@ -37,24 +37,24 @@ public final class Params {
     }
 
 
-    public static OptionalCommandParam optionalStringParam(String name,
-                                                           String description,
-                                                           String defaultValue,
-                                                           String... possibleValues) {
+    public static CommandParam optionalStringParam(String name,
+                                                   String description,
+                                                   String defaultValue,
+                                                   String... possibleValues) {
         return optionalStringParam(name, description, Arrays.asList(possibleValues), new ConstDefaultValueSupplier<>(defaultValue));
     }
 
-    public static OptionalCommandParam optionalStringParam(String name,
-                                                           String description,
-                                                           Supplier<String> defaultValueSupplier,
-                                                           String... possibleValues) {
+    public static CommandParam optionalStringParam(String name,
+                                                   String description,
+                                                   Supplier<String> defaultValueSupplier,
+                                                   String... possibleValues) {
         return optionalStringParam(name, description, Arrays.asList(possibleValues), defaultValueSupplier);
     }
 
-    public static OptionalCommandParam optionalStringParam(String name,
-                                                           String description,
-                                                           List<String> possibleValues,
-                                                           Supplier<String> defaultValueSupplier) {
+    public static CommandParam optionalStringParam(String name,
+                                                   String description,
+                                                   List<String> possibleValues,
+                                                   Supplier<String> defaultValueSupplier) {
         final CommandParam stringParam = stringParam(name, description, possibleValues);
         return new OptionalParam<>(stringParam, defaultValueSupplier);
     }
@@ -65,17 +65,17 @@ public final class Params {
     }
 
 
-    public static OptionalCommandParam optionalDynamicStringParam(String name,
-                                                                  String description,
-                                                                  String defaultValue,
-                                                                  Supplier<List<String>> valueSupplier) {
+    public static CommandParam optionalDynamicStringParam(String name,
+                                                          String description,
+                                                          String defaultValue,
+                                                          Supplier<List<String>> valueSupplier) {
         return optionalDynamicStringParam(name, description, valueSupplier, new ConstDefaultValueSupplier<>(defaultValue));
     }
 
-    public static OptionalCommandParam optionalDynamicStringParam(String name,
-                                                                  String description,
-                                                                  Supplier<List<String>> valueSupplier,
-                                                                  Supplier<String> defaultValueSupplier) {
+    public static CommandParam optionalDynamicStringParam(String name,
+                                                          String description,
+                                                          Supplier<List<String>> valueSupplier,
+                                                          Supplier<String> defaultValueSupplier) {
         final CommandParam stringParam = dynamicStringParam(name, description, valueSupplier);
         return new OptionalParam<>(stringParam, defaultValueSupplier);
     }
@@ -86,11 +86,11 @@ public final class Params {
     }
 
 
-    public static OptionalCommandParam optionalBooleanParam(String name, String description, boolean defaultValue) {
+    public static CommandParam optionalBooleanParam(String name, String description, boolean defaultValue) {
         return optionalBooleanParam(name, description, new ConstDefaultValueSupplier<>(defaultValue));
     }
 
-    public static OptionalCommandParam optionalBooleanParam(String name, String description, Supplier<Boolean> defaultValueSupplier) {
+    public static CommandParam optionalBooleanParam(String name, String description, Supplier<Boolean> defaultValueSupplier) {
         final CommandParam booleanParam = booleanParam(name, description);
         return new OptionalParam<>(booleanParam, defaultValueSupplier);
     }
@@ -101,11 +101,11 @@ public final class Params {
     }
 
 
-    public static OptionalCommandParam optionalIntegerParam(String name, String description, int defaultValue) {
+    public static CommandParam optionalIntegerParam(String name, String description, int defaultValue) {
         return optionalIntegerParam(name, description, new ConstDefaultValueSupplier<>(defaultValue));
     }
 
-    public static OptionalCommandParam optionalIntegerParam(String name, String description, Supplier<Integer> defaultValueSupplier) {
+    public static CommandParam optionalIntegerParam(String name, String description, Supplier<Integer> defaultValueSupplier) {
         final CommandParam integerParam = integerParam(name, description);
         return new OptionalParam<>(integerParam, defaultValueSupplier);
     }
@@ -116,11 +116,11 @@ public final class Params {
     }
 
 
-    public static OptionalCommandParam optionalDoubleParam(String name, String description, double defaultValue) {
+    public static CommandParam optionalDoubleParam(String name, String description, double defaultValue) {
         return optionalDoubleParam(name, description, new ConstDefaultValueSupplier<>(defaultValue));
     }
 
-    public static OptionalCommandParam optionalDoubleParam(String name, String description, Supplier<Double> defaultValueSupplier) {
+    public static CommandParam optionalDoubleParam(String name, String description, Supplier<Double> defaultValueSupplier) {
         final CommandParam doubleParam = doubleParam(name, description);
         return new OptionalParam<>(doubleParam, defaultValueSupplier);
     }
@@ -131,11 +131,11 @@ public final class Params {
     }
 
 
-    public static OptionalCommandParam optionalFileParam(String name, String description, ShellCommand defaultValue) {
+    public static CommandParam optionalFileParam(String name, String description, ShellCommand defaultValue) {
         return optionalFileParam(name, description, new ConstDefaultValueSupplier<>(defaultValue));
     }
 
-    public static OptionalCommandParam optionalFileParam(String name, String description, Supplier<ShellCommand> defaultValueSupplier) {
+    public static CommandParam optionalFileParam(String name, String description, Supplier<ShellCommand> defaultValueSupplier) {
         final CommandParam fileParam = fileParam(name, description);
         return new OptionalParam<>(fileParam, defaultValueSupplier);
     }
@@ -146,17 +146,17 @@ public final class Params {
     }
 
 
-    public static OptionalCommandParam optionalDirectoryParam(String name, String description, ShellDirectory defaultValue) {
+    public static CommandParam optionalDirectoryParam(String name, String description, ShellDirectory defaultValue) {
         return optionalDirectoryParam(name, description, new ConstDefaultValueSupplier<>(defaultValue));
     }
 
-    public static OptionalCommandParam optionalDirectoryParam(String name, String description, Supplier<ShellDirectory> defaultValueSupplier) {
+    public static CommandParam optionalDirectoryParam(String name, String description, Supplier<ShellDirectory> defaultValueSupplier) {
         final CommandParam directoryParam = directoryParam(name, description);
         return new OptionalParam<>(directoryParam, defaultValueSupplier);
     }
 
 
-    public static OptionalCommandParam flag(String name, String description) {
+    public static CommandParam flag(String name, String description) {
         return new FlagParam(name, description);
     }
 

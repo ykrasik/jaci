@@ -40,6 +40,14 @@ public final class AutoCompleteErrors {
         return parseError(ParseErrors.paramAlreadyBound(paramName, value).getFailure());
     }
 
+    public static AutoCompleteReturnValue paramNotBound(String paramName) {
+        return parseError(ParseErrors.paramNotBound(paramName).getFailure());
+    }
+
+    public static AutoCompleteReturnValue invalidFlagValue(String paramName) {
+        return parseError(ParseErrors.invalidFlagValue(paramName).getFailure());
+    }
+
     public static AutoCompleteReturnValue noPossibleValuesNoInfo() {
         return AutoCompleteReturnValue.failure(
             new AutoCompleteReturnValueFailure(

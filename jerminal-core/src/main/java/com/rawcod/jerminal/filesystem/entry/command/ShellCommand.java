@@ -4,7 +4,7 @@ import com.rawcod.jerminal.command.CommandArgs;
 import com.rawcod.jerminal.command.CommandExecutor;
 import com.rawcod.jerminal.command.ExecutionContext;
 import com.rawcod.jerminal.command.parameters.CommandParam;
-import com.rawcod.jerminal.command.parameters.CommandParamManager;
+import com.rawcod.jerminal.command.parameters.manager.CommandParamManager;
 import com.rawcod.jerminal.filesystem.entry.AbstractShellEntry;
 import com.rawcod.jerminal.returnvalue.execute.ExecuteReturnValue;
 

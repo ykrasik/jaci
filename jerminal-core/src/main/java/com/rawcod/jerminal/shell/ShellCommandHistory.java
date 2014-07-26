@@ -23,28 +23,28 @@ public class ShellCommandHistory {
 
     public Optional<String> getPrevCommand() {
         if (prevCommands.isEmpty()) {
-            return null;
+            return Optional.absent();
         }
         if (prevCommands.size() == 1) {
-            return prevCommands.peek();
+            return Optional.of(prevCommands.peek());
         }
 
         final String prevCommand = prevCommands.pollLast();
         nextCommands.addFirst(prevCommand);
-        return prevCommand;
+        return Optional.of(prevCommand);
     }
 
     public Optional<String>  getNextCommand() {
         if (nextCommands.isEmpty()) {
-            return null;
+            return Optional.absent();
         }
         if (nextCommands.size() == 1){
-            return nextCommands.peek();
+            return Optional.of(nextCommands.peek());
         }
 
         final String nextCommand = nextCommands.pollFirst();
         prevCommands.addLast(nextCommand);
-        return nextCommand;
+        return Optional.of(nextCommand);
     }
 
     public void pushCommand(String command) {

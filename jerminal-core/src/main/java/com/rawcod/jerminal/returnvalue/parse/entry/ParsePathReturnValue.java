@@ -5,6 +5,7 @@ import com.rawcod.jerminal.filesystem.entry.ShellEntry;
 import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
 import com.rawcod.jerminal.returnvalue.Failable;
 import com.rawcod.jerminal.returnvalue.ReturnValueImpl;
+import com.rawcod.jerminal.returnvalue.SuccessImpl;
 import com.rawcod.jerminal.returnvalue.parse.ParseReturnValueFailure;
 import com.rawcod.jerminal.returnvalue.parse.entry.ParsePathReturnValue.ParsePathReturnValueSuccess;
 

@@ -1,11 +1,10 @@
 package com.rawcod.jerminal.returnvalue.parse;
 
-import com.rawcod.jerminal.command.parameters.CommandParam;
 import com.rawcod.jerminal.returnvalue.parse.args.ParseBoundParamsReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.entry.ParseEntryReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.param.ParseParamReturnValue;
+import com.rawcod.jerminal.returnvalue.parse.param.ParseParamValueReturnValue;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -46,25 +45,25 @@ public final class ParseErrors {
         ));
     }
 
-    public static ParseReturnValueFailure invalidParamValue(String paramName, String value) {
-        return from(
+    public static ParseParamValueReturnValue invalidParamValue(String paramName, String value) {
+        return ParseParamValueReturnValue.failure(from(
             ParseError.INVALID_PARAM_VALUE,
             "Parse error: Invalid value for param '%s': '%s'.", paramName, value
-        );
+        ));
     }
 
-    public static ParseReturnValueFailure invalidFlagValue(String paramName) {
-        return from(
+    public static ParseParamValueReturnValue invalidFlagValue(String paramName) {
+        return ParseParamValueReturnValue.failure(from(
             ParseError.INVALID_PARAM_VALUE,
             "Parse error: Flag params take no value: '%s'.", paramName
-        );
+        ));
     }
 
-    public static ParseReturnValueFailure paramsNotBound(Collection<CommandParam> params) {
-        return from(
+    public static ParseParamValueReturnValue paramNotBound(String paramName) {
+        return ParseParamValueReturnValue.failure(from(
             ParseError.PARAM_NOT_BOUND,
-            "Parse error: Mandatory parameters have not been bound: %s", params
-        );
+            "Parse error: Mandatory parameter was not bound: %s", paramName
+        ));
     }
 
     public static ParseBoundParamsReturnValue paramAlreadyBound(String paramName, Object value) {

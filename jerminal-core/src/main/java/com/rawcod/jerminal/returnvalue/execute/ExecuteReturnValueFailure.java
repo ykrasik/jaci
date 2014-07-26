@@ -3,7 +3,7 @@ package com.rawcod.jerminal.returnvalue.execute;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.rawcod.jerminal.filesystem.entry.ShellSuggestion;
-import com.rawcod.jerminal.returnvalue.ReturnValueImpl;
+import com.rawcod.jerminal.returnvalue.FailureImpl;
 import com.rawcod.jerminal.returnvalue.parse.ParseError;
 
 import java.util.List;
@@ -15,7 +15,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Date: 16/07/2014
  * Time: 21:19
  */
-public class ExecuteReturnValueFailure extends ReturnValueImpl.FailureImpl {
+public class ExecuteReturnValueFailure extends FailureImpl {
     private final ExecuteError error;
     private final String errorMessage;
     private final Optional<Exception> exception;

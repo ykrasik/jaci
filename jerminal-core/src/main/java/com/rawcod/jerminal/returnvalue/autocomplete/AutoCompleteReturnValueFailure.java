@@ -2,7 +2,7 @@ package com.rawcod.jerminal.returnvalue.autocomplete;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
-import com.rawcod.jerminal.returnvalue.ReturnValueImpl;
+import com.rawcod.jerminal.returnvalue.FailureImpl;
 import com.rawcod.jerminal.returnvalue.parse.ParseError;
 
 import java.util.List;
@@ -14,7 +14,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Date: 18/07/2014
  * Time: 13:14
  */
-public class AutoCompleteReturnValueFailure extends ReturnValueImpl.FailureImpl {
+public class AutoCompleteReturnValueFailure extends FailureImpl {
     private final AutoCompleteError error;
     private final Optional<ParseError> parseError;
     private final String message;

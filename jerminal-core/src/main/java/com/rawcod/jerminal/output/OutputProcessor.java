@@ -17,7 +17,7 @@ public interface OutputProcessor {
 
     void println(String message);
 
-    void processAutoCompleteSuccess(String newCommandLine, List<String> possibilities);
+    void displayAutoCompleteSuggestions(List<String> suggestions);
     void processAutoCompleteFailure(AutoCompleteReturnValueFailure returnValue);
 
     void processExecuteOutputSuccess(String output, Optional<Object> returnValue);

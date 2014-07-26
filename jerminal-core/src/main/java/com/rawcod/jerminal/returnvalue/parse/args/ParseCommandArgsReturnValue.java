@@ -4,6 +4,7 @@ import com.google.common.base.Objects;
 import com.rawcod.jerminal.command.CommandArgs;
 import com.rawcod.jerminal.returnvalue.Failable;
 import com.rawcod.jerminal.returnvalue.ReturnValueImpl;
+import com.rawcod.jerminal.returnvalue.SuccessImpl;
 import com.rawcod.jerminal.returnvalue.parse.ParseReturnValueFailure;
 import com.rawcod.jerminal.returnvalue.parse.args.ParseCommandArgsReturnValue.ParseCommandArgsReturnValueSuccess;
 

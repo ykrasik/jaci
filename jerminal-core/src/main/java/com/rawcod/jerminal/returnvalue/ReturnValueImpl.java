@@ -1,8 +1,6 @@
 package com.rawcod.jerminal.returnvalue;
 
 import com.google.common.base.Objects;
-import com.rawcod.jerminal.returnvalue.ReturnValue.Failure;
-import com.rawcod.jerminal.returnvalue.ReturnValue.Success;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -70,17 +68,4 @@ public class ReturnValueImpl<S extends Success, F extends Failure> implements Re
             .toString();
     }
 
-    public static class SuccessImpl implements Success {
-        @Override
-        public boolean isSuccess() {
-            return true;
-        }
-    }
-
-    public static class FailureImpl implements Failure {
-        @Override
-        public boolean isSuccess() {
-            return false;
-        }
-    }
 }

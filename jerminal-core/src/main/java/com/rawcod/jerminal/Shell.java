@@ -9,6 +9,7 @@ import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
 import com.rawcod.jerminal.filesystem.FileSystemManager;
 import com.rawcod.jerminal.output.OutputHandler;
 import com.rawcod.jerminal.output.OutputProcessor;
+import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteErrors;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue.AutoCompleteReturnValueSuccess;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValueFailure;
@@ -56,9 +57,15 @@ public class Shell {
         final AutoCompleteReturnValue returnValue = doAutoComplete(commandLine);
         if (returnValue.isSuccess()) {
             final AutoCompleteReturnValueSuccess success = returnValue.getSuccess();
-            final String newCommandLine = rawCommandLine + success.getAutoCompleteAddition();
+            final String autoCompleteAddition = success.getAutoCompleteAddition();
+            if (!autoCompleteAddition.isEmpty()) {
+                final String newCommandLine = rawCommandLine + autoCompleteAddition;
+                outputHandler.setCommandLine(newCommandLine);
+            }
             final List<String> possibilities = success.getPossibilities();
-            outputHandler.handleAutoCompleteSuccess(newCommandLine, possibilities);
+            if (possibilities.size() > 1) {
+                outputHandler.displayAutoCompleteSuggestions(possibilities);
+            }
         } else {
             final AutoCompleteReturnValueFailure failure = returnValue.getFailure();
             outputHandler.handleAutoCompleteFailure(failure);
@@ -81,7 +88,7 @@ public class Shell {
         final ParsePathReturnValue returnValue = fileSystemManager.parsePathToCommand(rawPath, currentDirectory);
         if (returnValue.isFailure()) {
             // Couldn't parse the command successfully.
-            return AutoCompleteReturnValue.parseFailure(returnValue.getFailure());
+            return AutoCompleteErrors.parseError(returnValue.getFailure());
         }
 
         // AutoComplete the command args.

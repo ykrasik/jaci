@@ -1,12 +1,12 @@
 package com.rawcod.jerminal.filesystem.entry.command.factory;
 
+import com.google.common.base.Supplier;
 import com.rawcod.jerminal.command.CommandArgs;
 import com.rawcod.jerminal.command.CommandExecutor;
 import com.rawcod.jerminal.command.ExecutionContext;
-import com.rawcod.jerminal.command.parameters.bool.OptionalBooleanParam;
+import com.rawcod.jerminal.command.parameters.Params;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommandBuilder;
-import com.rawcod.jerminal.command.parameters.CommandParamDefaultValueProvider;
 import com.rawcod.jerminal.returnvalue.execute.ExecuteReturnValue;
 
 /**
@@ -14,7 +14,7 @@ import com.rawcod.jerminal.returnvalue.execute.ExecuteReturnValue;
  * Date: 06/01/14
  */
 public final class ToggleShellCommandFactory {
-    private static final String PARAM_NAME = "toggle";
+    private static final String PARAM_NAME = "state";
 
     private ToggleShellCommandFactory() { }
 
@@ -23,7 +23,7 @@ public final class ToggleShellCommandFactory {
                                       final StateAccessor accessor) {
         return new ShellCommandBuilder(name)
             .setDescription(description)
-            .addParam(new OptionalBooleanParam(PARAM_NAME, new AccessorDefaultValueProvider(accessor), defaultValueSupplier))
+            .addParam(Params.optionalBooleanParam(PARAM_NAME, "toggle", new AccessorDefaultValueProvider(accessor)))
             .setExecutor(new CommandExecutor() {
                 @Override
                 public ExecuteReturnValue execute(CommandArgs args, ExecutionContext context) {
@@ -40,7 +40,7 @@ public final class ToggleShellCommandFactory {
         boolean get();
     }
 
-    private static class AccessorDefaultValueProvider implements CommandParamDefaultValueProvider<Boolean> {
+    private static class AccessorDefaultValueProvider implements Supplier<Boolean> {
         private final StateAccessor accessor;
 
         private AccessorDefaultValueProvider(StateAccessor accessor) {
@@ -48,7 +48,7 @@ public final class ToggleShellCommandFactory {
         }
 
         @Override
-        public Boolean getDefaultValue() {
+        public Boolean get() {
             return accessor.get();
         }
     }

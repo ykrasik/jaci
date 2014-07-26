@@ -1,8 +1,10 @@
 package com.rawcod.jerminal.command.parameters.flag;
 
 import com.google.common.base.Optional;
-import com.rawcod.jerminal.command.parameters.OptionalCommandParam;
+import com.rawcod.jerminal.command.parameters.CommandParam;
 import com.rawcod.jerminal.command.parameters.ParamParseContext;
+import com.rawcod.jerminal.command.parameters.ParamType;
+import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteErrors;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.ParseErrors;
 import com.rawcod.jerminal.returnvalue.parse.param.ParseParamValueReturnValue;
@@ -14,7 +16,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Date: 25/07/2014
  * Time: 21:46
  */
-public class FlagParam implements OptionalCommandParam {
+public class FlagParam implements CommandParam {
     private final String name;
     private final String description;
 
@@ -34,8 +36,8 @@ public class FlagParam implements OptionalCommandParam {
     }
 
     @Override
-    public Object getDefaultValue() {
-        return false;
+    public ParamType getType() {
+        return ParamType.FLAG;
     }
 
     @Override
@@ -43,14 +45,14 @@ public class FlagParam implements OptionalCommandParam {
         // Flags are not allowed to have a value.
         // Their presence is enough to set the flag to true.
         if (rawValue.isPresent()) {
-            return ParseParamValueReturnValue.failure(ParseErrors.invalidFlagValue(getName()));
+            return ParseErrors.invalidFlagValue(getName());
         }
         return ParseParamValueReturnValue.success(true);
     }
 
     @Override
     public AutoCompleteReturnValue autoComplete(Optional<String> prefix, ParamParseContext context) {
-        return AutoCompleteReturnValue.parseFailure(ParseErrors.invalidFlagValue(getName()));
+        return AutoCompleteErrors.invalidFlagValue(getName());
     }
 
     @Override

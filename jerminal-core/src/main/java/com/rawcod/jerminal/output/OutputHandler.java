@@ -50,11 +50,11 @@ public class OutputHandler {
         });
     }
 
-    public void handleAutoCompleteSuccess(final String newCommandLine, final List<String> possibilities) {
+    public void displayAutoCompleteSuggestions(final List<String> suggestions) {
         forEachOutputProcessor(new OutputProcessorTask() {
             @Override
             public void process(OutputProcessor outputProcessor) {
-                outputProcessor.processAutoCompleteSuccess(newCommandLine, possibilities);
+                outputProcessor.displayAutoCompleteSuggestions(suggestions);
             }
         });
     }

@@ -42,10 +42,6 @@ public class AutoCompleter<T> {
         return success;
     }
 
-    public AutoCompleter<T> union(AutoCompleter<T> other) {
-        return new AutoCompleter<>(words.union(other.words));
-    }
-
     private String getAutoCompleteAddition(String rawArg, String autoCompletedArg) {
         return autoCompletedArg.substring(rawArg.length());
     }

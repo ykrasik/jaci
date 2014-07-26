@@ -1,7 +1,7 @@
 package com.rawcod.jerminal.returnvalue.parse;
 
 import com.google.common.base.Objects;
-import com.rawcod.jerminal.returnvalue.ReturnValueImpl;
+import com.rawcod.jerminal.returnvalue.FailureImpl;
 
 import java.util.List;
 
@@ -12,7 +12,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Date: 19/07/2014
  * Time: 23:43
  */
-public class ParseReturnValueFailure extends ReturnValueImpl.FailureImpl {
+public class ParseReturnValueFailure extends FailureImpl {
     private final ParseError error;
     private final String message;
     private final List<String> suggestions;
