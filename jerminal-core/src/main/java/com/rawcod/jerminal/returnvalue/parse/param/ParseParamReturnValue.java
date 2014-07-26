@@ -1,6 +1,7 @@
 package com.rawcod.jerminal.returnvalue.parse.param;
 
 import com.google.common.base.Objects;
+import com.rawcod.jerminal.command.parameters.CommandParam;
 import com.rawcod.jerminal.returnvalue.Failable;
 import com.rawcod.jerminal.returnvalue.ReturnValueImpl;
 import com.rawcod.jerminal.returnvalue.parse.ParseReturnValueFailure;
@@ -19,8 +20,8 @@ public class ParseParamReturnValue extends ReturnValueImpl<ParseParamReturnValue
     }
 
 
-    public static ParseParamReturnValue success(String paramName, Object value) {
-        return new ParseParamReturnValue(new ParseParamReturnValueSuccess(paramName, value));
+    public static ParseParamReturnValue success(CommandParam param, Object value) {
+        return new ParseParamReturnValue(new ParseParamReturnValueSuccess(param, value));
     }
 
     public static ParseParamReturnValue failure(ParseReturnValueFailure failure) {
@@ -29,16 +30,16 @@ public class ParseParamReturnValue extends ReturnValueImpl<ParseParamReturnValue
 
 
     public static class ParseParamReturnValueSuccess extends SuccessImpl {
-        private final String paramName;
+        private final CommandParam param;
         private final Object value;
 
-        private ParseParamReturnValueSuccess(String paramName, Object value) {
-            this.paramName = checkNotNull(paramName, "paramName is null!");
+        private ParseParamReturnValueSuccess(CommandParam param, Object value) {
+            this.param = checkNotNull(param, "param is null!");
             this.value = checkNotNull(value, "value is null!");
         }
 
-        public String getParamName() {
-            return paramName;
+        public CommandParam getParam() {
+            return param;
         }
 
         public Object getValue() {
@@ -48,7 +49,7 @@ public class ParseParamReturnValue extends ReturnValueImpl<ParseParamReturnValue
         @Override
         public String toString() {
             return Objects.toStringHelper(this)
-                .add("paramName", paramName)
+                .add("param", param)
                 .add("value", value)
                 .toString();
         }

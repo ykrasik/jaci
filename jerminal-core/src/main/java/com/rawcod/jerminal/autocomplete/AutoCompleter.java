@@ -1,9 +1,10 @@
 package com.rawcod.jerminal.autocomplete;
 
 import com.google.common.base.Predicate;
-import com.rawcod.jerminal.collections.trie.Trie;
+import com.rawcod.jerminal.collections.trie.ReadOnlyTrie;
+import com.rawcod.jerminal.collections.trie.Tries;
+import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteErrors;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValueFailure;
 
 import java.util.List;
 
@@ -12,21 +13,18 @@ import java.util.List;
  * Date: 25/07/2014
  * Time: 17:47
  */
-public abstract class AbstractAutoCompleter<T> {
-    private final Trie<T> words;
+public class AutoCompleter<T> {
+    private final ReadOnlyTrie<T> words;
 
-    protected AbstractAutoCompleter(Trie<T> words) {
+    public AutoCompleter(ReadOnlyTrie<T> words) {
         this.words = words;
     }
 
     public AutoCompleteReturnValue autoComplete(String prefix, Predicate<T> filter) {
-        final List<String> possibleWords = words.getWordsFromPrefixWithFilter(prefix, filter);
-
-        // No words are reachable with this prefix and filter.
+        final List<String> possibleWords = Tries.getWordsFromPrefixWithFilter(words, prefix, filter);
         if (possibleWords.isEmpty()) {
-            // Give a meaningful error message.
-            final AutoCompleteReturnValueFailure failure = noPossibleWords(prefix);
-            return AutoCompleteReturnValue.failure(failure);
+            // No words are reachable with this prefix and filter.
+            return AutoCompleteErrors.noPossibleValuesNoInfo();
         }
 
         final AutoCompleteReturnValue success;
@@ -37,16 +35,18 @@ public abstract class AbstractAutoCompleter<T> {
             success = AutoCompleteReturnValue.successSingle(autoCompleteAddition);
         } else {
             // Multiple words are reachable with this prefix and filter.
-            final String longestPrefix = words.getLongestPrefixWithFilter(prefix, filter);
+            final String longestPrefix = Tries.getLongestPrefixFromPrefixAndFilter(words, prefix, filter);
             final String autoCompleteAddition = getAutoCompleteAddition(prefix, longestPrefix);
             success = AutoCompleteReturnValue.successMultiple(autoCompleteAddition, possibleWords);
         }
         return success;
     }
 
+    public AutoCompleter<T> union(AutoCompleter<T> other) {
+        return new AutoCompleter<>(words.union(other.words));
+    }
+
     private String getAutoCompleteAddition(String rawArg, String autoCompletedArg) {
         return autoCompletedArg.substring(rawArg.length());
     }
-
-    protected abstract AutoCompleteReturnValueFailure noPossibleWords(String prefix);
 }

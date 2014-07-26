@@ -9,13 +9,12 @@ import java.util.regex.Pattern;
  * Date: 19/07/2014
  * Time: 12:40
  */
-public final class CommandLineSplitter {
-    private CommandLineSplitter() {
-
-    }
-
+public final class CommandLineUtils {
     // A pattern that regards sequential spaces as a single space
     private static final Pattern ARGS_PATTERN = Pattern.compile("[ ]+");
+
+    private CommandLineUtils() {
+    }
 
     public static List<String> splitCommandLineForAutoComplete(String commandLine) {
         final String trimmedCommandLine = trimCommandLineForAutoComplete(commandLine);

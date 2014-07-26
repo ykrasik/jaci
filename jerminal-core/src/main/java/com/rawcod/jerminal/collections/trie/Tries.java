@@ -44,4 +44,18 @@ public final class Tries {
         }
         return prefixTrie.getValuesWithFilter(filter);
     }
+
+    public static <T> String getLongestPrefixFromPrefixAndFilter(ReadOnlyTrie<T> trie,
+                                                                 String prefix,
+                                                                 Predicate<T> filter) {
+        final ReadOnlyTrie<T> prefixTrie = trie.subTrie(prefix);
+        if (prefixTrie == null) {
+            // No such prefix in trie.
+            return "";
+        }
+
+        // Filter the subTrie.
+        final ReadOnlyTrie<T> filteredTrie = prefixTrie.filter(filter);
+        return filteredTrie.getLongestPrefix();
+    }
 }

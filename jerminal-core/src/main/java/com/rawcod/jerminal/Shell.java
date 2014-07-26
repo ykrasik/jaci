@@ -21,7 +21,7 @@ import com.rawcod.jerminal.returnvalue.parse.entry.ParsePathReturnValue.ParsePat
 import com.rawcod.jerminal.returnvalue.parse.flow.ParseReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.flow.ParseReturnValue.ParseReturnValueSuccess;
 import com.rawcod.jerminal.shell.ShellCommandHistory;
-import com.rawcod.jerminal.util.CommandLineSplitter;
+import com.rawcod.jerminal.util.CommandLineUtils;
 
 import java.util.List;
 
@@ -50,7 +50,7 @@ public class Shell {
 
     public void autoComplete(String rawCommandLine) {
         // Split the commandLine for autoComplete.
-        final List<String> commandLine = CommandLineSplitter.splitCommandLineForAutoComplete(rawCommandLine);
+        final List<String> commandLine = CommandLineUtils.splitCommandLineForAutoComplete(rawCommandLine);
 
         // Do the actual autoCompletion.
         final AutoCompleteReturnValue returnValue = doAutoComplete(commandLine);
@@ -102,7 +102,7 @@ public class Shell {
         commandHistory.pushCommand(rawCommandLine);
 
         // Split the commandLine for autoComplete.
-        final List<String> commandLine = CommandLineSplitter.splitCommandLineForExecute(rawCommandLine);
+        final List<String> commandLine = CommandLineUtils.splitCommandLineForExecute(rawCommandLine);
 
         // Execute the command.
         final ExecuteReturnValue executeReturnValue = doExecute(commandLine);

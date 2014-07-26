@@ -1,6 +1,5 @@
-package com.rawcod.jerminal.command.parameters.entry.directory;
+package com.rawcod.jerminal.command.parameters.entry;
 
-import com.rawcod.jerminal.command.parameters.entry.AbstractEntryCommandParam;
 import com.rawcod.jerminal.filesystem.FileSystemManager;
 import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
@@ -10,8 +9,8 @@ import com.rawcod.jerminal.returnvalue.parse.entry.ParsePathReturnValue;
  * User: ykrasik
  * Date: 18/01/14
  */
-public class CommandDirectoryParam extends AbstractEntryCommandParam {
-    public CommandDirectoryParam(String name, String description) {
+public class DirectoryParam extends AbstractEntryCommandParam {
+    public DirectoryParam(String name, String description) {
         super(name, description);
     }
 

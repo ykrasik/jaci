@@ -12,8 +12,8 @@ public enum ParseError {
 
     // Param related
     INVALID_PARAM,
-    PARAM_VALUE_NOT_SPECIFIED,
     INVALID_PARAM_VALUE,
+    PARAM_NOT_BOUND,
     PARAM_ALREADY_BOUND,
 
     INTERNAL_ERROR

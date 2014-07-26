@@ -5,9 +5,9 @@ import com.google.common.base.Splitter;
 import com.rawcod.jerminal.filesystem.entry.EntryFilters;
 import com.rawcod.jerminal.filesystem.entry.ShellEntry;
 import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
+import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteErrors;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue.AutoCompleteReturnValueSuccess;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValueFailure;
 import com.rawcod.jerminal.returnvalue.parse.entry.ParseEntryReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.entry.ParsePathReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.entry.ParsePathReturnValue.ParsePathReturnValueSuccess;
@@ -118,7 +118,7 @@ public class FileSystemManager {
 
         final ParsePathReturnValue parsePathReturnValue = parsePathToDirectory(pathToParse, currentDirectory);
         if (parsePathReturnValue.isFailure()) {
-            return AutoCompleteReturnValue.parseFailure(parsePathReturnValue.getFailure());
+            return AutoCompleteErrors.parseError(parsePathReturnValue.getFailure());
         }
 
         // AutoComplete the last entry along the path.
@@ -143,11 +143,7 @@ public class FileSystemManager {
 
         // Having an empty possibilities list here is an internal error.
         if (possibilities.isEmpty()) {
-            return AutoCompleteReturnValue.failure(
-                AutoCompleteReturnValueFailure.internalError(
-                    "Internal error: AutoComplete succeeded, but returned no possibilities!"
-                )
-            );
+            return AutoCompleteErrors.internalErrorEmptyPossibilities();
         }
 
         if (possibilities.size() > 1) {
@@ -165,10 +161,8 @@ public class FileSystemManager {
         if (parseEntryReturnValue.isFailure()) {
             // AutoComplete returned a single autoCompleteAddition that, when added to the autoCompleteArg,
             // gives us an invalid entry? Shouldn't happen.
-            return AutoCompleteReturnValue.failure(
-                AutoCompleteReturnValueFailure.internalError(
-                    "Internal error: AutoComplete suggested an invalid entry! entry='%s'", autoCompletedArg
-                )
+            return AutoCompleteErrors.internalError(
+                "Internal error: AutoComplete suggested an invalid entry! entry='%s'", autoCompletedArg
             );
         }
 

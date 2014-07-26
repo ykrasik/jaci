@@ -1,14 +1,15 @@
 package com.rawcod.jerminal.filesystem.entry.directory;
 
 import com.google.common.base.Predicate;
-import com.rawcod.jerminal.autocomplete.DirectoryEntryAutoCompleter;
+import com.rawcod.jerminal.autocomplete.AutoCompleter;
 import com.rawcod.jerminal.collections.trie.Trie;
 import com.rawcod.jerminal.collections.trie.TrieImpl;
 import com.rawcod.jerminal.filesystem.entry.EntryFilters;
 import com.rawcod.jerminal.filesystem.entry.ShellEntry;
+import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteError;
+import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteErrors;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
-import com.rawcod.jerminal.returnvalue.parse.ParseError;
-import com.rawcod.jerminal.returnvalue.parse.ParseReturnValueFailure;
+import com.rawcod.jerminal.returnvalue.parse.ParseErrors;
 import com.rawcod.jerminal.returnvalue.parse.entry.ParseEntryReturnValue;
 
 import java.util.Arrays;
@@ -25,7 +26,7 @@ public class DirectoryEntryManager {
 
     private final ShellDirectory directory;
     private final Trie<ShellEntry> children;
-    private final DirectoryEntryAutoCompleter autoCompleter;
+    private final AutoCompleter<ShellEntry> autoCompleter;
 
     public DirectoryEntryManager(ShellDirectory directory) {
         this.directory = directory;
@@ -34,7 +35,7 @@ public class DirectoryEntryManager {
         children.put(THIS, directory);
         children.put(PARENT, directory.getParent());
 
-        this.autoCompleter = new DirectoryEntryAutoCompleter(children, directory);
+        this.autoCompleter = new AutoCompleter<>(children);
     }
 
     public void addChild(ShellEntry entry) {
@@ -58,26 +59,18 @@ public class DirectoryEntryManager {
         final ShellEntry parsedEntry = children.get(rawEntry);
         if (parsedEntry == null) {
             // Give a meaningful error message.
-            final ParseReturnValueFailure failure;
+            final ParseEntryReturnValue failure;
             if (directory.isEmpty()) {
-                failure = ParseReturnValueFailure.emptyDirectory(directory.getName());
+                failure = ParseErrors.emptyDirectory(directory.getName());
             } else {
-                failure = ParseReturnValueFailure.from(
-                    ParseError.ENTRY_DOES_NOT_EXIST,
-                    "Parse error: Directory '%s' doesn't contain entry '%s'.", directory.getName(), rawEntry
-                );
+                failure = ParseErrors.entryDoesNotExist(directory.getName(), rawEntry);
             }
-            return ParseEntryReturnValue.failure(failure);
+            return failure;
         }
 
         // Child entry exists, check that it is allowed by the filter.
         if (!filter.apply(parsedEntry)) {
-            return ParseEntryReturnValue.failure(
-                ParseReturnValueFailure.from(
-                    ParseError.INVALID_ACCESS_TO_ENTRY,
-                    "Parse error: Invalid access from directory '%s' to entry '%s'.", directory.getName(), rawEntry
-                )
-            );
+            return ParseEntryReturnValue.failure(ParseErrors.invalidAccessToEntry(directory.getName(), rawEntry));
         }
 
         return ParseEntryReturnValue.success(parsedEntry);
@@ -103,6 +96,17 @@ public class DirectoryEntryManager {
             return EMPTY_DIR_AUTO_COMPLETE;
         }
 
-        return autoCompleter.autoComplete(prefix, filter);
+        final AutoCompleteReturnValue returnValue = autoCompleter.autoComplete(prefix, filter);
+        if (returnValue.isSuccess() || returnValue.getFailure().getError() != AutoCompleteError.NO_POSSIBLE_VALUES) {
+            return returnValue;
+        }
+
+        // AutoCompleter couldn't autoComplete.
+        // Give a meaningful error message.
+        if (directory.isEmpty()) {
+            return AutoCompleteErrors.emptyDirectory(directory.getName());
+        }
+
+        return AutoCompleteErrors.noPossibleValuesForDirectoryWithPrefix(directory.getName(), prefix);
     }
 }

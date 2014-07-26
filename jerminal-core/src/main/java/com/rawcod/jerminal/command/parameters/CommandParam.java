@@ -12,8 +12,6 @@ public interface CommandParam {
     String getName();
     String getDescription();
 
-    boolean isOptional();
-
     ParseParamValueReturnValue parse(Optional<String> rawValue, ParamParseContext context);
     AutoCompleteReturnValue autoComplete(Optional<String> prefix, ParamParseContext context);
 }

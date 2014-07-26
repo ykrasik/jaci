@@ -11,8 +11,8 @@ import java.util.Arrays;
  * User: ykrasik
  * Date: 05/01/14
  */
-public class BoolCommandParam extends StringParam {
-    public BoolCommandParam(String name, String description) {
+public class BooleanParam extends StringParam {
+    public BooleanParam(String name, String description) {
         super(name, description, Arrays.asList("true", "false"));
     }
 

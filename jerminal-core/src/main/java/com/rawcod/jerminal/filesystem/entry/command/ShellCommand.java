@@ -37,7 +37,7 @@ public class ShellCommand extends AbstractShellEntry implements ReadOnlyCommand 
 
     @Override
     public List<CommandParam> getParams() {
-        return paramManager.getParams();
+        return paramManager.getAllParams();
     }
 
     public CommandParamManager getParamManager() {

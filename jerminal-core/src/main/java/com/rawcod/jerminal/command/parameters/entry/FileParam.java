@@ -1,6 +1,5 @@
-package com.rawcod.jerminal.command.parameters.entry.file;
+package com.rawcod.jerminal.command.parameters.entry;
 
-import com.rawcod.jerminal.command.parameters.entry.AbstractEntryCommandParam;
 import com.rawcod.jerminal.filesystem.FileSystemManager;
 import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;

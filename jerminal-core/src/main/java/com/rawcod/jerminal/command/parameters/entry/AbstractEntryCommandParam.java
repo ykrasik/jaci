@@ -1,6 +1,6 @@
 package com.rawcod.jerminal.command.parameters.entry;
 
-import com.rawcod.jerminal.command.parameters.AbstractCommandParam;
+import com.rawcod.jerminal.command.parameters.AbstractMandatoryCommandParam;
 import com.rawcod.jerminal.command.parameters.ParamParseContext;
 import com.rawcod.jerminal.filesystem.FileSystemManager;
 import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
@@ -14,7 +14,7 @@ import com.rawcod.jerminal.returnvalue.parse.param.ParseParamValueReturnValue;
  * Date: 25/07/2014
  * Time: 20:42
  */
-public abstract class AbstractEntryCommandParam extends AbstractCommandParam {
+public abstract class AbstractEntryCommandParam extends AbstractMandatoryCommandParam {
     protected AbstractEntryCommandParam(String name, String description) {
         super(name, description);
     }

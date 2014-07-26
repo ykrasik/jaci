@@ -1,7 +1,8 @@
 package com.rawcod.jerminal.shell;
 
 import com.rawcod.jerminal.command.CommandExecutor;
-import com.rawcod.jerminal.command.parameters.entry.file.FileParam;
+import com.rawcod.jerminal.command.parameters.entry.DirectoryParam;
+import com.rawcod.jerminal.command.parameters.entry.FileParam;
 import com.rawcod.jerminal.filesystem.entry.ShellEntry;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
 import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
@@ -10,8 +11,6 @@ import com.rawcod.jerminal.returnvalue.execute.ExecuteReturnValue;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommandArgs;
 import com.rawcod.jerminal.filesystem.entry.directory.ShellTree;
 import com.rawcod.jerminal.command.parameters.CommandParam;
-import com.rawcod.jerminal.command.parameters.entry.directory.OptionalCommandDirectoryParam;
-import com.rawcod.jerminal.command.parameters.entry.directory.CommandDirectoryParam;
 import com.rawcod.jerminal.shell.parser.ShellCommandParser;
 import com.rawcod.jerminal.returnvalue.autocomplete.flow.AutoCompleteReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.flow.ParseReturnValue;
@@ -45,7 +44,7 @@ public class ShellManager {
 
     private ShellCommand createChangeDirectoryShellCommand() {
         final CommandParam[] params = {
-            new CommandDirectoryParam("dir")
+            new DirectoryParam("dir")
         };
         return new ShellCommand("cd", "Change directory", params, new CommandExecutor() {
             @Override

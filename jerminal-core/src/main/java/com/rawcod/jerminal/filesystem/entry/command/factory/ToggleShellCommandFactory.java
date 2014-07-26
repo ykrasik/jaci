@@ -3,10 +3,10 @@ package com.rawcod.jerminal.filesystem.entry.command.factory;
 import com.rawcod.jerminal.command.CommandArgs;
 import com.rawcod.jerminal.command.CommandExecutor;
 import com.rawcod.jerminal.command.ExecutionContext;
+import com.rawcod.jerminal.command.parameters.bool.OptionalBooleanParam;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommandBuilder;
 import com.rawcod.jerminal.command.parameters.CommandParamDefaultValueProvider;
-import com.rawcod.jerminal.command.parameters.bool.OptionalBoolCommandParam;
 import com.rawcod.jerminal.returnvalue.execute.ExecuteReturnValue;
 
 /**
@@ -23,7 +23,7 @@ public final class ToggleShellCommandFactory {
                                       final StateAccessor accessor) {
         return new ShellCommandBuilder(name)
             .setDescription(description)
-            .addParam(new OptionalBoolCommandParam(PARAM_NAME, new AccessorDefaultValueProvider(accessor), defaultValueSupplier))
+            .addParam(new OptionalBooleanParam(PARAM_NAME, new AccessorDefaultValueProvider(accessor), defaultValueSupplier))
             .setExecutor(new CommandExecutor() {
                 @Override
                 public ExecuteReturnValue execute(CommandArgs args, ExecutionContext context) {

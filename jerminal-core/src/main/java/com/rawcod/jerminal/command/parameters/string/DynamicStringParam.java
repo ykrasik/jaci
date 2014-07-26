@@ -3,7 +3,7 @@ package com.rawcod.jerminal.command.parameters.string;
 import com.google.common.base.Predicates;
 import com.google.common.base.Supplier;
 import com.rawcod.jerminal.collections.trie.Trie;
-import com.rawcod.jerminal.command.parameters.AbstractCommandParam;
+import com.rawcod.jerminal.command.parameters.AbstractMandatoryCommandParam;
 import com.rawcod.jerminal.command.parameters.ParamParseContext;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.param.ParseParamValueReturnValue;
@@ -16,7 +16,7 @@ import java.util.List;
  * Date: 25/07/2014
  * Time: 18:21
  */
-public class DynamicStringParam extends AbstractCommandParam {
+public class DynamicStringParam extends AbstractMandatoryCommandParam {
     private final Supplier<List<String>> valuesSupplier;
 
     public DynamicStringParam(String name, String description, Supplier<List<String>> valuesSupplier) {

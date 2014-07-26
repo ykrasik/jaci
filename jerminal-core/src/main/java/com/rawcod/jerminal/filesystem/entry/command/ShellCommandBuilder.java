@@ -48,15 +48,6 @@ public class ShellCommandBuilder {
         return this;
     }
 
-    public ShellCommandBuilder setParams(CommandParam... params) {
-        return setParams(Arrays.asList(params));
-    }
-
-    public ShellCommandBuilder setParams(List<CommandParam> params) {
-        this.params = params;
-        return this;
-    }
-
     public ShellCommandBuilder setExecutor(CommandExecutor executor) {
         this.executor = executor;
         return this;

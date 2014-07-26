@@ -4,7 +4,6 @@ import com.google.common.base.Objects;
 import com.rawcod.jerminal.returnvalue.Failable;
 import com.rawcod.jerminal.returnvalue.ReturnValueImpl;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue.AutoCompleteReturnValueSuccess;
-import com.rawcod.jerminal.returnvalue.parse.ParseReturnValueFailure;
 
 import java.util.Collections;
 import java.util.List;
@@ -35,10 +34,6 @@ public class AutoCompleteReturnValue extends ReturnValueImpl<AutoCompleteReturnV
 
     public static AutoCompleteReturnValue failure(AutoCompleteReturnValueFailure failure) {
         return new AutoCompleteReturnValue(failure);
-    }
-
-    public static AutoCompleteReturnValue parseFailure(ParseReturnValueFailure failure) {
-        return new AutoCompleteReturnValue(AutoCompleteReturnValueFailure.parseFailure(failure));
     }
 
 

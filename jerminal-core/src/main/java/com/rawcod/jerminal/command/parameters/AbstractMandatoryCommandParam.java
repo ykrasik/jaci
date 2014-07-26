@@ -1,6 +1,5 @@
 package com.rawcod.jerminal.command.parameters;
 
-import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.ParseReturnValueFailure;
@@ -13,11 +12,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Date: 25/07/2014
  * Time: 16:19
  */
-public abstract class AbstractCommandParam implements CommandParam {
+public abstract class AbstractMandatoryCommandParam implements CommandParam {
     private final String name;
     private final String description;
 
-    protected AbstractCommandParam(String name, String description) {
+    protected AbstractMandatoryCommandParam(String name, String description) {
         this.name = checkNotNull(name, "name is null!");
         this.description = checkNotNull(description, "description is null!");
     }
@@ -30,11 +29,6 @@ public abstract class AbstractCommandParam implements CommandParam {
     @Override
     public String getDescription() {
         return description;
-    }
-
-    @Override
-    public boolean isOptional() {
-        return false;
     }
 
     @Override
@@ -58,9 +52,6 @@ public abstract class AbstractCommandParam implements CommandParam {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(getClass())
-            .add("name", name)
-            .add("description", description)
-            .toString();
+        return name + ": " + description;
     }
 }
