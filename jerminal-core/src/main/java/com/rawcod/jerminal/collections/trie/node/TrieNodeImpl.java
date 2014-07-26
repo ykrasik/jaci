@@ -1,37 +1,22 @@
 package com.rawcod.jerminal.collections.trie.node;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 public class TrieNodeImpl<T> implements TrieNode<T> {
-    private final Map<Character, TrieNode<T>> children;
-    private final TrieNode<T> parent;
     private final char character;
+    private final Map<Character, TrieNode<T>> children;
 
     private T value;
 
     public TrieNodeImpl() {
-        this.children = new HashMap<>(1);
-        this.parent = null;
-        this.character = (char) 0;
+        this((char) 0);
     }
 
-    public TrieNodeImpl(char character, TrieNode<T> parent) {
-        this.children = new HashMap<>(1);
-        this.parent = parent;
+    public TrieNodeImpl(char character) {
         this.character = character;
-    }
-
-    @Override
-    public int numChildren() {
-        return children.size();
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return children.isEmpty();
+        this.children = new HashMap<>(1);
     }
 
     @Override
@@ -40,26 +25,12 @@ public class TrieNodeImpl<T> implements TrieNode<T> {
     }
 
     @Override
-    public String getPrefix() {
-        if (parent == null) {
-            return "";
-        } else {
-            return String.format("%s%c", parent.toString(), character);
-        }
-    }
-
-    @Override
-    public boolean isWord() {
-        return value != null;
-    }
-
-    @Override
     public T getValue() {
         return value;
     }
 
     @Override
-    public T setValue(T value) {
+    public void setValue(T value) {
         this.value = value;
     }
 
@@ -74,17 +45,20 @@ public class TrieNodeImpl<T> implements TrieNode<T> {
 
     @Override
     public void setChild(char c, TrieNode<T> child) {
-        checkArgument(getChild(c) == null, "Node already has a child at '%c'", c);
+        if (getChild(c) != null) {
+            final String message = String.format("Node already has a child at '%c'", c);
+            throw new IllegalArgumentException(message);
+        }
         children.put(c, child);
     }
 
     @Override
-    public Iterable<TrieNode<T>> getChildren() {
+    public Collection<TrieNode<T>> getChildren() {
         return children.values();
     }
 
     @Override
     public String toString() {
-        return getPrefix();
+        return String.valueOf(character);
     }
 }

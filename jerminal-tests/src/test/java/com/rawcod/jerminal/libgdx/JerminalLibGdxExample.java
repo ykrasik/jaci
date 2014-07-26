@@ -8,14 +8,14 @@ import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.rawcod.jerminal.command.CommandExecutor;
-import com.rawcod.jerminal.command.parameters.integer.IntParam;
+import com.rawcod.jerminal.command.parameters.bool.OptionalBooleanParam;
+import com.rawcod.jerminal.command.parameters.number.IntegerParam;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
 import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
 import com.rawcod.jerminal.returnvalue.execute.ExecuteReturnValue;
 import com.rawcod.jerminal.shell.ShellManager;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommandArgs;
 import com.rawcod.jerminal.command.parameters.CommandParam;
-import com.rawcod.jerminal.command.parameters.bool.OptionalBoolCommandParam;
 
 import java.util.Set;
 
@@ -92,8 +92,8 @@ public class JerminalLibGdxExample extends ApplicationAdapter {
                 "cmd",
                 "cmd",
                 new CommandParam[] {
-                    new IntParam("mandatoryInt"),
-                    new OptionalBoolCommandParam("optionalBool", false, defaultValueSupplier)
+                    new IntegerParam("mandatoryInt"),
+                    new OptionalBooleanParam("optionalBool", false, defaultValueSupplier)
                 },
                 new CommandExecutor() {
                     @Override

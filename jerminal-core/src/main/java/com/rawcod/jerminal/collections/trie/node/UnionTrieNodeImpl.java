@@ -11,27 +11,17 @@ import static com.google.common.base.Preconditions.checkArgument;
  * Date: 23/07/2014
  * Time: 22:52
  */
-public class UnionTrieNodeImpl<T> implements TrieNode<T> {
+public class UnionTrieNodeImpl<T> extends AbstractReadOnlyNode<T> {
     private final TrieNode<T> node1;
     private final TrieNode<T> node2;
 
     private Map<Character, TrieNode<T>> children;
 
     public UnionTrieNodeImpl(TrieNode<T> node1, TrieNode<T> node2) {
-        checkArgument(!(node1.isWord() && node2.isWord()), "Cannot create a node union between 2 word nodes!");
+        checkArgument(!(isWord(node1) && isWord(node2)), "Cannot create a node union between 2 word nodes!");
 
         this.node1 = node1;
         this.node2 = node2;
-    }
-
-    @Override
-    public int numChildren() {
-        return lazyGetChildren().size();
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return numChildren() == 0;
     }
 
     @Override
@@ -40,29 +30,14 @@ public class UnionTrieNodeImpl<T> implements TrieNode<T> {
     }
 
     @Override
-    public String getPrefix() {
-        return node1.getPrefix();
-    }
-
-    @Override
-    public boolean isWord() {
-        return node1.isWord() || node2.isWord();
-    }
-
-    @Override
     public T getValue() {
-        if (node1.isWord()) {
+        if (node1.getValue() != null) {
             return node1.getValue();
         }
-        if (node2.isWord()) {
+        if (node2.getValue() != null) {
             return node2.getValue();
         }
         return null;
-    }
-
-    @Override
-    public T setValue(T value) {
-        throw new UnsupportedOperationException("Union nodes are read-only!");
     }
 
     @Override
@@ -76,12 +51,7 @@ public class UnionTrieNodeImpl<T> implements TrieNode<T> {
     }
 
     @Override
-    public void setChild(char c, TrieNode<T> child) {
-        throw new UnsupportedOperationException("Union nodes are read-only!");
-    }
-
-    @Override
-    public Iterable<TrieNode<T>> getChildren() {
+    public Collection<TrieNode<T>> getChildren() {
         return lazyGetChildren().values();
     }
 
@@ -93,7 +63,7 @@ public class UnionTrieNodeImpl<T> implements TrieNode<T> {
     }
 
     private Map<Character, TrieNode<T>> createUnionChildren() {
-        final Map<Character, TrieNode<T>> unionChildren = new HashMap<>(node1.numChildren());
+        final Map<Character, TrieNode<T>> unionChildren = new HashMap<>(node1.getChildren().size());
 
         // Check which of node1's children are also present in node2 and vice versa.
         // Those that are unique will be used as is.
@@ -133,8 +103,12 @@ public class UnionTrieNodeImpl<T> implements TrieNode<T> {
         return commonNodes;
     }
 
+    private boolean isWord(TrieNode<T> node) {
+        return node.getValue() != null;
+    }
+
     @Override
     public String toString() {
-        return getPrefix();
+        return String.valueOf(node1.getCharacter());
     }
 }
