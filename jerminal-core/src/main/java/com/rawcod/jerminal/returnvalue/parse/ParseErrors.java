@@ -24,18 +24,25 @@ public final class ParseErrors {
         ));
     }
 
-    public static ParseEntryReturnValue entryDoesNotExist(String directoryName, String entry) {
+    public static ParseEntryReturnValue directoryDoesNotContainEntry(String directoryName, String entry) {
         return ParseEntryReturnValue.failure(from(
-            ParseError.ENTRY_DOES_NOT_EXIST,
+            ParseError.INVALID_ENTRY,
             "Parse error: Directory '%s' doesn't contain entry '%s'.", directoryName, entry
         ));
     }
 
-    public static ParseReturnValueFailure invalidAccessToEntry(String directoryName, String entry) {
-        return from(
+    public static ParseEntryReturnValue invalidGlobalCommand(String entry) {
+        return ParseEntryReturnValue.failure(from(
+            ParseError.INVALID_ENTRY,
+            "Parse error: Invalid global command: '%s'.", entry
+        ));
+    }
+
+    public static ParseEntryReturnValue invalidAccessToEntry(String directoryName, String entry) {
+        return ParseEntryReturnValue.failure(from(
             ParseError.INVALID_ACCESS_TO_ENTRY,
             "Parse error: Invalid access from directory '%s' to entry '%s'.", directoryName, entry
-        );
+        ));
     }
 
     public static ParseParamReturnValue invalidParam(String paramName) {

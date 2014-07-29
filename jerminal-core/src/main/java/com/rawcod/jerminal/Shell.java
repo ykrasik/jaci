@@ -36,8 +36,6 @@ public class Shell {
 
     private final OutputHandler outputHandler;
 
-    private ShellDirectory currentDirectory;
-
     public Shell(ShellFileSystem fileSystem, int maxCommandHistory) {
         this.fileSystemManager = new FileSystemManager(fileSystem);
         this.commandHistory = new ShellCommandHistory(maxCommandHistory);
@@ -62,7 +60,7 @@ public class Shell {
                 final String newCommandLine = rawCommandLine + autoCompleteAddition;
                 outputHandler.setCommandLine(newCommandLine);
             }
-            final List<String> possibilities = success.getPossibilities();
+            final List<String> possibilities = success.getSuggestions();
             if (possibilities.size() > 1) {
                 outputHandler.displayAutoCompleteSuggestions(possibilities);
             }
@@ -80,12 +78,12 @@ public class Shell {
         // Otherwise, the first arg is expected to be a valid command and we are autoCompleting its' args.
         if (commandLine.size() == 1) {
             // The first arg is the only arg on the commandLine, autoComplete path to command.
-            return fileSystemManager.autoCompletePath(rawPath, currentDirectory);
+            return fileSystemManager.autoCompletePath(rawPath);
         }
 
         // The first arg is not the only arg on the commandLine,
         // it is expected to be a valid path to a command.
-        final ParsePathReturnValue returnValue = fileSystemManager.parsePathToCommand(rawPath, currentDirectory);
+        final ParsePathReturnValue returnValue = fileSystemManager.parsePathToCommand(rawPath);
         if (returnValue.isFailure()) {
             // Couldn't parse the command successfully.
             return AutoCompleteErrors.parseError(returnValue.getFailure());
@@ -93,7 +91,7 @@ public class Shell {
 
         // AutoComplete the command args.
         // The args start from the 2nd commandLine element (the first was the command).
-        final ParamParseContext context = new ParamParseContext(fileSystemManager, currentDirectory);
+        final ParamParseContext context = new ParamParseContext(fileSystemManager);
         final ShellCommand command = (ShellCommand) returnValue.getSuccess().getLastEntry();
         final List<String> args = commandLine.subList(1, commandLine.size());
         return command.getParamManager().autoCompleteArgs(args, context);
@@ -144,7 +142,7 @@ public class Shell {
         final String rawPath = commandLine.get(0);
 
         // Parse the path to the command.
-        final ParsePathReturnValue parseCommandReturnValue = fileSystemManager.parsePathToCommand(rawPath, currentDirectory);
+        final ParsePathReturnValue parseCommandReturnValue = fileSystemManager.parsePathToCommand(rawPath);
         if (parseCommandReturnValue.isFailure()) {
             // Failed to parse the command.
             return ParseReturnValue.failure(parseCommandReturnValue.getFailure());
@@ -157,7 +155,7 @@ public class Shell {
         // Parse the command args.
         // The args start from the 2nd commandLine element (the first was the command).
         final List<String> args = commandLine.subList(1, commandLine.size());
-        final ParamParseContext context = new ParamParseContext(fileSystemManager, currentDirectory);
+        final ParamParseContext context = new ParamParseContext(fileSystemManager);
         final ParseCommandArgsReturnValue parseArgsReturnValue = command.getParamManager().parseCommandArgs(args, context);
         if (parseArgsReturnValue.isFailure()) {
             return ParseReturnValue.failure(parseArgsReturnValue.getFailure());

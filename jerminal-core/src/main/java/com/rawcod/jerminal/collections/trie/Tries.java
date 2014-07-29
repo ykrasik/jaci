@@ -58,4 +58,28 @@ public final class Tries {
         final ReadOnlyTrie<T> filteredTrie = prefixTrie.filter(filter);
         return filteredTrie.getLongestPrefix();
     }
+
+    public static <T> WordTrie getWordTrie(ReadOnlyTrie<T> trie,
+                                           String prefix) {
+        return trie
+            .subTrie(prefix)
+            .wordTrie();
+    }
+
+    public static <T> WordTrie getWordTrieWithFilter(ReadOnlyTrie<T> trie,
+                                                     String prefix,
+                                                     Predicate<T> filter) {
+        return trie
+            .subTrie(prefix)
+            .filter(filter)
+            .wordTrie();
+    }
+
+    public static Trie<String> toTrie(List<String> values) {
+        final Trie<String> trie = new TrieImpl<>();
+        for (String value : values) {
+            trie.put(value, value);
+        }
+        return trie;
+    }
 }

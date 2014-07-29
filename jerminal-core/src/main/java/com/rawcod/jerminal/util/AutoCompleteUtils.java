@@ -1,8 +1,6 @@
-package com.rawcod.jerminal.autocomplete;
+package com.rawcod.jerminal.util;
 
-import com.google.common.base.Predicate;
-import com.rawcod.jerminal.collections.trie.ReadOnlyTrie;
-import com.rawcod.jerminal.collections.trie.Tries;
+import com.rawcod.jerminal.collections.trie.WordTrie;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteErrors;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
 
@@ -10,39 +8,42 @@ import java.util.List;
 
 /**
  * User: ykrasik
- * Date: 25/07/2014
- * Time: 17:47
+ * Date: 29/07/2014
+ * Time: 23:14
  */
-public class AutoCompleter<T> {
-    private final ReadOnlyTrie<T> words;
+public final class AutoCompleteUtils {
+    private AutoCompleteUtils() {
 
-    public AutoCompleter(ReadOnlyTrie<T> words) {
-        this.words = words;
     }
 
-    public AutoCompleteReturnValue autoComplete(String prefix, Predicate<T> filter) {
-        final List<String> possibleWords = Tries.getWordsFromPrefixWithFilter(words, prefix, filter);
-        if (possibleWords.isEmpty()) {
+    public static AutoCompleteReturnValue autoComplete(String prefix, WordTrie words) {
+        if (words.isEmpty()) {
             // No words are reachable with this prefix and filter.
             return AutoCompleteErrors.noPossibleValuesNoInfo();
         }
 
+        final List<String> possibleWords = words.getAllWords();
+        if (possibleWords.isEmpty()) {
+            // No words are reachable with this prefix and filter.
+            return AutoCompleteErrors.internalError("Words aren't empty, but returned an empty list?!");
+        }
+
         final AutoCompleteReturnValue success;
         if (possibleWords.size() == 1) {
-            // Only a single word is reachable with this prefix and filter.
+            // Only a single word in the trie.
             final String possibility = possibleWords.get(0);
             final String autoCompleteAddition = getAutoCompleteAddition(prefix, possibility);
             success = AutoCompleteReturnValue.successSingle(autoCompleteAddition);
         } else {
-            // Multiple words are reachable with this prefix and filter.
-            final String longestPrefix = Tries.getLongestPrefixFromPrefixAndFilter(words, prefix, filter);
+            // Multiple words in the trie.
+            final String longestPrefix = words.getLongestPrefix();
             final String autoCompleteAddition = getAutoCompleteAddition(prefix, longestPrefix);
             success = AutoCompleteReturnValue.successMultiple(autoCompleteAddition, possibleWords);
         }
         return success;
     }
 
-    private String getAutoCompleteAddition(String rawArg, String autoCompletedArg) {
+    private static String getAutoCompleteAddition(String rawArg, String autoCompletedArg) {
         return autoCompletedArg.substring(rawArg.length());
     }
 }

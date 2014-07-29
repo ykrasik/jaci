@@ -12,7 +12,7 @@ import com.rawcod.jerminal.filesystem.entry.command.ShellCommandArgs;
 import com.rawcod.jerminal.filesystem.entry.directory.ShellTree;
 import com.rawcod.jerminal.command.parameters.CommandParam;
 import com.rawcod.jerminal.shell.parser.ShellCommandParser;
-import com.rawcod.jerminal.returnvalue.autocomplete.flow.AutoCompleteReturnValue;
+import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.flow.ParseReturnValue;
 
 import java.util.List;

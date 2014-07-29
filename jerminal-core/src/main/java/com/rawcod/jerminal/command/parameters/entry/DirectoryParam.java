@@ -1,7 +1,6 @@
 package com.rawcod.jerminal.command.parameters.entry;
 
 import com.rawcod.jerminal.filesystem.FileSystemManager;
-import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.entry.ParsePathReturnValue;
 
@@ -15,17 +14,13 @@ public class DirectoryParam extends AbstractEntryCommandParam {
     }
 
     @Override
-    protected ParsePathReturnValue doParse(String rawValue,
-                                           FileSystemManager fileSystemManager,
-                                           ShellDirectory currentDirectory) {
-        return fileSystemManager.parsePathToDirectory(rawValue, currentDirectory);
+    protected ParsePathReturnValue doParse(String rawValue, FileSystemManager fileSystemManager) {
+        return fileSystemManager.parsePathToDirectory(rawValue);
     }
 
     @Override
-    protected AutoCompleteReturnValue doAutoComplete(String prefix,
-                                                     FileSystemManager fileSystemManager,
-                                                     ShellDirectory currentDirectory) {
-        return fileSystemManager.autoCompletePathToDirectory(prefix, currentDirectory);
+    protected AutoCompleteReturnValue doAutoComplete(String prefix, FileSystemManager fileSystemManager) {
+        return fileSystemManager.autoCompletePathToDirectory(prefix);
     }
 
     @Override

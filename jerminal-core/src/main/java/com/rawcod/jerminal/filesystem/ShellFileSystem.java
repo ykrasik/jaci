@@ -1,6 +1,10 @@
 package com.rawcod.jerminal.filesystem;
 
+import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
 import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * User: ykrasik
@@ -9,12 +13,22 @@ import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
  */
 public class ShellFileSystem {
     private final ShellDirectory root;
+    private final Set<ShellCommand> globalCommands;
 
-    public ShellFileSystem(ShellDirectory root) {
+    public ShellFileSystem() {
         this.root = new ShellDirectory("", "Root");
+        this.globalCommands = new HashSet<>();
     }
 
     public ShellDirectory getRoot() {
         return root;
+    }
+
+    public void addGlobalCommand(ShellCommand command) {
+        globalCommands.add(command);
+    }
+
+    public Set<ShellCommand> getGlobalCommands() {
+        return globalCommands;
     }
 }

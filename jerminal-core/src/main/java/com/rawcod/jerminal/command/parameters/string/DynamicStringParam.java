@@ -1,18 +1,19 @@
 package com.rawcod.jerminal.command.parameters.string;
 
-import com.google.common.base.Predicates;
 import com.google.common.base.Supplier;
-import com.rawcod.jerminal.autocomplete.AutoCompleter;
 import com.rawcod.jerminal.collections.trie.Trie;
+import com.rawcod.jerminal.collections.trie.Tries;
+import com.rawcod.jerminal.collections.trie.WordTrie;
 import com.rawcod.jerminal.command.parameters.AbstractMandatoryCommandParam;
 import com.rawcod.jerminal.command.parameters.ParamParseContext;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteError;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteErrors;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.param.ParseParamValueReturnValue;
-import com.rawcod.jerminal.util.TrieUtils;
+import com.rawcod.jerminal.util.AutoCompleteUtils;
 
 import java.util.List;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * User: ykrasik
@@ -24,7 +25,7 @@ public class DynamicStringParam extends AbstractMandatoryCommandParam {
 
     public DynamicStringParam(String name, String description, Supplier<List<String>> valuesSupplier) {
         super(name, description);
-        this.valuesSupplier = valuesSupplier;
+        this.valuesSupplier = checkNotNull(valuesSupplier, "valuesSupplier is null!");
     }
 
     @Override
@@ -37,18 +38,17 @@ public class DynamicStringParam extends AbstractMandatoryCommandParam {
     @Override
     protected AutoCompleteReturnValue autoComplete(String prefix, ParamParseContext context) {
         final Trie<String> values = getValues();
-        final AutoCompleter<String> autoCompleter = new AutoCompleter<>(values);
-        final AutoCompleteReturnValue returnValue = autoCompleter.autoComplete(prefix, Predicates.<String>alwaysTrue());
-        if (returnValue.isSuccess() || returnValue.getFailure().getError() != AutoCompleteError.NO_POSSIBLE_VALUES) {
-            return returnValue;
+        final WordTrie wordTrie = Tries.getWordTrie(values, prefix);
+        if (wordTrie.isEmpty()) {
+            // Give a meaningful error message;
+            return AutoCompleteErrors.noPossibleValuesForParamWithPrefix(getName(), prefix);
         }
 
-        // Give a meaningful error message;
-        return AutoCompleteErrors.noPossibleValuesForParamWithPrefix(getName(), prefix);
+        return AutoCompleteUtils.autoComplete(prefix, wordTrie);
     }
 
     private Trie<String> getValues() {
-        return TrieUtils.toTrie(valuesSupplier.get());
+        return Tries.toTrie(valuesSupplier.get());
     }
 
     @Override

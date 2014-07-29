@@ -23,7 +23,7 @@ public abstract class AbstractNumberCommandParam<T> extends AbstractMandatoryCom
             final T parsedValue = parseNumber(rawValue);
             return ParseParamValueReturnValue.success(parsedValue);
         } catch (NumberFormatException ignored) {
-            return ParseParamValueReturnValue.failure(ParseErrors.invalidParamValue(getName(), rawValue));
+            return ParseErrors.invalidParamValue(getName(), rawValue);
         }
     }
 

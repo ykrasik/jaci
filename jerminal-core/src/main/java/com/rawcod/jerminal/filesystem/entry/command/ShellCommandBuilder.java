@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 /**
  * User: ykrasik
  * Date: 25/07/2014
@@ -25,7 +23,6 @@ public class ShellCommandBuilder {
     }
 
     public ShellCommand build() {
-        checkNotNull(executor, "executor wasn't set!");
         return new ShellCommand(name, description, params, executor);
     }
 
@@ -35,7 +32,7 @@ public class ShellCommandBuilder {
     }
 
     public ShellCommandBuilder addParam(CommandParam param) {
-        this.params.add(checkNotNull(param, "param is null!"));
+        this.params.add(param);
         return this;
     }
 

@@ -7,7 +7,7 @@ package com.rawcod.jerminal.returnvalue.parse;
 public enum ParseError {
     // Directory related
     EMPTY_DIRECTORY,
-    ENTRY_DOES_NOT_EXIST,
+    INVALID_ENTRY,
     INVALID_ACCESS_TO_ENTRY,
 
     // Param related

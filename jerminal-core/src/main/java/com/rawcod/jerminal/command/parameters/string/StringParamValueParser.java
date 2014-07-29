@@ -20,16 +20,13 @@ public class StringParamValueParser {
 
     public ParseParamValueReturnValue parse(String rawValue) {
         // If the possible values trie is empty, all values are accepted.
-        if (values.isEmpty()) {
+        // If it isn't, rawValue must be contained in the possible values trie.
+        if (values.isEmpty() || values.contains(rawValue)) {
             return ParseParamValueReturnValue.success(rawValue);
         }
 
-        // This string param is constrained by the values it can receive.
-        // rawValue must be contained in the possible values trie.
-        if (!values.contains(rawValue)) {
-            return ParseErrors.invalidParamValue(paramName, rawValue);
-        }
-
-        return ParseParamValueReturnValue.success(rawValue);
+        // This string param is constrained by the values it can receive,
+        // and rawValue isn't contained in the possible values trie.
+        return ParseErrors.invalidParamValue(paramName, rawValue);
     }
 }

@@ -3,7 +3,6 @@ package com.rawcod.jerminal.command.parameters.entry;
 import com.rawcod.jerminal.command.parameters.AbstractMandatoryCommandParam;
 import com.rawcod.jerminal.command.parameters.ParamParseContext;
 import com.rawcod.jerminal.filesystem.FileSystemManager;
-import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.entry.ParsePathReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.entry.ParsePathReturnValue.ParsePathReturnValueSuccess;
@@ -22,8 +21,7 @@ public abstract class AbstractEntryCommandParam extends AbstractMandatoryCommand
     @Override
     protected ParseParamValueReturnValue parse(String rawValue, ParamParseContext context) {
         final FileSystemManager fileSystemManager = context.getFileSystemManager();
-        final ShellDirectory currentDirectory = context.getCurrentDirectory();
-        final ParsePathReturnValue returnValue = doParse(rawValue, fileSystemManager, currentDirectory);
+        final ParsePathReturnValue returnValue = doParse(rawValue, fileSystemManager);
         if (returnValue.isFailure()) {
             return ParseParamValueReturnValue.failure(returnValue.getFailure());
         }
@@ -35,15 +33,9 @@ public abstract class AbstractEntryCommandParam extends AbstractMandatoryCommand
     @Override
     protected AutoCompleteReturnValue autoComplete(String prefix, ParamParseContext context) {
         final FileSystemManager fileSystemManager = context.getFileSystemManager();
-        final ShellDirectory currentDirectory = context.getCurrentDirectory();
-        return doAutoComplete(prefix, fileSystemManager, currentDirectory);
+        return doAutoComplete(prefix, fileSystemManager);
     }
 
-    protected abstract ParsePathReturnValue doParse(String rawValue,
-                                                    FileSystemManager fileSystemManager,
-                                                    ShellDirectory currentDirectory);
-
-    protected abstract AutoCompleteReturnValue doAutoComplete(String prefix,
-                                                              FileSystemManager fileSystemManager,
-                                                              ShellDirectory currentDirectory);
+    protected abstract ParsePathReturnValue doParse(String rawValue, FileSystemManager fileSystemManager);
+    protected abstract AutoCompleteReturnValue doAutoComplete(String prefix, FileSystemManager fileSystemManager);
 }

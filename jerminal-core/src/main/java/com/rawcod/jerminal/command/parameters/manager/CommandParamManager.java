@@ -2,15 +2,15 @@ package com.rawcod.jerminal.command.parameters.manager;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import com.rawcod.jerminal.autocomplete.AutoCompleter;
 import com.rawcod.jerminal.collections.trie.Trie;
 import com.rawcod.jerminal.collections.trie.TrieImpl;
+import com.rawcod.jerminal.collections.trie.Tries;
+import com.rawcod.jerminal.collections.trie.WordTrie;
 import com.rawcod.jerminal.command.CommandArgs;
 import com.rawcod.jerminal.command.parameters.CommandParam;
 import com.rawcod.jerminal.command.parameters.ParamParseContext;
 import com.rawcod.jerminal.command.parameters.ParamType;
 import com.rawcod.jerminal.exception.ShellException;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteError;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteErrors;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue.AutoCompleteReturnValueSuccess;
@@ -21,6 +21,7 @@ import com.rawcod.jerminal.returnvalue.parse.args.ParseCommandArgsReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.param.ParseParamReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.param.ParseParamReturnValue.ParseParamReturnValueSuccess;
 import com.rawcod.jerminal.returnvalue.parse.param.ParseParamValueReturnValue;
+import com.rawcod.jerminal.util.AutoCompleteUtils;
 
 import java.util.*;
 
@@ -38,16 +39,11 @@ public class CommandParamManager {
     private final List<CommandParam> mandatoryParams;
 
     private final Trie<CommandParam> paramsTrie;
-    private final Trie<String> paramNamesTrie;
-
-    private final AutoCompleter<CommandParam> autoCompleter;
-    private final AutoCompleter<String> paramNameAutoCompleter;
 
     public CommandParamManager(List<CommandParam> params) {
         this.allParams = Collections.unmodifiableList(checkNotNull(params, "params is null!"));
         this.mandatoryParams = new ArrayList<>(params.size());
         this.paramsTrie = new TrieImpl<>();
-        this.paramNamesTrie = new TrieImpl<>();
 
         // Analyze params
         for (CommandParam param : params) {
@@ -60,15 +56,11 @@ public class CommandParamManager {
             }
 
             paramsTrie.put(paramName, param);
-            paramNamesTrie.put(paramName, "");
 
             if (param.getType() == ParamType.MANDATORY) {
                 mandatoryParams.add(param);
             }
         }
-
-        this.autoCompleter = new AutoCompleter<>(paramsTrie);
-        this.paramNameAutoCompleter = new AutoCompleter<>(paramNamesTrie);
     }
 
     public List<CommandParam> getAllParams() {
@@ -204,7 +196,7 @@ public class CommandParamManager {
         // A successful autoComplete either has 1 or more possibilities.
         // 0 possibilities is considered a failed autoComplete.
         final AutoCompleteReturnValueSuccess success = returnValue.getSuccess();
-        final List<String> possibilities = success.getPossibilities();
+        final List<String> possibilities = success.getSuggestions();
 
         // Having an empty possibilities list here is an internal error.
         if (possibilities.isEmpty()) {
@@ -257,7 +249,7 @@ public class CommandParamManager {
             // A successful autoComplete either has 1 or more possibilities.
             // 0 possibilities is considered a failed autoComplete.
             final AutoCompleteReturnValueSuccess success = autoCompleteReturnValue.getSuccess();
-            final List<String> possibilities = success.getPossibilities();
+            final List<String> possibilities = success.getSuggestions();
 
             // Having an empty possibilities list here is an internal error.
             if (possibilities.isEmpty()) {
@@ -309,7 +301,7 @@ public class CommandParamManager {
 //            final AutoCompleteReturnValue returnValue = deducedParam.autoComplete(Optional.of(prefix), context);
 //            if (returnValue.isSuccess()) {
 //                final AutoCompleteReturnValueSuccess success = returnValue.getSuccess();
-//                final List<String> possibilities = success.getPossibilities();
+//                final List<String> possibilities = success.getSuggestions();
 //                if (possibilities.isEmpty()) {
 //                    return AutoCompleteErrors.internalErrorEmptyPossibilities();
 //                }
@@ -355,21 +347,19 @@ public class CommandParamManager {
     }
 
     private AutoCompleteReturnValue autoCompleteParamName(String prefix, Map<String, Object> parsedArgs) {
-        final AutoCompleteReturnValue autoCompleteReturnValue = autoCompleter.autoComplete(prefix, new BoundParamsFilter(parsedArgs));
+        final WordTrie paramNames = Tries.getWordTrieWithFilter(paramsTrie, prefix, new BoundParamsFilter(parsedArgs));
+        if (paramNames.isEmpty()) {
+            return AutoCompleteErrors.noPossibleValuesForParamNamePrefix(prefix);
+        }
+
+        final AutoCompleteReturnValue autoCompleteReturnValue = AutoCompleteUtils.autoComplete(prefix, paramNames);
         if (autoCompleteReturnValue.isFailure()) {
-            // Give a meaningful error message.
-            final AutoCompleteReturnValue failure;
-            if (autoCompleteReturnValue.getFailure().getError() == AutoCompleteError.NO_POSSIBLE_VALUES) {
-                failure = AutoCompleteErrors.noPossibleValuesForParamNamePrefix(prefix);
-            } else {
-                failure = autoCompleteReturnValue;
-            }
-            return failure;
+            return autoCompleteReturnValue;
         }
 
         // Let's be helpful - if there's only 1 possible way of autoCompleting the paramName, add a '=' after it.
         final AutoCompleteReturnValueSuccess success = autoCompleteReturnValue.getSuccess();
-        final List<String> possibleParamNames = success.getPossibilities();
+        final List<String> possibleParamNames = success.getSuggestions();
         final AutoCompleteReturnValue returnValue;
         if (possibleParamNames.size() == 1) {
             final String autoCompleteAddition = success.getAutoCompleteAddition();

@@ -2,7 +2,6 @@ package com.rawcod.jerminal.command.parameters;
 
 import com.google.common.base.Objects;
 import com.rawcod.jerminal.filesystem.FileSystemManager;
-import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
 
 /**
  * User: ykrasik
@@ -11,26 +10,19 @@ import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
  */
 public class ParamParseContext {
     private final FileSystemManager fileSystemManager;
-    private final ShellDirectory currentDirectory;
 
-    public ParamParseContext(FileSystemManager fileSystemManager, ShellDirectory currentDirectory) {
+    public ParamParseContext(FileSystemManager fileSystemManager) {
         this.fileSystemManager = fileSystemManager;
-        this.currentDirectory = currentDirectory;
     }
 
     public FileSystemManager getFileSystemManager() {
         return fileSystemManager;
     }
 
-    public ShellDirectory getCurrentDirectory() {
-        return currentDirectory;
-    }
-
     @Override
     public String toString() {
         return Objects.toStringHelper(this)
             .add("fileSystemManager", fileSystemManager)
-            .add("currentDirectory", currentDirectory)
             .toString();
     }
 }
