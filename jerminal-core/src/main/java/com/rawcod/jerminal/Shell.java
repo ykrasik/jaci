@@ -3,11 +3,12 @@ package com.rawcod.jerminal;
 import com.google.common.base.Optional;
 import com.rawcod.jerminal.command.CommandArgs;
 import com.rawcod.jerminal.command.parameters.ParamParseContext;
+import com.rawcod.jerminal.filesystem.FileSystemManager;
 import com.rawcod.jerminal.filesystem.GlobalCommandRepository;
 import com.rawcod.jerminal.filesystem.ShellFileSystem;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
-import com.rawcod.jerminal.filesystem.entry.directory.ShellFolder;
-import com.rawcod.jerminal.filesystem.FileSystemManager;
+import com.rawcod.jerminal.filesystem.entry.command.ShellCommandImpl;
+import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
 import com.rawcod.jerminal.output.OutputHandler;
 import com.rawcod.jerminal.output.OutputProcessor;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteErrors;
@@ -94,7 +95,7 @@ public class Shell {
         // AutoComplete the command args.
         // The args start from the 2nd commandLine element (the first was the command).
         final ParamParseContext context = new ParamParseContext(fileSystemManager);
-        final ShellCommand command = (ShellCommand) returnValue.getSuccess().getLastEntry();
+        final ShellCommand command = returnValue.getSuccess().getLastEntry().getCommand();
         final List<String> args = commandLine.subList(1, commandLine.size());
         return command.getParamManager().autoCompleteArgs(args, context);
     }
@@ -147,7 +148,7 @@ public class Shell {
 
         final ParsePathReturnValueSuccess parseCommandSuccess = parseCommandReturnValue.getSuccess();
         final List<ShellDirectory> path = parseCommandSuccess.getPath();
-        final ShellCommand command = (ShellCommand) parseCommandSuccess.getLastEntry();
+        final ShellCommand command = parseCommandSuccess.getLastEntry().getCommand();
 
         // Parse the command args.
         // The command args start from the 2nd commandLine element (the first was the command).

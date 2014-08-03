@@ -10,8 +10,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.rawcod.jerminal.command.CommandExecutor;
 import com.rawcod.jerminal.command.parameters.bool.OptionalBooleanParam;
 import com.rawcod.jerminal.command.parameters.number.IntegerParam;
-import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
-import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
+import com.rawcod.jerminal.filesystem.entry.command.ShellCommandImpl;
+import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectoryImpl;
 import com.rawcod.jerminal.returnvalue.execute.ExecuteReturnValue;
 import com.rawcod.jerminal.shell.ShellManager;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommandArgs;
@@ -60,27 +60,27 @@ public class JerminalLibGdxExample extends ApplicationAdapter {
         final ShellManager manager = new ShellManager();
 
         manager.addEntry(
-            new ShellDirectory("nested").addEntries(
-                new ShellDirectory("d").addEntries(
-                    new ShellDirectory("1possible"),
-                    new ShellDirectory("2possible")
+            new ShellDirectoryImpl("nested").addEntries(
+                new ShellDirectoryImpl("d").addEntries(
+                    new ShellDirectoryImpl("1possible"),
+                    new ShellDirectoryImpl("2possible")
                 ),
-                new ShellDirectory("dir").addEntry(
-                    new ShellDirectory("singlePossible")
+                new ShellDirectoryImpl("dir").addEntry(
+                    new ShellDirectoryImpl("singlePossible")
                 ),
-                new ShellDirectory("dir1").addEntry(
-                    new ShellDirectory("singlePossible")
+                new ShellDirectoryImpl("dir1").addEntry(
+                    new ShellDirectoryImpl("singlePossible")
                 ),
-                new ShellDirectory("dir2").addEntry(
-                    new ShellDirectory("singlePossible")
+                new ShellDirectoryImpl("dir2").addEntry(
+                    new ShellDirectoryImpl("singlePossible")
                 ),
-                new ShellDirectory("directory").addEntries(
-                    new ShellDirectory("singlePossible").addEntries(
-                        new ShellDirectory("multiplePossible1").addEntry(
-                            new ShellDirectory("singlePossible")
+                new ShellDirectoryImpl("directory").addEntries(
+                    new ShellDirectoryImpl("singlePossible").addEntries(
+                        new ShellDirectoryImpl("multiplePossible1").addEntry(
+                            new ShellDirectoryImpl("singlePossible")
                         ),
-                        new ShellDirectory("multiplePossible2").addEntry(
-                            new ShellDirectory("singlePossible")
+                        new ShellDirectoryImpl("multiplePossible2").addEntry(
+                            new ShellDirectoryImpl("singlePossible")
                         )
                     )
                 )
@@ -88,7 +88,7 @@ public class JerminalLibGdxExample extends ApplicationAdapter {
         );
 
         manager.addEntries(
-            new ShellCommand(
+            new ShellCommandImpl(
                 "cmd",
                 "cmd",
                 new CommandParam[] {

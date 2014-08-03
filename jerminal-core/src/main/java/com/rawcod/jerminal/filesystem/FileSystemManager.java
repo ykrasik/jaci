@@ -90,7 +90,7 @@ public class FileSystemManager {
                 return ParsePathReturnValue.failure(returnValue.getFailure());
             }
 
-            dir = (ShellDirectory) returnValue.getSuccess().getEntry();
+            dir = returnValue.getSuccess().getEntry().getDirectory();
             parsedPath.add(dir);
         }
 
@@ -135,7 +135,7 @@ public class FileSystemManager {
 
         // AutoComplete the last entry along the path.
         final ParsePathReturnValueSuccess parsePathSuccess = parsePathReturnValue.getSuccess();
-        final ShellDirectory lastDir = (ShellDirectory) parsePathSuccess.getLastEntry();
+        final ShellDirectory lastDir = parsePathSuccess.getLastEntry().getDirectory();
         return autoCompleteEntry(lastDir, filter, autoCompleteArg);
     }
 

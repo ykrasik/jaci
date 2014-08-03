@@ -1,6 +1,7 @@
 package com.rawcod.jerminal.filesystem.entry;
 
-import java.util.List;
+import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
+import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
 
 /**
  * User: ykrasik
@@ -11,5 +12,6 @@ public interface ShellEntry {
     String getDescription();
 
     boolean isDirectory();
-    List<ShellEntry> getChildren();
+    ShellDirectory getDirectory();
+    ShellCommand getCommand();
 }

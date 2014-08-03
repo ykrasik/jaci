@@ -1,7 +1,7 @@
 package com.rawcod.jerminal.command;
 
 import com.rawcod.jerminal.TestTerminal;
-import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
+import com.rawcod.jerminal.filesystem.entry.command.ShellCommandImpl;
 import com.rawcod.jerminal.returnvalue.execute.flow.ExecuteReturnValue;
 import com.rawcod.jerminal.Shell;
 import com.rawcod.jerminal.shell.ShellManager;
@@ -231,7 +231,7 @@ public class CommandSingleStringParamAutoCompleteTest {
 
     private void setParams(CommandParam... params) {
         manager.addEntry(
-            new ShellCommand("cmd", "cmd", params, new CommandExecutor() {
+            new ShellCommandImpl("cmd", "cmd", params, new CommandExecutor() {
                 @Override
                 protected ExecuteReturnValue doExecute(ShellCommandArgs args, Set<String> flags) {
                     return success("Executed");

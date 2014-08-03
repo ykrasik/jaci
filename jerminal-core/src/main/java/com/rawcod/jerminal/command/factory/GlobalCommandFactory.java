@@ -10,9 +10,10 @@ import com.rawcod.jerminal.filesystem.FileSystemManager;
 import com.rawcod.jerminal.filesystem.entry.ShellEntry;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommandBuilder;
-import com.rawcod.jerminal.filesystem.entry.directory.ShellFolder;
+import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
 import com.rawcod.jerminal.output.OutputHandler;
 import com.rawcod.jerminal.returnvalue.execute.executor.ExecutorReturnValue;
+import sun.awt.shell.ShellFolder;
 
 import java.util.List;
 
@@ -45,8 +46,8 @@ public class GlobalCommandFactory {
             .setExecutor(new CommandExecutor() {
                 @Override
                 public ExecutorReturnValue execute(CommandArgs args, ExecutionContext context) {
-                    final ShellFolder directory = args.getDirectory(dirArgName);
-                    fileSystemManager.setCurrentFolder(directory);
+                    final ShellDirectory directory = args.getDirectory(dirArgName);
+                    fileSystemManager.setCurrentDirectory(directory);
                     return success();
                 }
             })
@@ -61,10 +62,10 @@ public class GlobalCommandFactory {
             .addParam(
                 new DirectoryParamBuilder(dirArgName)
                     .setDescription("Directory to list")
-                    .setOptional(new Supplier<ShellFolder>() {
+                    .setOptional(new Supplier<ShellDirectory>() {
                         @Override
-                        public ShellFolder get() {
-                            return fileSystemManager.getCurrentFolder();
+                        public ShellDirectory get() {
+                            return fileSystemManager.getCurrentDirectory();
                         }
                     })
                     .build()
@@ -77,7 +78,7 @@ public class GlobalCommandFactory {
             .setExecutor(new CommandExecutor() {
                 @Override
                 public ExecutorReturnValue execute(CommandArgs args, ExecutionContext context) {
-                    final ShellFolder directory = args.getDirectory(dirArgName);
+                    final ShellDirectory directory = args.getDirectory(dirArgName);
                     final boolean recursive = args.getBool(recursiveArgName);
                     // FIXME: How to return this to the outputProcessors?
                 }

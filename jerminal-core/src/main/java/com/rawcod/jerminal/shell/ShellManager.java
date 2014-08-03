@@ -4,8 +4,8 @@ import com.rawcod.jerminal.command.CommandExecutor;
 import com.rawcod.jerminal.command.parameters.entry.DirectoryParam;
 import com.rawcod.jerminal.command.parameters.entry.FileParam;
 import com.rawcod.jerminal.filesystem.entry.ShellEntry;
-import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
-import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
+import com.rawcod.jerminal.filesystem.entry.command.ShellCommandImpl;
+import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectoryImpl;
 import com.rawcod.jerminal.output.Terminal;
 import com.rawcod.jerminal.returnvalue.execute.ExecuteReturnValue;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommandArgs;
@@ -24,15 +24,15 @@ import java.util.Set;
  * Date: 08/01/14
  */
 public class ShellManager {
-    private final ShellDirectory root;
+    private final ShellDirectoryImpl root;
     private final ShellCommandParser shellCommandParser;
 
-    private ShellDirectory currentDirectory;
+    private ShellDirectoryImpl currentDirectory;
 
     private Terminal terminal;
 
     public ShellManager() {
-        this.root = new ShellDirectory("/", "root");
+        this.root = new ShellDirectoryImpl("/", "root");
         this.shellCommandParser = new ShellCommandParser(this);
         this.currentDirectory = root;
 
@@ -42,14 +42,14 @@ public class ShellManager {
         addGlobalCommand(createDescribeShellCommand());
     }
 
-    private ShellCommand createChangeDirectoryShellCommand() {
+    private ShellCommandImpl createChangeDirectoryShellCommand() {
         final CommandParam[] params = {
             new DirectoryParam("dir")
         };
-        return new ShellCommand("cd", "Change directory", params, new CommandExecutor() {
+        return new ShellCommandImpl("cd", "Change directory", params, new CommandExecutor() {
             @Override
             protected ExecuteReturnValue doExecute(ShellCommandArgs args, Set<String> flags) {
-                final ShellDirectory directory = args.popDirectory();
+                final ShellDirectoryImpl directory = args.popDirectory();
                 currentDirectory = directory;
                 final List<String> path = directory.getPath();
                 if ("/".equals(path.get(0))) {
@@ -62,14 +62,14 @@ public class ShellManager {
         });
     }
 
-    private ShellCommand createListDirectoryShellCommand() {
+    private ShellCommandImpl createListDirectoryShellCommand() {
         final CommandParam[] params = {
             new OptionalCommandDirectoryParam("dir")
         };
-        return new ShellCommand("ls", "List directory", params, new CommandExecutor() {
+        return new ShellCommandImpl("ls", "List directory", params, new CommandExecutor() {
             @Override
             protected ExecuteReturnValue doExecute(ShellCommandArgs args, Set<String> flags) {
-                final ShellDirectory directory = args.popDirectory();
+                final ShellDirectoryImpl directory = args.popDirectory();
                 final boolean recursive = flags.contains("-r");
                 final ShellTree shellTree = directory.listContent(recursive);
                 terminal.displayShellTree(shellTree);
@@ -78,14 +78,14 @@ public class ShellManager {
         });
     }
 
-    private ShellCommand createDescribeShellCommand() {
+    private ShellCommandImpl createDescribeShellCommand() {
         final CommandParam[] params = {
             new FileParam("command")
         };
-        return new ShellCommand("man", "Describe command", params, new CommandExecutor() {
+        return new ShellCommandImpl("man", "Describe command", params, new CommandExecutor() {
             @Override
             protected ExecuteReturnValue doExecute(ShellCommandArgs args, Set<String> flags) {
-                final ShellCommand command = args.popFile();
+                final ShellCommandImpl command = args.popFile();
                 final StringBuilder sb = new StringBuilder();
                 sb.append(command.getName());
                 sb.append(" : ");
@@ -113,7 +113,7 @@ public class ShellManager {
         root.addEntry(entry);
     }
 
-    public void addGlobalCommand(ShellCommand command) {
+    public void addGlobalCommand(ShellCommandImpl command) {
         command.install(this);
         shellCommandParser.addGlobalCommand(command);
     }
@@ -127,28 +127,28 @@ public class ShellManager {
         }
 
         // The first arg is not the only arg on the commandLine, it is expected to be a valid command.
-        final ParseReturnValue<ShellCommand> returnValue = shellCommandParser.parse(commandArg);
+        final ParseReturnValue<ShellCommandImpl> returnValue = shellCommandParser.parse(commandArg);
         if (!returnValue.isSuccess()) {
             // Couldn't parse the command successfully.
             return AutoCompleteReturnValue.from(returnValue);
         }
 
         // Let the command autoComplete the args.
-        final ShellCommand command = returnValue.getParsedValue();
+        final ShellCommandImpl command = returnValue.getParsedValue();
         return command.autoComplete(args);
     }
 
     public ParseReturnValue<?> parse(Queue<String> args, Queue<Object> parsedArgs, Set<String> flags) {
         final String commandArg = args.poll();
 
-        final ParseReturnValue<ShellCommand> returnValue = shellCommandParser.parse(commandArg);
+        final ParseReturnValue<ShellCommandImpl> returnValue = shellCommandParser.parse(commandArg);
         if (!returnValue.isSuccess()) {
             // Couldn't parse the command successfully.
             return returnValue;
         }
 
         // Add parsed command to parsedArgs.
-        final ShellCommand command = returnValue.getParsedValue();
+        final ShellCommandImpl command = returnValue.getParsedValue();
         parsedArgs.add(command);
 
         // Let the command parse the rest of the args.
@@ -161,15 +161,15 @@ public class ShellManager {
         }
 
         // The first arg is the command.
-        final ShellCommand command = (ShellCommand) parsedArgs.poll();
+        final ShellCommandImpl command = (ShellCommandImpl) parsedArgs.poll();
         return command.execute(parsedArgs, flags);
     }
 
-    public ShellDirectory getRoot() {
+    public ShellDirectoryImpl getRoot() {
         return root;
     }
 
-    public ShellDirectory getCurrentDirectory() {
+    public ShellDirectoryImpl getCurrentDirectory() {
         return currentDirectory;
     }
 }

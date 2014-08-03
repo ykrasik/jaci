@@ -1,7 +1,10 @@
 package com.rawcod.jerminal.filesystem;
 
 import com.google.common.base.Predicate;
-import com.rawcod.jerminal.collections.trie.*;
+import com.rawcod.jerminal.collections.trie.Trie;
+import com.rawcod.jerminal.collections.trie.TrieImpl;
+import com.rawcod.jerminal.collections.trie.Tries;
+import com.rawcod.jerminal.collections.trie.WordTrie;
 import com.rawcod.jerminal.filesystem.entry.ShellEntry;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
 import com.rawcod.jerminal.returnvalue.parse.ParseErrors;

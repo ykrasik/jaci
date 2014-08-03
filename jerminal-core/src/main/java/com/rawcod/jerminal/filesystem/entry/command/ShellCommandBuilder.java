@@ -23,7 +23,7 @@ public class ShellCommandBuilder {
     }
 
     public ShellCommand build() {
-        return new ShellCommand(name, description, params, executor);
+        return new ShellCommandImpl(name, description, params, executor);
     }
 
     public ShellCommandBuilder setDescription(String description) {

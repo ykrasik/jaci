@@ -2,7 +2,7 @@ package com.rawcod.jerminal.directory;
 
 import com.rawcod.jerminal.TestTerminal;
 import com.rawcod.jerminal.Shell;
-import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
+import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectoryImpl;
 import com.rawcod.jerminal.shell.ShellManager;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,14 +19,14 @@ public class DirectorySpacesTest {
     public void setup() {
         final ShellManager manager = new ShellManager();
         manager.addEntries(
-            new ShellDirectory("d").addEntries(
-                new ShellDirectory("multiplePossible1"),
-                new ShellDirectory("multiplePossible2")
+            new ShellDirectoryImpl("d").addEntries(
+                new ShellDirectoryImpl("multiplePossible1"),
+                new ShellDirectoryImpl("multiplePossible2")
             ),
-            new ShellDirectory("dirStart").addEntry(
-                new ShellDirectory("dir1").addEntry(
-                    new ShellDirectory("dir2").addEntry(
-                        new ShellDirectory("dirEnd")
+            new ShellDirectoryImpl("dirStart").addEntry(
+                new ShellDirectoryImpl("dir1").addEntry(
+                    new ShellDirectoryImpl("dir2").addEntry(
+                        new ShellDirectoryImpl("dirEnd")
                     )
                 )
             )
