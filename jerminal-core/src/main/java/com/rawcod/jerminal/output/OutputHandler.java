@@ -2,7 +2,9 @@ package com.rawcod.jerminal.output;
 
 import com.google.common.base.Optional;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValueFailure;
-import com.rawcod.jerminal.returnvalue.execute.ExecuteReturnValueFailure;
+import com.rawcod.jerminal.returnvalue.execute.flow.ExecuteReturnValueFailure;
+import com.rawcod.jerminal.returnvalue.execute.flow.ExecuteReturnValueSuccess;
+import com.rawcod.jerminal.returnvalue.parse.ParseReturnValueFailure;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,75 +26,44 @@ public class OutputHandler {
     }
 
     public void clearCommandLine() {
-        forEachOutputProcessor(new OutputProcessorTask() {
-            @Override
-            public void process(OutputProcessor outputProcessor) {
-                outputProcessor.clearCommandLine();
-            }
-        });
-    }
-
-    public void setCommandLine(final String commandLine) {
-        forEachOutputProcessor(new OutputProcessorTask() {
-            @Override
-            public void process(OutputProcessor outputProcessor) {
-                outputProcessor.setCommandLine(commandLine);
-            }
-        });
-    }
-
-    public void println(final String message) {
-        forEachOutputProcessor(new OutputProcessorTask() {
-            @Override
-            public void process(OutputProcessor outputProcessor) {
-                outputProcessor.println(message);
-            }
-        });
-    }
-
-    public void displayAutoCompleteSuggestions(final List<String> suggestions) {
-        forEachOutputProcessor(new OutputProcessorTask() {
-            @Override
-            public void process(OutputProcessor outputProcessor) {
-                outputProcessor.displayAutoCompleteSuggestions(suggestions);
-            }
-        });
-    }
-
-    public void handleAutoCompleteFailure(final AutoCompleteReturnValueFailure failure) {
-        forEachOutputProcessor(new OutputProcessorTask() {
-            @Override
-            public void process(OutputProcessor outputProcessor) {
-                outputProcessor.processAutoCompleteFailure(failure);
-            }
-        });
-    }
-
-    public void handleExecuteSuccess(final String output, final Optional<Object> returnValue) {
-        forEachOutputProcessor(new OutputProcessorTask() {
-            @Override
-            public void process(OutputProcessor outputProcessor) {
-                outputProcessor.processExecuteOutputSuccess(output, returnValue);
-            }
-        });
-    }
-
-    public void handleExecuteFailure(final ExecuteReturnValueFailure failure) {
-        forEachOutputProcessor(new OutputProcessorTask() {
-            @Override
-            public void process(OutputProcessor outputProcessor) {
-                outputProcessor.processExecuteOutputFailure(failure);
-            }
-        });
-    }
-
-    private void forEachOutputProcessor(OutputProcessorTask task) {
         for (OutputProcessor outputProcessor : outputProcessors) {
-            task.process(outputProcessor);
+            outputProcessor.clearCommandLine();
         }
     }
 
-    private interface OutputProcessorTask {
-        void process(OutputProcessor outputProcessor);
+    public void setCommandLine(String commandLine) {
+        for (OutputProcessor outputProcessor : outputProcessors) {
+            outputProcessor.setCommandLine(commandLine);
+        }
+    }
+
+    public void handleParseFailure(ParseReturnValueFailure failure) {
+        for (OutputProcessor outputProcessor : outputProcessors) {
+            outputProcessor.handleParseFailure(failure);
+        }
+    }
+
+    public void displayAutoCompleteSuggestions(List<String> suggestions) {
+        for (OutputProcessor outputProcessor : outputProcessors) {
+            outputProcessor.displayAutoCompleteSuggestions(suggestions);
+        }
+    }
+
+    public void handleAutoCompleteFailure(AutoCompleteReturnValueFailure failure) {
+        for (OutputProcessor outputProcessor : outputProcessors) {
+            outputProcessor.handleAutoCompleteFailure(failure);
+        }
+    }
+
+    public void handleExecuteSuccess(ExecuteReturnValueSuccess success) {
+        for (OutputProcessor outputProcessor : outputProcessors) {
+            outputProcessor.handleExecuteCommandSuccess(output, returnValue);
+        }
+    }
+
+    public void handleExecuteFailure(ExecuteReturnValueFailure failure) {
+        for (OutputProcessor outputProcessor : outputProcessors) {
+            outputProcessor.handleExecuteCommandFailure(failure);
+        }
     }
 }

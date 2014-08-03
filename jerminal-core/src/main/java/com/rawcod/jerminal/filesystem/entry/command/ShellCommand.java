@@ -6,9 +6,15 @@ import com.rawcod.jerminal.command.ExecutionContext;
 import com.rawcod.jerminal.command.parameters.CommandParam;
 import com.rawcod.jerminal.command.parameters.manager.CommandParamManager;
 import com.rawcod.jerminal.filesystem.entry.AbstractShellEntry;
-import com.rawcod.jerminal.returnvalue.execute.ExecuteReturnValue;
+import com.rawcod.jerminal.filesystem.entry.ShellEntry;
+import com.rawcod.jerminal.returnvalue.execute.executor.ExecutorReturnValue;
+import com.rawcod.jerminal.returnvalue.execute.flow.ExecuteReturnValue;
+import com.rawcod.jerminal.returnvalue.execute.flow.ExecuteReturnValueFailure;
+import com.rawcod.jerminal.returnvalue.execute.flow.ExecuteReturnValueSuccess;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -36,6 +42,11 @@ public class ShellCommand extends AbstractShellEntry implements ReadOnlyCommand 
     }
 
     @Override
+    public List<ShellEntry> getChildren() {
+        return Collections.emptyList();
+    }
+
+    @Override
     public List<CommandParam> getParams() {
         return paramManager.getAllParams();
     }
@@ -45,15 +56,29 @@ public class ShellCommand extends AbstractShellEntry implements ReadOnlyCommand 
     }
 
     public ExecuteReturnValue execute(CommandArgs args) {
-        final ExecutionContext context = new ExecutionContext();
+        final List<String> outputBuffer = new ArrayList<>();
+        final ExecutionContext context = new ExecutionContext(outputBuffer);
         try {
-            return doExecute(args, context);
+            final ExecutorReturnValue returnValue = executor.execute(args, context);
+            if (returnValue.isSuccess()) {
+                context.println("Command '%s' executed successfully.", getName());
+            } else {
+                context.println("Command '%s' finished with an error: %s", getName(), returnValue.getFailure().getErrorMessage());
+            }
+            return translateReturnValue(returnValue, outputBuffer);
         } catch (Exception e) {
-
+            context.println("Command '%s' was terminated by an unhandled exception: %s", getName(), e.getMessage());
+            return ExecuteReturnValue.failureException(e, outputBuffer);
         }
     }
 
-    private ExecuteReturnValue doExecute(CommandArgs args, ExecutionContext context) {
-        executor.execute(args, context);
+    private ExecuteReturnValue translateReturnValue(ExecutorReturnValue returnValue, List<String> outputBuffer) {
+        if (returnValue.isSuccess()) {
+            final ExecuteReturnValueSuccess success = returnValue.getSuccess();
+            return ExecuteReturnValue.success(success.getReturnValue(), outputBuffer);
+        } else {
+            final ExecuteReturnValueFailure failure = returnValue.getFailure();
+            return ExecuteReturnValue.failure(failure.getErrorMessage(), outputBuffer);
+        }
     }
 }

@@ -28,7 +28,7 @@ public class AutoCompleteReturnValue extends ReturnValueImpl<AutoCompleteReturnV
 
     public static AutoCompleteReturnValue successMultiple(String autoCompleteAddition, List<String> possibilities) {
         if (possibilities.size() < 2) {
-            throw new IllegalArgumentException("Multiple autoComplete must have at least 2 possibilities!");
+            throw new IllegalArgumentException("Multiple autoComplete must have at least 2 suggestions!");
         }
         return new AutoCompleteReturnValue(new AutoCompleteReturnValueSuccess(autoCompleteAddition, possibilities));
     }
@@ -40,26 +40,26 @@ public class AutoCompleteReturnValue extends ReturnValueImpl<AutoCompleteReturnV
 
     public static class AutoCompleteReturnValueSuccess extends SuccessImpl {
         private final String autoCompleteAddition;
-        private final List<String> possibilities;
+        private final List<String> suggestions;
 
-        private AutoCompleteReturnValueSuccess(String autoCompleteAddition, List<String> possibilities) {
+        private AutoCompleteReturnValueSuccess(String autoCompleteAddition, List<String> suggestions) {
             this.autoCompleteAddition = checkNotNull(autoCompleteAddition, "autoCompleteAddition is null!");
-            this.possibilities = checkNotNull(possibilities, "possibilities is null!");
+            this.suggestions = checkNotNull(suggestions, "suggestions is null!");
         }
 
         public String getAutoCompleteAddition() {
             return autoCompleteAddition;
         }
 
-        public List<String> getPossibilities() {
-            return possibilities;
+        public List<String> getSuggestions() {
+            return suggestions;
         }
 
         @Override
         public String toString() {
             return Objects.toStringHelper(this)
                 .add("autoCompleteAddition", autoCompleteAddition)
-                .add("possibilities", possibilities)
+                .add("suggestions", suggestions)
                 .toString();
         }
     }

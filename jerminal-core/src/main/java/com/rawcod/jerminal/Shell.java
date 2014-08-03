@@ -3,9 +3,10 @@ package com.rawcod.jerminal;
 import com.google.common.base.Optional;
 import com.rawcod.jerminal.command.CommandArgs;
 import com.rawcod.jerminal.command.parameters.ParamParseContext;
+import com.rawcod.jerminal.filesystem.GlobalCommandRepository;
 import com.rawcod.jerminal.filesystem.ShellFileSystem;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
-import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
+import com.rawcod.jerminal.filesystem.entry.directory.ShellFolder;
 import com.rawcod.jerminal.filesystem.FileSystemManager;
 import com.rawcod.jerminal.output.OutputHandler;
 import com.rawcod.jerminal.output.OutputProcessor;
@@ -13,9 +14,9 @@ import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteErrors;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue.AutoCompleteReturnValueSuccess;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValueFailure;
-import com.rawcod.jerminal.returnvalue.execute.ExecuteReturnValue;
-import com.rawcod.jerminal.returnvalue.execute.ExecuteReturnValueFailure;
-import com.rawcod.jerminal.returnvalue.execute.ExecuteReturnValueSuccess;
+import com.rawcod.jerminal.returnvalue.execute.flow.ExecuteReturnValue;
+import com.rawcod.jerminal.returnvalue.execute.flow.ExecuteReturnValueFailure;
+import com.rawcod.jerminal.returnvalue.execute.flow.ExecuteReturnValueSuccess;
 import com.rawcod.jerminal.returnvalue.parse.args.ParseCommandArgsReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.entry.ParsePathReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.entry.ParsePathReturnValue.ParsePathReturnValueSuccess;
@@ -37,7 +38,8 @@ public class Shell {
     private final OutputHandler outputHandler;
 
     public Shell(ShellFileSystem fileSystem, int maxCommandHistory) {
-        this.fileSystemManager = new FileSystemManager(fileSystem);
+        final GlobalCommandRepository globalCommandRepository = new GlobalCommandRepository(fileSystem.getGlobalCommands());
+        this.fileSystemManager = new FileSystemManager(fileSystem, globalCommandRepository);
         this.commandHistory = new ShellCommandHistory(maxCommandHistory);
 
         this.outputHandler = new OutputHandler();
@@ -99,41 +101,36 @@ public class Shell {
 
     public void execute(String rawCommandLine) {
         if (rawCommandLine.isEmpty()) {
-            outputHandler.println("");
             return;
         }
 
         // Save command in history
         commandHistory.pushCommand(rawCommandLine);
 
-        // Split the commandLine for autoComplete.
+        // Split the commandLine.
         final List<String> commandLine = CommandLineUtils.splitCommandLineForExecute(rawCommandLine);
 
+        // Parse commandLine.
+        final ParseReturnValue parseReturnValue = parseCommandLine(commandLine);
+        if (parseReturnValue.isFailure()) {
+            outputHandler.handleParseFailure(parseReturnValue.getFailure());
+            return;
+        }
+
         // Execute the command.
-        final ExecuteReturnValue executeReturnValue = doExecute(commandLine);
+        final ExecuteReturnValue executeReturnValue = doExecute(parseReturnValue.getSuccess());
         if (executeReturnValue.isSuccess()) {
             final ExecuteReturnValueSuccess success = executeReturnValue.getSuccess();
-            final String output = success.getOutput();
-            final Optional<Object> returnValue = success.getReturnValue();
-            outputHandler.handleExecuteSuccess(output, returnValue);
+            outputHandler.handleExecuteSuccess(success);
         } else {
             final ExecuteReturnValueFailure failure = executeReturnValue.getFailure();
             outputHandler.handleExecuteFailure(failure);
         }
     }
 
-    private ExecuteReturnValue doExecute(List<String> commandLine) {
-        // Parse commandLine.
-        final ParseReturnValue parseReturnValue = parseCommandLine(commandLine);
-        if (parseReturnValue.isFailure()) {
-            return ExecuteReturnValue.parseFailure(parseReturnValue.getFailure());
-        }
-
-        final ParseReturnValueSuccess parseSuccess = parseReturnValue.getSuccess();
-        final ShellCommand command = parseSuccess.getCommand();
-        final CommandArgs args = parseSuccess.getArgs();
-
-        // Execute command.
+    private ExecuteReturnValue doExecute(ParseReturnValueSuccess success) {
+        final ShellCommand command = success.getCommand();
+        final CommandArgs args = success.getArgs();
         return command.execute(args);
     }
 
@@ -153,7 +150,7 @@ public class Shell {
         final ShellCommand command = (ShellCommand) parseCommandSuccess.getLastEntry();
 
         // Parse the command args.
-        // The args start from the 2nd commandLine element (the first was the command).
+        // The command args start from the 2nd commandLine element (the first was the command).
         final List<String> args = commandLine.subList(1, commandLine.size());
         final ParamParseContext context = new ParamParseContext(fileSystemManager);
         final ParseCommandArgsReturnValue parseArgsReturnValue = command.getParamManager().parseCommandArgs(args, context);

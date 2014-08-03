@@ -7,5 +7,7 @@ package com.rawcod.jerminal.returnvalue.execute;
  */
 public enum ExecuteError {
     EXECUTION_FAILURE,
+    UNHANDLED_EXCEPTION,
+
     INTERNAL_ERROR
 }

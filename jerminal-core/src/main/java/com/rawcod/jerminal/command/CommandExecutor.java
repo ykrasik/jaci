@@ -1,47 +1,35 @@
 package com.rawcod.jerminal.command;
 
-import com.rawcod.jerminal.returnvalue.execute.ExecuteReturnValue;
+import com.rawcod.jerminal.returnvalue.execute.executor.ExecutorReturnValue;
 
 /**
  * User: ykrasik
  * Date: 04/01/14
  */
 public abstract class CommandExecutor {
-    public abstract ExecuteReturnValue execute(CommandArgs args, ExecutionContext context);
+    public abstract ExecutorReturnValue execute(CommandArgs args, ExecutionContext context);
 
-    protected ExecuteReturnValue successNoMessage() {
-        return ExecuteReturnValue.successNoMessage();
+    protected ExecutorReturnValue success() {
+        return ExecutorReturnValue.success();
     }
 
-    protected ExecuteReturnValue success(String message) {
-        return ExecuteReturnValue.success(message);
+    protected ExecutorReturnValue success(Object returnValue) {
+        return ExecutorReturnValue.success(returnValue);
     }
 
-    protected ExecuteReturnValue success(String format, Object arg) {
-        return ExecuteReturnValue.success(format, arg);
+    protected ExecutorReturnValue failure(String message) {
+        return ExecutorReturnValue.failure(message);
     }
 
-    protected ExecuteReturnValue success(String format, Object arg1, Object arg2) {
-        return ExecuteReturnValue.success(format, arg1, arg2);
+    protected ExecutorReturnValue failure(String format, Object... args) {
+        return ExecutorReturnValue.failure(format, args);
     }
 
-    protected ExecuteReturnValue success(String format, Object arg1, Object arg2, Object arg3) {
-        return ExecuteReturnValue.success(format, arg1, arg2, arg3);
+    protected ExecutorReturnValue failure(Exception e, String message) {
+        return ExecutorReturnValue.failure(e, message);
     }
 
-    protected ExecuteReturnValue failure(String message) {
-        return ExecuteReturnValue.failure(message);
-    }
-
-    protected ExecuteReturnValue failure(String format, Object arg) {
-        return ExecuteReturnValue.failure(format, arg);
-    }
-
-    protected ExecuteReturnValue failure(String format, Object arg1, Object arg2) {
-        return ExecuteReturnValue.failure(format, arg1, arg2);
-    }
-
-    protected ExecuteReturnValue failure(String format, Object arg1, Object arg2, Object arg3) {
-        return ExecuteReturnValue.failure(format, arg1, arg2, arg3);
+    protected ExecutorReturnValue failure(Exception e, String format, Object... args) {
+        return ExecutorReturnValue.failure(e, format, args);
     }
 }

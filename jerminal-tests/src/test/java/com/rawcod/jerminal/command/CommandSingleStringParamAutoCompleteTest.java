@@ -2,7 +2,7 @@ package com.rawcod.jerminal.command;
 
 import com.rawcod.jerminal.TestTerminal;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
-import com.rawcod.jerminal.returnvalue.execute.ExecuteReturnValue;
+import com.rawcod.jerminal.returnvalue.execute.flow.ExecuteReturnValue;
 import com.rawcod.jerminal.Shell;
 import com.rawcod.jerminal.shell.ShellManager;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommandArgs;
