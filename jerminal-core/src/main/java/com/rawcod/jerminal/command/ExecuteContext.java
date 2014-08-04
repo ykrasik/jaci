@@ -7,10 +7,10 @@ import java.util.List;
  * Date: 25/07/2014
  * Time: 15:15
  */
-public class ExecutionContext {
+public class ExecuteContext {
     private final List<String> outputBuffer;
 
-    public ExecutionContext(List<String> outputBuffer) {
+    public ExecuteContext(List<String> outputBuffer) {
         this.outputBuffer = outputBuffer;
     }
 

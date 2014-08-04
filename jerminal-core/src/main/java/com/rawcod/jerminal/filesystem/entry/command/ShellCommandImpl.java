@@ -2,7 +2,7 @@ package com.rawcod.jerminal.filesystem.entry.command;
 
 import com.rawcod.jerminal.command.CommandArgs;
 import com.rawcod.jerminal.command.CommandExecutor;
-import com.rawcod.jerminal.command.ExecutionContext;
+import com.rawcod.jerminal.command.ExecuteContext;
 import com.rawcod.jerminal.command.parameters.CommandParam;
 import com.rawcod.jerminal.command.parameters.manager.CommandParamManager;
 import com.rawcod.jerminal.filesystem.entry.AbstractShellEntry;
@@ -65,7 +65,7 @@ public class ShellCommandImpl extends AbstractShellEntry implements ShellCommand
     @Override
     public ExecuteReturnValue execute(CommandArgs args) {
         final List<String> outputBuffer = new ArrayList<>();
-        final ExecutionContext context = new ExecutionContext(outputBuffer);
+        final ExecuteContext context = new ExecuteContext(outputBuffer);
         try {
             final ExecutorReturnValue returnValue = executor.execute(args, context);
             if (returnValue.isSuccess()) {

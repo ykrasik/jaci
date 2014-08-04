@@ -13,7 +13,8 @@ public interface CommandParam {
     String getDescription();
 
     ParamType getType();
+    String getExternalForm();
 
-    ParseParamValueReturnValue parse(Optional<String> rawValue, ParamParseContext context);
-    AutoCompleteReturnValue autoComplete(Optional<String> prefix, ParamParseContext context);
+    ParseParamValueReturnValue parse(Optional<String> rawValue, ParseParamContext context);
+    AutoCompleteReturnValue autoComplete(Optional<String> prefix, ParseParamContext context);
 }

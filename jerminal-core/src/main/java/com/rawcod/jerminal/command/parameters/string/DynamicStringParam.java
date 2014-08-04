@@ -5,7 +5,7 @@ import com.rawcod.jerminal.collections.trie.Trie;
 import com.rawcod.jerminal.collections.trie.Tries;
 import com.rawcod.jerminal.collections.trie.WordTrie;
 import com.rawcod.jerminal.command.parameters.AbstractMandatoryCommandParam;
-import com.rawcod.jerminal.command.parameters.ParamParseContext;
+import com.rawcod.jerminal.command.parameters.ParseParamContext;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteErrors;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.param.ParseParamValueReturnValue;
@@ -29,14 +29,19 @@ public class DynamicStringParam extends AbstractMandatoryCommandParam {
     }
 
     @Override
-    protected ParseParamValueReturnValue parse(String rawValue, ParamParseContext context) {
+    protected String getExternalFormType() {
+        return "string";
+    }
+
+    @Override
+    protected ParseParamValueReturnValue parse(String rawValue, ParseParamContext context) {
         final Trie<String> values = getValues();
         final StringParamValueParser parser = new StringParamValueParser(values, getName());
         return parser.parse(rawValue);
     }
 
     @Override
-    protected AutoCompleteReturnValue autoComplete(String prefix, ParamParseContext context) {
+    protected AutoCompleteReturnValue autoComplete(String prefix, ParseParamContext context) {
         final Trie<String> values = getValues();
         final WordTrie wordTrie = Tries.getWordTrie(values, prefix);
         if (wordTrie.isEmpty()) {
@@ -49,10 +54,5 @@ public class DynamicStringParam extends AbstractMandatoryCommandParam {
 
     private Trie<String> getValues() {
         return Tries.toTrie(valuesSupplier.get());
-    }
-
-    @Override
-    public String toString() {
-        return String.format("{%s: String}", getName());
     }
 }

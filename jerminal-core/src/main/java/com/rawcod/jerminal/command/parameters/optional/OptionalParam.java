@@ -3,7 +3,7 @@ package com.rawcod.jerminal.command.parameters.optional;
 import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
 import com.rawcod.jerminal.command.parameters.CommandParam;
-import com.rawcod.jerminal.command.parameters.ParamParseContext;
+import com.rawcod.jerminal.command.parameters.ParseParamContext;
 import com.rawcod.jerminal.command.parameters.ParamType;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.param.ParseParamValueReturnValue;
@@ -38,7 +38,12 @@ public class OptionalParam<T> implements CommandParam {
     }
 
     @Override
-    public ParseParamValueReturnValue parse(Optional<String> rawValue, ParamParseContext context) {
+    public String getExternalForm() {
+        return '[' + delegate.getExternalForm() + ']';
+    }
+
+    @Override
+    public ParseParamValueReturnValue parse(Optional<String> rawValue, ParseParamContext context) {
         if (rawValue.isPresent()) {
             return delegate.parse(rawValue, context);
         }
@@ -46,12 +51,12 @@ public class OptionalParam<T> implements CommandParam {
     }
 
     @Override
-    public AutoCompleteReturnValue autoComplete(Optional<String> prefix, ParamParseContext context) {
+    public AutoCompleteReturnValue autoComplete(Optional<String> prefix, ParseParamContext context) {
         return delegate.autoComplete(prefix, context);
     }
 
     @Override
     public String toString() {
-        return '[' + delegate.toString() + ']';
+        return getExternalForm();
     }
 }

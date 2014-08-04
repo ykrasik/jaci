@@ -14,6 +14,11 @@ public class FileParam extends AbstractEntryCommandParam {
     }
 
     @Override
+    protected String getExternalFormType() {
+        return "file";
+    }
+
+    @Override
     protected ParsePathReturnValue doParse(String rawValue, FileSystemManager fileSystemManager) {
         return fileSystemManager.parsePathToCommand(rawValue);
     }
@@ -21,10 +26,5 @@ public class FileParam extends AbstractEntryCommandParam {
     @Override
     protected AutoCompleteReturnValue doAutoComplete(String prefix, FileSystemManager fileSystemManager) {
         return fileSystemManager.autoCompletePathToCommand(prefix);
-    }
-
-    @Override
-    public String toString() {
-        return String.format("{%s: file}", getName());
     }
 }

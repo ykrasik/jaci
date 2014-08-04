@@ -14,6 +14,11 @@ public class DirectoryParam extends AbstractEntryCommandParam {
     }
 
     @Override
+    protected String getExternalFormType() {
+        return "directory";
+    }
+
+    @Override
     protected ParsePathReturnValue doParse(String rawValue, FileSystemManager fileSystemManager) {
         return fileSystemManager.parsePathToDirectory(rawValue);
     }
@@ -21,10 +26,5 @@ public class DirectoryParam extends AbstractEntryCommandParam {
     @Override
     protected AutoCompleteReturnValue doAutoComplete(String prefix, FileSystemManager fileSystemManager) {
         return fileSystemManager.autoCompletePathToDirectory(prefix);
-    }
-
-    @Override
-    public String toString() {
-        return String.format("{%s: directory}", getName());
     }
 }

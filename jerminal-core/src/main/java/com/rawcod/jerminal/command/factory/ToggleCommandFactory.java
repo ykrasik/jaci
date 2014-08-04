@@ -3,7 +3,7 @@ package com.rawcod.jerminal.command.factory;
 import com.google.common.base.Supplier;
 import com.rawcod.jerminal.command.CommandArgs;
 import com.rawcod.jerminal.command.CommandExecutor;
-import com.rawcod.jerminal.command.ExecutionContext;
+import com.rawcod.jerminal.command.ExecuteContext;
 import com.rawcod.jerminal.command.parameters.bool.BooleanParamBuilder;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommandBuilder;
@@ -30,7 +30,7 @@ public final class ToggleCommandFactory {
             )
             .setExecutor(new CommandExecutor() {
                 @Override
-                public ExecutorReturnValue execute(CommandArgs args, ExecutionContext context) {
+                public ExecutorReturnValue execute(CommandArgs args, ExecuteContext context) {
                     final boolean toggle = args.getBool(PARAM_NAME);
                     accessor.set(toggle);
                     context.println("%s: %s", name, toggle);

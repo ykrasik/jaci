@@ -3,18 +3,27 @@ package com.rawcod.jerminal.command.factory;
 import com.google.common.base.Supplier;
 import com.rawcod.jerminal.command.CommandArgs;
 import com.rawcod.jerminal.command.CommandExecutor;
-import com.rawcod.jerminal.command.ExecutionContext;
+import com.rawcod.jerminal.command.ExecuteContext;
+import com.rawcod.jerminal.command.parameters.CommandParam;
 import com.rawcod.jerminal.command.parameters.entry.DirectoryParamBuilder;
+import com.rawcod.jerminal.command.parameters.entry.FileParamBuilder;
 import com.rawcod.jerminal.command.parameters.flag.FlagParamBuilder;
+import com.rawcod.jerminal.command.view.ShellCommandParamView;
+import com.rawcod.jerminal.command.view.ShellCommandParamViewImpl;
+import com.rawcod.jerminal.command.view.ShellCommandView;
+import com.rawcod.jerminal.command.view.ShellCommandViewImpl;
 import com.rawcod.jerminal.filesystem.FileSystemManager;
 import com.rawcod.jerminal.filesystem.entry.ShellEntry;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommandBuilder;
 import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
+import com.rawcod.jerminal.filesystem.entry.view.ShellEntryView;
+import com.rawcod.jerminal.filesystem.entry.view.ShellEntryViewImpl;
 import com.rawcod.jerminal.output.OutputHandler;
 import com.rawcod.jerminal.returnvalue.execute.executor.ExecutorReturnValue;
-import sun.awt.shell.ShellFolder;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -25,6 +34,7 @@ import java.util.List;
 public class GlobalCommandFactory {
     private static final String CHANGE_DIRECTORY_COMMAND_NAME = "cd";
     private static final String LIST_DIRECTORY_COMMAND_NAME = "ls";
+    private static final String DESCRIBE_COMMAND_COMMAND_NAME = "man";
 
     private final FileSystemManager fileSystemManager;
     private final OutputHandler outputHandler;
@@ -45,7 +55,7 @@ public class GlobalCommandFactory {
             )
             .setExecutor(new CommandExecutor() {
                 @Override
-                public ExecutorReturnValue execute(CommandArgs args, ExecutionContext context) {
+                public ExecutorReturnValue execute(CommandArgs args, ExecuteContext context) {
                     final ShellDirectory directory = args.getDirectory(dirArgName);
                     fileSystemManager.setCurrentDirectory(directory);
                     return success();
@@ -54,7 +64,7 @@ public class GlobalCommandFactory {
             .build();
     }
 
-    private ShellCommand createListDirectoryCommand() {
+    public ShellCommand createListDirectoryCommand() {
         final String dirArgName = "dir";
         final String recursiveArgName = "-r";
         return new ShellCommandBuilder(LIST_DIRECTORY_COMMAND_NAME)
@@ -77,28 +87,63 @@ public class GlobalCommandFactory {
             )
             .setExecutor(new CommandExecutor() {
                 @Override
-                public ExecutorReturnValue execute(CommandArgs args, ExecutionContext context) {
+                public ExecutorReturnValue execute(CommandArgs args, ExecuteContext context) {
                     final ShellDirectory directory = args.getDirectory(dirArgName);
                     final boolean recursive = args.getBool(recursiveArgName);
-                    // FIXME: How to return this to the outputProcessors?
+                    final ShellEntryView shellEntryView = listDirectory(directory, recursive);
+                    outputHandler.displayShellEntryView(shellEntryView);
+                    return success();
                 }
             })
             .build();
     }
 
-    private ShellTree listContent(ShellFolder directory, boolean recursive) {
-        return createShellTreeNode(this, true, !recursive);
+    private ShellEntryView listDirectory(ShellDirectory directory, boolean recursive) {
+        final List<ShellEntryView> children = new ArrayList<>(directory.getChildren().size());
+        for (ShellEntry child : directory.getChildren()) {
+            final ShellEntryView childToAdd;
+            if (child.isDirectory() && recursive) {
+                childToAdd = listDirectory(child.getDirectory(), true);
+            } else {
+                childToAdd = new ShellEntryViewImpl(child.getName(), child.getDescription(), child.isDirectory(), Collections.<ShellEntryView>emptyList());
+            }
+            children.add(childToAdd);
+        }
+        return new ShellEntryViewImpl(directory.getName(), directory.getDescription(), true, children);
     }
 
-    private ShellTree createShellTreeNode(ShellEntry shellEntry, boolean recursive, boolean recurseOnce) {
-        final ShellTree root = new ShellTree(shellEntry.getName(), shellEntry.getDescription(), shellEntry.getDescription(), shellEntry.isDirectory());
-        if (recursive && shellEntry.isDirectory()) {
-            final List<ShellEntry> children = ((ShellFolder) shellEntry).getChildren();
-            for (ShellEntry child : children) {
-                final ShellTree node = createShellTreeNode(child, !recurseOnce, recurseOnce);
-                root.addChild(node);
-            }
+    public ShellCommand createDescribeCommandCommand() {
+        final String commandArgName = "cmd";
+        return new ShellCommandBuilder(DESCRIBE_COMMAND_COMMAND_NAME)
+            .setDescription("Describe command")
+            .addParam(
+                new FileParamBuilder(commandArgName)
+                    .setDescription("Command to describe")
+                    .build()
+            )
+            .setExecutor(new CommandExecutor() {
+                @Override
+                public ExecutorReturnValue execute(CommandArgs args, ExecuteContext context) {
+                    final ShellCommand command = args.getFile(commandArgName);
+                    final ShellCommandView shellCommandView = describeCommand(command);
+                    outputHandler.displayShellCommandView(shellCommandView);
+                    return success();
+                }
+            })
+            .build();
+    }
+
+    private ShellCommandView describeCommand(ShellCommand command) {
+        final List<ShellCommandParamView> params = describeCommandParams(command.getParams());
+        return new ShellCommandViewImpl(command.getName(), command.getDescription(), params);
+    }
+
+    private List<ShellCommandParamView> describeCommandParams(List<CommandParam> params) {
+        final List<ShellCommandParamView> paramViews = new ArrayList<>(params.size());
+        for (CommandParam param : params) {
+            final ShellCommandParamView paramView = new ShellCommandParamViewImpl(param.getName(), param.getDescription(), param.getType(), param.getExternalForm());
+            paramViews.add(paramView);
         }
-        return root;
+        return paramViews;
     }
 }

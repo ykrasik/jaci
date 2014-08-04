@@ -10,12 +10,12 @@ public class IntegerParam extends AbstractNumberCommandParam<Integer> {
     }
 
     @Override
-    protected Integer parseNumber(String rawValue) {
-        return Integer.parseInt(rawValue);
+    protected String getExternalFormType() {
+        return "int";
     }
 
     @Override
-    public String toString() {
-        return String.format("{%s: int}", getName());
+    protected Integer parseNumber(String rawValue) {
+        return Integer.parseInt(rawValue);
     }
 }

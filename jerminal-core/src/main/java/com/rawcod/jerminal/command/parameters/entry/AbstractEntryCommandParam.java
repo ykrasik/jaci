@@ -1,7 +1,7 @@
 package com.rawcod.jerminal.command.parameters.entry;
 
 import com.rawcod.jerminal.command.parameters.AbstractMandatoryCommandParam;
-import com.rawcod.jerminal.command.parameters.ParamParseContext;
+import com.rawcod.jerminal.command.parameters.ParseParamContext;
 import com.rawcod.jerminal.filesystem.FileSystemManager;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.entry.ParsePathReturnValue;
@@ -19,7 +19,7 @@ public abstract class AbstractEntryCommandParam extends AbstractMandatoryCommand
     }
 
     @Override
-    protected ParseParamValueReturnValue parse(String rawValue, ParamParseContext context) {
+    protected ParseParamValueReturnValue parse(String rawValue, ParseParamContext context) {
         final FileSystemManager fileSystemManager = context.getFileSystemManager();
         final ParsePathReturnValue returnValue = doParse(rawValue, fileSystemManager);
         if (returnValue.isFailure()) {
@@ -31,7 +31,7 @@ public abstract class AbstractEntryCommandParam extends AbstractMandatoryCommand
     }
 
     @Override
-    protected AutoCompleteReturnValue autoComplete(String prefix, ParamParseContext context) {
+    protected AutoCompleteReturnValue autoComplete(String prefix, ParseParamContext context) {
         final FileSystemManager fileSystemManager = context.getFileSystemManager();
         return doAutoComplete(prefix, fileSystemManager);
     }

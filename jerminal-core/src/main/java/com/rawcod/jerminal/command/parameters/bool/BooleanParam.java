@@ -1,6 +1,6 @@
 package com.rawcod.jerminal.command.parameters.bool;
 
-import com.rawcod.jerminal.command.parameters.ParamParseContext;
+import com.rawcod.jerminal.command.parameters.ParseParamContext;
 import com.rawcod.jerminal.command.parameters.string.StringParam;
 import com.rawcod.jerminal.returnvalue.parse.param.ParseParamValueReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.param.ParseParamValueReturnValue.ParseParamValueReturnValueSuccess;
@@ -17,7 +17,12 @@ public class BooleanParam extends StringParam {
     }
 
     @Override
-    protected ParseParamValueReturnValue parse(String rawValue, ParamParseContext context) {
+    protected String getExternalFormType() {
+        return "bool";
+    }
+
+    @Override
+    protected ParseParamValueReturnValue parse(String rawValue, ParseParamContext context) {
         final ParseParamValueReturnValue returnValue = super.parse(rawValue, context);
         if (returnValue.isFailure()) {
             return returnValue;
@@ -27,10 +32,5 @@ public class BooleanParam extends StringParam {
         final ParseParamValueReturnValueSuccess success = returnValue.getSuccess();
         final Boolean boolValue = Boolean.parseBoolean(success.getValue().toString());
         return ParseParamValueReturnValue.success(boolValue);
-    }
-
-    @Override
-    public String toString() {
-        return String.format("{%s: bool}", getName());
     }
 }

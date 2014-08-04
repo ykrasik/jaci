@@ -10,12 +10,12 @@ public class DoubleParam extends AbstractNumberCommandParam<Double> {
     }
 
     @Override
-    protected Double parseNumber(String rawValue) {
-        return Double.parseDouble(rawValue);
+    protected String getExternalFormType() {
+        return "double";
     }
 
     @Override
-    public String toString() {
-        return String.format("{%s: double}", getName());
+    protected Double parseNumber(String rawValue) {
+        return Double.parseDouble(rawValue);
     }
 }

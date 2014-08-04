@@ -7,7 +7,7 @@ import com.rawcod.jerminal.returnvalue.execute.executor.ExecutorReturnValue;
  * Date: 04/01/14
  */
 public abstract class CommandExecutor {
-    public abstract ExecutorReturnValue execute(CommandArgs args, ExecutionContext context);
+    public abstract ExecutorReturnValue execute(CommandArgs args, ExecuteContext context);
 
     protected ExecutorReturnValue success() {
         return ExecutorReturnValue.success();

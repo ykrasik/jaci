@@ -8,10 +8,10 @@ import com.rawcod.jerminal.filesystem.FileSystemManager;
  * Date: 19/07/2014
  * Time: 16:24
  */
-public class ParamParseContext {
+public class ParseParamContext {
     private final FileSystemManager fileSystemManager;
 
-    public ParamParseContext(FileSystemManager fileSystemManager) {
+    public ParseParamContext(FileSystemManager fileSystemManager) {
         this.fileSystemManager = fileSystemManager;
     }
 

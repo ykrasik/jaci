@@ -1,6 +1,8 @@
 package com.rawcod.jerminal.output;
 
 import com.google.common.base.Optional;
+import com.rawcod.jerminal.command.view.ShellCommandView;
+import com.rawcod.jerminal.filesystem.entry.view.ShellEntryView;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValueFailure;
 import com.rawcod.jerminal.returnvalue.execute.flow.ExecuteReturnValueFailure;
 import com.rawcod.jerminal.returnvalue.execute.flow.ExecuteReturnValueSuccess;
@@ -65,5 +67,13 @@ public class OutputHandler {
         for (OutputProcessor outputProcessor : outputProcessors) {
             outputProcessor.handleExecuteCommandFailure(failure);
         }
+    }
+
+    public void displayShellEntryView(ShellEntryView shellEntryView) {
+
+    }
+
+    public void displayShellCommandView(ShellCommandView shellCommandView) {
+
     }
 }

@@ -38,7 +38,7 @@ public abstract class AbstractMandatoryCommandParam implements CommandParam {
     }
 
     @Override
-    public ParseParamValueReturnValue parse(Optional<String> rawValue, ParamParseContext context) {
+    public ParseParamValueReturnValue parse(Optional<String> rawValue, ParseParamContext context) {
         if (!rawValue.isPresent()) {
             return ParseErrors.paramNotBound(name);
         }
@@ -46,18 +46,25 @@ public abstract class AbstractMandatoryCommandParam implements CommandParam {
     }
 
     @Override
-    public AutoCompleteReturnValue autoComplete(Optional<String> prefix, ParamParseContext context) {
+    public AutoCompleteReturnValue autoComplete(Optional<String> prefix, ParseParamContext context) {
         if (!prefix.isPresent()) {
             return AutoCompleteErrors.paramNotBound(name);
         }
         return autoComplete(prefix.get(), context);
     }
 
-    protected abstract ParseParamValueReturnValue parse(String rawValue, ParamParseContext context);
-    protected abstract AutoCompleteReturnValue autoComplete(String prefix, ParamParseContext context);
+    @Override
+    public String getExternalForm() {
+        final String type = getExternalFormType();
+        return String.format("{%s: %s}", name, type);
+    }
+
+    protected abstract String getExternalFormType();
+    protected abstract ParseParamValueReturnValue parse(String rawValue, ParseParamContext context);
+    protected abstract AutoCompleteReturnValue autoComplete(String prefix, ParseParamContext context);
 
     @Override
     public String toString() {
-        return name + ": " + description;
+        return getExternalForm();
     }
 }

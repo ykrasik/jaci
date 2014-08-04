@@ -8,7 +8,7 @@ import com.rawcod.jerminal.collections.trie.Tries;
 import com.rawcod.jerminal.collections.trie.WordTrie;
 import com.rawcod.jerminal.command.CommandArgs;
 import com.rawcod.jerminal.command.parameters.CommandParam;
-import com.rawcod.jerminal.command.parameters.ParamParseContext;
+import com.rawcod.jerminal.command.parameters.ParseParamContext;
 import com.rawcod.jerminal.command.parameters.ParamType;
 import com.rawcod.jerminal.exception.ShellException;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteErrors;
@@ -67,7 +67,7 @@ public class CommandParamManager {
         return allParams;
     }
 
-    public ParseCommandArgsReturnValue parseCommandArgs(List<String> args, ParamParseContext context) {
+    public ParseCommandArgsReturnValue parseCommandArgs(List<String> args, ParseParamContext context) {
         // Parse all args that have been passed.
         final ParseBoundParamsReturnValue parseBoundParams = parseBoundParams(args, context);
         if (parseBoundParams.isFailure()) {
@@ -102,7 +102,7 @@ public class CommandParamManager {
         return ParseCommandArgsReturnValue.success(commandArgs);
     }
 
-    private ParseBoundParamsReturnValue parseBoundParams(List<String> args, ParamParseContext context) {
+    private ParseBoundParamsReturnValue parseBoundParams(List<String> args, ParseParamContext context) {
         // Parse all args that have been passed.
         // Keep track of all params that are unbound.
         final Map<String, Object> parsedArgs = new HashMap<>(args.size());
@@ -134,7 +134,7 @@ public class CommandParamManager {
 
     private ParseParamReturnValue parseParam(String rawArg,
                                              Map<String, Object> parsedArgs,
-                                             ParamParseContext context) {
+                                             ParseParamContext context) {
         // rawArg is expected to be from the form "{name}={value}".
         // The "={value}" part is optional for some params (for example, flags).
         final int indexOfDelimiter = rawArg.indexOf(ARG_VALUE_DELIMITER);
@@ -174,7 +174,7 @@ public class CommandParamManager {
         return ParseParamReturnValue.success(param, parsedValue);
     }
 
-    public AutoCompleteReturnValue autoCompleteArgs(List<String> args, ParamParseContext context) {
+    public AutoCompleteReturnValue autoCompleteArgs(List<String> args, ParseParamContext context) {
         // Only the last arg is up for autoCompletion, the rest are expected to be valid args.
         final List<String> argsToBeParsed = args.subList(0, args.size() - 1);
         final String autoCompleteArg = args.get(args.size() - 1);
@@ -217,7 +217,7 @@ public class CommandParamManager {
 
     private AutoCompleteReturnValue autoCompleteArg(String rawArg,
                                                     Map<String, Object> parsedArgs,
-                                                    ParamParseContext context) {
+                                                    ParseParamContext context) {
         // rawArg is expected to be from the form "{name}={value}".
         // The "={value}" part is optional for some params (for example, flags).
         final int indexOfDelimiter = rawArg.indexOf(ARG_VALUE_DELIMITER);
@@ -373,7 +373,7 @@ public class CommandParamManager {
     private AutoCompleteReturnValue autoCompleteParamValue(CommandParam param,
                                                            Optional<String> rawValue,
                                                            Map<String, Object> parsedArgs,
-                                                           ParamParseContext context) {
+                                                           ParseParamContext context) {
         final String paramName = param.getName();
 
         // Make sure this param isn't already bound.
