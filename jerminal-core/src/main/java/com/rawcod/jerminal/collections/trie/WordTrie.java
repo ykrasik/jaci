@@ -9,11 +9,9 @@ import java.util.List;
  */
 public interface WordTrie {
     boolean isEmpty();
-
     boolean contains(String word);
 
     List<String> getAllWords();
-
     String getLongestPrefix();
 
     WordTrie subTrie(String prefix);

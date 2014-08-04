@@ -4,7 +4,6 @@ import com.google.common.base.Optional;
 import com.rawcod.jerminal.command.CommandArgs;
 import com.rawcod.jerminal.command.parameters.ParseParamContext;
 import com.rawcod.jerminal.filesystem.FileSystemManager;
-import com.rawcod.jerminal.filesystem.GlobalCommandRepository;
 import com.rawcod.jerminal.filesystem.ShellFileSystem;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
 import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
@@ -22,7 +21,6 @@ import com.rawcod.jerminal.returnvalue.parse.entry.ParsePathReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.entry.ParsePathReturnValue.ParsePathReturnValueSuccess;
 import com.rawcod.jerminal.returnvalue.parse.flow.ParseReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.flow.ParseReturnValue.ParseReturnValueSuccess;
-import com.rawcod.jerminal.shell.ShellCommandHistory;
 import com.rawcod.jerminal.util.CommandLineUtils;
 
 import java.util.List;
@@ -35,18 +33,12 @@ public class Shell {
     private final FileSystemManager fileSystemManager;
     private final ShellCommandHistory commandHistory;
 
-    private final OutputHandler outputHandler;
+    private final OutputProcessor outputProcessor;
 
-    public Shell(ShellFileSystem fileSystem, int maxCommandHistory) {
-        final GlobalCommandRepository globalCommandRepository = new GlobalCommandRepository(fileSystem.getGlobalCommands());
-        this.fileSystemManager = new FileSystemManager(fileSystem, globalCommandRepository);
+    public Shell(ShellFileSystem fileSystem, int maxCommandHistory, OutputHandler outputHandler) {
+        this.fileSystemManager = new FileSystemManager(fileSystem);
         this.commandHistory = new ShellCommandHistory(maxCommandHistory);
-
-        this.outputHandler = new OutputHandler();
-    }
-
-    public void addOutputProcessor(OutputProcessor outputProcessor) {
-        outputHandler.add(outputProcessor);
+        this.outputProcessor = new OutputProcessor(outputHandler);
     }
 
     public void autoComplete(String rawCommandLine) {
@@ -57,18 +49,10 @@ public class Shell {
         final AutoCompleteReturnValue returnValue = doAutoComplete(commandLine);
         if (returnValue.isSuccess()) {
             final AutoCompleteReturnValueSuccess success = returnValue.getSuccess();
-            final String autoCompleteAddition = success.getAutoCompleteAddition();
-            if (!autoCompleteAddition.isEmpty()) {
-                final String newCommandLine = rawCommandLine + autoCompleteAddition;
-                outputHandler.setCommandLine(newCommandLine);
-            }
-            final List<String> possibilities = success.getSuggestions();
-            if (possibilities.size() > 1) {
-                outputHandler.displayAutoCompleteSuggestions(possibilities);
-            }
+            outputProcessor.autoCompleteSuccess(success, rawCommandLine);
         } else {
             final AutoCompleteReturnValueFailure failure = returnValue.getFailure();
-            outputHandler.handleAutoCompleteFailure(failure);
+            outputProcessor.autoCompleteFailure(failure);
         }
     }
 
@@ -79,7 +63,7 @@ public class Shell {
         // If we only have 1 arg, we are trying to autoComplete a path to a command.
         // Otherwise, the first arg is expected to be a valid command and we are autoCompleting its' args.
         if (commandLine.size() == 1) {
-            // The first arg is the only arg on the commandLine, autoComplete path to command.
+            // The first arg is the only arg on the commandLine, autoComplete path.
             return fileSystemManager.autoCompletePath(rawPath);
         }
 
@@ -100,20 +84,21 @@ public class Shell {
     }
 
     public void execute(String rawCommandLine) {
-        if (rawCommandLine.isEmpty()) {
+        // Split the commandLine.
+        final List<String> commandLine = CommandLineUtils.splitCommandLineForExecute(rawCommandLine);
+        if (commandLine.size() == 1 && commandLine.get(0).isEmpty()) {
+            // Received a commandLine that is either empty or full of spaces.
+            outputProcessor.blankCommandLine();
             return;
         }
 
         // Save command in history
         commandHistory.pushCommand(rawCommandLine);
 
-        // Split the commandLine.
-        final List<String> commandLine = CommandLineUtils.splitCommandLineForExecute(rawCommandLine);
-
         // Parse commandLine.
         final ParseReturnValue parseReturnValue = parseCommandLine(commandLine);
         if (parseReturnValue.isFailure()) {
-            outputHandler.handleParseFailure(parseReturnValue.getFailure());
+            outputProcessor.parseFailure(parseReturnValue.getFailure());
             return;
         }
 
@@ -121,10 +106,10 @@ public class Shell {
         final ExecuteReturnValue executeReturnValue = doExecute(parseReturnValue.getSuccess());
         if (executeReturnValue.isSuccess()) {
             final ExecuteReturnValueSuccess success = executeReturnValue.getSuccess();
-            outputHandler.handleExecuteSuccess(success);
+            outputProcessor.executeSuccess(success);
         } else {
             final ExecuteReturnValueFailure failure = executeReturnValue.getFailure();
-            outputHandler.handleExecuteFailure(failure);
+            outputProcessor.executeFailure(failure);
         }
     }
 
@@ -163,7 +148,7 @@ public class Shell {
     }
 
     public void clearCommandLine() {
-        outputHandler.clearCommandLine();
+        outputProcessor.clearCommandLine();
     }
 
     public void showPrevCommand() {
@@ -179,7 +164,7 @@ public class Shell {
     private void doShowCommand(Optional<String> commandOptional) {
         if (commandOptional.isPresent()) {
             final String command = commandOptional.get();
-            outputHandler.setCommandLine(command);
+            outputProcessor.setCommandLine(command);
         }
     }
 }

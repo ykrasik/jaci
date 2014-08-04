@@ -19,7 +19,7 @@ import com.rawcod.jerminal.filesystem.entry.command.ShellCommandBuilder;
 import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
 import com.rawcod.jerminal.filesystem.entry.view.ShellEntryView;
 import com.rawcod.jerminal.filesystem.entry.view.ShellEntryViewImpl;
-import com.rawcod.jerminal.output.OutputHandler;
+import com.rawcod.jerminal.output.OutputProcessor;
 import com.rawcod.jerminal.returnvalue.execute.executor.ExecutorReturnValue;
 
 import java.util.ArrayList;
@@ -37,11 +37,11 @@ public class GlobalCommandFactory {
     private static final String DESCRIBE_COMMAND_COMMAND_NAME = "man";
 
     private final FileSystemManager fileSystemManager;
-    private final OutputHandler outputHandler;
+    private final OutputProcessor outputProcessor;
 
-    public GlobalCommandFactory(FileSystemManager fileSystemManager, OutputHandler outputHandler) {
+    public GlobalCommandFactory(FileSystemManager fileSystemManager, OutputProcessor outputProcessor) {
         this.fileSystemManager = fileSystemManager;
-        this.outputHandler = outputHandler;
+        this.outputProcessor = outputProcessor;
     }
 
     public ShellCommand createChangeDirectoryCommand() {
@@ -91,7 +91,7 @@ public class GlobalCommandFactory {
                     final ShellDirectory directory = args.getDirectory(dirArgName);
                     final boolean recursive = args.getBool(recursiveArgName);
                     final ShellEntryView shellEntryView = listDirectory(directory, recursive);
-                    outputHandler.displayShellEntryView(shellEntryView);
+                    outputProcessor.processShellEntryView(shellEntryView);
                     return success();
                 }
             })
@@ -126,7 +126,7 @@ public class GlobalCommandFactory {
                 public ExecutorReturnValue execute(CommandArgs args, ExecuteContext context) {
                     final ShellCommand command = args.getFile(commandArgName);
                     final ShellCommandView shellCommandView = describeCommand(command);
-                    outputHandler.displayShellCommandView(shellCommandView);
+                    outputProcessor.processShellCommandView(shellCommandView);
                     return success();
                 }
             })

@@ -1,4 +1,4 @@
-package com.rawcod.jerminal.shell;
+package com.rawcod.jerminal;
 
 import com.google.common.base.Optional;
 
