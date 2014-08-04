@@ -19,8 +19,8 @@ public interface OutputHandler {
 
     void handleBlankCommandLine();
 
-    void parseError(ParseError error, String message);
-    void autoCompleteError(AutoCompleteError error, String message);
+    void parseError(ParseError error, String errorMessage);
+    void autoCompleteError(AutoCompleteError error, String errorMessage);
     void executeError(ExecuteError error, String errorMessage);
     void executeUnhandledException(Exception e);
 

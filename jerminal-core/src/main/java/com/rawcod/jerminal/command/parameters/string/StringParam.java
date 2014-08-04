@@ -2,7 +2,7 @@ package com.rawcod.jerminal.command.parameters.string;
 
 import com.rawcod.jerminal.collections.trie.Trie;
 import com.rawcod.jerminal.collections.trie.Tries;
-import com.rawcod.jerminal.collections.trie.WordTrie;
+import com.rawcod.jerminal.collections.trie.TrieView;
 import com.rawcod.jerminal.command.parameters.AbstractMandatoryCommandParam;
 import com.rawcod.jerminal.command.parameters.ParseParamContext;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteErrors;
@@ -40,7 +40,7 @@ public class StringParam extends AbstractMandatoryCommandParam {
 
     @Override
     protected AutoCompleteReturnValue autoComplete(String prefix, ParseParamContext context) {
-        final WordTrie valuesTrie = Tries.getWordTrie(values, prefix);
+        final TrieView valuesTrie = Tries.getWordTrie(values, prefix);
         if (valuesTrie.isEmpty()) {
             // Give a meaningful error message;
             return AutoCompleteErrors.noPossibleValuesForParamWithPrefix(getName(), prefix);

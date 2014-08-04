@@ -31,6 +31,7 @@ public class OutputProcessor {
     }
 
     public void blankCommandLine() {
+        clearCommandLine();
         outputHandler.handleBlankCommandLine();
     }
 
@@ -60,10 +61,12 @@ public class OutputProcessor {
     }
 
     public void executeSuccess(ExecuteReturnValueSuccess success) {
+        outputHandler.clearCommandLine();
         displayCommandOutputIfApplicable(success.getOutput());
     }
 
     public void executeFailure(ExecuteReturnValueFailure failure) {
+        outputHandler.clearCommandLine();
         if (failure.getException().isPresent()) {
             outputHandler.executeUnhandledException(failure.getException().get());
         } else {

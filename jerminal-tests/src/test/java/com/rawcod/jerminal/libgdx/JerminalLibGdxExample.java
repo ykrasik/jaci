@@ -7,17 +7,15 @@ import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.rawcod.jerminal.command.CommandArgs;
 import com.rawcod.jerminal.command.CommandExecutor;
-import com.rawcod.jerminal.command.parameters.bool.OptionalBooleanParam;
-import com.rawcod.jerminal.command.parameters.number.IntegerParam;
-import com.rawcod.jerminal.filesystem.entry.command.ShellCommandImpl;
+import com.rawcod.jerminal.command.ExecuteContext;
+import com.rawcod.jerminal.command.parameters.bool.BooleanParamBuilder;
+import com.rawcod.jerminal.command.parameters.number.IntegerParamBuilder;
+import com.rawcod.jerminal.filesystem.ShellFileSystem;
+import com.rawcod.jerminal.filesystem.entry.command.ShellCommandBuilder;
 import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectoryImpl;
-import com.rawcod.jerminal.returnvalue.execute.ExecuteReturnValue;
-import com.rawcod.jerminal.shell.ShellManager;
-import com.rawcod.jerminal.filesystem.entry.command.ShellCommandArgs;
-import com.rawcod.jerminal.command.parameters.CommandParam;
-
-import java.util.Set;
+import com.rawcod.jerminal.returnvalue.execute.executor.ExecutorReturnValue;
 
 /**
  * User: ykrasik
@@ -42,7 +40,7 @@ public class JerminalLibGdxExample extends ApplicationAdapter {
 
     @Override
     public void create() {
-        final ShellManager manager = createManager();
+        final ShellFileSystem fileSystem = createFileSystem();
 
         final int width = Gdx.graphics.getWidth();
         final int height = Gdx.graphics.getHeight();
@@ -50,16 +48,16 @@ public class JerminalLibGdxExample extends ApplicationAdapter {
         final int maxBufferEntries = 30;
         final int maxCommandHistory = 20;
         final LibGdxConsoleWidgetFactory widgetFactory = new JerminalLibGdxTestConsoleWidgetFactory();
-        console = new LibGdxConsole(width, height, toggleKey, maxBufferEntries, maxCommandHistory, manager, widgetFactory);
+        console = new LibGdxConsole(width, height, toggleKey, maxBufferEntries, maxCommandHistory, fileSystem, widgetFactory);
 
         Gdx.input.setInputProcessor(console);
         console.activate();
     }
 
-    private ShellManager createManager() {
-        final ShellManager manager = new ShellManager();
+    private ShellFileSystem createFileSystem() {
+        final ShellFileSystem fileSystem = new ShellFileSystem();
 
-        manager.addEntry(
+        fileSystem.getRoot().addEntry(
             new ShellDirectoryImpl("nested").addEntries(
                 new ShellDirectoryImpl("d").addEntries(
                     new ShellDirectoryImpl("1possible"),
@@ -87,26 +85,33 @@ public class JerminalLibGdxExample extends ApplicationAdapter {
             )
         );
 
-        manager.addEntries(
-            new ShellCommandImpl(
-                "cmd",
-                "cmd",
-                new CommandParam[] {
-                    new IntegerParam("mandatoryInt"),
-                    new OptionalBooleanParam("optionalBool", false, defaultValueSupplier)
-                },
-                new CommandExecutor() {
+        fileSystem.getRoot().addEntries(
+            new ShellCommandBuilder("cmd")
+                .setDescription("cmd")
+                .addParam(
+                    new IntegerParamBuilder("mandatoryInt")
+                        .setDescription("This int is mandatory!")
+                        .build()
+                )
+                .addParam(
+                    new BooleanParamBuilder("optionalBool")
+                        .setDescription("This boolean is optional...")
+                        .setOptional(false)
+                        .build()
+                )
+                .setExecutor(new CommandExecutor() {
                     @Override
-                    protected ExecuteReturnValue doExecute(ShellCommandArgs args, Set<String> flags) {
-                        final int integer = args.popInt();
-                        final boolean bool = args.popBool();
-                        return success("yay: int = %d, bool = %s", integer, bool);
+                    public ExecutorReturnValue execute(CommandArgs args, ExecuteContext context) {
+                        final int integer = args.getInt("mandatoryInt");
+                        final boolean bool = args.getBool("optionalBool");
+                        context.println("yay: int = %d, bool = %s", integer, bool);
+                        return success();
                     }
-                }
-            )
+                })
+                .build()
         );
-        
-        return manager;
+
+        return fileSystem;
     }
 
     @Override

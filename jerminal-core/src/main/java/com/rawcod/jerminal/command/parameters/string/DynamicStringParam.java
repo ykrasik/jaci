@@ -3,7 +3,7 @@ package com.rawcod.jerminal.command.parameters.string;
 import com.google.common.base.Supplier;
 import com.rawcod.jerminal.collections.trie.Trie;
 import com.rawcod.jerminal.collections.trie.Tries;
-import com.rawcod.jerminal.collections.trie.WordTrie;
+import com.rawcod.jerminal.collections.trie.TrieView;
 import com.rawcod.jerminal.command.parameters.AbstractMandatoryCommandParam;
 import com.rawcod.jerminal.command.parameters.ParseParamContext;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteErrors;
@@ -43,13 +43,13 @@ public class DynamicStringParam extends AbstractMandatoryCommandParam {
     @Override
     protected AutoCompleteReturnValue autoComplete(String prefix, ParseParamContext context) {
         final Trie<String> values = getValues();
-        final WordTrie wordTrie = Tries.getWordTrie(values, prefix);
-        if (wordTrie.isEmpty()) {
+        final TrieView trieView = Tries.getWordTrie(values, prefix);
+        if (trieView.isEmpty()) {
             // Give a meaningful error message;
             return AutoCompleteErrors.noPossibleValuesForParamWithPrefix(getName(), prefix);
         }
 
-        return AutoCompleteUtils.autoComplete(prefix, wordTrie);
+        return AutoCompleteUtils.autoComplete(prefix, trieView);
     }
 
     private Trie<String> getValues() {

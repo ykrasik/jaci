@@ -5,10 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.rawcod.jerminal.output.Terminal;
-import com.rawcod.jerminal.filesystem.entry.directory.ShellTree;
-
-import java.util.List;
+import com.rawcod.jerminal.output.terminal.Terminal;
 
 /**
  * User: yevgenyk
@@ -102,71 +99,54 @@ public class LibGdxTerminal extends Stage implements Terminal {
         return widgetFactory.createInputTextField("");
     }
 
+//    @Override
+//    public void displayMessage(String message) {
+//        final String displayMessage = String.format("[%s] %s", currentPath.getText(), message);
+//        print(displayMessage, Color.WHITE);
+//    }
+//
+//    @Override
+//    public void displayCommandReturnMessage(String message) {
+//        print(message, Color.WHITE);
+//    }
+//
+//    @Override
+//    public void displayError(String error) {
+//        final String errorMessage = "Error: " + error;
+//        print(errorMessage, Color.PINK);
+//    }
+//
+//    @Override
+//    public void displayUsage(String usage) {
+//        final String usageMessage = "Usage: " + usage;
+//        print(usageMessage, Color.CYAN);
+//    }
+//
+//    @Override
+//    public void displaySuggestions(List<String> suggestions) {
+//        final String suggestionMessage = "Suggestions: " + suggestions;
+//        print(suggestionMessage, Color.ORANGE);
+//    }
+
     @Override
-    public void displayMessage(String message) {
-        final String displayMessage = String.format("[%s] %s", currentPath.getText(), message);
-        print(displayMessage, Color.WHITE);
+    public void clearCommandLine() {
+        setCommandLine("");
     }
 
     @Override
-    public void displayCommandReturnMessage(String message) {
+    public void setCommandLine(String commandLine) {
+        textField.setText(commandLine);
+        textField.setCursorPosition(commandLine.length());
+    }
+
+    @Override
+    public void print(String message) {
         print(message, Color.WHITE);
     }
 
     @Override
-    public void displayError(String error) {
-        final String errorMessage = "Error: " + error;
-        print(errorMessage, Color.PINK);
-    }
-
-    @Override
-    public void displayUsage(String usage) {
-        final String usageMessage = "Usage: " + usage;
-        print(usageMessage, Color.CYAN);
-    }
-
-    @Override
-    public void displaySuggestions(List<String> suggestions) {
-        final String suggestionMessage = "Suggestions: " + suggestions;
-        print(suggestionMessage, Color.ORANGE);
-    }
-
-    @Override
-    public void displayShellTree(ShellTree shellTree) {
-        final StringBuilder sb = new StringBuilder();
-        serializeShellTree(sb, shellTree, 0);
-        print(sb.toString(), Color.WHITE);
-    }
-
-    private void serializeShellTree(StringBuilder sb, ShellTree shellTree, int depth) {
-        // Print root
-        if (shellTree.isDirectory()) {
-            sb.append('[');
-        }
-        sb.append(shellTree.getName());
-        if (shellTree.isDirectory()) {
-            sb.append(']');
-        }
-        if (!shellTree.isDirectory()) {
-            sb.append(" : ");
-            sb.append(shellTree.getDescription());
-        }
-        sb.append('\n');
-
-        // Print children
-        if (shellTree.isDirectory()) {
-            for (ShellTree child : shellTree.getChildren()) {
-                sb.append('|');
-                appendDepthSpaces(sb, depth + 1);
-                serializeShellTree(sb, child, depth + 1);
-            }
-        }
-    }
-
-    private void appendDepthSpaces(StringBuilder sb, int depth) {
-        for (int i = 0; i < depth; i++) {
-            sb.append("  ");
-        }
+    public void printError(String message) {
+        print(message, Color.PINK);
     }
 
     private void print(String message, Color color) {
@@ -176,29 +156,19 @@ public class LibGdxTerminal extends Stage implements Terminal {
         bufferScrollPane.updateVisualScroll();
     }
 
-    @Override
-    public void setCommandLine(String commandLine) {
-        textField.setText(commandLine);
-    }
-
-    @Override
-    public void setCommandLineCursor(int index) {
-        textField.setCursorPosition(index);
-    }
-
-    @Override
-    public void setCurrentPath(List<String> path) {
-        final StringBuffer sb = new StringBuffer();
-        for (String entry : path) {
-            sb.append(entry);
-            sb.append('/');
-        }
-        if (sb.length() != 0) {
-            sb.replace(sb.length() - 1, sb.length(), " ");
-        }
-        sb.append('$');
-        currentPath.setText(sb.toString());
-    }
+//    @Override
+//    public void setCurrentPath(List<String> path) {
+//        final StringBuffer sb = new StringBuffer();
+//        for (String entry : path) {
+//            sb.append(entry);
+//            sb.append('/');
+//        }
+//        if (sb.length() != 0) {
+//            sb.replace(sb.length() - 1, sb.length(), " ");
+//        }
+//        sb.append('$');
+//        currentPath.setText(sb.toString());
+//    }
 
     public String readCommandLine() {
         return textField.getText();

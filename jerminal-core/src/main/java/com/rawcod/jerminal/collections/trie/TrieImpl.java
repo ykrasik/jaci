@@ -4,18 +4,20 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.rawcod.jerminal.collections.trie.node.TrieNode;
 import com.rawcod.jerminal.collections.trie.node.TrieNodeImpl;
-import com.rawcod.jerminal.collections.trie.node.UnionTrieNodeImpl;
+import com.rawcod.jerminal.collections.trie.node.ValueTrieNode;
+import com.rawcod.jerminal.collections.trie.visitor.CollectorTrieVisitor;
 import com.rawcod.jerminal.collections.trie.visitor.TrieVisitor;
-import com.rawcod.jerminal.collections.trie.visitor.ValueCollectorTrieVisitor;
-import com.rawcod.jerminal.collections.trie.visitor.WordCollectorTrieVisitor;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class TrieImpl<T> implements Trie<T> {
-    private final TrieNode<T> root;
+    private final ValueTrieNode<T> root;
 
     // This is the prefix of the current trie. Used by subTries.
     private final String triePrefix;
@@ -24,7 +26,7 @@ public class TrieImpl<T> implements Trie<T> {
         this(new TrieNodeImpl<T>(), "");
     }
 
-    private TrieImpl(TrieNode<T> root, String triePrefix) {
+    private TrieImpl(ValueTrieNode<T> root, String triePrefix) {
         this.root = root;
         this.triePrefix = triePrefix;
     }
@@ -36,13 +38,13 @@ public class TrieImpl<T> implements Trie<T> {
 
     @Override
     public boolean contains(String word) {
-        final TrieNode<T> node = getNode(word);
-        return node != null && isWord(node);
+        final ValueTrieNode<T> node = getNode(word);
+        return node != null && node.isWord();
     }
 
     @Override
     public T get(String word) {
-        final TrieNode<T> node = getNode(word);
+        final ValueTrieNode<T> node = getNode(word);
         return node != null ? node.getValue() : null;
     }
 
@@ -53,9 +55,9 @@ public class TrieImpl<T> implements Trie<T> {
 
     @Override
     public List<String> getWordsWithFilter(Predicate<T> filter) {
-        final WordCollectorTrieVisitor<T> wordCollector = new WordCollectorTrieVisitor<>();
-        visitWordsByFilter(wordCollector, filter);
-        return wordCollector.getWords();
+        final CollectorTrieVisitor<T> collector = new CollectorTrieVisitor<>();
+        visitWordsByFilter(collector, filter);
+        return collector.getWords();
     }
 
     @Override
@@ -65,9 +67,9 @@ public class TrieImpl<T> implements Trie<T> {
 
     @Override
     public List<T> getValuesWithFilter(Predicate<T> filter) {
-        final ValueCollectorTrieVisitor<T> valueCollector = new ValueCollectorTrieVisitor<>();
-        visitWordsByFilter(valueCollector, filter);
-        return valueCollector.getValues();
+        final CollectorTrieVisitor<T> collector = new CollectorTrieVisitor<>();
+        visitWordsByFilter(collector, filter);
+        return collector.getValues();
     }
 
     @Override
@@ -85,11 +87,11 @@ public class TrieImpl<T> implements Trie<T> {
     public String getLongestPrefix() {
         // Keep going down the tree, until a node has more than 1 children or is a word.
         final StringBuilder prefixBuilder = new StringBuilder(triePrefix);
-        TrieNode<T> currentNode = root;
-        while (currentNode.getChildren().size() == 1 && !isWord(currentNode)) {
+        TrieNode currentNode = root;
+        while (currentNode.getChildren().size() == 1 && !currentNode.isWord()) {
             // currentNode only has 1 child and is not a word.
             prefixBuilder.append(currentNode.getCharacter());
-            for (TrieNode<T> child : currentNode.getChildren()) {
+            for (TrieNode child : currentNode.getChildren()) {
                 // Move on to currentNode's only child.
                 currentNode = child;
             }
@@ -100,7 +102,7 @@ public class TrieImpl<T> implements Trie<T> {
 
     @Override
     public ReadOnlyTrie<T> subTrie(String prefix) {
-        final TrieNode<T> node = getNode(prefix);
+        final ValueTrieNode<T> node = getNode(prefix);
         if (node == null) {
             return null;
         }
@@ -109,7 +111,7 @@ public class TrieImpl<T> implements Trie<T> {
 
     @Override
     public ReadOnlyTrie<T> filter(Predicate<T> filter) {
-        TrieNode<T> filteredRoot = filterNode(root, filter);
+        ValueTrieNode<T> filteredRoot = filterNode(root, filter);
         if (filteredRoot == null) {
             // Empty root.
             filteredRoot = new TrieNodeImpl<>();
@@ -117,12 +119,17 @@ public class TrieImpl<T> implements Trie<T> {
         return new TrieImpl<>(filteredRoot, triePrefix);
     }
 
-    private TrieNode<T> filterNode(TrieNode<T> node, Predicate<T> filter) {
+    @Override
+    public TrieView trieView() {
+        return new TrieViewImpl(root, triePrefix);
+    }
+
+    private ValueTrieNode<T> filterNode(ValueTrieNode<T> node, Predicate<T> filter) {
         final T value = node.getValue();
         final boolean valueAccepted = value != null && filter.apply(value);
 
         // Filter the node's children.
-        final List<TrieNode<T>> filteredChildren = filterChildren(node, filter);
+        final List<ValueTrieNode<T>> filteredChildren = filterChildren(node, filter);
         if (filteredChildren.isEmpty() && !valueAccepted) {
             // None of the node's children passed the filter,
             // and the node either had no value or it didn't pass the filter as well.
@@ -131,28 +138,29 @@ public class TrieImpl<T> implements Trie<T> {
         }
 
         // Create a new node and set it's value if it passed the filter.
-        final TrieNode<T> newNode = new TrieNodeImpl<>(node.getCharacter());
+        final ValueTrieNode<T> newNode = new TrieNodeImpl<>(node.getCharacter());
         if (valueAccepted) {
             newNode.setValue(value);
         }
 
         // Link the new node with the filtered children.
-        for (TrieNode<T> child : filteredChildren) {
+        for (ValueTrieNode<T> child : filteredChildren) {
             newNode.setChild(child.getCharacter(), child);
         }
 
         return newNode;
     }
 
-    private List<TrieNode<T>> filterChildren(TrieNode<T> node, Predicate<T> filter) {
-        final Collection<TrieNode<T>> children = node.getChildren();
+    @SuppressWarnings("unchecked")
+    private List<ValueTrieNode<T>> filterChildren(ValueTrieNode<T> node, Predicate<T> filter) {
+        final Collection<TrieNode> children = node.getChildren();
         if (children.isEmpty()) {
             return Collections.emptyList();
         }
 
-        final List<TrieNode<T>> filteredChildren = new ArrayList<>(children);
-        for (TrieNode<T> child : children) {
-            final TrieNode<T> filteredChild = filterNode(child, filter);
+        final List<ValueTrieNode<T>> filteredChildren = new ArrayList<>(children.size());
+        for (TrieNode child : children) {
+            final ValueTrieNode<T> filteredChild = filterNode((ValueTrieNode<T>) child, filter);
             if (filteredChild != null) {
                 filteredChildren.add(filteredChild);
             }
@@ -160,23 +168,17 @@ public class TrieImpl<T> implements Trie<T> {
         return filteredChildren;
     }
 
-    @Override
-    public ReadOnlyTrie<T> union(ReadOnlyTrie<T> other) {
-        // I couldn't find a better solution other then this downcasting...
-        final TrieNode<T> unionRoot = new UnionTrieNodeImpl<>(root, ((TrieImpl<T>) other).root);
-        return new TrieImpl<>(unionRoot, triePrefix);
-    }
-
+    @SuppressWarnings("unchecked")
     @Override
     public void put(String word, T value) {
         checkArgument(!word.isEmpty(), "Empty words are not allowed!");
         checkNotNull(value, "Null values are not allowed!");
 
         // Navigate the tree by the letters of the word, starting from the root.
-        TrieNode<T> currentNode = root;
+        ValueTrieNode<T> currentNode = root;
         for (int i = 0; i < word.length(); i++) {
             final char c = word.charAt(i);
-            TrieNode<T> child = currentNode.getChild(c);
+            ValueTrieNode<T> child = (ValueTrieNode<T>) currentNode.getChild(c);
             if (child == null) {
                 child = new TrieNodeImpl<>(c);
                 currentNode.setChild(c, child);
@@ -197,7 +199,7 @@ public class TrieImpl<T> implements Trie<T> {
     @Override
     public T remove(String word) {
         // Get the node representing the word.
-        final TrieNode<T> node = getNode(word);
+        final ValueTrieNode<T> node = getNode(word);
         if (node == null) {
             final String message = String.format("Trie does not contain word: '%s'", word);
             throw new IllegalArgumentException(message);
@@ -213,8 +215,9 @@ public class TrieImpl<T> implements Trie<T> {
         return value;
     }
 
+    @SuppressWarnings("unchecked")
     private void visitWordsFromNodeByFilter(StringBuilder prefixBuilder,
-                                            TrieNode<T> node,
+                                            ValueTrieNode<T> node,
                                             Predicate<T> filter,
                                             TrieVisitor<T> visitor) {
         // Started processing node, push it's character to the prefix.
@@ -227,8 +230,8 @@ public class TrieImpl<T> implements Trie<T> {
         visitIfNodeAccepted(prefixBuilder, node, filter, visitor);
 
         // Visit all the node's children.
-        for (TrieNode<T> child : node.getChildren()) {
-            visitWordsFromNodeByFilter(prefixBuilder, child, filter, visitor);
+        for (TrieNode child : node.getChildren()) {
+            visitWordsFromNodeByFilter(prefixBuilder, (ValueTrieNode<T>) child, filter, visitor);
         }
 
         // Done processing node, pop it's character from the prefix.
@@ -238,7 +241,7 @@ public class TrieImpl<T> implements Trie<T> {
     }
 
     private void visitIfNodeAccepted(StringBuilder prefixBuilder,
-                                     TrieNode<T> node,
+                                     ValueTrieNode<T> node,
                                      Predicate<T> filter,
                                      TrieVisitor<T> visitor) {
         final T value = node.getValue();
@@ -248,21 +251,18 @@ public class TrieImpl<T> implements Trie<T> {
         }
     }
 
-    private TrieNode<T> getNode(String prefix) {
+    @SuppressWarnings("unchecked")
+    private ValueTrieNode<T> getNode(String prefix) {
         // Navigate the tree by the letters of the prefix, starting from the root.
-        TrieNode<T> currentNode = root;
+        ValueTrieNode<T> currentNode = root;
         for (int i = 0; i < prefix.length(); i++) {
             final char c = prefix.charAt(i);
-            currentNode = currentNode.getChild(c);
+            currentNode = (ValueTrieNode<T>) currentNode.getChild(c);
             if (currentNode == null) {
                 return null;
             }
         }
         return currentNode;
-    }
-
-    private boolean isWord(TrieNode<T> node) {
-        return node.getValue() != null;
     }
 
     @Override

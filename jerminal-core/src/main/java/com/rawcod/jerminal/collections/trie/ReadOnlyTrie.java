@@ -29,7 +29,6 @@ public interface ReadOnlyTrie<T> {
 
     ReadOnlyTrie<T> subTrie(String prefix);
     ReadOnlyTrie<T> filter(Predicate<T> filter);
-    ReadOnlyTrie<T> union(ReadOnlyTrie<T> other);
 
-    WordTrie wordTrie();
+    TrieView trieView();
 }

@@ -1,25 +1,21 @@
 package com.rawcod.jerminal.collections.trie.node;
 
-import com.google.common.collect.Sets;
-
-import java.util.*;
-
-import static com.google.common.base.Preconditions.checkArgument;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * User: ykrasik
  * Date: 23/07/2014
  * Time: 22:52
  */
-public class UnionTrieNodeImpl<T> extends AbstractReadOnlyNode<T> {
-    private final TrieNode<T> node1;
-    private final TrieNode<T> node2;
+public class UnionTrieNodeImpl implements TrieNode {
+    private final TrieNode node1;
+    private final TrieNode node2;
 
-    private Map<Character, TrieNode<T>> children;
+    private Map<Character, TrieNode> children;
 
-    public UnionTrieNodeImpl(TrieNode<T> node1, TrieNode<T> node2) {
-        checkArgument(!(isWord(node1) && isWord(node2)), "Cannot create a node union between 2 word nodes!");
-
+    public UnionTrieNodeImpl(TrieNode node1, TrieNode node2) {
         this.node1 = node1;
         this.node2 = node2;
     }
@@ -30,20 +26,14 @@ public class UnionTrieNodeImpl<T> extends AbstractReadOnlyNode<T> {
     }
 
     @Override
-    public T getValue() {
-        if (node1.getValue() != null) {
-            return node1.getValue();
-        }
-        if (node2.getValue() != null) {
-            return node2.getValue();
-        }
-        return null;
+    public boolean isWord() {
+        return node1.isWord() || node2.isWord();
     }
 
     @Override
-    public TrieNode<T> getChild(char c) {
-        final Map<Character, TrieNode<T>> children = lazyGetChildren();
-        TrieNode<T> child = children.get(Character.toLowerCase(c));
+    public TrieNode getChild(char c) {
+        final Map<Character, TrieNode> children = lazyGetChildren();
+        TrieNode child = children.get(Character.toLowerCase(c));
         if (child == null) {
             child = children.get(Character.toUpperCase(c));
         }
@@ -51,60 +41,48 @@ public class UnionTrieNodeImpl<T> extends AbstractReadOnlyNode<T> {
     }
 
     @Override
-    public Collection<TrieNode<T>> getChildren() {
+    public Collection<TrieNode> getChildren() {
         return lazyGetChildren().values();
     }
 
-    private Map<Character, TrieNode<T>> lazyGetChildren() {
+    private Map<Character, TrieNode> lazyGetChildren() {
         if (children == null) {
             children = createUnionChildren();
         }
         return children;
     }
 
-    private Map<Character, TrieNode<T>> createUnionChildren() {
-        final Map<Character, TrieNode<T>> unionChildren = new HashMap<>(node1.getChildren().size());
-
+    private Map<Character, TrieNode> createUnionChildren() {
         // Check which of node1's children are also present in node2 and vice versa.
         // Those that are unique will be used as is.
         // Those that are present in both will be replaced with a UnionNode.
-
-        // Iterate over node1's children.
-        final List<TrieNode<T>> commonNodes = checkChildren(node1.getChildren(), node2, unionChildren);
-
-        // Avoid checking children that are present in both nodes twice.
-        final Set<TrieNode<T>> uncheckedChildren2 = Sets.newHashSet(node2.getChildren());
-        uncheckedChildren2.removeAll(commonNodes);
-
-        // Iterate over node2's still unchecked children
-        checkChildren(uncheckedChildren2, node1, unionChildren);
-
+        final Map<Character, TrieNode> unionChildren = new HashMap<>(node1.getChildren().size() + node2.getChildren().size());
+        checkNode(node1, node2, unionChildren);
+        checkNode(node2, node1, unionChildren);
         return unionChildren;
     }
 
-    private List<TrieNode<T>> checkChildren(Iterable<TrieNode<T>> children,
-                                            TrieNode<T> otherNode,
-                                            Map<Character, TrieNode<T>> unionChildren) {
-        final List<TrieNode<T>> commonNodes = new ArrayList<>();
-        for (TrieNode<T> child : children) {
-            final char c = child.getCharacter();
-            final TrieNode<T> otherChild = otherNode.getChild(c);
-            final TrieNode<T> unionNode;
-            if (otherChild == null) {
-                // otherNode doesn't have a child under the character 'c', use the original child.
-                unionNode = child;
-            } else {
-                // Both nodes have a child under the character 'c', use a union node.
-                unionNode = new UnionTrieNodeImpl<>(child, otherChild);
-                commonNodes.add(otherChild);
+    private void checkNode(TrieNode mainNode,
+                           TrieNode otherNode,
+                           Map<Character, TrieNode> unionChildren) {
+        for (TrieNode mainChild : mainNode.getChildren()) {
+            final char character = mainChild.getCharacter();
+            if (unionChildren.containsKey(character)) {
+                // This node's character was already handled in a previous iteration.
+                continue;
             }
-            unionChildren.put(c, unionNode);
-        }
-        return commonNodes;
-    }
 
-    private boolean isWord(TrieNode<T> node) {
-        return node.getValue() != null;
+            final TrieNode otherChild = otherNode.getChild(character);
+            final TrieNode trieNodeToAdd;
+            if (otherChild == null) {
+                // The other node has no child under 'c'.
+                trieNodeToAdd = mainChild;
+            } else {
+                // The other node has a child under 'c', use a union node.
+                trieNodeToAdd = new UnionTrieNodeImpl(mainChild, otherChild);
+            }
+            unionChildren.put(character, trieNodeToAdd);
+        }
     }
 
     @Override

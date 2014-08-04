@@ -59,20 +59,20 @@ public final class Tries {
         return filteredTrie.getLongestPrefix();
     }
 
-    public static <T> WordTrie getWordTrie(ReadOnlyTrie<T> trie,
+    public static <T> TrieView getWordTrie(ReadOnlyTrie<T> trie,
                                            String prefix) {
         return trie
             .subTrie(prefix)
-            .wordTrie();
+            .trieView();
     }
 
-    public static <T> WordTrie getWordTrieWithFilter(ReadOnlyTrie<T> trie,
+    public static <T> TrieView getWordTrieWithFilter(ReadOnlyTrie<T> trie,
                                                      String prefix,
                                                      Predicate<T> filter) {
         return trie
             .subTrie(prefix)
             .filter(filter)
-            .wordTrie();
+            .trieView();
     }
 
     public static Trie<String> toTrie(List<String> values) {

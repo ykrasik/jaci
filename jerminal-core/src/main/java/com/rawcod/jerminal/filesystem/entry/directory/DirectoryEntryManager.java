@@ -31,7 +31,9 @@ public class DirectoryEntryManager {
         this.children = new TrieImpl<>();
 
         children.put(THIS, directory);
-        children.put(PARENT, directory.getParent());
+        if (directory.getParent() != null) {
+            children.put(PARENT, directory.getParent());
+        }
     }
 
     public void addChild(ShellEntry entry) {
@@ -94,23 +96,23 @@ public class DirectoryEntryManager {
                                                      Predicate<ShellEntry> filter,
                                                      ParseEntryContext context) {
         // Create the global commands word trie.
-        final WordTrie globalCommandsWordTrie = context.getGlobalCommandRepository().getWordTrie(prefix, filter);
+        final TrieView globalCommandsTrieView = context.getGlobalCommandRepository().getWordTrie(prefix, filter);
 
         if (prefix.isEmpty() && directory.isEmpty()) {
             // We are being asked to autoComplete an empty directory from an empty prefix.
             // This is a special case in which we only show the special characters and global commands,
             // but don't change the commandLine.
             final List<String> possibilities = Arrays.asList(THIS, PARENT);
-            final List<String> globalCommands = globalCommandsWordTrie.getAllWords();
+            final List<String> globalCommands = globalCommandsTrieView.getAllWords();
             possibilities.addAll(globalCommands);
             return AutoCompleteReturnValue.successMultiple("", possibilities);
         }
 
         // Create a trie from the possible children words.
-        final WordTrie childrenWordTrie = Tries.getWordTrieWithFilter(children, prefix, filter);
+        final TrieView childrenTrieView = Tries.getWordTrieWithFilter(children, prefix, filter);
 
         // Create a union between all possible auto-complete words.
-        final WordTrie unionTrie = childrenWordTrie.union(globalCommandsWordTrie);
+        final TrieView unionTrie = childrenTrieView.union(globalCommandsTrieView);
 
         if (unionTrie.isEmpty()) {
             // Give a meaningful error message.

@@ -5,7 +5,7 @@ import com.google.common.base.Predicate;
 import com.rawcod.jerminal.collections.trie.Trie;
 import com.rawcod.jerminal.collections.trie.TrieImpl;
 import com.rawcod.jerminal.collections.trie.Tries;
-import com.rawcod.jerminal.collections.trie.WordTrie;
+import com.rawcod.jerminal.collections.trie.TrieView;
 import com.rawcod.jerminal.command.CommandArgs;
 import com.rawcod.jerminal.command.parameters.CommandParam;
 import com.rawcod.jerminal.command.parameters.ParseParamContext;
@@ -347,7 +347,7 @@ public class CommandParamManager {
     }
 
     private AutoCompleteReturnValue autoCompleteParamName(String prefix, Map<String, Object> parsedArgs) {
-        final WordTrie paramNames = Tries.getWordTrieWithFilter(paramsTrie, prefix, new BoundParamsFilter(parsedArgs));
+        final TrieView paramNames = Tries.getWordTrieWithFilter(paramsTrie, prefix, new BoundParamsFilter(parsedArgs));
         if (paramNames.isEmpty()) {
             return AutoCompleteErrors.noPossibleValuesForParamNamePrefix(prefix);
         }

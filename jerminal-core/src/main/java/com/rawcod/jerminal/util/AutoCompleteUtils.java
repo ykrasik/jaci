@@ -1,6 +1,6 @@
 package com.rawcod.jerminal.util;
 
-import com.rawcod.jerminal.collections.trie.WordTrie;
+import com.rawcod.jerminal.collections.trie.TrieView;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteErrors;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
 
@@ -16,7 +16,7 @@ public final class AutoCompleteUtils {
 
     }
 
-    public static AutoCompleteReturnValue autoComplete(String prefix, WordTrie words) {
+    public static AutoCompleteReturnValue autoComplete(String prefix, TrieView words) {
         if (words.isEmpty()) {
             // No words are reachable with this prefix and filter.
             return AutoCompleteErrors.noPossibleValuesNoInfo();

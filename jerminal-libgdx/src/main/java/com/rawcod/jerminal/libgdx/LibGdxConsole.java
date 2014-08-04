@@ -5,7 +5,8 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.rawcod.jerminal.Shell;
-import com.rawcod.jerminal.shell.ShellManager;
+import com.rawcod.jerminal.filesystem.ShellFileSystem;
+import com.rawcod.jerminal.output.terminal.TerminalOutputHandler;
 
 /**
  * User: ykrasik
@@ -27,12 +28,12 @@ public class LibGdxConsole implements InputProcessor {
                          int toggleKeycode,
                          int maxBufferEntries,
                          int maxCommandHistory,
-                         ShellManager manager,
+                         ShellFileSystem fileSystem,
                          LibGdxConsoleWidgetFactory widgetFactory) {
         this.toggleKeycode = toggleKeycode > 0 ? toggleKeycode : -2;
 
         this.terminal = new LibGdxTerminal(width, height, maxBufferEntries, widgetFactory, this);
-        this.shell = new Shell(manager, terminal, maxCommandHistory);
+        this.shell = new Shell(fileSystem, maxCommandHistory, new TerminalOutputHandler(terminal));
     }
 
     public void setListener(ConsoleActivationListener listener) {

@@ -7,13 +7,13 @@ import java.util.List;
  * Date: 29/07/2014
  * Time: 21:25
  */
-public interface WordTrie {
+public interface TrieView {
     boolean isEmpty();
     boolean contains(String word);
 
     List<String> getAllWords();
     String getLongestPrefix();
 
-    WordTrie subTrie(String prefix);
-    WordTrie union(WordTrie other);
+    TrieView subTrie(String prefix);
+    TrieView union(TrieView other);
 }

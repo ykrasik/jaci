@@ -6,18 +6,24 @@ import java.util.List;
 /**
  * User: ykrasik
  * Date: 23/07/2014
- * Time: 21:50
+ * Time: 21:49
  */
-public class ValueCollectorTrieVisitor<T> implements TrieVisitor<T> {
+public class CollectorTrieVisitor<T> implements TrieVisitor<T> {
+    private final List<String> words;
     private final List<T> values;
 
-    public ValueCollectorTrieVisitor() {
+    public CollectorTrieVisitor() {
+        this.words = new ArrayList<>();
         this.values = new ArrayList<>();
     }
 
     @Override
     public void visit(String word, T value) {
-        values.add(value);
+        words.add(word);
+    }
+
+    public List<String> getWords() {
+        return words;
     }
 
     public List<T> getValues() {
