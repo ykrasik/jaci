@@ -34,7 +34,7 @@ public class ParseCommandArgsReturnValue extends ReturnValueImpl<ParseCommandArg
         private final CommandArgs args;
 
         private ParseCommandArgsReturnValueSuccess(CommandArgs args) {
-            this.args = checkNotNull(args, "args is null!");
+            this.args = checkNotNull(args, "args");
         }
 
         public CommandArgs getArgs() {

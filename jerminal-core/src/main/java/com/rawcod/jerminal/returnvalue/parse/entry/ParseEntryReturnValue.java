@@ -34,7 +34,7 @@ public class ParseEntryReturnValue extends ReturnValueImpl<ParseEntryReturnValue
         private final ShellEntry entry;
 
         private ParseEntryReturnValueSuccess(ShellEntry entry) {
-            this.entry = checkNotNull(entry, "entry is null!");
+            this.entry = checkNotNull(entry, "entry");
         }
 
         public ShellEntry getEntry() {

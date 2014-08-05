@@ -1,7 +1,6 @@
 package com.rawcod.jerminal.output.terminal;
 
 import com.google.common.base.Joiner;
-import com.rawcod.jerminal.command.view.ShellCommandParamView;
 import com.rawcod.jerminal.command.view.ShellCommandView;
 import com.rawcod.jerminal.filesystem.entry.view.ShellEntryView;
 import com.rawcod.jerminal.output.OutputHandler;
@@ -37,7 +36,7 @@ public class TerminalOutputHandler implements OutputHandler {
 
     @Override
     public void handleBlankCommandLine() {
-        println("");
+        print("");
     }
 
     @Override
@@ -58,7 +57,7 @@ public class TerminalOutputHandler implements OutputHandler {
     @Override
     public void executeUnhandledException(Exception e) {
         for (StackTraceElement stackTraceElement : e.getStackTrace()) {
-            println(stackTraceElement.toString());
+            print(stackTraceElement.toString());
         }
     }
 
@@ -66,90 +65,34 @@ public class TerminalOutputHandler implements OutputHandler {
     public void displaySuggestions(List<String> suggestions) {
         final String suggestionsStr = JOINER.join(suggestions);
         final String message = String.format("Suggestions: [%s]", suggestionsStr);
-        println(message);
+        print(message);
     }
 
     @Override
     public void displayCommandOutput(List<String> output) {
+        final StringBuilder sb = new StringBuilder();
         for (String str : output) {
-            println(str);
+            sb.append(str);
+            sb.append('\n');
         }
+        print(sb.toString());
     }
 
     @Override
     public void displayShellEntryView(ShellEntryView shellEntryView) {
-        final StringBuilder sb = new StringBuilder();
-        serializeShellEntryView(sb, shellEntryView, 0);
-        println(sb.toString());
+        print(DefaultViewSerializer.serializeShellEntryView(shellEntryView));
     }
 
     @Override
     public void displayShellCommandView(ShellCommandView shellCommandView) {
-        final StringBuilder sb = new StringBuilder();
-        serializeShellCommandView(sb, shellCommandView);
-        println(sb.toString());
+        print(DefaultViewSerializer.serializeShellCommandView(shellCommandView));
     }
 
-    private void println(String message) {
+    private void print(String message) {
         terminal.print(message);
     }
 
     private void printError(String message) {
         terminal.printError(message);
-    }
-
-    private void serializeShellEntryView(StringBuilder sb,
-                                         ShellEntryView entry,
-                                         int depth) {
-        final boolean directory = entry.isDirectory();
-
-        // Print root
-        if (directory) {
-            sb.append('[');
-        }
-        sb.append(entry.getName());
-        if (directory) {
-            sb.append(']');
-        }
-
-        if (!directory) {
-            sb.append(" : ");
-            sb.append(entry.getDescription());
-        }
-        sb.append('\n');
-
-        // Print children
-        if (directory) {
-            for (ShellEntryView child : entry.getChildren()) {
-                sb.append('|');
-                appendDepthSpaces(sb, depth + 1);
-                serializeShellEntryView(sb, child, depth + 1);
-            }
-        }
-    }
-
-    private void serializeShellCommandView(StringBuilder sb, ShellCommandView command) {
-        sb.append(command.getName());
-        sb.append(" : ");
-        sb.append(command.getDescription());
-        sb.append('\n');
-
-        for (ShellCommandParamView paramView : command.getParams()) {
-            appendDepthSpaces(sb, 1);
-            serializedShellCommandParamView(sb, paramView);
-            sb.append('\n');
-        }
-    }
-
-    private void serializedShellCommandParamView(StringBuilder sb, ShellCommandParamView param) {
-        sb.append(param.getExternalForm());
-        sb.append(" - ");
-        sb.append(param.getDescription());
-    }
-
-    private void appendDepthSpaces(StringBuilder sb, int depth) {
-        for (int i = 0; i < depth; i++) {
-            sb.append("    ");
-        }
     }
 }

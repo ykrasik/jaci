@@ -50,7 +50,7 @@ public class ExecutorReturnValue extends ReturnValueImpl<ExecuteReturnValueSucce
         private final Optional<Object> returnValue;
 
         private ExecutorReturnValueSuccess(Optional<Object> returnValue) {
-            this.returnValue = checkNotNull(returnValue, "returnValue is null!");
+            this.returnValue = checkNotNull(returnValue, "returnValue");
         }
 
         public Optional<Object> getReturnValue() {
@@ -70,8 +70,8 @@ public class ExecutorReturnValue extends ReturnValueImpl<ExecuteReturnValueSucce
         private final Optional<Exception> exception;
 
         private ExecutorReturnValueFailure(String errorMessage, Optional<Exception> exception) {
-            this.errorMessage = checkNotNull(errorMessage, "errorMessage is null!");
-            this.exception = checkNotNull(exception, "exception is null!");
+            this.errorMessage = checkNotNull(errorMessage, "errorMessage");
+            this.exception = checkNotNull(exception, "exception");
         }
 
         public String getErrorMessage() {

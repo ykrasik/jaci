@@ -1,16 +1,18 @@
 package com.rawcod.jerminal.command.parameters.string;
 
-import com.rawcod.jerminal.collections.trie.Trie;
-import com.rawcod.jerminal.collections.trie.Tries;
+import com.google.common.base.Optional;
+import com.google.common.base.Supplier;
+import com.rawcod.jerminal.collections.trie.ReadOnlyTrie;
 import com.rawcod.jerminal.collections.trie.TrieView;
+import com.rawcod.jerminal.collections.trie.Tries;
 import com.rawcod.jerminal.command.parameters.AbstractMandatoryCommandParam;
 import com.rawcod.jerminal.command.parameters.ParseParamContext;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteErrors;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
+import com.rawcod.jerminal.returnvalue.parse.ParseErrors;
 import com.rawcod.jerminal.returnvalue.parse.param.ParseParamValueReturnValue;
-import com.rawcod.jerminal.util.AutoCompleteUtils;
 
-import java.util.List;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * User: ykrasik
@@ -18,14 +20,11 @@ import java.util.List;
  * Time: 16:36
  */
 public class StringParam extends AbstractMandatoryCommandParam {
-    private final Trie<String> values;
-    private final StringParamValueParser parser;
+    private final Supplier<ReadOnlyTrie<String>> valuesSupplier;
 
-    public StringParam(String name, String description, List<String> possibleValues) {
+    public StringParam(String name, String description, Supplier<ReadOnlyTrie<String>> valuesSupplier) {
         super(name, description);
-
-        values = Tries.toTrie(possibleValues);
-        this.parser = new StringParamValueParser(values, name);
+        this.valuesSupplier = checkNotNull(valuesSupplier, "valuesSupplier");
     }
 
     @Override
@@ -35,17 +34,31 @@ public class StringParam extends AbstractMandatoryCommandParam {
 
     @Override
     protected ParseParamValueReturnValue parse(String rawValue, ParseParamContext context) {
-        return parser.parse(rawValue);
+        final ReadOnlyTrie<String> values = getValues();
+
+        // If the possible values trie is empty, all values are accepted.
+        // If it isn't, rawValue must be contained in the possible values trie.
+        if (values.isEmpty() || values.contains(rawValue)) {
+            return ParseParamValueReturnValue.success(rawValue);
+        }
+
+        // This string param is constrained by the values it can receive,
+        // and rawValue isn't contained in the possible values trie.
+        return ParseErrors.invalidParamValue(getName(), rawValue);
     }
 
     @Override
     protected AutoCompleteReturnValue autoComplete(String prefix, ParseParamContext context) {
-        final TrieView valuesTrie = Tries.getWordTrie(values, prefix);
-        if (valuesTrie.isEmpty()) {
+        final ReadOnlyTrie<String> values = getValues();
+        final Optional<TrieView> possibilitiesTrieView = Tries.getTrieView(values, prefix);
+        if (!possibilitiesTrieView.isPresent()) {
             // Give a meaningful error message;
             return AutoCompleteErrors.noPossibleValuesForParamWithPrefix(getName(), prefix);
         }
+        return AutoCompleteReturnValue.success(prefix, possibilitiesTrieView.get());
+    }
 
-        return AutoCompleteUtils.autoComplete(prefix, valuesTrie);
+    private ReadOnlyTrie<String> getValues() {
+        return valuesSupplier.get();
     }
 }

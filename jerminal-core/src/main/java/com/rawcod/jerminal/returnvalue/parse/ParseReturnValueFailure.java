@@ -14,21 +14,21 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class ParseReturnValueFailure extends FailureImpl {
     private final ParseError error;
-    private final String message;
+    private final String errorMessage;
     private final List<String> suggestions;
 
-    public ParseReturnValueFailure(ParseError error, String message, List<String> suggestions) {
-        this.error = checkNotNull(error, "error is null!");
-        this.message = checkNotNull(message, "message is null!");
-        this.suggestions = checkNotNull(suggestions, "suggestions is null!");
+    public ParseReturnValueFailure(ParseError error, String errorMessage, List<String> suggestions) {
+        this.error = checkNotNull(error, "error");
+        this.errorMessage = checkNotNull(errorMessage, "errorMessage");
+        this.suggestions = checkNotNull(suggestions, "suggestions");
     }
 
     public ParseError getError() {
         return error;
     }
 
-    public String getMessage() {
-        return message;
+    public String getErrorMessage() {
+        return errorMessage;
     }
 
     public List<String> getSuggestions() {
@@ -39,7 +39,7 @@ public class ParseReturnValueFailure extends FailureImpl {
     public String toString() {
         return Objects.toStringHelper(this)
             .add("error", error)
-            .add("message", message)
+            .add("errorMessage", errorMessage)
             .add("suggestions", suggestions)
             .toString();
     }

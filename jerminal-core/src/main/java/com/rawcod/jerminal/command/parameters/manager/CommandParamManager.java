@@ -4,16 +4,15 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.rawcod.jerminal.collections.trie.Trie;
 import com.rawcod.jerminal.collections.trie.TrieImpl;
-import com.rawcod.jerminal.collections.trie.Tries;
 import com.rawcod.jerminal.collections.trie.TrieView;
+import com.rawcod.jerminal.collections.trie.Tries;
 import com.rawcod.jerminal.command.CommandArgs;
 import com.rawcod.jerminal.command.parameters.CommandParam;
-import com.rawcod.jerminal.command.parameters.ParseParamContext;
 import com.rawcod.jerminal.command.parameters.ParamType;
+import com.rawcod.jerminal.command.parameters.ParseParamContext;
 import com.rawcod.jerminal.exception.ShellException;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteErrors;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue.AutoCompleteReturnValueSuccess;
 import com.rawcod.jerminal.returnvalue.parse.ParseErrors;
 import com.rawcod.jerminal.returnvalue.parse.args.ParseBoundParamsReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.args.ParseBoundParamsReturnValue.ParseBoundParamsReturnValueSuccess;
@@ -21,7 +20,6 @@ import com.rawcod.jerminal.returnvalue.parse.args.ParseCommandArgsReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.param.ParseParamReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.param.ParseParamReturnValue.ParseParamReturnValueSuccess;
 import com.rawcod.jerminal.returnvalue.parse.param.ParseParamValueReturnValue;
-import com.rawcod.jerminal.util.AutoCompleteUtils;
 
 import java.util.*;
 
@@ -41,7 +39,7 @@ public class CommandParamManager {
     private final Trie<CommandParam> paramsTrie;
 
     public CommandParamManager(List<CommandParam> params) {
-        this.allParams = Collections.unmodifiableList(checkNotNull(params, "params is null!"));
+        this.allParams = Collections.unmodifiableList(checkNotNull(params, "params"));
         this.mandatoryParams = new ArrayList<>(params.size());
         this.paramsTrie = new TrieImpl<>();
 
@@ -188,31 +186,35 @@ public class CommandParamManager {
 
         final ParseBoundParamsReturnValueSuccess parseBoundParamsSuccess = parseBoundParams.getSuccess();
         final Map<String, Object> parsedArgs = parseBoundParamsSuccess.getParsedArgs();
-        final AutoCompleteReturnValue returnValue = autoCompleteArg(autoCompleteArg, parsedArgs, context);
-        if (returnValue.isFailure()) {
-            return returnValue;
-        }
+        return autoCompleteArg(autoCompleteArg, parsedArgs, context);
 
-        // A successful autoComplete either has 1 or more possibilities.
-        // 0 possibilities is considered a failed autoComplete.
-        final AutoCompleteReturnValueSuccess success = returnValue.getSuccess();
-        final List<String> possibilities = success.getSuggestions();
-
-        // Having an empty possibilities list here is an internal error.
-        if (possibilities.isEmpty()) {
-            return AutoCompleteErrors.internalErrorEmptyPossibilities();
-        }
-
-        if (possibilities.size() > 1) {
-            // More then 1 possibility available, no further processing should be done here.
-            return returnValue;
-        }
-
-        // There was only 1 way of autoCompleting the arg.
-        // Let's try to be as helpful as we can: Let's add a space!
-        // FIXME: This isn't correct. We need to either add a space, or a '=', depending on what we autoCompleted.
-        final String autoCompleteAddition = success.getAutoCompleteAddition();
-        return AutoCompleteReturnValue.successSingle(autoCompleteAddition + ' ');
+        // FIXME: Figure this out.
+//        final AutoCompleteReturnValue returnValue = autoCompleteArg(autoCompleteArg, parsedArgs, context);
+//        if (returnValue.isFailure()) {
+//            return returnValue;
+//        }
+//
+//
+//        // A successful autoComplete either has 1 or more possibilities.
+//        // 0 possibilities is considered a failed autoComplete.
+//        final AutoCompleteReturnValueSuccess success = returnValue.getSuccess();
+//        final List<String> possibilities = success.getSuggestions();
+//
+//        // Having an empty possibilities list here is an internal error.
+//        if (possibilities.isEmpty()) {
+//            return AutoCompleteErrors.internalErrorEmptyPossibilities();
+//        }
+//
+//        if (possibilities.size() > 1) {
+//            // More then 1 possibility available, no further processing should be done here.
+//            return returnValue;
+//        }
+//
+//        // There was only 1 way of autoCompleting the arg.
+//        // Let's try to be as helpful as we can: Let's add a space!
+//        // FIXME: This isn't correct. We need to either add a space, or a '=', depending on what we autoCompleted.
+//        final String autoCompleteAddition = success.getAutoCompleteAddition();
+//        return AutoCompleteReturnValue.successSingle(autoCompleteAddition + ' ');
     }
 
     private AutoCompleteReturnValue autoCompleteArg(String rawArg,
@@ -241,29 +243,31 @@ public class CommandParamManager {
 
             // The param is valid and unbound, autoComplete it's value.
             final Optional<String> rawValue = extractValue(rawArg, indexOfDelimiter);
-            final AutoCompleteReturnValue autoCompleteReturnValue = param.autoComplete(rawValue, context);
-            if (autoCompleteReturnValue.isFailure()) {
-                return autoCompleteReturnValue;
-            }
-
-            // A successful autoComplete either has 1 or more possibilities.
-            // 0 possibilities is considered a failed autoComplete.
-            final AutoCompleteReturnValueSuccess success = autoCompleteReturnValue.getSuccess();
-            final List<String> possibilities = success.getSuggestions();
-
-            // Having an empty possibilities list here is an internal error.
-            if (possibilities.isEmpty()) {
-                return AutoCompleteErrors.internalErrorEmptyPossibilities();
-            }
-
-            if (possibilities.size() == 1) {
-                // There was only 1 way of autoCompleting the value.
-                // Let's try to be as helpful as we can: Let's add a space!
-                final String autoCompleteAddition = success.getAutoCompleteAddition();
-                returnValue = AutoCompleteReturnValue.successSingle(autoCompleteAddition + ' ');
-            } else {
-                returnValue = autoCompleteReturnValue;
-            }
+            return param.autoComplete(rawValue, context);
+            // FIXME: Figure this out
+//            final AutoCompleteReturnValue autoCompleteReturnValue = param.autoComplete(rawValue, context);
+//            if (autoCompleteReturnValue.isFailure()) {
+//                return autoCompleteReturnValue;
+//            }
+//
+//            // A successful autoComplete either has 1 or more possibilities.
+//            // 0 possibilities is considered a failed autoComplete.
+//            final AutoCompleteReturnValueSuccess success = autoCompleteReturnValue.getSuccess();
+//            final List<String> possibilities = success.getSuggestions();
+//
+//            // Having an empty possibilities list here is an internal error.
+//            if (possibilities.isEmpty()) {
+//                return AutoCompleteErrors.internalErrorEmptyPossibilities();
+//            }
+//
+//            if (possibilities.size() == 1) {
+//                // There was only 1 way of autoCompleting the value.
+//                // Let's try to be as helpful as we can: Let's add a space!
+//                final String autoCompleteAddition = success.getAutoCompleteAddition();
+//                returnValue = AutoCompleteReturnValue.successSingle(autoCompleteAddition + ' ');
+//            } else {
+//                returnValue = autoCompleteReturnValue;
+//            }
         } else {
             returnValue = autoCompleteParamName(rawParamName, parsedArgs);
 
@@ -347,27 +351,28 @@ public class CommandParamManager {
     }
 
     private AutoCompleteReturnValue autoCompleteParamName(String prefix, Map<String, Object> parsedArgs) {
-        final TrieView paramNames = Tries.getWordTrieWithFilter(paramsTrie, prefix, new BoundParamsFilter(parsedArgs));
-        if (paramNames.isEmpty()) {
+        final Optional<TrieView> paramNamesTrieView = Tries.getTrieViewWithFilter(paramsTrie, prefix, new BoundParamsFilter(parsedArgs));
+        if (!paramNamesTrieView.isPresent()) {
             return AutoCompleteErrors.noPossibleValuesForParamNamePrefix(prefix);
         }
-
-        final AutoCompleteReturnValue autoCompleteReturnValue = AutoCompleteUtils.autoComplete(prefix, paramNames);
-        if (autoCompleteReturnValue.isFailure()) {
-            return autoCompleteReturnValue;
-        }
-
-        // Let's be helpful - if there's only 1 possible way of autoCompleting the paramName, add a '=' after it.
-        final AutoCompleteReturnValueSuccess success = autoCompleteReturnValue.getSuccess();
-        final List<String> possibleParamNames = success.getSuggestions();
-        final AutoCompleteReturnValue returnValue;
-        if (possibleParamNames.size() == 1) {
-            final String autoCompleteAddition = success.getAutoCompleteAddition();
-            returnValue = AutoCompleteReturnValue.successSingle(autoCompleteAddition + ARG_VALUE_DELIMITER);
-        } else {
-            returnValue = autoCompleteReturnValue;
-        }
-        return returnValue;
+        return AutoCompleteReturnValue.success(prefix, paramNamesTrieView.get());
+        // FIXME: Figure this out
+//        final AutoCompleteReturnValue autoCompleteReturnValue = AutoCompleteUtils.autoComplete(prefix, paramNamesTrieView);
+//        if (autoCompleteReturnValue.isFailure()) {
+//            return autoCompleteReturnValue;
+//        }
+//
+//        // Let's be helpful - if there's only 1 possible way of autoCompleting the paramName, add a '=' after it.
+//        final AutoCompleteReturnValueSuccess success = autoCompleteReturnValue.getSuccess();
+//        final List<String> possibleParamNames = success.getSuggestions();
+//        final AutoCompleteReturnValue returnValue;
+//        if (possibleParamNames.size() == 1) {
+//            final String autoCompleteAddition = success.getAutoCompleteAddition();
+//            returnValue = AutoCompleteReturnValue.successSingle(autoCompleteAddition + ARG_VALUE_DELIMITER);
+//        } else {
+//            returnValue = autoCompleteReturnValue;
+//        }
+//        return returnValue;
     }
 
     private AutoCompleteReturnValue autoCompleteParamValue(CommandParam param,

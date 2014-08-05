@@ -1,11 +1,14 @@
 package com.rawcod.jerminal.output;
 
+import com.google.common.base.Optional;
 import com.rawcod.jerminal.command.view.ShellCommandView;
 import com.rawcod.jerminal.filesystem.entry.view.ShellEntryView;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue.AutoCompleteReturnValueSuccess;
+import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteError;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValueFailure;
+import com.rawcod.jerminal.returnvalue.execute.ExecuteError;
 import com.rawcod.jerminal.returnvalue.execute.flow.ExecuteReturnValueFailure;
 import com.rawcod.jerminal.returnvalue.execute.flow.ExecuteReturnValueSuccess;
+import com.rawcod.jerminal.returnvalue.parse.ParseError;
 import com.rawcod.jerminal.returnvalue.parse.ParseReturnValueFailure;
 
 import java.util.List;
@@ -36,44 +39,56 @@ public class OutputProcessor {
     }
 
     public void parseFailure(ParseReturnValueFailure failure) {
-        outputHandler.parseError(failure.getError(), failure.getMessage());
+        final ParseError error = failure.getError();
+        final String errorMessage = failure.getErrorMessage();
+        outputHandler.parseError(error, errorMessage);
     }
 
-    public void autoCompleteSuccess(AutoCompleteReturnValueSuccess success, String rawCommandLine) {
-        final String autoCompleteAddition = success.getAutoCompleteAddition();
+    public void autoCompleteSuccess(String autoCompleteAddition, List<String> suggestions) {
         if (!autoCompleteAddition.isEmpty()) {
             // Set commandLine to autoCompleted commandLine.
-            final String newCommandLine = rawCommandLine + autoCompleteAddition;
+            final String newCommandLine = suggestions + autoCompleteAddition;
             outputHandler.setCommandLine(newCommandLine);
         }
 
-        displaySuggestionsIfApplicable(success.getSuggestions());
+        displaySuggestionsIfApplicable(suggestions);
     }
 
     public void autoCompleteFailure(AutoCompleteReturnValueFailure failure) {
-        if (failure.getParseError().isPresent()) {
-            outputHandler.parseError(failure.getParseError().get(), failure.getMessage());
+        final String errorMessage = failure.getErrorMessage();
+        final Optional<ParseError> parseError = failure.getParseError();
+        if (parseError.isPresent()) {
+            outputHandler.parseError(parseError.get(), errorMessage);
         } else {
-            outputHandler.autoCompleteError(failure.getError(), failure.getMessage());
+            final AutoCompleteError error = failure.getError();
+            outputHandler.autoCompleteError(error, errorMessage);
         }
 
-        displaySuggestionsIfApplicable(failure.getSuggestions());
+        final List<String> suggestions = failure.getSuggestions();
+        displaySuggestionsIfApplicable(suggestions);
     }
 
     public void executeSuccess(ExecuteReturnValueSuccess success) {
         outputHandler.clearCommandLine();
-        displayCommandOutputIfApplicable(success.getOutput());
+
+        final List<String> output = success.getOutput();
+        displayCommandOutputIfApplicable(output);
     }
 
     public void executeFailure(ExecuteReturnValueFailure failure) {
         outputHandler.clearCommandLine();
-        if (failure.getException().isPresent()) {
-            outputHandler.executeUnhandledException(failure.getException().get());
+
+        final Optional<Exception> exception = failure.getException();
+        if (exception.isPresent()) {
+            outputHandler.executeUnhandledException(exception.get());
         } else {
-            outputHandler.executeError(failure.getError(), failure.getErrorMessage());
+            final ExecuteError error = failure.getError();
+            final String errorMessage = failure.getErrorMessage();
+            outputHandler.executeError(error, errorMessage);
         }
 
-        displayCommandOutputIfApplicable(failure.getOutput());
+        final List<String> output = failure.getOutput();
+        displayCommandOutputIfApplicable(output);
     }
 
     public void processShellEntryView(ShellEntryView shellEntryView) {

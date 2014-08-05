@@ -33,7 +33,7 @@ public class ParseParamValueReturnValue extends ReturnValueImpl<ParseParamValueR
         private final Object value;
 
         private ParseParamValueReturnValueSuccess(Object value) {
-            this.value = checkNotNull(value, "value is null!");
+            this.value = checkNotNull(value, "value");
         }
 
         public Object getValue() {

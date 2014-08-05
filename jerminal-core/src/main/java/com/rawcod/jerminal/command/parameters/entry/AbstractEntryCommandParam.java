@@ -4,8 +4,8 @@ import com.rawcod.jerminal.command.parameters.AbstractMandatoryCommandParam;
 import com.rawcod.jerminal.command.parameters.ParseParamContext;
 import com.rawcod.jerminal.filesystem.FileSystemManager;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
-import com.rawcod.jerminal.returnvalue.parse.entry.ParsePathReturnValue;
-import com.rawcod.jerminal.returnvalue.parse.entry.ParsePathReturnValue.ParsePathReturnValueSuccess;
+import com.rawcod.jerminal.returnvalue.parse.entry.ParseEntryReturnValue;
+import com.rawcod.jerminal.returnvalue.parse.entry.ParseEntryReturnValue.ParseEntryReturnValueSuccess;
 import com.rawcod.jerminal.returnvalue.parse.param.ParseParamValueReturnValue;
 
 /**
@@ -21,13 +21,13 @@ public abstract class AbstractEntryCommandParam extends AbstractMandatoryCommand
     @Override
     protected ParseParamValueReturnValue parse(String rawValue, ParseParamContext context) {
         final FileSystemManager fileSystemManager = context.getFileSystemManager();
-        final ParsePathReturnValue returnValue = doParse(rawValue, fileSystemManager);
+        final ParseEntryReturnValue returnValue = doParse(rawValue, fileSystemManager);
         if (returnValue.isFailure()) {
             return ParseParamValueReturnValue.failure(returnValue.getFailure());
         }
 
-        final ParsePathReturnValueSuccess success = returnValue.getSuccess();
-        return ParseParamValueReturnValue.success(success.getLastEntry());
+        final ParseEntryReturnValueSuccess success = returnValue.getSuccess();
+        return ParseParamValueReturnValue.success(success.getEntry());
     }
 
     @Override
@@ -36,6 +36,6 @@ public abstract class AbstractEntryCommandParam extends AbstractMandatoryCommand
         return doAutoComplete(prefix, fileSystemManager);
     }
 
-    protected abstract ParsePathReturnValue doParse(String rawValue, FileSystemManager fileSystemManager);
+    protected abstract ParseEntryReturnValue doParse(String rawValue, FileSystemManager fileSystemManager);
     protected abstract AutoCompleteReturnValue doAutoComplete(String prefix, FileSystemManager fileSystemManager);
 }

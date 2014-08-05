@@ -40,8 +40,8 @@ public class ParseBoundParamsReturnValue extends ReturnValueImpl<ParseBoundParam
 
         private ParseBoundParamsReturnValueSuccess(Map<String, Object> parsedArgs,
                                                    Collection<CommandParam> unboundParams) {
-            this.parsedArgs = checkNotNull(parsedArgs, "parsedArgs is null!");
-            this.unboundParams = checkNotNull(unboundParams, "unboundParams is null!");
+            this.parsedArgs = checkNotNull(parsedArgs, "parsedArgs");
+            this.unboundParams = checkNotNull(unboundParams, "unboundParams");
         }
 
         public Map<String, Object> getParsedArgs() {

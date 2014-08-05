@@ -2,7 +2,7 @@ package com.rawcod.jerminal.command.parameters.entry;
 
 import com.rawcod.jerminal.filesystem.FileSystemManager;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
-import com.rawcod.jerminal.returnvalue.parse.entry.ParsePathReturnValue;
+import com.rawcod.jerminal.returnvalue.parse.entry.ParseEntryReturnValue;
 
 /**
  * User: ykrasik
@@ -19,7 +19,7 @@ public class DirectoryParam extends AbstractEntryCommandParam {
     }
 
     @Override
-    protected ParsePathReturnValue doParse(String rawValue, FileSystemManager fileSystemManager) {
+    protected ParseEntryReturnValue doParse(String rawValue, FileSystemManager fileSystemManager) {
         return fileSystemManager.parsePathToDirectory(rawValue);
     }
 

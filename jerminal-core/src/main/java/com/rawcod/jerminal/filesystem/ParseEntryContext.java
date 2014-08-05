@@ -6,13 +6,13 @@ package com.rawcod.jerminal.filesystem;
  * Time: 23:11
  */
 public class ParseEntryContext {
-    private final GlobalCommandRepository globalCommandRepository;
+    private final GlobalCommandManager globalCommandManager;
 
-    public ParseEntryContext(GlobalCommandRepository globalCommandRepository) {
-        this.globalCommandRepository = globalCommandRepository;
+    public ParseEntryContext(GlobalCommandManager globalCommandManager) {
+        this.globalCommandManager = globalCommandManager;
     }
 
-    public GlobalCommandRepository getGlobalCommandRepository() {
-        return globalCommandRepository;
+    public GlobalCommandManager getGlobalCommandManager() {
+        return globalCommandManager;
     }
 }

@@ -24,10 +24,10 @@ public class ExecuteReturnValueFailure extends FailureImpl {
                                      String errorMessage,
                                      List<String> output,
                                      Optional<Exception> exception) {
-        this.error = checkNotNull(error, "error is null!");
+        this.error = checkNotNull(error, "error");
         this.errorMessage = checkNotNull(errorMessage, "errorMessage");
-        this.output = checkNotNull(output, "output is null!");
-        this.exception = checkNotNull(exception, "exception is null!");
+        this.output = checkNotNull(output, "output");
+        this.exception = checkNotNull(exception, "exception");
     }
 
     public ExecuteError getError() {

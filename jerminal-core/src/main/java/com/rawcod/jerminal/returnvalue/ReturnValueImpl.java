@@ -14,7 +14,7 @@ public class ReturnValueImpl<S extends Success, F extends Failure> implements Re
     private final Failable returnValue;
 
     public ReturnValueImpl(Failable returnValue) {
-        this.returnValue = checkNotNull(returnValue, "returnValue is null!");
+        this.returnValue = checkNotNull(returnValue, "returnValue");
     }
 
     @Override

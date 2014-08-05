@@ -1,5 +1,6 @@
 package com.rawcod.jerminal.collections.trie;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.rawcod.jerminal.collections.trie.visitor.TrieVisitor;
 
@@ -27,8 +28,8 @@ public interface ReadOnlyTrie<T> {
 
     String getLongestPrefix();
 
-    ReadOnlyTrie<T> subTrie(String prefix);
-    ReadOnlyTrie<T> filter(Predicate<T> filter);
+    Optional<ReadOnlyTrie<T>> subTrie(String prefix);
+    Optional<ReadOnlyTrie<T>> filter(Predicate<T> filter);
 
     TrieView trieView();
 }

@@ -1,6 +1,11 @@
 package com.rawcod.jerminal.command.parameters;
 
 import com.google.common.base.Supplier;
+import com.rawcod.jerminal.collections.trie.ReadOnlyTrie;
+import com.rawcod.jerminal.collections.trie.Trie;
+import com.rawcod.jerminal.collections.trie.TrieImpl;
+
+import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -150,16 +155,59 @@ public final class Params {
         return new ConstDefaultValueSupplier<>(defaultValue);
     }
 
+    public static Supplier<ReadOnlyTrie<String>> constStringValuesSupplier(List<String> possibleValues) {
+        return new ConstStringValuesSupplier(possibleValues);
+    }
+
+    public static Supplier<ReadOnlyTrie<String>> dynamicStringValuesSupplier(Supplier<List<String>> supplier) {
+        return new DynamicStringValuesSupplier(supplier);
+    }
+
     private static class ConstDefaultValueSupplier<T> implements Supplier<T> {
         private final T defaultValue;
 
         private ConstDefaultValueSupplier(T defaultValue) {
-            this.defaultValue = checkNotNull(defaultValue, "defaultValue is null!");
+            this.defaultValue = checkNotNull(defaultValue, "defaultValue");
         }
 
         @Override
         public T get() {
             return defaultValue;
         }
+    }
+
+    private static class ConstStringValuesSupplier implements Supplier<ReadOnlyTrie<String>> {
+        private final Trie<String> trie;
+
+        private ConstStringValuesSupplier(List<String> possibleValues) {
+            this.trie = toTrie(checkNotNull(possibleValues, "possibleValues"));
+        }
+
+        @Override
+        public Trie<String> get() {
+            return trie;
+        }
+    }
+
+    private static class DynamicStringValuesSupplier implements Supplier<ReadOnlyTrie<String>> {
+        private final Supplier<List<String>> supplier;
+
+        private DynamicStringValuesSupplier(Supplier<List<String>> supplier) {
+            this.supplier = checkNotNull(supplier, "supplier");
+        }
+
+        @Override
+        public ReadOnlyTrie<String> get() {
+            final List<String> values = supplier.get();
+            return toTrie(values);
+        }
+    }
+
+    private static Trie<String> toTrie(List<String> values) {
+        final Trie<String> trie = new TrieImpl<>();
+        for (String value : values) {
+            trie.put(value, value);
+        }
+        return trie;
     }
 }

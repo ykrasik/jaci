@@ -35,8 +35,8 @@ public class ParseParamReturnValue extends ReturnValueImpl<ParseParamReturnValue
         private final Object value;
 
         private ParseParamReturnValueSuccess(CommandParam param, Object value) {
-            this.param = checkNotNull(param, "param is null!");
-            this.value = checkNotNull(value, "value is null!");
+            this.param = checkNotNull(param, "param");
+            this.value = checkNotNull(value, "value");
         }
 
         public CommandParam getParam() {

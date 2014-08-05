@@ -22,7 +22,7 @@ public final class AutoCompleteErrors {
             new AutoCompleteReturnValueFailure(
                 AutoCompleteError.PARSE_ERROR,
                 Optional.of(failure.getError()),
-                failure.getMessage(),
+                failure.getErrorMessage(),
                 failure.getSuggestions()
             )
         );
@@ -48,22 +48,11 @@ public final class AutoCompleteErrors {
         return parseError(ParseErrors.invalidFlagValue(paramName).getFailure());
     }
 
-    public static AutoCompleteReturnValue noPossibleValuesNoInfo() {
-        return AutoCompleteReturnValue.failure(
-            new AutoCompleteReturnValueFailure(
-                AutoCompleteError.NO_POSSIBLE_VALUES,
-                Optional.<ParseError>absent(),
-                "AutoComplete error: No possible values.",
-                Collections.<String>emptyList()
-            )
-        );
-    }
-
     public static AutoCompleteReturnValue noPossibleValuesForParamNamePrefix(String prefix) {
         return AutoCompleteReturnValue.failure(
             from(
                 AutoCompleteError.NO_POSSIBLE_VALUES,
-                "AutoComplete error: No unbound param starts with '%s'.", prefix
+                "AutoComplete error: No unbound param starts with '%s'", prefix
             )
         );
     }
@@ -72,7 +61,7 @@ public final class AutoCompleteErrors {
         return AutoCompleteReturnValue.failure(
             from(
                 AutoCompleteError.NO_POSSIBLE_VALUES,
-                "AutoComplete error: Number parameters cannot be auto completed: '%s'.", paramName
+                "AutoComplete error: Number parameters cannot be auto completed: '%s'", paramName
             )
         );
     }
@@ -81,7 +70,7 @@ public final class AutoCompleteErrors {
         return AutoCompleteReturnValue.failure(
             from(
                 AutoCompleteError.NO_POSSIBLE_VALUES,
-                "AutoComplete error: No values are possible for param '%s' with prefix: '%s'.", paramName, prefix
+                "AutoComplete error: No values are possible for param '%s' with prefix: '%s'", paramName, prefix
             )
         );
     }
@@ -91,6 +80,15 @@ public final class AutoCompleteErrors {
             from(
                 AutoCompleteError.NO_POSSIBLE_VALUES,
                 "AutoComplete error: No child entries possible for directory='%s', prefix='%s'", directoryName, prefix
+            )
+        );
+    }
+
+    public static AutoCompleteReturnValue noPossibleValuesForPrefix(String prefix) {
+        return AutoCompleteReturnValue.failure(
+            from(
+                AutoCompleteError.NO_POSSIBLE_VALUES,
+                "AutoComplete error: No values are possible for prefix='%s'", prefix
             )
         );
     }

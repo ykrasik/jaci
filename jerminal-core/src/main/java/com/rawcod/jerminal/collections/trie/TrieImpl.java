@@ -1,5 +1,6 @@
 package com.rawcod.jerminal.collections.trie;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.rawcod.jerminal.collections.trie.node.TrieNode;
@@ -101,22 +102,22 @@ public class TrieImpl<T> implements Trie<T> {
     }
 
     @Override
-    public ReadOnlyTrie<T> subTrie(String prefix) {
+    public Optional<ReadOnlyTrie<T>> subTrie(String prefix) {
         final ValueTrieNode<T> node = getNode(prefix);
         if (node == null) {
-            return null;
+            return Optional.absent();
         }
-        return new TrieImpl<>(node, triePrefix + prefix);
+        return Optional.<ReadOnlyTrie<T>>of(new TrieImpl<>(node, triePrefix + prefix));
     }
 
     @Override
-    public ReadOnlyTrie<T> filter(Predicate<T> filter) {
-        ValueTrieNode<T> filteredRoot = filterNode(root, filter);
+    public Optional<ReadOnlyTrie<T>> filter(Predicate<T> filter) {
+        final ValueTrieNode<T> filteredRoot = filterNode(root, filter);
         if (filteredRoot == null) {
             // Empty root.
-            filteredRoot = new TrieNodeImpl<>();
+            return Optional.absent();
         }
-        return new TrieImpl<>(filteredRoot, triePrefix);
+        return Optional.<ReadOnlyTrie<T>>of(new TrieImpl<>(filteredRoot, triePrefix));
     }
 
     @Override

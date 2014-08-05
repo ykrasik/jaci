@@ -1,12 +1,13 @@
 package com.rawcod.jerminal.command.parameters.string;
 
 import com.google.common.base.Supplier;
+import com.rawcod.jerminal.collections.trie.ReadOnlyTrie;
 import com.rawcod.jerminal.command.parameters.CommandParam;
 import com.rawcod.jerminal.command.parameters.Params;
 import com.rawcod.jerminal.command.parameters.optional.OptionalParam;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -15,18 +16,19 @@ import java.util.List;
  * Time: 00:22
  */
 public class StringParamBuilder {
+    private static final Supplier<ReadOnlyTrie<String>> NO_VALUES_SUPPLIER = Params.constStringValuesSupplier(Collections.<String>emptyList());
+
     private final String name;
     private String description = "string";
-    private final List<String> possibleValues;
+    private Supplier<ReadOnlyTrie<String>> possibleValuesSupplier = NO_VALUES_SUPPLIER;
     private Supplier<String> defaultValueSupplier;
 
     public StringParamBuilder(String name) {
         this.name = name;
-        this.possibleValues = new ArrayList<>(4);
     }
 
     public CommandParam build() {
-        final CommandParam param = new StringParam(name, description, possibleValues);
+        final CommandParam param = new StringParam(name, description, possibleValuesSupplier);
         if (defaultValueSupplier == null) {
             return param;
         }
@@ -38,17 +40,17 @@ public class StringParamBuilder {
         return this;
     }
 
-    public StringParamBuilder addPossibleValue(String possibleValue) {
-        possibleValues.add(possibleValue);
+    public StringParamBuilder setConstantPossibleValues(String... possibleValues) {
+        return setConstantPossibleValues(Arrays.asList(possibleValues));
+    }
+
+    public StringParamBuilder setConstantPossibleValues(List<String> possibleValues) {
+        this.possibleValuesSupplier = Params.constStringValuesSupplier(possibleValues);
         return this;
     }
 
-    public StringParamBuilder addPossibleValues(String... possibleValues) {
-        return addPossibleValues(Arrays.asList(possibleValues));
-    }
-
-    public StringParamBuilder addPossibleValues(List<String> possibleValues) {
-        this.possibleValues.addAll(possibleValues);
+    public StringParamBuilder setDynamicPossibleValuesSupplier(Supplier<List<String>> supplier) {
+        this.possibleValuesSupplier = Params.dynamicStringValuesSupplier(supplier);
         return this;
     }
 

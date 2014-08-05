@@ -1,5 +1,6 @@
 package com.rawcod.jerminal.collections.trie;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 
@@ -12,7 +13,14 @@ import java.util.List;
  * Time: 14:57
  */
 public final class Tries {
+    private static final TrieImpl<Object> EMPTY_TRIE = new TrieImpl<>();
+
     private Tries() {
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> ReadOnlyTrie<T> emptyTrie() {
+        return (ReadOnlyTrie<T>) EMPTY_TRIE;
     }
 
     public static <T> List<String> getWordsFromPrefix(ReadOnlyTrie<T> trie, String prefix) {
@@ -22,12 +30,12 @@ public final class Tries {
     public static <T> List<String> getWordsFromPrefixWithFilter(ReadOnlyTrie<T> trie,
                                                                 String prefix,
                                                                 Predicate<T> filter) {
-        final ReadOnlyTrie<T> prefixTrie = trie.subTrie(prefix);
-        if (prefixTrie == null) {
+        final Optional<ReadOnlyTrie<T>> prefixTrie = trie.subTrie(prefix);
+        if (!prefixTrie.isPresent()) {
             // No such prefix in trie.
             return Collections.emptyList();
         }
-        return prefixTrie.getWordsWithFilter(filter);
+        return prefixTrie.get().getWordsWithFilter(filter);
     }
 
     public static <T> List<T> getValuesByPrefix(ReadOnlyTrie<T> trie, String prefix) {
@@ -37,49 +45,38 @@ public final class Tries {
     public static <T> List<T> getValuesByPrefixWithFilter(ReadOnlyTrie<T> trie,
                                                           String prefix,
                                                           Predicate<T> filter) {
-        final ReadOnlyTrie<T> prefixTrie = trie.subTrie(prefix);
-        if (prefixTrie == null) {
+        final Optional<ReadOnlyTrie<T>> prefixTrie = trie.subTrie(prefix);
+        if (!prefixTrie.isPresent()) {
             // No such prefix in trie.
             return Collections.emptyList();
         }
-        return prefixTrie.getValuesWithFilter(filter);
+        return prefixTrie.get().getValuesWithFilter(filter);
     }
 
-    public static <T> String getLongestPrefixFromPrefixAndFilter(ReadOnlyTrie<T> trie,
-                                                                 String prefix,
-                                                                 Predicate<T> filter) {
-        final ReadOnlyTrie<T> prefixTrie = trie.subTrie(prefix);
-        if (prefixTrie == null) {
+    public static <T> Optional<TrieView> getTrieView(ReadOnlyTrie<T> trie, String prefix) {
+        final Optional<ReadOnlyTrie<T>> prefixTrie = trie.subTrie(prefix);
+        if (!prefixTrie.isPresent()) {
             // No such prefix in trie.
-            return "";
+            return Optional.absent();
         }
 
-        // Filter the subTrie.
-        final ReadOnlyTrie<T> filteredTrie = prefixTrie.filter(filter);
-        return filteredTrie.getLongestPrefix();
+        return Optional.of(prefixTrie.get().trieView());
     }
 
-    public static <T> TrieView getWordTrie(ReadOnlyTrie<T> trie,
-                                           String prefix) {
-        return trie
-            .subTrie(prefix)
-            .trieView();
-    }
-
-    public static <T> TrieView getWordTrieWithFilter(ReadOnlyTrie<T> trie,
-                                                     String prefix,
-                                                     Predicate<T> filter) {
-        return trie
-            .subTrie(prefix)
-            .filter(filter)
-            .trieView();
-    }
-
-    public static Trie<String> toTrie(List<String> values) {
-        final Trie<String> trie = new TrieImpl<>();
-        for (String value : values) {
-            trie.put(value, value);
+    public static <T> Optional<TrieView> getTrieViewWithFilter(ReadOnlyTrie<T> trie,
+                                                               String prefix,
+                                                               Predicate<T> filter) {
+        final Optional<ReadOnlyTrie<T>> prefixTrie = trie.subTrie(prefix);
+        if (!prefixTrie.isPresent()) {
+            // No such prefix in trie.
+            return Optional.absent();
         }
-        return trie;
+
+        final Optional<ReadOnlyTrie<T>> filteredTrie = prefixTrie.get().filter(filter);
+        if (!filteredTrie.isPresent()) {
+            return Optional.absent();
+        }
+
+        return Optional.of(filteredTrie.get().trieView());
     }
 }

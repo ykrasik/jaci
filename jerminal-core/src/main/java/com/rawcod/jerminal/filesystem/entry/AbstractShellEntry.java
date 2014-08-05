@@ -14,8 +14,8 @@ public abstract class AbstractShellEntry implements ShellEntry {
     private final String description;
 
     protected AbstractShellEntry(String name, String description) {
-        this.name = checkNotNull(name, "name is null!");
-        this.description = checkNotNull(description, "description is null!");
+        this.name = checkNotNull(name, "name");
+        this.description = checkNotNull(description, "description");
     }
 
     @Override

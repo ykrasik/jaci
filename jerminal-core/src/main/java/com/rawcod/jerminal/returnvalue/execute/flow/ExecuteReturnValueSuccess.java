@@ -18,8 +18,8 @@ public class ExecuteReturnValueSuccess extends SuccessImpl {
     private final List<String> output;
 
     public ExecuteReturnValueSuccess(Optional<Object> returnValue, List<String> output) {
-        this.returnValue = checkNotNull(returnValue, "returnValue is null!");
-        this.output = checkNotNull(output, "output is null!");
+        this.returnValue = checkNotNull(returnValue, "returnValue");
+        this.output = checkNotNull(output, "output");
     }
 
     public Optional<Object> getReturnValue() {

@@ -17,17 +17,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class AutoCompleteReturnValueFailure extends FailureImpl {
     private final AutoCompleteError error;
     private final Optional<ParseError> parseError;
-    private final String message;
+    private final String errorMessage;
     private final List<String> suggestions;
 
     public AutoCompleteReturnValueFailure(AutoCompleteError error,
                                           Optional<ParseError> parseError,
-                                          String message,
+                                          String errorMessage,
                                           List<String> suggestions) {
-        this.error = checkNotNull(error, "error is null!");
-        this.parseError = checkNotNull(parseError, "parseError is null!");
-        this.message = checkNotNull(message, "message is null!");
-        this.suggestions = checkNotNull(suggestions, "suggestions is null!");
+        this.error = checkNotNull(error, "error");
+        this.parseError = checkNotNull(parseError, "parseError");
+        this.errorMessage = checkNotNull(errorMessage, "errorMessage");
+        this.suggestions = checkNotNull(suggestions, "suggestions");
     }
 
     public AutoCompleteError getError() {
@@ -38,8 +38,8 @@ public class AutoCompleteReturnValueFailure extends FailureImpl {
         return parseError;
     }
 
-    public String getMessage() {
-        return message;
+    public String getErrorMessage() {
+        return errorMessage;
     }
 
     public List<String> getSuggestions() {
@@ -51,7 +51,7 @@ public class AutoCompleteReturnValueFailure extends FailureImpl {
         return Objects.toStringHelper(this)
             .add("error", error)
             .add("parseError", parseError)
-            .add("message", message)
+            .add("errorMessage", errorMessage)
             .add("suggestions", suggestions)
             .toString();
     }

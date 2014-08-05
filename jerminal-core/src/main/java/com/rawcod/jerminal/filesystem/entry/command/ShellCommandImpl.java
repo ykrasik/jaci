@@ -32,7 +32,7 @@ public class ShellCommandImpl extends AbstractShellEntry implements ShellCommand
                             CommandExecutor executor) {
         super(name, description);
 
-        this.executor = checkNotNull(executor, "executor is null!");
+        this.executor = checkNotNull(executor, "executor");
         this.paramManager = new CommandParamManager(params);
     }
 

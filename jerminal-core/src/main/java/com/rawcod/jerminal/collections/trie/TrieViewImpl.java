@@ -17,14 +17,14 @@ public class TrieViewImpl implements TrieView {
     // This is the prefix of the current trie. Used by subTries.
     private final String triePrefix;
 
-    public TrieViewImpl(TrieNode root, String triePrefix) {
+    protected TrieViewImpl(TrieNode root, String triePrefix) {
         this.root = root;
         this.triePrefix = triePrefix;
     }
 
     @Override
     public boolean isEmpty() {
-        return root.getChildren().isEmpty();
+        return !root.isWord() && root.getChildren().isEmpty();
     }
 
     @Override
