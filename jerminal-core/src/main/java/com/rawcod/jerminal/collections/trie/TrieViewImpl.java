@@ -49,7 +49,9 @@ public class TrieViewImpl implements TrieView {
         TrieNode currentNode = root;
         while (currentNode.getChildren().size() == 1 && !currentNode.isWord()) {
             // currentNode only has 1 child and is not a word.
-            prefixBuilder.append(currentNode.getCharacter());
+            if (currentNode != root) {
+                prefixBuilder.append(currentNode.getCharacter());
+            }
             for (TrieNode child : currentNode.getChildren()) {
                 // Move on to currentNode's only child.
                 currentNode = child;

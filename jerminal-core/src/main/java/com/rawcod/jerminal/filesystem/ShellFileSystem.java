@@ -17,7 +17,7 @@ public class ShellFileSystem {
     private final Set<ShellCommand> globalCommands;
 
     public ShellFileSystem() {
-        this.root = new ShellDirectoryImpl("", "Root");
+        this.root = new ShellDirectoryImpl("/", "Root");
         this.globalCommands = new HashSet<>();
     }
 

@@ -122,14 +122,9 @@ public class FileSystemManager {
 
     public AutoCompleteReturnValue autoCompletePath(String rawPath, Predicate<ShellEntry> filter) {
         // Parse the path until the last delimiter, after which we autoComplete the remaining arg.
-        int lastIndexOfDelimiter = rawPath.lastIndexOf(DELIMITER);
-        if (lastIndexOfDelimiter == -1) {
-            // Use the whole string for autoCompletion if no delimiter present.
-            lastIndexOfDelimiter = 0;
-        }
-
-        final String pathToParse = rawPath.substring(0, lastIndexOfDelimiter);
-        final String autoCompleteArg = rawPath.substring(lastIndexOfDelimiter);
+        final int lastIndexOfDelimiter = rawPath.lastIndexOf(DELIMITER);
+        final String pathToParse = rawPath.substring(0, lastIndexOfDelimiter != - 1 ? lastIndexOfDelimiter : 0);
+        final String autoCompleteArg = rawPath.substring(lastIndexOfDelimiter + 1);
 
         final ShellDirectory lastDir;
         if (pathToParse.isEmpty()) {

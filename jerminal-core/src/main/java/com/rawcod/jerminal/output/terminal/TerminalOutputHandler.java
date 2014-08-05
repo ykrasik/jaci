@@ -57,7 +57,7 @@ public class TerminalOutputHandler implements OutputHandler {
     @Override
     public void executeUnhandledException(Exception e) {
         for (StackTraceElement stackTraceElement : e.getStackTrace()) {
-            print(stackTraceElement.toString());
+            printError("    " + stackTraceElement.toString());
         }
     }
 

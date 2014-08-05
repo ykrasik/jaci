@@ -130,7 +130,8 @@ public class Shell {
             suggestions = possibleWords;
         }
 
-        outputProcessor.autoCompleteSuccess(autoCompleteAddition, suggestions);
+        final String newCommandLine = rawCommandLine + autoCompleteAddition;
+        outputProcessor.autoCompleteSuccess(newCommandLine, suggestions);
     }
 
     private String getAutoCompleteAddition(String prefix, String autoCompletedPrefix) {

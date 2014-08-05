@@ -44,12 +44,8 @@ public class OutputProcessor {
         outputHandler.parseError(error, errorMessage);
     }
 
-    public void autoCompleteSuccess(String autoCompleteAddition, List<String> suggestions) {
-        if (!autoCompleteAddition.isEmpty()) {
-            // Set commandLine to autoCompleted commandLine.
-            final String newCommandLine = suggestions + autoCompleteAddition;
-            outputHandler.setCommandLine(newCommandLine);
-        }
+    public void autoCompleteSuccess(String newCommandLine, List<String> suggestions) {
+        outputHandler.setCommandLine(newCommandLine);
 
         displaySuggestionsIfApplicable(suggestions);
     }
