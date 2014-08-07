@@ -99,7 +99,7 @@ public class Shell {
         // AutoComplete the command args.
         // The args start from the 2nd commandLine element (the first was the command).
         final ParseParamContext context = new ParseParamContext(fileSystemManager);
-        final ShellCommand command = returnValue.getSuccess().getEntry().getCommand();
+        final ShellCommand command = returnValue.getSuccess().getEntry().getAsCommand();
         final List<String> args = commandLine.subList(1, commandLine.size());
         return command.getParamManager().autoCompleteArgs(args, context);
     }
@@ -184,7 +184,7 @@ public class Shell {
             // Failed to parse the command.
             return ParseReturnValue.failure(parseCommandReturnValue.getFailure());
         }
-        final ShellCommand command = parseCommandReturnValue.getSuccess().getEntry().getCommand();
+        final ShellCommand command = parseCommandReturnValue.getSuccess().getEntry().getAsCommand();
 
         // Parse the command args.
         // The command args start from the 2nd commandLine element (the first was the command).

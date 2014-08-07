@@ -122,7 +122,7 @@ public class TrieImpl<T> implements Trie<T> {
 
     @Override
     public TrieView trieView() {
-        return new TrieViewImpl(root, triePrefix);
+        return new TrieViewImpl(root, triePrefix, "");
     }
 
     private ValueTrieNode<T> filterNode(ValueTrieNode<T> node, Predicate<T> filter) {

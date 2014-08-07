@@ -6,6 +6,7 @@ buildscript {
         guavaVersion = '17.0'
         gdxVersion = '0.9.9'
         junitVersion = '4.11'
+        mockitoVersion = '1.9.5'
     }
 }
 
@@ -22,7 +23,9 @@ project("jerminal-core") {
 
     dependencies {
         compile "com.google.guava:guava:$guavaVersion"
+
         testCompile "junit:junit:$junitVersion"
+        testCompile "org.mockito:mockito-all:$mockitoVersion"
     }
 }
 

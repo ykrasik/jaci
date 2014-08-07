@@ -17,9 +17,13 @@ public class TrieViewImpl implements TrieView {
     // This is the prefix of the current trie. Used by subTries.
     private final String triePrefix;
 
-    protected TrieViewImpl(TrieNode root, String triePrefix) {
+    // A suffix that is added to each individual word.
+    private final String wordSuffix;
+
+    protected TrieViewImpl(TrieNode root, String triePrefix, String wordSuffix) {
         this.root = root;
         this.triePrefix = triePrefix;
+        this.wordSuffix = wordSuffix;
     }
 
     @Override
@@ -67,14 +71,19 @@ public class TrieViewImpl implements TrieView {
         if (node == null) {
             return null;
         }
-        return new TrieViewImpl(node, triePrefix + prefix);
+        return new TrieViewImpl(node, triePrefix + prefix, wordSuffix);
     }
 
     @Override
     public TrieView union(TrieView other) {
         // I couldn't find a better solution other then this downcasting...
         final TrieNode unionRoot = new UnionTrieNodeImpl(root, ((TrieViewImpl) other).root);
-        return new TrieViewImpl(unionRoot, triePrefix);
+        return new TrieViewImpl(unionRoot, triePrefix, wordSuffix);
+    }
+
+    @Override
+    public TrieView wordSuffix(String wordSuffix) {
+        return new TrieViewImpl(root, triePrefix, wordSuffix);
     }
 
     private void collectWordsFromNode(List<String> words,
@@ -87,7 +96,7 @@ public class TrieViewImpl implements TrieView {
         }
 
         if (node.isWord()) {
-            words.add(prefixBuilder.toString());
+            words.add(prefixBuilder + wordSuffix);
         }
 
         // Check node's children.

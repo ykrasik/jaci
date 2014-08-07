@@ -25,6 +25,6 @@ public class FileParam extends AbstractEntryCommandParam {
 
     @Override
     protected AutoCompleteReturnValue doAutoComplete(String prefix, FileSystemManager fileSystemManager) {
-        return fileSystemManager.autoCompletePathToCommand(prefix);
+        return fileSystemManager.autoCompletePath(prefix);
     }
 }

@@ -12,6 +12,6 @@ public interface ShellEntry {
     String getDescription();
 
     boolean isDirectory();
-    ShellDirectory getDirectory();
-    ShellCommand getCommand();
+    ShellDirectory getAsDirectory();
+    ShellCommand getAsCommand();
 }

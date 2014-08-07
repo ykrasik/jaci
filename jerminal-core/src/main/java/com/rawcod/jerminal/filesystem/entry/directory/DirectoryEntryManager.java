@@ -6,7 +6,6 @@ import com.rawcod.jerminal.collections.trie.Trie;
 import com.rawcod.jerminal.collections.trie.TrieImpl;
 import com.rawcod.jerminal.collections.trie.TrieView;
 import com.rawcod.jerminal.collections.trie.Tries;
-import com.rawcod.jerminal.filesystem.entry.EntryFilters;
 import com.rawcod.jerminal.filesystem.entry.ShellEntry;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteErrors;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
@@ -21,6 +20,13 @@ import com.rawcod.jerminal.returnvalue.parse.entry.ParseEntryReturnValue;
 public class DirectoryEntryManager {
     private static final String THIS = ".";
     private static final String PARENT = "..";
+
+    private static final Predicate<ShellEntry> DIRECTORY_FILTER = new Predicate<ShellEntry>() {
+        @Override
+        public boolean apply(ShellEntry value) {
+            return value.isDirectory();
+        }
+    };
 
     private final ShellDirectory directory;
     private final Trie<ShellEntry> children;
@@ -40,18 +46,14 @@ public class DirectoryEntryManager {
     }
 
     public ParseEntryReturnValue parseCommand(String rawCommand) {
-        return parseEntry(rawCommand, EntryFilters.FILE_FILTER);
+        return doParseEntry(rawCommand, false);
     }
 
     public ParseEntryReturnValue parseDirectory(String rawDirectory) {
-        return parseEntry(rawDirectory, EntryFilters.DIRECTORY_FILTER);
+        return doParseEntry(rawDirectory, true);
     }
 
-    public ParseEntryReturnValue parseEntry(String rawEntry) {
-        return parseEntry(rawEntry, EntryFilters.NO_FILTER);
-    }
-
-    public ParseEntryReturnValue parseEntry(String rawEntry, Predicate<ShellEntry> filter) {
+    private ParseEntryReturnValue doParseEntry(String rawEntry, boolean isDirectory) {
         // Check children.
         final ShellEntry childEntry = children.get(rawEntry);
         if (childEntry == null) {
@@ -59,39 +61,41 @@ public class DirectoryEntryManager {
             if (directory.isEmpty()) {
                 return ParseErrors.emptyDirectory(directory.getName());
             } else {
-                return ParseErrors.directoryDoesNotContainEntry(directory.getName(), rawEntry);
+                return ParseErrors.directoryDoesNotContainEntry(directory.getName(), rawEntry, isDirectory);
             }
         }
 
-        // Child entry exists, check that it is allowed by the filter.
-        if (!filter.apply(childEntry)) {
-            return ParseErrors.invalidAccessToEntry(directory.getName(), rawEntry);
+        // Child entry exists, check that it is what we are looking for..
+        if (childEntry.isDirectory() != isDirectory) {
+            return ParseErrors.invalidAccessToEntry(rawEntry, isDirectory);
         }
 
         return ParseEntryReturnValue.success(childEntry);
     }
 
-    public AutoCompleteReturnValue autoCompleteCommand(String prefix) {
-        return autoCompleteEntry(prefix, EntryFilters.FILE_FILTER);
-    }
-
     public AutoCompleteReturnValue autoCompleteDirectory(String prefix) {
-        return autoCompleteEntry(prefix, EntryFilters.DIRECTORY_FILTER);
+        return doAutoCompleteEntry(prefix, true);
     }
 
     public AutoCompleteReturnValue autoCompleteEntry(String prefix) {
-        return autoCompleteEntry(prefix, EntryFilters.NO_FILTER);
+        return doAutoCompleteEntry(prefix, false);
     }
 
-    public AutoCompleteReturnValue autoCompleteEntry(String prefix, Predicate<ShellEntry> filter) {
+    private AutoCompleteReturnValue doAutoCompleteEntry(String prefix, boolean isDirectory) {
         // Get all possible words with this prefix.
-        final Optional<TrieView> childrenTrieView = Tries.getTrieViewWithFilter(children, prefix, filter);
+        final Optional<TrieView> childrenTrieView;
+        if (isDirectory) {
+            childrenTrieView = Tries.getTrieViewWithFilter(children, prefix, DIRECTORY_FILTER);
+        } else {
+            childrenTrieView = Tries.getTrieView(children, prefix);
+        }
+
         if (!childrenTrieView.isPresent()) {
             // Give a meaningful error message.
             if (directory.isEmpty()) {
                 return AutoCompleteErrors.emptyDirectory(directory.getName());
             } else {
-                return AutoCompleteErrors.noPossibleValuesForDirectoryWithPrefix(directory.getName(), prefix);
+                return AutoCompleteErrors.noPossibleValuesForDirectoryWithPrefix(directory.getName(), prefix, isDirectory);
             }
         }
         return AutoCompleteReturnValue.success(prefix, childrenTrieView.get());

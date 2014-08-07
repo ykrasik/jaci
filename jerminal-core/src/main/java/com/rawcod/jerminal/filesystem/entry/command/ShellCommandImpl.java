@@ -42,13 +42,13 @@ public class ShellCommandImpl extends AbstractShellEntry implements ShellCommand
     }
 
     @Override
-    public ShellDirectory getDirectory() {
+    public ShellDirectory getAsDirectory() {
         final String message = String.format("'%s' is a command, not a directory!", getName());
         throw new IllegalStateException(message);
     }
 
     @Override
-    public ShellCommand getCommand() {
+    public ShellCommand getAsCommand() {
         return this;
     }
 

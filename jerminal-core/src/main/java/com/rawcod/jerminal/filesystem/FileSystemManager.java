@@ -1,9 +1,7 @@
 package com.rawcod.jerminal.filesystem;
 
-import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.rawcod.jerminal.collections.trie.TrieView;
-import com.rawcod.jerminal.filesystem.entry.EntryFilters;
 import com.rawcod.jerminal.filesystem.entry.ShellEntry;
 import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteErrors;
@@ -44,18 +42,14 @@ public class FileSystemManager {
     }
 
     public ParseEntryReturnValue parsePathToCommand(String rawPath) {
-        return parsePath(rawPath, EntryFilters.FILE_FILTER);
+        return doParsePath(rawPath, false);
     }
 
     public ParseEntryReturnValue parsePathToDirectory(String rawPath) {
-        return parsePath(rawPath, EntryFilters.DIRECTORY_FILTER);
+        return doParsePath(rawPath, true);
     }
 
-    public ParseEntryReturnValue parsePath(String rawPath) {
-        return parsePath(rawPath, EntryFilters.NO_FILTER);
-    }
-
-    public ParseEntryReturnValue parsePath(String rawPath, Predicate<ShellEntry> filter) {
+    private ParseEntryReturnValue doParsePath(String rawPath, boolean directory) {
         final boolean startsFromRoot = !rawPath.isEmpty() && rawPath.charAt(0) == DELIMITER;
         final String pathToSplit = startsFromRoot ? rawPath.substring(1) : rawPath;
 
@@ -64,9 +58,9 @@ public class FileSystemManager {
 
         // First check if rawPath is a global commands.
         // It may only be a global command if splitPath only has 1 entry that doesn't start from root.
-        if (splitPath.size() == 1 && !startsFromRoot) {
+        if (!directory && splitPath.size() == 1 && !startsFromRoot) {
             final String rawEntry = splitPath.get(0);
-            final ParseEntryReturnValue globalCommandReturnValue = globalCommandManager.parseGlobalCommand(rawEntry, filter);
+            final ParseEntryReturnValue globalCommandReturnValue = globalCommandManager.parseGlobalCommand(rawEntry);
             if (globalCommandReturnValue.isSuccess()) {
                 return globalCommandReturnValue;
             }
@@ -80,11 +74,16 @@ public class FileSystemManager {
             return getLastDirReturnValue;
         }
 
-        final ShellDirectory dir = getLastDirReturnValue.getSuccess().getEntry().getDirectory();
+        final ShellDirectory dir = getLastDirReturnValue.getSuccess().getEntry().getAsDirectory();
 
         // Parse the last entry in the path according to the filter.
         final String lastEntry = splitPath.get(splitPath.size() - 1);
-        final ParseEntryReturnValue returnValue = dir.getEntryManager().parseEntry(lastEntry, filter);
+        final ParseEntryReturnValue returnValue;
+        if (directory) {
+            returnValue = dir.getEntryManager().parseDirectory(lastEntry);
+        } else {
+            returnValue = dir.getEntryManager().parseCommand(lastEntry);
+        }
         if (returnValue.isFailure()) {
             return ParseEntryReturnValue.failure(returnValue.getFailure());
         }
@@ -102,25 +101,21 @@ public class FileSystemManager {
                 return returnValue;
             }
 
-            dir = returnValue.getSuccess().getEntry().getDirectory();
+            dir = returnValue.getSuccess().getEntry().getAsDirectory();
         }
 
         return ParseEntryReturnValue.success(dir);
     }
 
-    public AutoCompleteReturnValue autoCompletePathToCommand(String rawPath) {
-        return autoCompletePath(rawPath, EntryFilters.FILE_FILTER);
-    }
-
     public AutoCompleteReturnValue autoCompletePathToDirectory(String rawPath) {
-        return autoCompletePath(rawPath, EntryFilters.DIRECTORY_FILTER);
+        return doAutoCompletePath(rawPath, true);
     }
 
     public AutoCompleteReturnValue autoCompletePath(String rawPath) {
-        return autoCompletePath(rawPath, EntryFilters.NO_FILTER);
+        return doAutoCompletePath(rawPath, false);
     }
 
-    public AutoCompleteReturnValue autoCompletePath(String rawPath, Predicate<ShellEntry> filter) {
+    private AutoCompleteReturnValue doAutoCompletePath(String rawPath, boolean directory) {
         // Parse the path until the last delimiter, after which we autoComplete the remaining arg.
         final int lastIndexOfDelimiter = rawPath.lastIndexOf(DELIMITER);
         final String pathToParse = rawPath.substring(0, lastIndexOfDelimiter != - 1 ? lastIndexOfDelimiter : 0);
@@ -134,20 +129,26 @@ public class FileSystemManager {
             if (returnValue.isFailure()) {
                 return AutoCompleteErrors.parseError(returnValue.getFailure());
             }
-            lastDir = returnValue.getSuccess().getEntry().getDirectory();
+            lastDir = returnValue.getSuccess().getEntry().getAsDirectory();
         }
 
         // AutoComplete the last entry along the path.
-        final AutoCompleteReturnValue entryReturnValue = lastDir.getEntryManager().autoCompleteEntry(autoCompleteArg, filter);
+        final AutoCompleteReturnValue entryReturnValue;
+        if (directory) {
+            entryReturnValue = lastDir.getEntryManager().autoCompleteDirectory(autoCompleteArg);
+        } else {
+            entryReturnValue = lastDir.getEntryManager().autoCompleteEntry(autoCompleteArg);
+        }
 
         // If pathToParse was empty, then autoCompleteArg could be a global command.
         final AutoCompleteReturnValue returnValue;
-        if (pathToParse.isEmpty()) {
-            final AutoCompleteReturnValue globalCommandReturnValue = globalCommandManager.autoCompleteGlobalCommand(autoCompleteArg, filter);
+        if (!directory && pathToParse.isEmpty()) {
+            final AutoCompleteReturnValue globalCommandReturnValue = globalCommandManager.autoCompleteGlobalCommand(autoCompleteArg);
             returnValue = mergeAutoCompleteReturnValues(entryReturnValue, globalCommandReturnValue);
         } else {
             returnValue = entryReturnValue;
         }
+
         return returnValue;
     }
 

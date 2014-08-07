@@ -24,10 +24,11 @@ public final class ParseErrors {
         ));
     }
 
-    public static ParseEntryReturnValue directoryDoesNotContainEntry(String directoryName, String entry) {
+    public static ParseEntryReturnValue directoryDoesNotContainEntry(String directoryName, String entry, boolean directory) {
+        final String entryType = directory ? "directory" : "command";
         return ParseEntryReturnValue.failure(from(
             ParseError.INVALID_ENTRY,
-            "Parse error: Directory '%s' doesn't contain entry '%s'.", directoryName, entry
+            "Parse error: Directory '%s' doesn't contain %s '%s'.", directoryName, entryType, entry
         ));
     }
 
@@ -38,10 +39,12 @@ public final class ParseErrors {
         ));
     }
 
-    public static ParseEntryReturnValue invalidAccessToEntry(String directoryName, String entry) {
+    public static ParseEntryReturnValue invalidAccessToEntry(String entry, boolean directory) {
+        final String desiredEntryType = directory ? "directory" : "command";
+        final String actualEntryType = directory ? "command" : "directory";
         return ParseEntryReturnValue.failure(from(
             ParseError.INVALID_ACCESS_TO_ENTRY,
-            "Parse error: Invalid access from directory '%s' to entry '%s'.", directoryName, entry
+            "Parse error: '%s' is a %s, not a %s!", entry, actualEntryType, desiredEntryType
         ));
     }
 

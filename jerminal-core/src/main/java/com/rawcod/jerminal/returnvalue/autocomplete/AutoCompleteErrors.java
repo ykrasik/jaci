@@ -75,11 +75,12 @@ public final class AutoCompleteErrors {
         );
     }
 
-    public static AutoCompleteReturnValue noPossibleValuesForDirectoryWithPrefix(String directoryName, String prefix) {
+    public static AutoCompleteReturnValue noPossibleValuesForDirectoryWithPrefix(String directoryName, String prefix, boolean directory) {
+        final String entryType = directory ? "directories" : "entries";
         return AutoCompleteReturnValue.failure(
             from(
                 AutoCompleteError.NO_POSSIBLE_VALUES,
-                "AutoComplete error: No child entries possible for directory='%s', prefix='%s'", directoryName, prefix
+                "AutoComplete error: Directory '%s' doesn't contain any %s starting with '%s'", directoryName, entryType, prefix
             )
         );
     }
