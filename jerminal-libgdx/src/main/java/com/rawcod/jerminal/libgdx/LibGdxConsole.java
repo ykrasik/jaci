@@ -33,7 +33,7 @@ public class LibGdxConsole implements InputProcessor {
         this.toggleKeycode = toggleKeycode > 0 ? toggleKeycode : -2;
 
         this.terminal = new LibGdxTerminal(width, height, maxBufferEntries, widgetFactory, this);
-        this.shell = new Shell(fileSystem, maxCommandHistory, new TerminalOutputHandler(terminal));
+        this.shell = new Shell(new TerminalOutputHandler(terminal), fileSystem, maxCommandHistory);
     }
 
     public void setListener(ConsoleActivationListener listener) {

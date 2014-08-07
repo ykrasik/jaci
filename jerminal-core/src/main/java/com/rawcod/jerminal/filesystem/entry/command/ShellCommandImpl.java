@@ -8,9 +8,9 @@ import com.rawcod.jerminal.command.parameters.manager.CommandParamManager;
 import com.rawcod.jerminal.filesystem.entry.AbstractShellEntry;
 import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
 import com.rawcod.jerminal.returnvalue.execute.executor.ExecutorReturnValue;
+import com.rawcod.jerminal.returnvalue.execute.executor.ExecutorReturnValue.ExecutorReturnValueFailure;
+import com.rawcod.jerminal.returnvalue.execute.executor.ExecutorReturnValue.ExecutorReturnValueSuccess;
 import com.rawcod.jerminal.returnvalue.execute.flow.ExecuteReturnValue;
-import com.rawcod.jerminal.returnvalue.execute.flow.ExecuteReturnValueFailure;
-import com.rawcod.jerminal.returnvalue.execute.flow.ExecuteReturnValueSuccess;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -82,10 +82,10 @@ public class ShellCommandImpl extends AbstractShellEntry implements ShellCommand
 
     private ExecuteReturnValue translateReturnValue(ExecutorReturnValue returnValue, List<String> outputBuffer) {
         if (returnValue.isSuccess()) {
-            final ExecuteReturnValueSuccess success = returnValue.getSuccess();
+            final ExecutorReturnValueSuccess success = returnValue.getSuccess();
             return ExecuteReturnValue.success(success.getReturnValue(), outputBuffer);
         } else {
-            final ExecuteReturnValueFailure failure = returnValue.getFailure();
+            final ExecutorReturnValueFailure failure = returnValue.getFailure();
             return ExecuteReturnValue.failure(failure.getErrorMessage(), outputBuffer);
         }
     }

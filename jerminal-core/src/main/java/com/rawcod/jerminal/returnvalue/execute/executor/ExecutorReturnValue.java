@@ -6,8 +6,8 @@ import com.rawcod.jerminal.returnvalue.Failable;
 import com.rawcod.jerminal.returnvalue.FailureImpl;
 import com.rawcod.jerminal.returnvalue.ReturnValueImpl;
 import com.rawcod.jerminal.returnvalue.SuccessImpl;
-import com.rawcod.jerminal.returnvalue.execute.flow.ExecuteReturnValueFailure;
-import com.rawcod.jerminal.returnvalue.execute.flow.ExecuteReturnValueSuccess;
+import com.rawcod.jerminal.returnvalue.execute.executor.ExecutorReturnValue.ExecutorReturnValueFailure;
+import com.rawcod.jerminal.returnvalue.execute.executor.ExecutorReturnValue.ExecutorReturnValueSuccess;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -15,7 +15,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * User: ykrasik
  * Date: 05/01/14
  */
-public class ExecutorReturnValue extends ReturnValueImpl<ExecuteReturnValueSuccess, ExecuteReturnValueFailure> {
+public class ExecutorReturnValue extends ReturnValueImpl<ExecutorReturnValueSuccess, ExecutorReturnValueFailure> {
     private ExecutorReturnValue(Failable returnValue) {
         super(returnValue);
     }

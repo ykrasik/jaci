@@ -19,18 +19,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Time: 19:37
  */
 public class FileSystemManager {
-    private static final char DELIMITER = '/';
-    private static final Splitter SPLITTER = Splitter.on(DELIMITER);
+    private static final Splitter SPLITTER = Splitter.on(ShellDirectory.DELIMITER);
+    private static final String DELIMITER_STR = String.valueOf(ShellDirectory.DELIMITER);
 
-    private final ShellFileSystem fileSystem;
+    private final ShellDirectory root;
     private final GlobalCommandManager globalCommandManager;
 
     private ShellDirectory currentDirectory;
 
-    public FileSystemManager(ShellFileSystem fileSystem) {
-        this.fileSystem = fileSystem;
-        this.globalCommandManager = new GlobalCommandManager(fileSystem.getGlobalCommands());
-        this.currentDirectory = fileSystem.getRoot();
+    public FileSystemManager(ShellDirectory root, GlobalCommandManager globalCommandManager) {
+        this.root = root;
+        this.globalCommandManager = globalCommandManager;
+        this.currentDirectory = root;
     }
 
     public ShellDirectory getCurrentDirectory() {
@@ -50,15 +50,19 @@ public class FileSystemManager {
     }
 
     private ParseEntryReturnValue doParsePath(String rawPath, boolean directory) {
-        final boolean startsFromRoot = !rawPath.isEmpty() && rawPath.charAt(0) == DELIMITER;
-        final String pathToSplit = startsFromRoot ? rawPath.substring(1) : rawPath;
+        // Remove leading and trailing '/'.
+        final boolean startsFromRoot = rawPath.startsWith(DELIMITER_STR);
+        final int startingDelimiterIndex = startsFromRoot ? 1 : 0;
+        final boolean endsWithDelimiter = rawPath.endsWith(DELIMITER_STR);
+        final int endingDelimiterIndex = endsWithDelimiter ? Math.max(rawPath.length() - 1, startingDelimiterIndex) : rawPath.length();
+        final String pathToSplit = rawPath.substring(startingDelimiterIndex, endingDelimiterIndex);
 
         // Split the given path according to delimiter.
         final List<String> splitPath = SPLITTER.splitToList(pathToSplit);
 
         // First check if rawPath is a global commands.
         // It may only be a global command if splitPath only has 1 entry that doesn't start from root.
-        if (!directory && splitPath.size() == 1 && !startsFromRoot) {
+        if (!directory && !startsFromRoot && splitPath.size() == 1) {
             final String rawEntry = splitPath.get(0);
             final ParseEntryReturnValue globalCommandReturnValue = globalCommandManager.parseGlobalCommand(rawEntry);
             if (globalCommandReturnValue.isSuccess()) {
@@ -74,15 +78,15 @@ public class FileSystemManager {
             return getLastDirReturnValue;
         }
 
-        final ShellDirectory dir = getLastDirReturnValue.getSuccess().getEntry().getAsDirectory();
+        final ShellDirectory lastDir = getLastDirReturnValue.getSuccess().getEntry().getAsDirectory();
 
         // Parse the last entry in the path according to the filter.
-        final String lastEntry = splitPath.get(splitPath.size() - 1);
+        final String rawEntry = splitPath.get(splitPath.size() - 1);
         final ParseEntryReturnValue returnValue;
         if (directory) {
-            returnValue = dir.getEntryManager().parseDirectory(lastEntry);
+            returnValue = lastDir.parseDirectory(rawEntry);
         } else {
-            returnValue = dir.getEntryManager().parseCommand(lastEntry);
+            returnValue = lastDir.parseCommand(rawEntry);
         }
         if (returnValue.isFailure()) {
             return ParseEntryReturnValue.failure(returnValue.getFailure());
@@ -93,9 +97,9 @@ public class FileSystemManager {
     }
 
     private ParseEntryReturnValue getLastDirectory(List<String> path, boolean startsFromRoot) {
-        ShellDirectory dir = startsFromRoot ? fileSystem.getRoot() : currentDirectory;
-        for (String entry : path) {
-            final ParseEntryReturnValue returnValue = dir.getEntryManager().parseDirectory(entry);
+        ShellDirectory dir = startsFromRoot ? root : currentDirectory;
+        for (final String entry : path) {
+            final ParseEntryReturnValue returnValue = dir.parseDirectory(entry);
             if (returnValue.isFailure()) {
                 // Invalid directory along the path.
                 return returnValue;
@@ -117,7 +121,7 @@ public class FileSystemManager {
 
     private AutoCompleteReturnValue doAutoCompletePath(String rawPath, boolean directory) {
         // Parse the path until the last delimiter, after which we autoComplete the remaining arg.
-        final int lastIndexOfDelimiter = rawPath.lastIndexOf(DELIMITER);
+        final int lastIndexOfDelimiter = rawPath.lastIndexOf(ShellDirectory.DELIMITER);
         final String pathToParse = rawPath.substring(0, lastIndexOfDelimiter != - 1 ? lastIndexOfDelimiter : 0);
         final String autoCompleteArg = rawPath.substring(lastIndexOfDelimiter + 1);
 
@@ -135,14 +139,15 @@ public class FileSystemManager {
         // AutoComplete the last entry along the path.
         final AutoCompleteReturnValue entryReturnValue;
         if (directory) {
-            entryReturnValue = lastDir.getEntryManager().autoCompleteDirectory(autoCompleteArg);
+            entryReturnValue = lastDir.autoCompleteDirectory(autoCompleteArg);
         } else {
-            entryReturnValue = lastDir.getEntryManager().autoCompleteEntry(autoCompleteArg);
+            entryReturnValue = lastDir.autoCompleteEntry(autoCompleteArg);
         }
 
-        // If pathToParse was empty, then autoCompleteArg could be a global command.
+        // If pathToParse was empty and the original path doesn't start with a delimiter,
+        // autoCompleteArg could be a global command.
         final AutoCompleteReturnValue returnValue;
-        if (!directory && pathToParse.isEmpty()) {
+        if (!directory && pathToParse.isEmpty() && !rawPath.startsWith(DELIMITER_STR)) {
             final AutoCompleteReturnValue globalCommandReturnValue = globalCommandManager.autoCompleteGlobalCommand(autoCompleteArg);
             returnValue = mergeAutoCompleteReturnValues(entryReturnValue, globalCommandReturnValue);
         } else {
@@ -151,44 +156,6 @@ public class FileSystemManager {
 
         return returnValue;
     }
-
-    // FIXME: Figure this out.
-//    private AutoCompleteReturnValue autoCompleteEntry(ShellDirectory lastDir,
-//                                                      Predicate<ShellEntry> filter,
-//                                                      String rawEntry) {
-//        // Let the last directory along the path autoComplete the arg.
-//        final AutoCompleteReturnValue returnValue = lastDir.getEntryManager().autoCompleteEntry(rawEntry, filter);
-//        if (returnValue.isFailure()) {
-//            return AutoCompleteReturnValue.failure(returnValue.getFailure());
-//        }
-//
-//
-//        // A successfull autoComplete either has 1 or more possibilities.
-//        // 0 possibilities is considered a failed autoComplete.
-//        final AutoCompleteReturnValueSuccess success = returnValue.getSuccess();
-//        final TrieView possibilitiesTrieView = success.getPossibilitiesTrieView();
-//        final int numPossibilities = possibilitiesTrieView.getNumWords();
-//        if (numPossibilities > 1) {
-//            // More then 1 possibility available, no further processing should be done here.
-//            return returnValue;
-//        }
-//
-//        // There was only 1 way of autoCompleting the entry.
-//        // Let's try to be as helpful as we can:
-//        // * If it's a command, add a space after.
-//        // * If it's a directory, add a delimiter after.
-//        final String autoCompletedArg = possibilitiesTrieView.getLongestPrefix();
-//        final ParseEntryReturnValue parseEntryReturnValue = lastDir.getEntryManager().parseEntry(autoCompletedArg, context);
-//        if (parseEntryReturnValue.isFailure()) {
-//            // AutoComplete returned a single autoComplete possibility that gives us an invalid entry?!
-//            return AutoCompleteErrors.internalError("AutoComplete suggested an invalid entry! entry='%s'", autoCompletedArg);
-//        }
-//
-//        // Return an updated autoCompleteAddition according to the entry type.
-//        final ShellEntry entry = parseEntryReturnValue.getSuccess().getEntry();
-//        final char autoCompleteSuffix = entry.isDirectory() ? DELIMITER : ' ';
-//        return AutoCompleteReturnValue.successSingle(autoCompleteAddition + autoCompleteSuffix);
-//    }
 
     private AutoCompleteReturnValue mergeAutoCompleteReturnValues(AutoCompleteReturnValue entryReturnValue,
                                                                   AutoCompleteReturnValue globalCommandReturnValue) {

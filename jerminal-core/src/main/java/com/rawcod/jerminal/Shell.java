@@ -3,8 +3,10 @@ package com.rawcod.jerminal;
 import com.google.common.base.Optional;
 import com.rawcod.jerminal.collections.trie.TrieView;
 import com.rawcod.jerminal.command.CommandArgs;
+import com.rawcod.jerminal.command.factory.DefaultGlobalCommandFactory;
 import com.rawcod.jerminal.command.parameters.ParseParamContext;
 import com.rawcod.jerminal.filesystem.FileSystemManager;
+import com.rawcod.jerminal.filesystem.GlobalCommandManager;
 import com.rawcod.jerminal.filesystem.ShellFileSystem;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
 import com.rawcod.jerminal.output.OutputHandler;
@@ -24,21 +26,32 @@ import com.rawcod.jerminal.util.CommandLineUtils;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /**
 * User: ykrasik
 * Date: 05/01/14
 */
 public class Shell {
+    private final OutputProcessor outputProcessor;
     private final FileSystemManager fileSystemManager;
     private final ShellCommandHistory commandHistory;
 
-    private final OutputProcessor outputProcessor;
-
-    public Shell(ShellFileSystem fileSystem, int maxCommandHistory, OutputHandler outputHandler) {
-        this.fileSystemManager = new FileSystemManager(fileSystem);
-        this.commandHistory = new ShellCommandHistory(maxCommandHistory);
+    public Shell(OutputHandler outputHandler, ShellFileSystem fileSystem, int maxCommandHistory) {
         this.outputProcessor = new OutputProcessor(outputHandler);
+        final GlobalCommandManager globalCommandManager = new GlobalCommandManager();
+        this.fileSystemManager = new FileSystemManager(fileSystem.getRoot(), globalCommandManager);
+        createGlobalCommands(globalCommandManager, fileSystem);
+        this.commandHistory = new ShellCommandHistory(maxCommandHistory);
+    }
+
+    private void createGlobalCommands(GlobalCommandManager globalCommandManager, ShellFileSystem fileSystem) {
+        final DefaultGlobalCommandFactory defaultGlobalCommandFactory = new DefaultGlobalCommandFactory(fileSystemManager, outputProcessor);
+        final Set<ShellCommand> globalCommands = defaultGlobalCommandFactory.createDefaultGlobalCommands();
+        globalCommands.addAll(fileSystem.getGlobalCommands());
+        for (ShellCommand globalCommand : globalCommands) {
+            globalCommandManager.addGlobalCommand(globalCommand);
+        }
     }
 
     public void clearCommandLine() {

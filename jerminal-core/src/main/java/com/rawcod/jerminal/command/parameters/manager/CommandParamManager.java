@@ -53,7 +53,7 @@ public class CommandParamManager {
                 throw new ShellException("Duplicate param detected: '%s'", paramName);
             }
 
-            paramsTrie.put(paramName, param);
+            paramsTrie.put(paramName + '=', param);
 
             if (param.getType() == ParamType.MANDATORY) {
                 mandatoryParams.add(param);

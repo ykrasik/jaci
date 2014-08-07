@@ -16,5 +16,4 @@ public interface TrieView {
 
     TrieView subTrie(String prefix);
     TrieView union(TrieView other);
-    TrieView wordSuffix(String wordSuffix);
 }

@@ -39,7 +39,9 @@ public class OptionalParam<T> implements CommandParam {
 
     @Override
     public String getExternalForm() {
-        return '[' + delegate.getExternalForm() + ']';
+        // Replace the original param's braces with '[]'.
+        final String originalExternalForm = delegate.getExternalForm();
+        return '[' + originalExternalForm.substring(1, originalExternalForm.length() - 1) + ']';
     }
 
     @Override

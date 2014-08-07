@@ -22,26 +22,34 @@ import com.rawcod.jerminal.filesystem.entry.view.ShellEntryViewImpl;
 import com.rawcod.jerminal.output.OutputProcessor;
 import com.rawcod.jerminal.returnvalue.execute.executor.ExecutorReturnValue;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * User: ykrasik
  * Date: 27/07/2014
  * Time: 23:55
  */
-public class GlobalCommandFactory {
+public class DefaultGlobalCommandFactory {
     private static final String CHANGE_DIRECTORY_COMMAND_NAME = "cd";
     private static final String LIST_DIRECTORY_COMMAND_NAME = "ls";
     private static final String DESCRIBE_COMMAND_COMMAND_NAME = "man";
 
+    private static final ShellEntryViewComparator COMPARATOR = new ShellEntryViewComparator();
+
     private final FileSystemManager fileSystemManager;
     private final OutputProcessor outputProcessor;
 
-    public GlobalCommandFactory(FileSystemManager fileSystemManager, OutputProcessor outputProcessor) {
+    public DefaultGlobalCommandFactory(FileSystemManager fileSystemManager, OutputProcessor outputProcessor) {
         this.fileSystemManager = fileSystemManager;
         this.outputProcessor = outputProcessor;
+    }
+
+    public Set<ShellCommand> createDefaultGlobalCommands() {
+        final Set<ShellCommand> globalCommands = new HashSet<>();
+        globalCommands.add(createChangeDirectoryCommand());
+        globalCommands.add(createListDirectoryCommand());
+        globalCommands.add(createDescribeCommandCommand());
+        return globalCommands;
     }
 
     public ShellCommand createChangeDirectoryCommand() {
@@ -99,17 +107,19 @@ public class GlobalCommandFactory {
     }
 
     private ShellEntryView listDirectory(ShellDirectory directory, boolean recursive) {
-        final List<ShellEntryView> children = new ArrayList<>(directory.getChildren().size());
-        for (ShellEntry child : directory.getChildren()) {
+        final Collection<ShellEntry> children = directory.getChildren();
+        final List<ShellEntryView> viewChildren = new ArrayList<>(children.size());
+        for (ShellEntry child : children) {
             final ShellEntryView childToAdd;
             if (child.isDirectory() && recursive) {
                 childToAdd = listDirectory(child.getAsDirectory(), true);
             } else {
                 childToAdd = new ShellEntryViewImpl(child.getName(), child.getDescription(), child.isDirectory(), Collections.<ShellEntryView>emptyList());
             }
-            children.add(childToAdd);
+            viewChildren.add(childToAdd);
         }
-        return new ShellEntryViewImpl(directory.getName(), directory.getDescription(), true, children);
+        Collections.sort(viewChildren, COMPARATOR);
+        return new ShellEntryViewImpl(directory.getName(), directory.getDescription(), true, viewChildren);
     }
 
     public ShellCommand createDescribeCommandCommand() {
@@ -145,5 +155,18 @@ public class GlobalCommandFactory {
             paramViews.add(paramView);
         }
         return paramViews;
+    }
+
+    private static class ShellEntryViewComparator implements Comparator<ShellEntryView> {
+        @Override
+        public int compare(ShellEntryView o1, ShellEntryView o2) {
+            if (o1.isDirectory() && !o2.isDirectory()) {
+                return 1;
+            }
+            if (o2.isDirectory() && !o1.isDirectory()) {
+                return -1;
+            }
+            return o1.getName().compareTo(o2.getName());
+        }
     }
 }

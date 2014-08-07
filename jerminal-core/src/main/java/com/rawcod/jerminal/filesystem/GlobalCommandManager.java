@@ -12,7 +12,8 @@ import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.ParseErrors;
 import com.rawcod.jerminal.returnvalue.parse.entry.ParseEntryReturnValue;
 
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * User: ykrasik
@@ -20,17 +21,24 @@ import java.util.Set;
  * Time: 22:58
  */
 public class GlobalCommandManager {
-    private final Trie<ShellEntry> globalCommandsTrie;
+    private final Map<String, ShellCommand> globalCommandsMap;
+    private final Trie<ShellCommand> globalCommandsTrie;
 
-    public GlobalCommandManager(Set<ShellCommand> globalCommands) {
+    public GlobalCommandManager() {
+        this.globalCommandsMap = new HashMap();
         this.globalCommandsTrie = new TrieImpl<>();
-        for (ShellCommand globalCommand : globalCommands) {
-            globalCommandsTrie.put(globalCommand.getName(), globalCommand);
-        }
+    }
+
+    public void addGlobalCommand(ShellCommand globalCommand) {
+        final String name = globalCommand.getName();
+        globalCommandsMap.put(name, globalCommand);
+
+        // Add a space for command autoCompletion.
+        globalCommandsTrie.put(name + ' ', globalCommand);
     }
 
     public ParseEntryReturnValue parseGlobalCommand(String rawEntry) {
-        final ShellEntry globalCommand = globalCommandsTrie.get(rawEntry);
+        final ShellEntry globalCommand = globalCommandsMap.get(rawEntry);
         if (globalCommand != null) {
             return ParseEntryReturnValue.success(globalCommand);
         }
