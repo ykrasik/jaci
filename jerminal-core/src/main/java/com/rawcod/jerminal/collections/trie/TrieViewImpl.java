@@ -1,5 +1,6 @@
 package com.rawcod.jerminal.collections.trie;
 
+import com.google.common.base.Optional;
 import com.rawcod.jerminal.collections.trie.node.TrieNode;
 import com.rawcod.jerminal.collections.trie.node.UnionTrieNodeImpl;
 
@@ -62,16 +63,20 @@ public class TrieViewImpl implements TrieView {
     }
 
     @Override
-    public TrieView subTrie(String prefix) {
+    public Optional<TrieView> subTrie(String prefix) {
         final TrieNode node = getNode(prefix);
         if (node == null) {
-            return null;
+            return Optional.absent();
         }
-        return new TrieViewImpl(node, triePrefix + prefix);
+        return Optional.<TrieView>of(new TrieViewImpl(node, triePrefix + prefix));
     }
 
     @Override
     public TrieView union(TrieView other) {
+        if (other.isEmpty()) {
+            return this;
+        }
+
         // I couldn't find a better solution other then this downcasting...
         final TrieNode unionRoot = new UnionTrieNodeImpl(root, ((TrieViewImpl) other).root);
         return new TrieViewImpl(unionRoot, triePrefix);

@@ -1,5 +1,7 @@
 package com.rawcod.jerminal.collections.trie;
 
+import com.google.common.base.Optional;
+
 import java.util.List;
 
 /**
@@ -14,6 +16,6 @@ public interface TrieView {
     List<String> getAllWords();
     String getLongestPrefix();
 
-    TrieView subTrie(String prefix);
+    Optional<TrieView> subTrie(String prefix);
     TrieView union(TrieView other);
 }

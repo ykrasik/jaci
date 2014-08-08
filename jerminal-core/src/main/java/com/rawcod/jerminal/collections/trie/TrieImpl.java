@@ -2,7 +2,6 @@ package com.rawcod.jerminal.collections.trie;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import com.rawcod.jerminal.collections.trie.node.TrieNode;
 import com.rawcod.jerminal.collections.trie.node.TrieNodeImpl;
 import com.rawcod.jerminal.collections.trie.node.ValueTrieNode;
@@ -34,7 +33,7 @@ public class TrieImpl<T> implements Trie<T> {
 
     @Override
     public boolean isEmpty() {
-        return root.getChildren().isEmpty();
+        return !root.isWord() && root.getChildren().isEmpty();
     }
 
     @Override
@@ -51,37 +50,22 @@ public class TrieImpl<T> implements Trie<T> {
 
     @Override
     public List<String> getAllWords() {
-        return getWordsWithFilter(Predicates.<T>alwaysTrue());
-    }
-
-    @Override
-    public List<String> getWordsWithFilter(Predicate<T> filter) {
         final CollectorTrieVisitor<T> collector = new CollectorTrieVisitor<>();
-        visitWordsByFilter(collector, filter);
+        visitAllWords(collector);
         return collector.getWords();
     }
 
     @Override
     public List<T> getAllValues() {
-        return getValuesWithFilter(Predicates.<T>alwaysTrue());
-    }
-
-    @Override
-    public List<T> getValuesWithFilter(Predicate<T> filter) {
         final CollectorTrieVisitor<T> collector = new CollectorTrieVisitor<>();
-        visitWordsByFilter(collector, filter);
+        visitAllWords(collector);
         return collector.getValues();
     }
 
     @Override
     public void visitAllWords(TrieVisitor<T> visitor) {
-        visitWordsByFilter(visitor, Predicates.<T>alwaysTrue());
-    }
-
-    @Override
-    public void visitWordsByFilter(TrieVisitor<T> visitor, Predicate<T> filter) {
         final StringBuilder prefixBuilder = new StringBuilder(triePrefix);
-        visitWordsFromNodeByFilter(prefixBuilder, root, filter, visitor);
+        visitWordsFromNodeByFilter(prefixBuilder, root, visitor);
     }
 
     @Override
@@ -91,10 +75,12 @@ public class TrieImpl<T> implements Trie<T> {
         TrieNode currentNode = root;
         while (currentNode.getChildren().size() == 1 && !currentNode.isWord()) {
             // currentNode only has 1 child and is not a word.
-            prefixBuilder.append(currentNode.getCharacter());
             for (TrieNode child : currentNode.getChildren()) {
                 // Move on to currentNode's only child.
                 currentNode = child;
+
+                // Append child's character to prefix.
+                prefixBuilder.append(currentNode.getCharacter());
             }
         }
 
@@ -223,7 +209,6 @@ public class TrieImpl<T> implements Trie<T> {
     @SuppressWarnings("unchecked")
     private void visitWordsFromNodeByFilter(StringBuilder prefixBuilder,
                                             ValueTrieNode<T> node,
-                                            Predicate<T> filter,
                                             TrieVisitor<T> visitor) {
         // Started processing node, push it's character to the prefix.
         if (node != root) {
@@ -232,11 +217,11 @@ public class TrieImpl<T> implements Trie<T> {
         }
 
         // Visit the node, if it is accepted.
-        visitIfNodeAccepted(prefixBuilder, node, filter, visitor);
+        visitIfNodeAccepted(prefixBuilder, node, visitor);
 
         // Visit all the node's children.
         for (TrieNode child : node.getChildren()) {
-            visitWordsFromNodeByFilter(prefixBuilder, (ValueTrieNode<T>) child, filter, visitor);
+            visitWordsFromNodeByFilter(prefixBuilder, (ValueTrieNode<T>) child, visitor);
         }
 
         // Done processing node, pop it's character from the prefix.
@@ -247,10 +232,9 @@ public class TrieImpl<T> implements Trie<T> {
 
     private void visitIfNodeAccepted(StringBuilder prefixBuilder,
                                      ValueTrieNode<T> node,
-                                     Predicate<T> filter,
                                      TrieVisitor<T> visitor) {
         final T value = node.getValue();
-        if (value != null && filter.apply(value)) {
+        if (value != null) {
             final String word = prefixBuilder.toString();
             visitor.visit(word, value);
         }

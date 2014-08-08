@@ -18,13 +18,8 @@ public interface ReadOnlyTrie<T> {
     T get(String word);
 
     List<String> getAllWords();
-    List<String> getWordsWithFilter(Predicate<T> filter);
-
     List<T> getAllValues();
-    List<T> getValuesWithFilter(Predicate<T> filter);
-
     void visitAllWords(TrieVisitor<T> visitor);
-    void visitWordsByFilter(TrieVisitor<T> visitor, Predicate<T> filter);
 
     String getLongestPrefix();
 

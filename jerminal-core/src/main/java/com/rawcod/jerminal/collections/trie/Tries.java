@@ -35,7 +35,11 @@ public final class Tries {
             // No such prefix in trie.
             return Collections.emptyList();
         }
-        return prefixTrie.get().getWordsWithFilter(filter);
+        final Optional<ReadOnlyTrie<T>> filteredTrie = prefixTrie.get().filter(filter);
+        if (!filteredTrie.isPresent()) {
+            return Collections.emptyList();
+        }
+        return filteredTrie.get().getAllWords();
     }
 
     public static <T> List<T> getValuesByPrefix(ReadOnlyTrie<T> trie, String prefix) {
@@ -50,7 +54,11 @@ public final class Tries {
             // No such prefix in trie.
             return Collections.emptyList();
         }
-        return prefixTrie.get().getValuesWithFilter(filter);
+        final Optional<ReadOnlyTrie<T>> filteredTrie = prefixTrie.get().filter(filter);
+        if (!filteredTrie.isPresent()) {
+            return Collections.emptyList();
+        }
+        return filteredTrie.get().getAllValues();
     }
 
     public static <T> Optional<TrieView> getTrieView(ReadOnlyTrie<T> trie, String prefix) {
@@ -71,12 +79,10 @@ public final class Tries {
             // No such prefix in trie.
             return Optional.absent();
         }
-
         final Optional<ReadOnlyTrie<T>> filteredTrie = prefixTrie.get().filter(filter);
         if (!filteredTrie.isPresent()) {
             return Optional.absent();
         }
-
         return Optional.of(filteredTrie.get().trieView());
     }
 }

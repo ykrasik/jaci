@@ -20,6 +20,7 @@ public class CollectorTrieVisitor<T> implements TrieVisitor<T> {
     @Override
     public void visit(String word, T value) {
         words.add(word);
+        values.add(value);
     }
 
     public List<String> getWords() {

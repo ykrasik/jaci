@@ -36,12 +36,14 @@ public class CommandParamManager {
     private final List<CommandParam> allParams;
     private final List<CommandParam> mandatoryParams;
 
-    private final Trie<CommandParam> paramsTrie;
+    private final Map<String, CommandParam> paramMap;
+    private final Trie<CommandParam> paramTrie;
 
     public CommandParamManager(List<CommandParam> params) {
         this.allParams = Collections.unmodifiableList(checkNotNull(params, "params"));
         this.mandatoryParams = new ArrayList<>(params.size());
-        this.paramsTrie = new TrieImpl<>();
+        this.paramMap = new HashMap<>(params.size());
+        this.paramTrie = new TrieImpl<>();
 
         // Analyze params
         for (CommandParam param : params) {
@@ -49,11 +51,12 @@ public class CommandParamManager {
             if (paramName.indexOf(ARG_VALUE_DELIMITER) != -1) {
                 throw new ShellException("Illegal param name: '%s'. Param names cannot contain '%c'!", paramName, ARG_VALUE_DELIMITER);
             }
-            if (paramsTrie.contains(paramName)) {
+            if (paramMap.containsKey(paramName)) {
                 throw new ShellException("Duplicate param detected: '%s'", paramName);
             }
 
-            paramsTrie.put(paramName + '=', param);
+            paramMap.put(paramName, param);
+            paramTrie.put(paramName + '=', param);
 
             if (param.getType() == ParamType.MANDATORY) {
                 mandatoryParams.add(param);
@@ -145,7 +148,7 @@ public class CommandParamManager {
         // 1. If rawArg contained a '=', the rawValue is considered present and equal to whatever came after the '='.
         // 2. If rawArg didn't contain a '=', the rawValue is considered absent.
         Optional<String> rawValue = Optional.absent();
-        CommandParam param = paramsTrie.get(paramName);
+        CommandParam param = paramMap.get(paramName);
         if (param == null) {
             // There are special convenience cases, where the param name can be omitted.
             if (!containsDelimiter) {
@@ -184,8 +187,7 @@ public class CommandParamManager {
             return AutoCompleteErrors.parseError(parseBoundParams.getFailure());
         }
 
-        final ParseBoundParamsReturnValueSuccess parseBoundParamsSuccess = parseBoundParams.getSuccess();
-        final Map<String, Object> parsedArgs = parseBoundParamsSuccess.getParsedArgs();
+        final Map<String, Object> parsedArgs = parseBoundParams.getSuccess().getParsedArgs();
         return autoCompleteArg(autoCompleteArg, parsedArgs, context);
 
         // FIXME: Figure this out.
@@ -233,7 +235,7 @@ public class CommandParamManager {
         if (containsDelimiter) {
             // rawArg had a '=', we are autoCompleting the param value.
             // The paramName is expected to be valid and unbound.
-            final CommandParam param = paramsTrie.get(rawParamName);
+            final CommandParam param = paramMap.get(rawParamName);
             if (param == null) {
                 return AutoCompleteErrors.invalidParam(rawParamName);
             }
@@ -339,19 +341,22 @@ public class CommandParamManager {
         return param;
     }
 
-    private CommandParam tryDeduceParam(List<CommandParam> paramList, Map<String, Object> parsedArgs) {
+    private CommandParam tryDeduceParam(Collection<CommandParam> params, Map<String, Object> parsedArgs) {
         // If the param list has more then 1 params, deducing the param is not possible.
-        if (paramList.size() != 1) {
+        if (params.size() != 1) {
             return null;
         }
 
         // Make sure param isn't bound yet.
-        final CommandParam param = paramList.get(0);
-        return parsedArgs.containsKey(param.getName()) ? null : param;
+        for (CommandParam param : params) {
+            // Only has 1 param.
+            return parsedArgs.containsKey(param.getName()) ? null : param;
+        }
+        return null;
     }
 
     private AutoCompleteReturnValue autoCompleteParamName(String prefix, Map<String, Object> parsedArgs) {
-        final Optional<TrieView> paramNamesTrieView = Tries.getTrieViewWithFilter(paramsTrie, prefix, new BoundParamsFilter(parsedArgs));
+        final Optional<TrieView> paramNamesTrieView = Tries.getTrieViewWithFilter(paramTrie, prefix, new BoundParamsFilter(parsedArgs));
         if (!paramNamesTrieView.isPresent()) {
             return AutoCompleteErrors.noPossibleValuesForParamNamePrefix(prefix);
         }

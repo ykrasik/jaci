@@ -3,7 +3,6 @@ package com.rawcod.jerminal.command.parameters.bool;
 import com.google.common.base.Supplier;
 import com.rawcod.jerminal.command.parameters.CommandParam;
 import com.rawcod.jerminal.command.parameters.Params;
-import com.rawcod.jerminal.command.parameters.entry.DirectoryParam;
 import com.rawcod.jerminal.command.parameters.optional.OptionalParam;
 
 /**
@@ -21,7 +20,7 @@ public class BooleanParamBuilder {
     }
 
     public CommandParam build() {
-        final CommandParam param = new DirectoryParam(name, description);
+        final CommandParam param = new BooleanParam(name, description);
         if (defaultValueSupplier == null) {
             return param;
         }
