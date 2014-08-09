@@ -1,6 +1,7 @@
 package com.rawcod.jerminal.filesystem.entry.directory;
 
 import com.rawcod.jerminal.filesystem.entry.ShellEntry;
+import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.entry.ParseEntryReturnValue;
 
@@ -16,12 +17,12 @@ public interface ShellDirectory extends ShellEntry {
     String THIS = ".";
     String PARENT = "..";
 
+    ShellDirectory createChildDirectory(String name, String description);
+    void addCommands(ShellCommand... commands);
+
     boolean isEmpty();
     Collection<ShellEntry> getChildren();
     ShellDirectory getParent();
-
-    ShellDirectory addEntries(ShellEntry... entries);
-    ShellDirectory addEntry(ShellEntry entry);
 
     ParseEntryReturnValue parseCommand(String rawCommand);
     ParseEntryReturnValue parseDirectory(String rawDirectory);

@@ -14,7 +14,6 @@ import com.rawcod.jerminal.command.parameters.bool.BooleanParamBuilder;
 import com.rawcod.jerminal.command.parameters.number.IntegerParamBuilder;
 import com.rawcod.jerminal.filesystem.ShellFileSystem;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommandBuilder;
-import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectoryImpl;
 import com.rawcod.jerminal.returnvalue.execute.executor.ExecutorReturnValue;
 
 /**
@@ -57,35 +56,15 @@ public class JerminalLibGdxExample extends ApplicationAdapter {
     private ShellFileSystem createFileSystem() {
         final ShellFileSystem fileSystem = new ShellFileSystem();
 
-        fileSystem.getRoot().addEntry(
-            new ShellDirectoryImpl("nested").addEntries(
-                new ShellDirectoryImpl("d").addEntries(
-                    new ShellDirectoryImpl("1possible"),
-                    new ShellDirectoryImpl("2possible")
-                ),
-                new ShellDirectoryImpl("dir").addEntry(
-                    new ShellDirectoryImpl("singlePossible")
-                ),
-                new ShellDirectoryImpl("dir1").addEntry(
-                    new ShellDirectoryImpl("singlePossible")
-                ),
-                new ShellDirectoryImpl("dir2").addEntry(
-                    new ShellDirectoryImpl("singlePossible")
-                ),
-                new ShellDirectoryImpl("directory").addEntries(
-                    new ShellDirectoryImpl("singlePossible").addEntries(
-                        new ShellDirectoryImpl("multiplePossible1").addEntry(
-                            new ShellDirectoryImpl("singlePossible")
-                        ),
-                        new ShellDirectoryImpl("multiplePossible2").addEntry(
-                            new ShellDirectoryImpl("singlePossible")
-                        )
-                    )
-                )
-            )
-        );
+        fileSystem.add("nested/d/1possible");
+        fileSystem.add("nested/d/2possible");
+        fileSystem.add("nested/dir/singlePossible");
+        fileSystem.add("nested/dir1/singlePossible");
+        fileSystem.add("nested/dir2/singlePossible");
+        fileSystem.add("nested/directory/singlePossible/multiplePossible1/singlePossible");
+        fileSystem.add("nested/directory/singlePossible/multiplePossible2/singlePossible");
 
-        fileSystem.getRoot().addEntries(
+        fileSystem.add(
             new ShellCommandBuilder("cmd")
                 .setDescription("cmd")
                 .addParam(

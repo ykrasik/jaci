@@ -31,7 +31,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Time: 16:37
  */
 public class CommandParamManager {
-    static final char ARG_VALUE_DELIMITER = '=';
+    private static final char ARG_VALUE_DELIMITER = '=';
 
     private final List<CommandParam> allParams;
     private final List<CommandParam> mandatoryParams;
@@ -56,7 +56,14 @@ public class CommandParamManager {
             }
 
             paramMap.put(paramName, param);
-            paramTrie.put(paramName + '=', param);
+
+            final String paramNameWithSuffix;
+            if (param.getType() != ParamType.FLAG) {
+                paramNameWithSuffix = paramName + '=';
+            } else {
+                paramNameWithSuffix = paramName;
+            }
+            paramTrie.put(paramNameWithSuffix, param);
 
             if (param.getType() == ParamType.MANDATORY) {
                 mandatoryParams.add(param);

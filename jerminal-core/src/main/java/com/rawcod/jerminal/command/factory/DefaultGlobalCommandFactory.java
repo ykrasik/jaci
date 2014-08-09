@@ -12,7 +12,7 @@ import com.rawcod.jerminal.command.view.ShellCommandParamView;
 import com.rawcod.jerminal.command.view.ShellCommandParamViewImpl;
 import com.rawcod.jerminal.command.view.ShellCommandView;
 import com.rawcod.jerminal.command.view.ShellCommandViewImpl;
-import com.rawcod.jerminal.filesystem.FileSystemManager;
+import com.rawcod.jerminal.filesystem.CurrentDirectoryContainer;
 import com.rawcod.jerminal.filesystem.entry.ShellEntry;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommandBuilder;
@@ -36,11 +36,11 @@ public class DefaultGlobalCommandFactory {
 
     private static final ShellEntryViewComparator COMPARATOR = new ShellEntryViewComparator();
 
-    private final FileSystemManager fileSystemManager;
+    private final CurrentDirectoryContainer currentDirectoryContainer;
     private final OutputProcessor outputProcessor;
 
-    public DefaultGlobalCommandFactory(FileSystemManager fileSystemManager, OutputProcessor outputProcessor) {
-        this.fileSystemManager = fileSystemManager;
+    public DefaultGlobalCommandFactory(CurrentDirectoryContainer currentDirectoryContainer, OutputProcessor outputProcessor) {
+        this.currentDirectoryContainer = currentDirectoryContainer;
         this.outputProcessor = outputProcessor;
     }
 
@@ -65,7 +65,7 @@ public class DefaultGlobalCommandFactory {
                 @Override
                 public ExecutorReturnValue execute(CommandArgs args, ExecuteContext context) {
                     final ShellDirectory directory = args.getDirectory(dirArgName);
-                    fileSystemManager.setCurrentDirectory(directory);
+                    currentDirectoryContainer.setCurrentDirectory(directory);
                     return success();
                 }
             })
@@ -83,7 +83,7 @@ public class DefaultGlobalCommandFactory {
                     .setOptional(new Supplier<ShellDirectory>() {
                         @Override
                         public ShellDirectory get() {
-                            return fileSystemManager.getCurrentDirectory();
+                            return currentDirectoryContainer.getCurrentDirectory();
                         }
                     })
                     .build()

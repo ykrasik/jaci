@@ -14,25 +14,29 @@ import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.ParseErrors;
 import com.rawcod.jerminal.returnvalue.parse.entry.ParseEntryReturnValue;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * User: ykrasik
  * Date: 06/01/14
  */
 public class ShellDirectoryImpl extends AbstractShellEntry implements ShellDirectory {
+    private final ShellDirectory parent;
+
     private final Map<String, ShellEntry> childrenMap;
     private final Trie<ShellEntry> allChildrenTrie;
     private final Trie<ShellEntry> childDirectoriesTrie;
 
-    private ShellDirectory parent;
-
-    public ShellDirectoryImpl(String name) {
-        this(name, "Directory");
-    }
-
-    public ShellDirectoryImpl(String name, String description) {
+    public ShellDirectoryImpl(String name, String description, ShellDirectory parent) {
         super(name, description);
+        this.parent = parent;
+
+        if (THIS.equals(name) || PARENT.equals(name)) {
+            throw new ShellException("Illegal name for directory: " + name);
+        }
 
         this.childrenMap = new HashMap<>();
         this.allChildrenTrie = new TrieImpl<>();
@@ -56,37 +60,25 @@ public class ShellDirectoryImpl extends AbstractShellEntry implements ShellDirec
     }
 
     @Override
-    public boolean isEmpty() {
-        return childrenMap.isEmpty();
+    public ShellDirectory createChildDirectory(String name, String description) {
+        if (childrenMap.containsKey(name)) {
+            final String message = String.format("Directory '%s' already contains a child entry called '%s'!", getName(), name);
+            throw new ShellException(message);
+        }
+
+        final ShellDirectory child = new ShellDirectoryImpl(name, description, this);
+        addEntry(child);
+        return child;
     }
 
     @Override
-    public Collection<ShellEntry> getChildren() {
-        return Collections.unmodifiableCollection(childrenMap.values());
-    }
-
-    @Override
-    public ShellDirectory getParent() {
-        return parent;
-    }
-
-    @Override
-    public ShellDirectory addEntries(ShellEntry... entries) {
-        for (ShellEntry entry : entries) {
+    public void addCommands(ShellCommand... commands) {
+        for (ShellEntry entry : commands) {
             addEntry(entry);
         }
-        return this;
     }
 
-    @Override
-    public ShellDirectory addEntry(ShellEntry entry) {
-        if (entry == this) {
-            throw new ShellException("Trying to add a directory to itself!");
-        }
-        if (entry.isDirectory()) {
-            ((ShellDirectoryImpl) entry).setParent(this);
-        }
-
+    private void addEntry(ShellEntry entry) {
         final String name = entry.getName();
         childrenMap.put(name, entry);
 
@@ -99,16 +91,21 @@ public class ShellDirectoryImpl extends AbstractShellEntry implements ShellDirec
         if (entry.isDirectory()) {
             childDirectoriesTrie.put(nameWithSuffix, entry);
         }
-
-        return this;
     }
 
-    private void setParent(ShellDirectory parent) {
-        if (this.parent != null) {
-            final String message = String.format("Directory '%s' already has a parent: '%s'", getName(), this.parent.getName());
-            throw new ShellException(message);
-        }
-        this.parent = parent;
+    @Override
+    public boolean isEmpty() {
+        return childrenMap.isEmpty();
+    }
+
+    @Override
+    public Collection<ShellEntry> getChildren() {
+        return Collections.unmodifiableCollection(childrenMap.values());
+    }
+
+    @Override
+    public ShellDirectory getParent() {
+        return parent;
     }
 
     @Override

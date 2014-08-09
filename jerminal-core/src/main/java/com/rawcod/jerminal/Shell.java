@@ -5,8 +5,8 @@ import com.rawcod.jerminal.collections.trie.TrieView;
 import com.rawcod.jerminal.command.CommandArgs;
 import com.rawcod.jerminal.command.factory.DefaultGlobalCommandFactory;
 import com.rawcod.jerminal.command.parameters.ParseParamContext;
+import com.rawcod.jerminal.filesystem.CurrentDirectoryContainer;
 import com.rawcod.jerminal.filesystem.FileSystemManager;
-import com.rawcod.jerminal.filesystem.GlobalCommandManager;
 import com.rawcod.jerminal.filesystem.ShellFileSystem;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
 import com.rawcod.jerminal.output.OutputHandler;
@@ -26,7 +26,6 @@ import com.rawcod.jerminal.util.CommandLineUtils;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 /**
 * User: ykrasik
@@ -39,18 +38,17 @@ public class Shell {
 
     public Shell(OutputHandler outputHandler, ShellFileSystem fileSystem, int maxCommandHistory) {
         this.outputProcessor = new OutputProcessor(outputHandler);
-        final GlobalCommandManager globalCommandManager = new GlobalCommandManager();
-        this.fileSystemManager = new FileSystemManager(fileSystem.getRoot(), globalCommandManager);
-        createGlobalCommands(globalCommandManager, fileSystem);
+        final CurrentDirectoryContainer currentDirectoryContainer = new CurrentDirectoryContainer(fileSystem);
+        addDefaultGlobalCommands(fileSystem, currentDirectoryContainer);
+        this.fileSystemManager = new FileSystemManager(fileSystem, currentDirectoryContainer);
         this.commandHistory = new ShellCommandHistory(maxCommandHistory);
     }
 
-    private void createGlobalCommands(GlobalCommandManager globalCommandManager, ShellFileSystem fileSystem) {
-        final DefaultGlobalCommandFactory defaultGlobalCommandFactory = new DefaultGlobalCommandFactory(fileSystemManager, outputProcessor);
-        final Set<ShellCommand> globalCommands = defaultGlobalCommandFactory.createDefaultGlobalCommands();
-        globalCommands.addAll(fileSystem.getGlobalCommands());
-        for (ShellCommand globalCommand : globalCommands) {
-            globalCommandManager.addGlobalCommand(globalCommand);
+    private void addDefaultGlobalCommands(ShellFileSystem fileSystem,
+                                          CurrentDirectoryContainer currentDirectoryContainer) {
+        final DefaultGlobalCommandFactory defaultGlobalCommandFactory = new DefaultGlobalCommandFactory(currentDirectoryContainer, outputProcessor);
+        for (ShellCommand defaultGlobalCommand : defaultGlobalCommandFactory.createDefaultGlobalCommands()) {
+            fileSystem.addGlobalCommand(defaultGlobalCommand);
         }
     }
 

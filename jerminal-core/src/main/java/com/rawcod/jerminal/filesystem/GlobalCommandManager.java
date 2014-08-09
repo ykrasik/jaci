@@ -14,6 +14,7 @@ import com.rawcod.jerminal.returnvalue.parse.entry.ParseEntryReturnValue;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * User: ykrasik
@@ -24,12 +25,16 @@ public class GlobalCommandManager {
     private final Map<String, ShellCommand> globalCommandsMap;
     private final Trie<ShellCommand> globalCommandsTrie;
 
-    public GlobalCommandManager() {
+    public GlobalCommandManager(Set<ShellCommand> globalCommands) {
         this.globalCommandsMap = new HashMap();
         this.globalCommandsTrie = new TrieImpl<>();
+
+        for (ShellCommand globalCommand : globalCommands) {
+            addGlobalCommand(globalCommand);
+        }
     }
 
-    public void addGlobalCommand(ShellCommand globalCommand) {
+    private void addGlobalCommand(ShellCommand globalCommand) {
         final String name = globalCommand.getName();
         globalCommandsMap.put(name, globalCommand);
 

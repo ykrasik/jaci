@@ -8,10 +8,9 @@ import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteErrors;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue.AutoCompleteReturnValueSuccess;
 import com.rawcod.jerminal.returnvalue.parse.entry.ParseEntryReturnValue;
+import com.rawcod.jerminal.util.StringUtils;
 
 import java.util.List;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * User: ykrasik
@@ -25,20 +24,12 @@ public class FileSystemManager {
     private final ShellDirectory root;
     private final GlobalCommandManager globalCommandManager;
 
-    private ShellDirectory currentDirectory;
+    private final CurrentDirectoryContainer currentDirectoryContainer;
 
-    public FileSystemManager(ShellDirectory root, GlobalCommandManager globalCommandManager) {
-        this.root = root;
-        this.globalCommandManager = globalCommandManager;
-        this.currentDirectory = root;
-    }
-
-    public ShellDirectory getCurrentDirectory() {
-        return currentDirectory;
-    }
-
-    public void setCurrentDirectory(ShellDirectory directory) {
-        this.currentDirectory = checkNotNull(directory, "directory");
+    public FileSystemManager(ShellFileSystem fileSystem, CurrentDirectoryContainer currentDirectoryContainer) {
+        this.root = fileSystem.getRoot();
+        this.globalCommandManager = new GlobalCommandManager(fileSystem.getGlobalCommands());
+        this.currentDirectoryContainer = currentDirectoryContainer;
     }
 
     public ParseEntryReturnValue parsePathToCommand(String rawPath) {
@@ -52,10 +43,7 @@ public class FileSystemManager {
     private ParseEntryReturnValue doParsePath(String rawPath, boolean directory) {
         // Remove leading and trailing '/'.
         final boolean startsFromRoot = rawPath.startsWith(DELIMITER_STR);
-        final int startingDelimiterIndex = startsFromRoot ? 1 : 0;
-        final boolean endsWithDelimiter = rawPath.endsWith(DELIMITER_STR);
-        final int endingDelimiterIndex = endsWithDelimiter ? Math.max(rawPath.length() - 1, startingDelimiterIndex) : rawPath.length();
-        final String pathToSplit = rawPath.substring(startingDelimiterIndex, endingDelimiterIndex);
+        final String pathToSplit = StringUtils.removeLeadingAndTrailing(rawPath, DELIMITER_STR);
 
         // Split the given path according to delimiter.
         final List<String> splitPath = SPLITTER.splitToList(pathToSplit);
@@ -97,7 +85,7 @@ public class FileSystemManager {
     }
 
     private ParseEntryReturnValue getLastDirectory(List<String> path, boolean startsFromRoot) {
-        ShellDirectory dir = startsFromRoot ? root : currentDirectory;
+        ShellDirectory dir = startsFromRoot ? root : currentDirectoryContainer.getCurrentDirectory();
         for (final String entry : path) {
             final ParseEntryReturnValue returnValue = dir.parseDirectory(entry);
             if (returnValue.isFailure()) {
@@ -127,7 +115,7 @@ public class FileSystemManager {
 
         final ShellDirectory lastDir;
         if (pathToParse.isEmpty()) {
-            lastDir = currentDirectory;
+            lastDir = currentDirectoryContainer.getCurrentDirectory();
         } else {
             final ParseEntryReturnValue returnValue = parsePathToDirectory(pathToParse);
             if (returnValue.isFailure()) {

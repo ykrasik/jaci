@@ -1,4 +1,4 @@
-package com.rawcode.jerminal.command;
+package com.rawcod.jerminal.command;
 
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
