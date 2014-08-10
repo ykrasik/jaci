@@ -2,7 +2,7 @@ package com.rawcod.jerminal.command.parameters.string;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
-import com.rawcod.jerminal.collections.trie.ReadOnlyTrie;
+import com.rawcod.jerminal.collections.trie.Trie;
 import com.rawcod.jerminal.collections.trie.TrieView;
 import com.rawcod.jerminal.collections.trie.Tries;
 import com.rawcod.jerminal.command.parameters.AbstractMandatoryCommandParam;
@@ -20,9 +20,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Time: 16:36
  */
 public class StringParam extends AbstractMandatoryCommandParam {
-    private final Supplier<ReadOnlyTrie<String>> valuesSupplier;
+    private final Supplier<Trie<String>> valuesSupplier;
 
-    public StringParam(String name, String description, Supplier<ReadOnlyTrie<String>> valuesSupplier) {
+    public StringParam(String name, String description, Supplier<Trie<String>> valuesSupplier) {
         super(name, description);
         this.valuesSupplier = checkNotNull(valuesSupplier, "valuesSupplier");
     }
@@ -34,7 +34,7 @@ public class StringParam extends AbstractMandatoryCommandParam {
 
     @Override
     protected ParseParamValueReturnValue parse(String rawValue, ParseParamContext context) {
-        final ReadOnlyTrie<String> values = getValues();
+        final Trie<String> values = getValues();
 
         // If the possible values trie is empty, all values are accepted.
         // If it isn't, rawValue must be contained in the possible values trie.
@@ -49,7 +49,7 @@ public class StringParam extends AbstractMandatoryCommandParam {
 
     @Override
     protected AutoCompleteReturnValue autoComplete(String prefix, ParseParamContext context) {
-        final ReadOnlyTrie<String> values = getValues();
+        final Trie<String> values = getValues();
         final Optional<TrieView> possibilitiesTrieView = Tries.getTrieView(values, prefix);
         if (!possibilitiesTrieView.isPresent()) {
             // Give a meaningful error message;
@@ -58,7 +58,7 @@ public class StringParam extends AbstractMandatoryCommandParam {
         return AutoCompleteReturnValue.success(prefix, possibilitiesTrieView.get());
     }
 
-    private ReadOnlyTrie<String> getValues() {
+    private Trie<String> getValues() {
         return valuesSupplier.get();
     }
 }

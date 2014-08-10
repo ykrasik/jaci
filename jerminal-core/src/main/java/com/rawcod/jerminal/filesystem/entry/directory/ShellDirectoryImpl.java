@@ -1,8 +1,8 @@
 package com.rawcod.jerminal.filesystem.entry.directory;
 
 import com.google.common.base.Optional;
-import com.rawcod.jerminal.collections.trie.Trie;
-import com.rawcod.jerminal.collections.trie.TrieImpl;
+import com.rawcod.jerminal.collections.trie.Trie2;
+import com.rawcod.jerminal.collections.trie.TrieBuilder;
 import com.rawcod.jerminal.collections.trie.TrieView;
 import com.rawcod.jerminal.collections.trie.Tries;
 import com.rawcod.jerminal.exception.ShellException;
@@ -16,7 +16,6 @@ import com.rawcod.jerminal.returnvalue.parse.entry.ParseEntryReturnValue;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -24,23 +23,30 @@ import java.util.Map;
  * Date: 06/01/14
  */
 public class ShellDirectoryImpl extends AbstractShellEntry implements ShellDirectory {
-    private final ShellDirectory parent;
+    private final Trie2<ShellEntry> allEntries;
+    private final Trie2<ShellEntry> directories;
 
-    private final Map<String, ShellEntry> childrenMap;
-    private final Trie<ShellEntry> allChildrenTrie;
-    private final Trie<ShellEntry> childDirectoriesTrie;
+    private ShellDirectory parent;
 
-    public ShellDirectoryImpl(String name, String description, ShellDirectory parent) {
+    ShellDirectoryImpl(String name,
+                       String description,
+                       Map<String, ShellDirectory> directories,
+                       Map<String, ShellCommand> commands) {
         super(name, description);
-        this.parent = parent;
 
-        if (THIS.equals(name) || PARENT.equals(name)) {
-            throw new ShellException("Illegal name for directory: " + name);
+        final TrieBuilder<ShellEntry> trieBuilder = new TrieBuilder<>();
+        trieBuilder.addAll(directories);
+        this.directories = trieBuilder.build();
+
+        trieBuilder.addAll(commands);
+        this.allEntries = trieBuilder.build();
+    }
+
+    void setParent(ShellDirectory parent) {
+        if (this.parent != null) {
+            throw new ShellException("Parent was already set for directory: '%s'", getName());
         }
-
-        this.childrenMap = new HashMap<>();
-        this.allChildrenTrie = new TrieImpl<>();
-        this.childDirectoriesTrie = new TrieImpl<>();
+        this.parent = parent;
     }
 
     @Override
@@ -60,47 +66,13 @@ public class ShellDirectoryImpl extends AbstractShellEntry implements ShellDirec
     }
 
     @Override
-    public ShellDirectory createChildDirectory(String name, String description) {
-        if (childrenMap.containsKey(name)) {
-            final String message = String.format("Directory '%s' already contains a child entry called '%s'!", getName(), name);
-            throw new ShellException(message);
-        }
-
-        final ShellDirectory child = new ShellDirectoryImpl(name, description, this);
-        addEntry(child);
-        return child;
-    }
-
-    @Override
-    public void addCommands(ShellCommand... commands) {
-        for (ShellEntry entry : commands) {
-            addEntry(entry);
-        }
-    }
-
-    private void addEntry(ShellEntry entry) {
-        final String name = entry.getName();
-        childrenMap.put(name, entry);
-
-        // Automatically add a suffix to autoComplete values.
-        // This will automatically add a helpful suffix to the word, when it's the only possible word.
-        // For directories, add a '/'. For commands, add a space.
-        final char suffix = entry.isDirectory() ? DELIMITER : ' ';
-        final String nameWithSuffix = name + suffix;
-        allChildrenTrie.put(nameWithSuffix, entry);
-        if (entry.isDirectory()) {
-            childDirectoriesTrie.put(nameWithSuffix, entry);
-        }
-    }
-
-    @Override
     public boolean isEmpty() {
-        return childrenMap.isEmpty();
+        return allEntries.isEmpty();
     }
 
     @Override
     public Collection<ShellEntry> getChildren() {
-        return Collections.unmodifiableCollection(childrenMap.values());
+        return Collections.unmodifiableCollection(allEntries.getAllValues());
     }
 
     @Override
@@ -126,7 +98,7 @@ public class ShellDirectoryImpl extends AbstractShellEntry implements ShellDirec
         } else if (PARENT.equals(rawEntry)) {
             childEntry = parent;
         } else {
-            childEntry = childrenMap.get(rawEntry);
+            childEntry = allEntries.get(rawEntry);
         }
 
         if (childEntry == null) {
@@ -160,11 +132,11 @@ public class ShellDirectoryImpl extends AbstractShellEntry implements ShellDirec
         // There are 2 ways to autoComplete an entry -
         // Either only show only directories, or show all entries (directories and commands).
         // Note - special characters are never autoCompleted.
-        final Trie<ShellEntry> childrenTrie;
+        final Trie2<ShellEntry> childrenTrie;
         if (isDirectory) {
-            childrenTrie = childDirectoriesTrie;
+            childrenTrie = directories;
         } else {
-            childrenTrie = allChildrenTrie;
+            childrenTrie = allEntries;
         }
 
         // Get all children possible with this prefix.
@@ -179,4 +151,5 @@ public class ShellDirectoryImpl extends AbstractShellEntry implements ShellDirec
         }
         return AutoCompleteReturnValue.success(prefix, childrenTrieView.get());
     }
+
 }

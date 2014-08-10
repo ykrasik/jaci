@@ -1,8 +1,8 @@
 package com.rawcod.jerminal.command.parameters;
 
 import com.google.common.base.Supplier;
-import com.rawcod.jerminal.collections.trie.ReadOnlyTrie;
 import com.rawcod.jerminal.collections.trie.Trie;
+import com.rawcod.jerminal.collections.trie.Trie2;
 import com.rawcod.jerminal.collections.trie.TrieImpl;
 
 import java.util.List;
@@ -155,11 +155,11 @@ public final class Params {
         return new ConstDefaultValueSupplier<>(defaultValue);
     }
 
-    public static Supplier<ReadOnlyTrie<String>> constStringValuesSupplier(List<String> possibleValues) {
+    public static Supplier<Trie<String>> constStringValuesSupplier(List<String> possibleValues) {
         return new ConstStringValuesSupplier(possibleValues);
     }
 
-    public static Supplier<ReadOnlyTrie<String>> dynamicStringValuesSupplier(Supplier<List<String>> supplier) {
+    public static Supplier<Trie<String>> dynamicStringValuesSupplier(Supplier<List<String>> supplier) {
         return new DynamicStringValuesSupplier(supplier);
     }
 
@@ -176,20 +176,20 @@ public final class Params {
         }
     }
 
-    private static class ConstStringValuesSupplier implements Supplier<ReadOnlyTrie<String>> {
-        private final Trie<String> trie;
+    private static class ConstStringValuesSupplier implements Supplier<Trie<String>> {
+        private final Trie2<String> trie;
 
         private ConstStringValuesSupplier(List<String> possibleValues) {
             this.trie = toTrie(checkNotNull(possibleValues, "possibleValues"));
         }
 
         @Override
-        public Trie<String> get() {
+        public Trie2<String> get() {
             return trie;
         }
     }
 
-    private static class DynamicStringValuesSupplier implements Supplier<ReadOnlyTrie<String>> {
+    private static class DynamicStringValuesSupplier implements Supplier<Trie<String>> {
         private final Supplier<List<String>> supplier;
 
         private DynamicStringValuesSupplier(Supplier<List<String>> supplier) {
@@ -197,14 +197,14 @@ public final class Params {
         }
 
         @Override
-        public ReadOnlyTrie<String> get() {
+        public Trie<String> get() {
             final List<String> values = supplier.get();
             return toTrie(values);
         }
     }
 
-    private static Trie<String> toTrie(List<String> values) {
-        final Trie<String> trie = new TrieImpl<>();
+    private static Trie2<String> toTrie(List<String> values) {
+        final Trie2<String> trie = new TrieImpl<>();
         for (String value : values) {
             trie.put(value, value);
         }

@@ -18,7 +18,7 @@ import java.util.List;
 public class TerminalOutputHandler implements OutputHandler {
     private static final Joiner JOINER = Joiner.on(',').skipNulls();
 
-    private final Terminal terminal;
+    protected final Terminal terminal;
 
     public TerminalOutputHandler(Terminal terminal) {
         this.terminal = terminal;
@@ -57,7 +57,7 @@ public class TerminalOutputHandler implements OutputHandler {
     @Override
     public void executeUnhandledException(Exception e) {
         for (StackTraceElement stackTraceElement : e.getStackTrace()) {
-            printError("    " + stackTraceElement.toString());
+            printError("|    " + stackTraceElement.toString());
         }
     }
 

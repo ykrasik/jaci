@@ -2,7 +2,7 @@ package com.rawcod.jerminal.command.parameters.manager;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import com.rawcod.jerminal.collections.trie.Trie;
+import com.rawcod.jerminal.collections.trie.Trie2;
 import com.rawcod.jerminal.collections.trie.TrieImpl;
 import com.rawcod.jerminal.collections.trie.TrieView;
 import com.rawcod.jerminal.collections.trie.Tries;
@@ -37,7 +37,7 @@ public class CommandParamManager {
     private final List<CommandParam> mandatoryParams;
 
     private final Map<String, CommandParam> paramMap;
-    private final Trie<CommandParam> paramTrie;
+    private final Trie2<CommandParam> paramTrie;
 
     public CommandParamManager(List<CommandParam> params) {
         this.allParams = Collections.unmodifiableList(checkNotNull(params, "params"));

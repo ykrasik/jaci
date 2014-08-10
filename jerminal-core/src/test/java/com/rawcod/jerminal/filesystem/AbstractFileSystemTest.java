@@ -24,7 +24,7 @@ public class AbstractFileSystemTest {
 
     @Before
     public void setUp() {
-        this.fileSystem = new ShellFileSystem();
+        this.fileSystem = new ShellFileSystem(root, globalCommands);
     }
 
     protected void add(String path) {

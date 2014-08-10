@@ -54,7 +54,7 @@ public class JerminalLibGdxExample extends ApplicationAdapter {
     }
 
     private ShellFileSystem createFileSystem() {
-        final ShellFileSystem fileSystem = new ShellFileSystem();
+        final ShellFileSystem fileSystem = new ShellFileSystem(root, globalCommands);
 
         fileSystem.add("nested/d/1possible");
         fileSystem.add("nested/d/2possible");

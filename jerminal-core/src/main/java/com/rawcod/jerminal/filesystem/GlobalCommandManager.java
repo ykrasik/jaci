@@ -1,8 +1,8 @@
 package com.rawcod.jerminal.filesystem;
 
 import com.google.common.base.Optional;
-import com.rawcod.jerminal.collections.trie.Trie;
-import com.rawcod.jerminal.collections.trie.TrieImpl;
+import com.rawcod.jerminal.collections.trie.Trie2;
+import com.rawcod.jerminal.collections.trie.TrieBuilder;
 import com.rawcod.jerminal.collections.trie.TrieView;
 import com.rawcod.jerminal.collections.trie.Tries;
 import com.rawcod.jerminal.filesystem.entry.ShellEntry;
@@ -12,9 +12,7 @@ import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.ParseErrors;
 import com.rawcod.jerminal.returnvalue.parse.entry.ParseEntryReturnValue;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * User: ykrasik
@@ -22,28 +20,14 @@ import java.util.Set;
  * Time: 22:58
  */
 public class GlobalCommandManager {
-    private final Map<String, ShellCommand> globalCommandsMap;
-    private final Trie<ShellCommand> globalCommandsTrie;
+    private final Trie2<ShellCommand> globalCommands;
 
-    public GlobalCommandManager(Set<ShellCommand> globalCommands) {
-        this.globalCommandsMap = new HashMap();
-        this.globalCommandsTrie = new TrieImpl<>();
-
-        for (ShellCommand globalCommand : globalCommands) {
-            addGlobalCommand(globalCommand);
-        }
-    }
-
-    private void addGlobalCommand(ShellCommand globalCommand) {
-        final String name = globalCommand.getName();
-        globalCommandsMap.put(name, globalCommand);
-
-        // Add a space for command autoCompletion.
-        globalCommandsTrie.put(name + ' ', globalCommand);
+    public GlobalCommandManager(Map<String, ShellCommand> globalCommands) {
+        this.globalCommands = new TrieBuilder<ShellCommand>().addAll(globalCommands).build();
     }
 
     public ParseEntryReturnValue parseGlobalCommand(String rawEntry) {
-        final ShellEntry globalCommand = globalCommandsMap.get(rawEntry);
+        final ShellEntry globalCommand = globalCommands.get(rawEntry);
         if (globalCommand != null) {
             return ParseEntryReturnValue.success(globalCommand);
         }
@@ -51,7 +35,7 @@ public class GlobalCommandManager {
     }
 
     public AutoCompleteReturnValue autoCompleteGlobalCommand(String prefix) {
-        final Optional<TrieView> globalCommandsTrieView = Tries.getTrieView(globalCommandsTrie, prefix);
+        final Optional<TrieView> globalCommandsTrieView = Tries.getTrieView(globalCommands, prefix);
         if (!globalCommandsTrieView.isPresent()) {
             return AutoCompleteErrors.noPossibleValuesForPrefix(prefix);
         }

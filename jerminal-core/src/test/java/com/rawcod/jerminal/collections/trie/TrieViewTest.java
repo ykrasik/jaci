@@ -16,7 +16,7 @@ import static org.junit.Assert.*;
  * Time: 14:10
  */
 public class TrieViewTest {
-    private Trie<String> trie;
+    private Trie2<String> trie;
     private TrieView currentTrieView;
 
     @Before
@@ -188,7 +188,7 @@ public class TrieViewTest {
     }
 
     private TrieView createTrieView(String... words) {
-        final Trie<String> trie = new TrieImpl<>();
+        final Trie2<String> trie = new TrieImpl<>();
         for (String word : words) {
             trie.put(word, "");
         }

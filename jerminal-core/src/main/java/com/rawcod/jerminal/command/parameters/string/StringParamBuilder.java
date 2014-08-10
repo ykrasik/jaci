@@ -1,7 +1,7 @@
 package com.rawcod.jerminal.command.parameters.string;
 
 import com.google.common.base.Supplier;
-import com.rawcod.jerminal.collections.trie.ReadOnlyTrie;
+import com.rawcod.jerminal.collections.trie.Trie;
 import com.rawcod.jerminal.command.parameters.CommandParam;
 import com.rawcod.jerminal.command.parameters.Params;
 import com.rawcod.jerminal.command.parameters.optional.OptionalParam;
@@ -16,11 +16,11 @@ import java.util.List;
  * Time: 00:22
  */
 public class StringParamBuilder {
-    private static final Supplier<ReadOnlyTrie<String>> NO_VALUES_SUPPLIER = Params.constStringValuesSupplier(Collections.<String>emptyList());
+    private static final Supplier<Trie<String>> NO_VALUES_SUPPLIER = Params.constStringValuesSupplier(Collections.<String>emptyList());
 
     private final String name;
     private String description = "string";
-    private Supplier<ReadOnlyTrie<String>> possibleValuesSupplier = NO_VALUES_SUPPLIER;
+    private Supplier<Trie<String>> possibleValuesSupplier = NO_VALUES_SUPPLIER;
     private Supplier<String> defaultValueSupplier;
 
     public StringParamBuilder(String name) {

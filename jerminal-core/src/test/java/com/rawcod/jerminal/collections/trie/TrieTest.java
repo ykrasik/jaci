@@ -20,8 +20,8 @@ import static org.junit.Assert.*;
  * Time: 12:06
  */
 public class TrieTest {
-    private Trie<String> trie;
-    private ReadOnlyTrie<String> currentSubTrie;
+    private Trie2<String> trie;
+    private Trie<String> currentSubTrie;
     private Map<String, String> expectedWordMap;
 
     // This filter considers empty values illegal.
@@ -190,7 +190,7 @@ public class TrieTest {
     }
 
     private void successfulSubTrie(String prefix) {
-        final Optional<ReadOnlyTrie<String>> subTrie = subTrie(prefix);
+        final Optional<Trie<String>> subTrie = subTrie(prefix);
         assertTrue("No subTrie for prefix: " + prefix, subTrie.isPresent());
         this.currentSubTrie = subTrie.get();
     }
@@ -199,7 +199,7 @@ public class TrieTest {
         assertFalse("Unexpected subTrie for prefix: " + prefix, subTrie(prefix).isPresent());
     }
 
-    private Optional<ReadOnlyTrie<String>> subTrie(String prefix) {
+    private Optional<Trie<String>> subTrie(String prefix) {
         return trie.subTrie(prefix);
     }
 
@@ -213,7 +213,7 @@ public class TrieTest {
 
     private boolean filter(String prefix) {
         successfulSubTrie(prefix);
-        final Optional<ReadOnlyTrie<String>> filteredTrie = currentSubTrie.filter(emptyFilter);
+        final Optional<Trie<String>> filteredTrie = currentSubTrie.filter(emptyFilter);
         if (!filteredTrie.isPresent()) {
             return false;
         }
@@ -223,7 +223,7 @@ public class TrieTest {
 
     private void assertWords(String... expectedWords) {
         final Set<String> expectedWordsSet = Sets.newHashSet(expectedWords);
-        assertEquals("Words mismatch!", expectedWordsSet, new HashSet<>(currentSubTrie.getAllWords()));
+        assertEquals("Words mismatch!", expectedWordsSet, new HashSet<>(currentSubTrie.getWords()));
 
         final Map<String, String> expectedValueMap = Maps.filterKeys(this.expectedWordMap, new Predicate<String>() {
             @Override
@@ -232,7 +232,7 @@ public class TrieTest {
             }
         });
         final Set<String> expectedValues = new HashSet<>(expectedValueMap.values());
-        assertEquals("Values mismatch!", expectedValues, new HashSet<>(currentSubTrie.getAllValues()));
+        assertEquals("Values mismatch!", expectedValues, new HashSet<>(currentSubTrie.getValues()));
     }
 
     private void assertEmpty() {
