@@ -1,7 +1,7 @@
 package com.rawcod.jerminal.command.parameters;
 
 import com.google.common.base.Objects;
-import com.rawcod.jerminal.filesystem.FileSystemManager;
+import com.rawcod.jerminal.filesystem.ShellFileSystem;
 
 /**
  * User: ykrasik
@@ -9,20 +9,20 @@ import com.rawcod.jerminal.filesystem.FileSystemManager;
  * Time: 16:24
  */
 public class ParseParamContext {
-    private final FileSystemManager fileSystemManager;
+    private final ShellFileSystem fileSystem;
 
-    public ParseParamContext(FileSystemManager fileSystemManager) {
-        this.fileSystemManager = fileSystemManager;
+    public ParseParamContext(ShellFileSystem fileSystem) {
+        this.fileSystem = fileSystem;
     }
 
-    public FileSystemManager getFileSystemManager() {
-        return fileSystemManager;
+    public ShellFileSystem getFileSystem() {
+        return fileSystem;
     }
 
     @Override
     public String toString() {
         return Objects.toStringHelper(this)
-            .add("fileSystemManager", fileSystemManager)
+            .add("fileSystemManager", fileSystem)
             .toString();
     }
 }

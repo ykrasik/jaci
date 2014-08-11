@@ -2,8 +2,7 @@ package com.rawcod.jerminal.command.parameters;
 
 import com.google.common.base.Supplier;
 import com.rawcod.jerminal.collections.trie.Trie;
-import com.rawcod.jerminal.collections.trie.Trie2;
-import com.rawcod.jerminal.collections.trie.TrieImpl;
+import com.rawcod.jerminal.collections.trie.TrieBuilder;
 
 import java.util.List;
 
@@ -177,14 +176,14 @@ public final class Params {
     }
 
     private static class ConstStringValuesSupplier implements Supplier<Trie<String>> {
-        private final Trie2<String> trie;
+        private final Trie<String> trie;
 
         private ConstStringValuesSupplier(List<String> possibleValues) {
             this.trie = toTrie(checkNotNull(possibleValues, "possibleValues"));
         }
 
         @Override
-        public Trie2<String> get() {
+        public Trie<String> get() {
             return trie;
         }
     }
@@ -203,11 +202,11 @@ public final class Params {
         }
     }
 
-    private static Trie2<String> toTrie(List<String> values) {
-        final Trie2<String> trie = new TrieImpl<>();
+    private static Trie<String> toTrie(List<String> values) {
+        final TrieBuilder<String> trieBuilder = new TrieBuilder<>();
         for (String value : values) {
-            trie.put(value, value);
+            trieBuilder.add(value, value);
         }
-        return trie;
+        return trieBuilder.build();
     }
 }

@@ -2,7 +2,7 @@ package com.rawcod.jerminal.command.parameters.entry;
 
 import com.rawcod.jerminal.command.parameters.AbstractMandatoryCommandParam;
 import com.rawcod.jerminal.command.parameters.ParseParamContext;
-import com.rawcod.jerminal.filesystem.FileSystemManager;
+import com.rawcod.jerminal.filesystem.ShellFileSystem;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.entry.ParseEntryReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.entry.ParseEntryReturnValue.ParseEntryReturnValueSuccess;
@@ -20,8 +20,8 @@ public abstract class AbstractEntryCommandParam extends AbstractMandatoryCommand
 
     @Override
     protected ParseParamValueReturnValue parse(String rawValue, ParseParamContext context) {
-        final FileSystemManager fileSystemManager = context.getFileSystemManager();
-        final ParseEntryReturnValue returnValue = doParse(rawValue, fileSystemManager);
+        final ShellFileSystem fileSystem = context.getFileSystem();
+        final ParseEntryReturnValue returnValue = doParse(rawValue, fileSystem);
         if (returnValue.isFailure()) {
             return ParseParamValueReturnValue.failure(returnValue.getFailure());
         }
@@ -32,10 +32,10 @@ public abstract class AbstractEntryCommandParam extends AbstractMandatoryCommand
 
     @Override
     protected AutoCompleteReturnValue autoComplete(String prefix, ParseParamContext context) {
-        final FileSystemManager fileSystemManager = context.getFileSystemManager();
-        return doAutoComplete(prefix, fileSystemManager);
+        final ShellFileSystem fileSystem = context.getFileSystem();
+        return doAutoComplete(prefix, fileSystem);
     }
 
-    protected abstract ParseEntryReturnValue doParse(String rawValue, FileSystemManager fileSystemManager);
-    protected abstract AutoCompleteReturnValue doAutoComplete(String prefix, FileSystemManager fileSystemManager);
+    protected abstract ParseEntryReturnValue doParse(String rawValue, ShellFileSystem fileSystem);
+    protected abstract AutoCompleteReturnValue doAutoComplete(String prefix, ShellFileSystem fileSystem);
 }

@@ -54,7 +54,7 @@ public class ShellCommandImpl extends AbstractShellEntry implements ShellCommand
 
     @Override
     public List<CommandParam> getParams() {
-        return Collections.unmodifiableList(paramManager.getAllParams());
+        return Collections.unmodifiableList(paramManager.getParams());
     }
 
     @Override

@@ -4,9 +4,7 @@ import com.google.common.base.Optional;
 import com.rawcod.jerminal.returnvalue.parse.ParseError;
 import com.rawcod.jerminal.returnvalue.parse.ParseErrors;
 import com.rawcod.jerminal.returnvalue.parse.ParseReturnValueFailure;
-
-import java.util.Collections;
-import java.util.List;
+import com.rawcod.jerminal.returnvalue.suggestion.Suggestions;
 
 /**
  * User: ykrasik
@@ -108,11 +106,11 @@ public final class AutoCompleteErrors {
     }
 
     private static AutoCompleteReturnValueFailure from(AutoCompleteError error, String format, Object... args) {
-        return from(error, Collections.<String>emptyList(), format, args);
+        return from(error, Optional.<Suggestions>absent(), format, args);
     }
 
     private static AutoCompleteReturnValueFailure from(AutoCompleteError error,
-                                                      List<String> suggestions,
+                                                       Optional<Suggestions> suggestions,
                                                       String format, Object... args) {
         final String message = String.format(format, args);
         return new AutoCompleteReturnValueFailure(error, Optional.<ParseError>absent(), message, suggestions);

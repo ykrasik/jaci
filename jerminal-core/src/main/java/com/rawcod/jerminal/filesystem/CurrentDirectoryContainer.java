@@ -12,8 +12,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class CurrentDirectoryContainer {
     private ShellDirectory currentDirectory;
 
-    public CurrentDirectoryContainer(ShellFileSystem fileSystem) {
-        this.currentDirectory = fileSystem.getRoot();
+    public CurrentDirectoryContainer() {
     }
 
     public ShellDirectory getCurrentDirectory() {
@@ -24,7 +23,7 @@ public class CurrentDirectoryContainer {
         final ShellDirectory prevDirectory = this.currentDirectory;
         this.currentDirectory = checkNotNull(currentDirectory, "currentDirectory");
         if (currentDirectory != prevDirectory) {
-
+            // TODO: Call a listener?
         }
     }
 }

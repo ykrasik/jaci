@@ -5,6 +5,7 @@ import com.rawcod.jerminal.command.view.ShellCommandView;
 import com.rawcod.jerminal.filesystem.entry.view.ShellEntryView;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteError;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValueFailure;
+import com.rawcod.jerminal.returnvalue.suggestion.Suggestions;
 import com.rawcod.jerminal.returnvalue.execute.ExecuteError;
 import com.rawcod.jerminal.returnvalue.execute.flow.ExecuteReturnValueFailure;
 import com.rawcod.jerminal.returnvalue.execute.flow.ExecuteReturnValueSuccess;
@@ -44,7 +45,7 @@ public class OutputProcessor {
         outputHandler.parseError(error, errorMessage);
     }
 
-    public void autoCompleteSuccess(String newCommandLine, List<String> suggestions) {
+    public void autoCompleteSuccess(String newCommandLine, Optional<Suggestions> suggestions) {
         outputHandler.setCommandLine(newCommandLine);
 
         displaySuggestionsIfApplicable(suggestions);
@@ -60,7 +61,7 @@ public class OutputProcessor {
             outputHandler.autoCompleteError(error, errorMessage);
         }
 
-        final List<String> suggestions = failure.getSuggestions();
+        final Optional<Suggestions> suggestions = failure.getSuggestions();
         displaySuggestionsIfApplicable(suggestions);
     }
 
@@ -95,9 +96,20 @@ public class OutputProcessor {
         outputHandler.displayShellCommandView(shellCommandView);
     }
 
-    private void displaySuggestionsIfApplicable(List<String> suggestions) {
-        if (!suggestions.isEmpty()) {
-            outputHandler.displaySuggestions(suggestions);
+    private void displaySuggestionsIfApplicable(Optional<Suggestions> suggestionsOptional) {
+        if (suggestionsOptional.isPresent()) {
+            final Suggestions suggestions = suggestionsOptional.get();
+            final List<String> directorySuggestions = suggestions.getDirectorySuggestions();
+            final List<String> commandSuggestions = suggestions.getCommandSuggestions();
+            final List<String> paramNameSuggestions = suggestions.getParamNameSuggestions();
+            final List<String> paramValueSuggestions = suggestions.getParamValueSuggestions();
+
+            outputHandler.displaySuggestions(
+                directorySuggestions,
+                commandSuggestions,
+                paramNameSuggestions,
+                paramValueSuggestions
+            );
         }
     }
 

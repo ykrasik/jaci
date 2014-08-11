@@ -1,8 +1,11 @@
 package com.rawcod.jerminal.filesystem.entry.directory;
 
 import com.rawcod.jerminal.exception.ShellException;
+import com.rawcod.jerminal.filesystem.ShellFileSystem;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -32,11 +35,7 @@ public class ShellDirectoryBuilder {
     }
 
     public ShellDirectory build() {
-        final Map<String, ShellDirectory> childDirectories = new HashMap<>(childDirectoryBuilders.size());
-        for (Entry<String, ShellDirectoryBuilder> entry : childDirectoryBuilders.entrySet()) {
-            final ShellDirectory childDirectory = entry.getValue().build();
-            childDirectories.put(entry.getKey(), childDirectory);
-        }
+        final Map<String, ShellDirectory> childDirectories = buildChildren();
         final ShellDirectoryImpl directory = new ShellDirectoryImpl(name, description, childDirectories, childCommands);
         for (ShellDirectory childDirectory : childDirectories.values()) {
             // This downcast isn't great, but it's guaranteed to always succeed.
@@ -44,6 +43,15 @@ public class ShellDirectoryBuilder {
             ((ShellDirectoryImpl) childDirectory).setParent(directory);
         }
         return directory;
+    }
+
+    private Map<String, ShellDirectory> buildChildren() {
+        final Map<String, ShellDirectory> childDirectories = new HashMap<>(childDirectoryBuilders.size());
+        for (Entry<String, ShellDirectoryBuilder> entry : childDirectoryBuilders.entrySet()) {
+            final ShellDirectory childDirectory = entry.getValue().build();
+            childDirectories.put(entry.getKey(), childDirectory);
+        }
+        return childDirectories;
     }
 
     public ShellDirectoryBuilder getOrCreateDirectory(String name, String description) {
@@ -64,6 +72,10 @@ public class ShellDirectoryBuilder {
     }
 
     public void addCommands(ShellCommand... commands) {
+        addCommands(Arrays.asList(commands));
+    }
+
+    public void addCommands(Collection<ShellCommand> commands) {
         for (ShellCommand command : commands) {
             addCommand(command);
         }
@@ -71,10 +83,6 @@ public class ShellDirectoryBuilder {
 
     public void addCommand(ShellCommand command) {
         final String commandName = command.getName();
-
-        if (ShellDirectory.THIS.equals(name) || ShellDirectory.PARENT.equals(name)) {
-            throw new ShellException("Illegal name for directory: " + name);
-        }
 
         // Assert 'commandName' is legal and isn't already taken by a child directory or command.
         assertLegalName(commandName);
@@ -86,7 +94,7 @@ public class ShellDirectoryBuilder {
     }
 
     private void assertLegalName(String name) {
-        if (ShellDirectory.THIS.equals(name) || ShellDirectory.PARENT.equals(name)) {
+        if (!ShellFileSystem.isLegalName(name)) {
             throw new ShellException("Illegal name for entry: '%s'", name);
         }
     }

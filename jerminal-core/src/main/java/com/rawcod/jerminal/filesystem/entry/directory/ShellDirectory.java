@@ -12,10 +12,6 @@ import java.util.Collection;
  * Time: 14:44
  */
 public interface ShellDirectory extends ShellEntry {
-    char DELIMITER = '/';
-    String THIS = ".";
-    String PARENT = "..";
-
     boolean isEmpty();
     Collection<ShellEntry> getChildren();
     ShellDirectory getParent();

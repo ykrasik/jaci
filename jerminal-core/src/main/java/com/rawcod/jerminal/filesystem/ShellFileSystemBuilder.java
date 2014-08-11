@@ -1,6 +1,8 @@
 package com.rawcod.jerminal.filesystem;
 
 import com.google.common.base.Splitter;
+import com.rawcod.jerminal.collections.trie.Trie;
+import com.rawcod.jerminal.collections.trie.TrieBuilder;
 import com.rawcod.jerminal.exception.ShellException;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
 import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
@@ -22,16 +24,19 @@ public class ShellFileSystemBuilder {
     private static final Splitter DESCRIPTION_SPLITTER = Splitter.on(DESCRIPTION_DELIMITER).trimResults();
 
     private final ShellDirectoryBuilder rootBuilder;
-    private final Map<String, ShellCommand> globalCommands;
+    private final TrieBuilder<ShellCommand> globalCommandsBuilder;
+    private final CurrentDirectoryContainer currentDirectoryContainer;
 
     public ShellFileSystemBuilder() {
         this.rootBuilder = new ShellDirectoryBuilder("root", "root");
-        this.globalCommands = new HashMap<>();
+        this.globalCommandsBuilder = new TrieBuilder<>();
+        this.currentDirectoryContainer = new CurrentDirectoryContainer();
     }
 
     public ShellFileSystem build() {
         final ShellDirectory root = rootBuilder.build();
-        return new ShellFileSystem(root, globalCommands);
+        final Trie<ShellCommand> globalCommands = globalCommandsBuilder.build();
+        return new ShellFileSystem(root, globalCommands, currentDirectoryContainer);
     }
 
     public ShellFileSystemBuilder add(ShellCommand... commands) {
@@ -39,22 +44,23 @@ public class ShellFileSystemBuilder {
     }
 
     public ShellFileSystemBuilder add(String path, ShellCommand... commands) {
+        return add(path, Arrays.asList(commands));
+    }
+
+    public ShellFileSystemBuilder add(String path, Collection<ShellCommand> commands) {
         final ShellDirectoryBuilder directory = getOrCreatePath(path);
         directory.addCommands(commands);
         return this;
     }
 
-    public ShellFileSystemBuilder addGlobalCommand(ShellCommand... globalCommands) {
-        return addGlobalCommand(Arrays.asList(globalCommands));
+    public ShellFileSystemBuilder addGlobalCommands(ShellCommand... globalCommands) {
+        return addGlobalCommands(Arrays.asList(globalCommands));
     }
 
-    public ShellFileSystemBuilder addGlobalCommand(Collection<ShellCommand> globalCommands) {
+    public ShellFileSystemBuilder addGlobalCommands(Collection<ShellCommand> globalCommands) {
         for (ShellCommand globalCommand : globalCommands) {
             final String name = globalCommand.getName();
-            if (this.globalCommands.containsKey(name)) {
-                throw new ShellException("Already have a global command with name: '%s'", name);
-            }
-            this.globalCommands.put(name, globalCommand);
+            this.globalCommandsBuilder.add(name, globalCommand);
         }
         return this;
     }

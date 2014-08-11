@@ -1,14 +1,12 @@
 package com.rawcod.jerminal.command.parameters.string;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
 import com.rawcod.jerminal.collections.trie.Trie;
-import com.rawcod.jerminal.collections.trie.TrieView;
-import com.rawcod.jerminal.collections.trie.Tries;
 import com.rawcod.jerminal.command.parameters.AbstractMandatoryCommandParam;
 import com.rawcod.jerminal.command.parameters.ParseParamContext;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteErrors;
+import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteMappers;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
+import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteType;
 import com.rawcod.jerminal.returnvalue.parse.ParseErrors;
 import com.rawcod.jerminal.returnvalue.parse.param.ParseParamValueReturnValue;
 
@@ -50,12 +48,8 @@ public class StringParam extends AbstractMandatoryCommandParam {
     @Override
     protected AutoCompleteReturnValue autoComplete(String prefix, ParseParamContext context) {
         final Trie<String> values = getValues();
-        final Optional<TrieView> possibilitiesTrieView = Tries.getTrieView(values, prefix);
-        if (!possibilitiesTrieView.isPresent()) {
-            // Give a meaningful error message;
-            return AutoCompleteErrors.noPossibleValuesForParamWithPrefix(getName(), prefix);
-        }
-        return AutoCompleteReturnValue.success(prefix, possibilitiesTrieView.get());
+        final Trie<AutoCompleteType> possibilities = values.subTrie(prefix).map(AutoCompleteMappers.commandParamValueStringMapper());
+        return AutoCompleteReturnValue.success(prefix, possibilities);
     }
 
     private Trie<String> getValues() {

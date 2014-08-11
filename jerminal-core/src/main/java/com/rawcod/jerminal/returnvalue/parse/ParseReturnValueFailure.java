@@ -1,9 +1,9 @@
 package com.rawcod.jerminal.returnvalue.parse;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Optional;
 import com.rawcod.jerminal.returnvalue.FailureImpl;
-
-import java.util.List;
+import com.rawcod.jerminal.returnvalue.suggestion.Suggestions;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -15,9 +15,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class ParseReturnValueFailure extends FailureImpl {
     private final ParseError error;
     private final String errorMessage;
-    private final List<String> suggestions;
+    private final Optional<Suggestions> suggestions;
 
-    public ParseReturnValueFailure(ParseError error, String errorMessage, List<String> suggestions) {
+    public ParseReturnValueFailure(ParseError error, String errorMessage, Optional<Suggestions> suggestions) {
         this.error = checkNotNull(error, "error");
         this.errorMessage = checkNotNull(errorMessage, "errorMessage");
         this.suggestions = checkNotNull(suggestions, "suggestions");
@@ -31,7 +31,7 @@ public class ParseReturnValueFailure extends FailureImpl {
         return errorMessage;
     }
 
-    public List<String> getSuggestions() {
+    public Optional<Suggestions> getSuggestions() {
         return suggestions;
     }
 

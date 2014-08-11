@@ -1,7 +1,7 @@
 package com.rawcod.jerminal.returnvalue.autocomplete;
 
 import com.google.common.base.Objects;
-import com.rawcod.jerminal.collections.trie.TrieView;
+import com.rawcod.jerminal.collections.trie.Trie;
 import com.rawcod.jerminal.returnvalue.Failable;
 import com.rawcod.jerminal.returnvalue.ReturnValueImpl;
 import com.rawcod.jerminal.returnvalue.SuccessImpl;
@@ -20,8 +20,8 @@ public class AutoCompleteReturnValue extends ReturnValueImpl<AutoCompleteReturnV
     }
 
 
-    public static AutoCompleteReturnValue success(String prefix, TrieView possibilitiesTrieView) {
-        return new AutoCompleteReturnValue(new AutoCompleteReturnValueSuccess(prefix, possibilitiesTrieView));
+    public static AutoCompleteReturnValue success(String prefix, Trie<AutoCompleteType> possibilities) {
+        return new AutoCompleteReturnValue(new AutoCompleteReturnValueSuccess(prefix, possibilities));
     }
 
     public static AutoCompleteReturnValue failure(AutoCompleteReturnValueFailure failure) {
@@ -31,26 +31,26 @@ public class AutoCompleteReturnValue extends ReturnValueImpl<AutoCompleteReturnV
 
     public static class AutoCompleteReturnValueSuccess extends SuccessImpl {
         private final String prefix;
-        private final TrieView possibilitiesTrieView;
+        private final Trie<AutoCompleteType> possibilities;
 
-        private AutoCompleteReturnValueSuccess(String prefix, TrieView possibilitiesTrieView) {
+        private AutoCompleteReturnValueSuccess(String prefix, Trie<AutoCompleteType> possibilities) {
             this.prefix = checkNotNull(prefix, "prefix");
-            this.possibilitiesTrieView = checkNotNull(possibilitiesTrieView, "possibilitiesTrieView");
+            this.possibilities = checkNotNull(possibilities, "possibilities");
         }
 
         public String getPrefix() {
             return prefix;
         }
 
-        public TrieView getPossibilitiesTrieView() {
-            return possibilitiesTrieView;
+        public Trie<AutoCompleteType> getPossibilities() {
+            return possibilities;
         }
 
         @Override
         public String toString() {
             return Objects.toStringHelper(this)
                 .add("prefix", prefix)
-                .add("possibilitiesTrieView", possibilitiesTrieView)
+                .add("possibilities", possibilities)
                 .toString();
         }
     }

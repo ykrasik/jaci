@@ -7,10 +7,13 @@ import java.util.Collection;
  * Date: 23/07/2014
  * Time: 20:26
  */
-public interface TrieNode {
-    char getCharacter();
+public interface TrieNode<T> {
     boolean isWord();
+    boolean isEmpty();
 
-    TrieNode getChild(char c);
-    Collection<TrieNode> getChildren();
+    char getCharacter();
+    T getValue();
+
+    TrieNode<T> getChild(char c);
+    Collection<TrieNode<T>> getChildren();
 }

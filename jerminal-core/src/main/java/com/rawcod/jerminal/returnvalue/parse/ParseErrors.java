@@ -1,12 +1,11 @@
 package com.rawcod.jerminal.returnvalue.parse;
 
+import com.google.common.base.Optional;
 import com.rawcod.jerminal.returnvalue.parse.args.ParseBoundParamsReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.entry.ParseEntryReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.param.ParseParamReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.param.ParseParamValueReturnValue;
-
-import java.util.Collections;
-import java.util.List;
+import com.rawcod.jerminal.returnvalue.suggestion.Suggestions;
 
 /**
  * User: ykrasik
@@ -32,10 +31,10 @@ public final class ParseErrors {
         ));
     }
 
-    public static ParseEntryReturnValue invalidGlobalCommand(String entry) {
+    public static ParseEntryReturnValue directoryDoesNotHaveParent(String directoryName) {
         return ParseEntryReturnValue.failure(from(
             ParseError.INVALID_ENTRY,
-            "Parse error: Invalid global command: '%s'.", entry
+            "Parse error: Directory '%s' doesn't have a parent.", directoryName
         ));
     }
 
@@ -91,10 +90,10 @@ public final class ParseErrors {
     }
 
     private static ParseReturnValueFailure from(ParseError error, String format, Object... args) {
-        return from(error, Collections.<String>emptyList(), format, args);
+        return from(error, Optional.<Suggestions>absent(), format, args);
     }
 
-    private static ParseReturnValueFailure from(ParseError error, List<String> suggestions, String format, Object... args) {
+    private static ParseReturnValueFailure from(ParseError error, Optional<Suggestions> suggestions, String format, Object... args) {
         final String message = String.format(format, args);
         return new ParseReturnValueFailure(error, message, suggestions);
     }

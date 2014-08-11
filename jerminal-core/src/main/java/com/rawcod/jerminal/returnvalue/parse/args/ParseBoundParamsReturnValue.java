@@ -35,17 +35,17 @@ public class ParseBoundParamsReturnValue extends ReturnValueImpl<ParseBoundParam
 
 
     public static class ParseBoundParamsReturnValueSuccess extends SuccessImpl {
-        private final Map<String, Object> parsedArgs;
+        private final Map<String, Object> boundParams;
         private final Collection<CommandParam> unboundParams;
 
-        private ParseBoundParamsReturnValueSuccess(Map<String, Object> parsedArgs,
+        private ParseBoundParamsReturnValueSuccess(Map<String, Object> boundParams,
                                                    Collection<CommandParam> unboundParams) {
-            this.parsedArgs = checkNotNull(parsedArgs, "parsedArgs");
+            this.boundParams = checkNotNull(boundParams, "boundParams");
             this.unboundParams = checkNotNull(unboundParams, "unboundParams");
         }
 
-        public Map<String, Object> getParsedArgs() {
-            return parsedArgs;
+        public Map<String, Object> getBoundParams() {
+            return boundParams;
         }
 
         public Collection<CommandParam> getUnboundParams() {
@@ -55,7 +55,7 @@ public class ParseBoundParamsReturnValue extends ReturnValueImpl<ParseBoundParam
         @Override
         public String toString() {
             return Objects.toStringHelper(this)
-                .add("parsedArgs", parsedArgs)
+                .add("boundParams", boundParams)
                 .add("unboundParams", unboundParams)
                 .toString();
         }

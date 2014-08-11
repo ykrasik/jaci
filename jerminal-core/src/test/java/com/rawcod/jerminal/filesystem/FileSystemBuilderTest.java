@@ -15,7 +15,7 @@ import static org.junit.Assert.*;
  * Date: 09/08/2014
  * Time: 21:08
  */
-public class ShellFileSystemTest extends AbstractFileSystemTest {
+public class FileSystemBuilderTest extends AbstractFileSystemTest {
     @Test
     public void testBasicPath() {
         add("dir1/dir2/dir3");
@@ -51,10 +51,10 @@ public class ShellFileSystemTest extends AbstractFileSystemTest {
 
     @Test
     public void testSamePathTwice() {
-        fileSystem.add("dir1/dir2");
+        builder.add("dir1/dir2");
         assertPathToCommand("dir1", "dir2", null);
 
-        fileSystem.add("dir1/dir2");
+        builder.add("dir1/dir2");
         assertPathToCommand("dir1", "dir2", null);
     }
 
@@ -84,19 +84,19 @@ public class ShellFileSystemTest extends AbstractFileSystemTest {
 
     @Test
     public void testEmptyPath() {
-        add("", cmd("cmd1"));
+        add("", "cmd1");
         assertPathToCommand("cmd1");
 
-        add("/", cmd("cmd2"));
+        add("/", "cmd2");
         assertPathToCommand("cmd2");
 
-        add("   /", cmd("cmd3"));
+        add("   /", "cmd3");
         assertPathToCommand("cmd3");
 
-        add("/   ", cmd("cmd4"));
+        add("/   ", "cmd4");
         assertPathToCommand("cmd4");
 
-        add("   /   ", cmd("cmd5"));
+        add("   /   ", "cmd5");
         assertPathToCommand("cmd5");
     }
 
@@ -126,28 +126,28 @@ public class ShellFileSystemTest extends AbstractFileSystemTest {
 
     @Test
     public void testSpecialCharacters() {
-        add("./dir1", cmd("cmd1"));
+        add("./dir1", "cmd1");
         assertPathToCommand("dir1", "cmd1");
 
-        add("/./dir1", cmd("cmd2"));
+        add("/./dir1", "cmd2");
         assertPathToCommand("dir1", "cmd2");
 
-        add("dir1/.", cmd("cmd3"));
+        add("dir1/.", "cmd3");
         assertPathToCommand("dir1", "cmd3");
 
-        add("dir1/./", cmd("cmd4"));
+        add("dir1/./", "cmd4");
         assertPathToCommand("dir1", "cmd4");
 
-        add("dir1/./dir2", cmd("cmd5"));
+        add("dir1/./dir2", "cmd5");
         assertPathToCommand("dir1", "dir2", "cmd5");
 
-        add("dir1/../dir2", cmd("cmd6"));
+        add("dir1/../dir2", "cmd6");
         assertPathToCommand("dir2", "cmd6");
 
-        add("dir1/dir2/..", cmd("cmd7"));
+        add("dir1/dir2/..", "cmd7");
         assertPathToCommand("dir1", "cmd7");
 
-        add("dir1/dir2/../", cmd("cmd8"));
+        add("dir1/dir2/../", "cmd8");
         assertPathToCommand("dir1", "cmd8");
     }
 
@@ -177,7 +177,7 @@ public class ShellFileSystemTest extends AbstractFileSystemTest {
         assertEquals("", dir.getDescription());
 
         // Try again with different descriptions, check that descriptions didn't change.
-        add("dir1:asd/dir2: asd/dir3 : asd/dir4:", cmd("cmd2"));
+        add("dir1:asd/dir2: asd/dir3 : asd/dir4:", "cmd2");
         assertPath("dir1", "dir2", "dir3", "dir4");
 
         dir = getChild(fileSystem.getRoot(), "dir1");
@@ -196,10 +196,10 @@ public class ShellFileSystemTest extends AbstractFileSystemTest {
     @Test
     public void testAddToRoot() {
         // These methods are identical.
-        add("/", cmd("cmd1"));
-        add("", cmd("cmd2"));
-        add("       ", cmd("cmd3"));
-        fileSystem.add(cmd("cmd4"));
+        add("/", "cmd1");
+        add("", "cmd2");
+        add("       ", "cmd3");
+        builder.add(cmd("cmd4"));
 
         assertPathToCommand("cmd1");
         assertPathToCommand("cmd2");
@@ -209,10 +209,10 @@ public class ShellFileSystemTest extends AbstractFileSystemTest {
 
     @Test(expected = IllegalStateException.class)
     public void testAddCommandTwice() {
-        add("dir", cmd("cmd"));
+        add("dir", "cmd");
         assertPathToCommand("dir", "cmd");
 
-        add("dir", cmd("cmd"));
+        add("dir", "cmd");
     }
 
     private void assertPath(String... path) {
@@ -231,7 +231,7 @@ public class ShellFileSystemTest extends AbstractFileSystemTest {
 
     private void assertIllegal(String path) {
         try {
-            fileSystem.add(path);
+            builder.add(path);
             fail();
         } catch (ShellException ignored) { }
     }

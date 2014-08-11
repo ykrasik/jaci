@@ -4,8 +4,7 @@ import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.rawcod.jerminal.returnvalue.FailureImpl;
 import com.rawcod.jerminal.returnvalue.parse.ParseError;
-
-import java.util.List;
+import com.rawcod.jerminal.returnvalue.suggestion.Suggestions;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -18,12 +17,12 @@ public class AutoCompleteReturnValueFailure extends FailureImpl {
     private final AutoCompleteError error;
     private final Optional<ParseError> parseError;
     private final String errorMessage;
-    private final List<String> suggestions;
+    private final Optional<Suggestions> suggestions;
 
     public AutoCompleteReturnValueFailure(AutoCompleteError error,
                                           Optional<ParseError> parseError,
                                           String errorMessage,
-                                          List<String> suggestions) {
+                                          Optional<Suggestions> suggestions) {
         this.error = checkNotNull(error, "error");
         this.parseError = checkNotNull(parseError, "parseError");
         this.errorMessage = checkNotNull(errorMessage, "errorMessage");
@@ -42,7 +41,7 @@ public class AutoCompleteReturnValueFailure extends FailureImpl {
         return errorMessage;
     }
 
-    public List<String> getSuggestions() {
+    public Optional<Suggestions> getSuggestions() {
         return suggestions;
     }
 

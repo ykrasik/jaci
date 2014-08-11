@@ -1,7 +1,7 @@
 package com.rawcod.jerminal.collections.trie.visitor;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * User: ykrasik
@@ -9,25 +9,18 @@ import java.util.List;
  * Time: 21:49
  */
 public class CollectorTrieVisitor<T> implements TrieVisitor<T> {
-    private final List<String> words;
-    private final List<T> values;
+    private final Map<String, T> values;
 
     public CollectorTrieVisitor() {
-        this.words = new ArrayList<>();
-        this.values = new ArrayList<>();
+        this.values = new HashMap<>();
     }
 
     @Override
     public void visit(String word, T value) {
-        words.add(word);
-        values.add(value);
+        values.put(word, value);
     }
 
-    public List<String> getWords() {
-        return words;
-    }
-
-    public List<T> getValues() {
+    public Map<String, T> getMap() {
         return values;
     }
 }

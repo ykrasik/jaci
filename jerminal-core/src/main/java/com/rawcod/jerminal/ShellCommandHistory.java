@@ -13,12 +13,12 @@ public class ShellCommandHistory {
     private final Deque<String> prevCommands;
     private final Deque<String> nextCommands;
 
-    private final int maxCommandsHistory;
+    private final int maxCommandHistory;
 
-    public ShellCommandHistory(int maxCommandsHistory) {
-        this.maxCommandsHistory = maxCommandsHistory;
-        this.prevCommands = new ArrayDeque<>(maxCommandsHistory);
-        this.nextCommands = new ArrayDeque<>(maxCommandsHistory);
+    public ShellCommandHistory(int maxCommandHistory) {
+        this.maxCommandHistory = maxCommandHistory;
+        this.prevCommands = new ArrayDeque<>(maxCommandHistory);
+        this.nextCommands = new ArrayDeque<>(maxCommandHistory);
     }
 
     public Optional<String> getPrevCommand() {
@@ -49,7 +49,7 @@ public class ShellCommandHistory {
 
     public void pushCommand(String command) {
         returnNextCommands();
-        if (prevCommands.size() >= maxCommandsHistory) {
+        if (prevCommands.size() >= maxCommandHistory) {
             prevCommands.removeFirst();
         }
         prevCommands.addLast(command);

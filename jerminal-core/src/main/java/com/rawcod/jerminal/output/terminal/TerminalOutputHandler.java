@@ -62,10 +62,27 @@ public class TerminalOutputHandler implements OutputHandler {
     }
 
     @Override
-    public void displaySuggestions(List<String> suggestions) {
-        final String suggestionsStr = JOINER.join(suggestions);
-        final String message = String.format("Suggestions: [%s]", suggestionsStr);
-        print(message);
+    public void displaySuggestions(List<String> directorySuggestions,
+                                   List<String> commandSuggestions,
+                                   List<String> paramNameSuggestions,
+                                   List<String> paramValueSuggestions) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("Suggestions: \n");
+        appendSuggestions(sb, directorySuggestions, "Directories");
+        appendSuggestions(sb, commandSuggestions, "Commands");
+        appendSuggestions(sb, paramNameSuggestions, "Parameter names");
+        appendSuggestions(sb, paramValueSuggestions, "Parameter values");
+        print(sb.toString());
+    }
+
+    private void appendSuggestions(StringBuilder sb, List<String> suggestions, String suggestionTitle) {
+        if (!suggestions.isEmpty()) {
+            sb.append("|   ");
+            sb.append(suggestionTitle);
+            sb.append(": [");
+            sb.append(JOINER.join(suggestions));
+            sb.append("]\n");
+        }
     }
 
     @Override

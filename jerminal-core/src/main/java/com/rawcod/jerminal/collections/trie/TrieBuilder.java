@@ -1,7 +1,7 @@
 package com.rawcod.jerminal.collections.trie;
 
-import com.rawcod.jerminal.collections.trie.node.TrieNodeImpl;
-import com.rawcod.jerminal.collections.trie.node.ValueTrieNode;
+import com.rawcod.jerminal.collections.trie.node.TrieNode;
+import com.rawcod.jerminal.collections.trie.node.TrieNodeBuilder;
 import com.rawcod.jerminal.exception.ShellException;
 
 import java.util.HashMap;
@@ -18,35 +18,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class TrieBuilder<T> {
     private final Map<String, T> values;
-    private final ValueTrieNode<T> root;
+    private final TrieNodeBuilder<T> rootBuilder;
 
     public TrieBuilder() {
         this.values = new HashMap<>();
-        this.root = new TrieNodeImpl<>();
+        this.rootBuilder = new TrieNodeBuilder<>();
     }
 
     public Trie<T> build() {
-        for (Entry<String, T> entry : values.entrySet()) {
-            putWord(entry.getKey(), entry.getValue());
-        }
+        final TrieNode<T> root = rootBuilder.build();
         return new TrieImpl<>(root);
-    }
-
-    private void putWord(String word, T value) {
-        // Navigate the tree by the letters of the word, starting from the root.
-        ValueTrieNode<T> currentNode = root;
-        for (int i = 0; i < word.length(); i++) {
-            final char c = word.charAt(i);
-            // FIXME: Create an immutable TrieNode
-            ValueTrieNode<T> child = (ValueTrieNode<T>) currentNode.getChild(c);
-            if (child == null) {
-                child = new TrieNodeImpl<>(c);
-                currentNode.setChild(c, child);
-            }
-            currentNode = child;
-        }
-
-        currentNode.setValue(value);
     }
 
     public TrieBuilder<T> addAll(Map<String, ? extends T> map) {
@@ -66,6 +47,18 @@ public class TrieBuilder<T> {
         }
 
         values.put(word, value);
+        putWord(word, value);
         return this;
+    }
+
+    private void putWord(String word, T value) {
+        // Navigate the tree by the letters of the word, starting from the root.
+        TrieNodeBuilder<T> currentNode = rootBuilder;
+        for (int i = 0; i < word.length(); i++) {
+            final char c = word.charAt(i);
+            currentNode = rootBuilder.getOrCreateNode(c);
+        }
+
+        currentNode.setValue(value);
     }
 }

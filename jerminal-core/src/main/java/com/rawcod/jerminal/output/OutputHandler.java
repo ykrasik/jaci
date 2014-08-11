@@ -24,7 +24,10 @@ public interface OutputHandler {
     void executeError(ExecuteError error, String errorMessage);
     void executeUnhandledException(Exception e);
 
-    void displaySuggestions(List<String> suggestions);
+    void displaySuggestions(List<String> directorySuggestions,
+                            List<String> commandSuggestions,
+                            List<String> paramNameSuggestions,
+                            List<String> paramValueSuggestions);
     void displayCommandOutput(List<String> output);
 
     void displayShellEntryView(ShellEntryView shellEntryView);
