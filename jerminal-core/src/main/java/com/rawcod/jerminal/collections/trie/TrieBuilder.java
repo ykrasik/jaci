@@ -56,7 +56,7 @@ public class TrieBuilder<T> {
         TrieNodeBuilder<T> currentNode = rootBuilder;
         for (int i = 0; i < word.length(); i++) {
             final char c = word.charAt(i);
-            currentNode = rootBuilder.getOrCreateNode(c);
+            currentNode = currentNode.getOrCreateNode(c);
         }
 
         currentNode.setValue(value);

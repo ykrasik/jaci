@@ -25,8 +25,8 @@ public class ShellBuilder {
 
     public ShellBuilder(OutputHandler outputHandler) {
         this.outputProcessor = new OutputProcessor(outputHandler);
-        this.fileSystemBuilder = new ShellFileSystemBuilder();
         this.currentDirectoryContainer = new CurrentDirectoryContainer();
+        this.fileSystemBuilder = new ShellFileSystemBuilder(currentDirectoryContainer);
 
         final Set<ShellCommand> defaultGlobalCommands = new DefaultGlobalCommandFactory(currentDirectoryContainer, outputProcessor).createDefaultGlobalCommands();
         fileSystemBuilder.addGlobalCommands(defaultGlobalCommands);

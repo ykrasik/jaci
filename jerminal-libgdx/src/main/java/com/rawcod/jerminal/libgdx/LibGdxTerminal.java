@@ -13,21 +13,20 @@ import com.rawcod.jerminal.output.terminal.Terminal;
  */
 public class LibGdxTerminal extends Stage implements Terminal {
     private final Table terminalScreen;
-
     private final LibGdxTerminalBuffer buffer;
     private final ScrollPane bufferScrollPane;
 
     private final Label currentPath;
-
     private final TextField textField;
 
     private boolean needsFocus;
 
+    private ConsoleActivationListener listener;
+
     public LibGdxTerminal(float width,
                           float height,
                           int maxBufferEntries,
-                          LibGdxConsoleWidgetFactory widgetFactory,
-                          final LibGdxConsole console) {
+                          LibGdxConsoleWidgetFactory widgetFactory) {
         super(width, height, true);
 
         // The buffer will show all the messages we got.
@@ -51,7 +50,7 @@ public class LibGdxTerminal extends Stage implements Terminal {
         closeButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                console.deactivate();
+                deactivate();
             }
         });
 
@@ -99,35 +98,6 @@ public class LibGdxTerminal extends Stage implements Terminal {
         return widgetFactory.createInputTextField("");
     }
 
-//    @Override
-//    public void displayMessage(String message) {
-//        final String displayMessage = String.format("[%s] %s", currentPath.getText(), message);
-//        print(displayMessage, Color.WHITE);
-//    }
-//
-//    @Override
-//    public void displayCommandReturnMessage(String message) {
-//        print(message, Color.WHITE);
-//    }
-//
-//    @Override
-//    public void displayError(String error) {
-//        final String errorMessage = "Error: " + error;
-//        print(errorMessage, Color.PINK);
-//    }
-//
-//    @Override
-//    public void displayUsage(String usage) {
-//        final String usageMessage = "Usage: " + usage;
-//        print(usageMessage, Color.CYAN);
-//    }
-//
-//    @Override
-//    public void displaySuggestions(List<String> suggestions) {
-//        final String suggestionMessage = "Suggestions: " + suggestions;
-//        print(suggestionMessage, Color.ORANGE);
-//    }
-
     @Override
     public void clearCommandLine() {
         setCommandLine("");
@@ -156,6 +126,10 @@ public class LibGdxTerminal extends Stage implements Terminal {
         bufferScrollPane.updateVisualScroll();
     }
 
+    public void setListener(ConsoleActivationListener listener) {
+        this.listener = listener;
+    }
+
 //    @Override
 //    public void setCurrentPath(List<String> path) {
 //        final StringBuffer sb = new StringBuffer();
@@ -178,27 +152,71 @@ public class LibGdxTerminal extends Stage implements Terminal {
         return textField.getText().substring(0, textField.getCursorPosition());
     }
 
+    public boolean isActive() {
+        return terminalScreen.isVisible();
+    }
+
+    public void toggle() {
+        if (!isActive()) {
+            activate();
+        } else {
+            deactivate();
+        }
+    }
+
     public void activate() {
+        if (isActive()) {
+            return;
+        }
+
         terminalScreen.setVisible(true);
 
         // Delegate giving the textField keyboard focus so that the key that activated
         // the terminal doesn't get typed into the textField.
         needsFocus = true;
+
+        // Notify listener
+        if (listener != null) {
+            listener.activated();
+        }
     }
 
     public void deactivate() {
+        if (!isActive()) {
+            return;
+        }
+
         terminalScreen.setVisible(false);
 
         // Clear stage keyboard focus
         this.setKeyboardFocus(null);
+
+        // Notify listener
+        if (listener != null) {
+            listener.deactivated();
+        }
     }
 
     @Override
     public void draw() {
+        if (!isActive()) {
+            return;
+        }
+
         if (needsFocus) {
             this.setKeyboardFocus(textField);
             needsFocus = false;
         }
+
         super.draw();
+    }
+
+    @Override
+    public void act(float delta) {
+        if (!isActive()) {
+            return;
+        }
+
+        super.act(delta);
     }
 }

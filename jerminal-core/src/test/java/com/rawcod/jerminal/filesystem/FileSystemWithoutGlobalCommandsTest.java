@@ -7,33 +7,21 @@ import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
 import com.rawcod.jerminal.returnvalue.parse.entry.ParseEntryReturnValue;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import java.util.Arrays;
 
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.when;
 
 /**
  * User: ykrasik
  * Date: 07/08/2014
  * Time: 19:15
  */
-@RunWith(MockitoJUnitRunner.class)
 public class FileSystemWithoutGlobalCommandsTest extends AbstractFileSystemTest {
     private final String[] commands = { "cmd1", "cmd2", "cmd2cmd", "cmf", "file" };
-
-    @Mock
-    private CurrentDirectoryContainer currentDirectoryContainer;
 
     @Override
     @Before
     public void setUp() {
         super.setUp();
-
-        when(currentDirectoryContainer.getCurrentDirectory()).thenReturn(fileSystem.getRoot());
 
         add("", commands);
         add("dir1", commands);
@@ -65,11 +53,6 @@ public class FileSystemWithoutGlobalCommandsTest extends AbstractFileSystemTest 
         assertPathToCommands("dir1/dir2/");
         assertPathToCommands("/dir1/dir2");
         assertPathToCommands("/dir1/dir2/");
-    }
-
-    private void setCurrentDirectory(String... path) {
-        final ShellDirectory directory = getDirectory(Arrays.asList(path));
-        when(currentDirectoryContainer.getCurrentDirectory()).thenReturn(directory);
     }
 
     private void assertPathToCommands(String basePath) {

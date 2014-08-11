@@ -3,97 +3,29 @@ package com.rawcod.jerminal.libgdx;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.rawcod.jerminal.Shell;
-import com.rawcod.jerminal.filesystem.ShellFileSystem;
-import com.rawcod.jerminal.output.terminal.TerminalOutputHandler;
 
 /**
  * User: ykrasik
  * Date: 04/01/14
  */
 public class LibGdxConsole implements InputProcessor {
-    private final int toggleKeycode;
-
     private final LibGdxTerminal terminal;
     private final Shell shell;
 
-    private ConsoleActivationListener listener;
+    private final int toggleKeycode;
 
-    private boolean debug;
-    private boolean active;
-
-    public LibGdxConsole(float width,
-                         float height,
-                         int toggleKeycode,
-                         int maxBufferEntries,
-                         int maxCommandHistory,
-                         ShellFileSystem fileSystem,
-                         LibGdxConsoleWidgetFactory widgetFactory) {
+    public LibGdxConsole(LibGdxTerminal terminal, Shell shell, int toggleKeycode) {
         this.toggleKeycode = toggleKeycode > 0 ? toggleKeycode : -2;
-        this.terminal = new LibGdxTerminal(width, height, maxBufferEntries, widgetFactory, this);
-        this.shell = new Shell(new TerminalOutputHandler(terminal), fileSystem, maxCommandHistory);
-    }
-
-    public void setListener(ConsoleActivationListener listener) {
-        this.listener = listener;
-    }
-
-    public boolean isActive() {
-        return active;
-    }
-
-    public void toggle() {
-        if (!active) {
-            activate();
-        } else {
-            deactivate();
-        }
-    }
-
-    public void activate() {
-        if (active) {
-            return;
-        }
-
-        active = true;
-        terminal.activate();
-
-        // Notify listener
-        if (listener != null) {
-            listener.activated();
-        }
-    }
-
-    public void deactivate() {
-        if (!active) {
-            return;
-        }
-
-        active = false;
-        terminal.deactivate();
-
-        // Notify listener
-        if (listener != null) {
-            listener.deactivated();
-        }
+        this.terminal = terminal;
+        this.shell = shell;
     }
 
     public void draw() {
-        if (!active) {
-            return;
-        }
         terminal.draw();
-
-        if (debug) {
-            Table.drawDebug(terminal);
-        }
     }
 
     public void act(float delta) {
-        if (!active) {
-            return;
-        }
         terminal.act(delta);
     }
 
@@ -101,13 +33,18 @@ public class LibGdxConsole implements InputProcessor {
         terminal.setViewport(width, height);
     }
 
+    public void activate() {
+        terminal.activate();
+    }
+
     @Override
     public boolean keyDown(int keycode) {
         if (keycode == toggleKeycode) {
-            toggle();
+            terminal.toggle();
             return true;
         }
-        if (!active) {
+
+        if (!terminal.isActive()) {
             return false;
         }
 
@@ -136,40 +73,36 @@ public class LibGdxConsole implements InputProcessor {
 
     @Override
     public boolean keyUp(int keycode) {
-        return active && terminal.keyUp(keycode);
+        return terminal.isActive() && terminal.keyUp(keycode);
     }
 
     @Override
     public boolean keyTyped(char character) {
-        return active && terminal.keyTyped(character);
+        return terminal.isActive() && terminal.keyTyped(character);
     }
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        return active && terminal.touchDown(screenX, screenY, pointer, button);
+        return terminal.isActive() && terminal.touchDown(screenX, screenY, pointer, button);
     }
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        return active && terminal.touchUp(screenX, screenY, pointer, button);
+        return terminal.isActive() && terminal.touchUp(screenX, screenY, pointer, button);
     }
 
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
-        return active && terminal.touchDragged(screenX, screenY, pointer);
+        return terminal.isActive() && terminal.touchDragged(screenX, screenY, pointer);
     }
 
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
-        return active && terminal.mouseMoved(screenX, screenY);
+        return terminal.isActive() && terminal.mouseMoved(screenX, screenY);
     }
 
     @Override
     public boolean scrolled(int amount) {
-        return active && terminal.scrolled(amount);
-    }
-
-    public void debug() {
-        this.debug = !this.debug;
+        return terminal.isActive() && terminal.scrolled(amount);
     }
 }

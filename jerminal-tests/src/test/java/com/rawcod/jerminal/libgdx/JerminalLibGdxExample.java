@@ -7,16 +7,12 @@ import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
-import com.rawcod.jerminal.Shell;
 import com.rawcod.jerminal.command.CommandArgs;
 import com.rawcod.jerminal.command.CommandExecutor;
 import com.rawcod.jerminal.command.ExecuteContext;
 import com.rawcod.jerminal.command.parameters.bool.BooleanParamBuilder;
 import com.rawcod.jerminal.command.parameters.number.IntegerParamBuilder;
-import com.rawcod.jerminal.filesystem.ShellFileSystem;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommandBuilder;
-import com.rawcod.jerminal.output.terminal.Terminal;
-import com.rawcod.jerminal.output.terminal.TerminalOutputHandler;
 import com.rawcod.jerminal.returnvalue.execute.executor.ExecutorReturnValue;
 
 /**
@@ -42,35 +38,33 @@ public class JerminalLibGdxExample extends ApplicationAdapter {
 
     @Override
     public void create() {
-        final ShellFileSystem fileSystem = createFileSystem();
-
-        this.shell = new Shell(new TerminalOutputHandler(terminal), fileSystem, maxCommandHistory);
-
         final int width = Gdx.graphics.getWidth();
         final int height = Gdx.graphics.getHeight();
-        final int toggleKey = Keys.GRAVE;
         final int maxBufferEntries = 30;
-        final int maxCommandHistory = 20;
         final LibGdxConsoleWidgetFactory widgetFactory = new JerminalLibGdxTestConsoleWidgetFactory();
-        final Terminal terminal = new LibGdxTerminal(width, height, maxBufferEntries, widgetFactory, this);
-        console = new LibGdxConsole(width, height, toggleKey, maxBufferEntries, maxCommandHistory, fileSystem, widgetFactory);
+
+        final LibGdxConsoleBuilder builder = new LibGdxConsoleBuilder(width, height, maxBufferEntries, widgetFactory);
+        builder.setMaxCommandHistory(20)
+            .setToggleKeycode(Keys.GRAVE);
+
+        createFileSystem(builder);
+
+        console = builder.build();
 
         Gdx.input.setInputProcessor(console);
         console.activate();
     }
 
-    private ShellFileSystem createFileSystem() {
-        final ShellFileSystem fileSystem = new ShellFileSystem(root, globalCommands);
+    private void createFileSystem(LibGdxConsoleBuilder builder) {
+        builder.add("nested/d/1possible");
+        builder.add("nested/d/2possible");
+        builder.add("nested/dir/singlePossible");
+        builder.add("nested/dir1/singlePossible");
+        builder.add("nested/dir2/singlePossible");
+        builder.add("nested/directory/singlePossible/multiplePossible1/singlePossible");
+        builder.add("nested/directory/singlePossible/multiplePossible2/singlePossible");
 
-        fileSystem.add("nested/d/1possible");
-        fileSystem.add("nested/d/2possible");
-        fileSystem.add("nested/dir/singlePossible");
-        fileSystem.add("nested/dir1/singlePossible");
-        fileSystem.add("nested/dir2/singlePossible");
-        fileSystem.add("nested/directory/singlePossible/multiplePossible1/singlePossible");
-        fileSystem.add("nested/directory/singlePossible/multiplePossible2/singlePossible");
-
-        fileSystem.add(
+        builder.add(
             new ShellCommandBuilder("cmd")
                 .setDescription("cmd")
                 .addParam(
@@ -95,8 +89,6 @@ public class JerminalLibGdxExample extends ApplicationAdapter {
                 })
                 .build()
         );
-
-        return fileSystem;
     }
 
     @Override

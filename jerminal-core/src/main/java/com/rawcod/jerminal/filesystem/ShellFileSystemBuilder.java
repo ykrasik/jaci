@@ -27,10 +27,10 @@ public class ShellFileSystemBuilder {
     private final TrieBuilder<ShellCommand> globalCommandsBuilder;
     private final CurrentDirectoryContainer currentDirectoryContainer;
 
-    public ShellFileSystemBuilder() {
+    public ShellFileSystemBuilder(CurrentDirectoryContainer currentDirectoryContainer) {
         this.rootBuilder = new ShellDirectoryBuilder("root", "root");
         this.globalCommandsBuilder = new TrieBuilder<>();
-        this.currentDirectoryContainer = new CurrentDirectoryContainer();
+        this.currentDirectoryContainer = currentDirectoryContainer;
     }
 
     public ShellFileSystem build() {

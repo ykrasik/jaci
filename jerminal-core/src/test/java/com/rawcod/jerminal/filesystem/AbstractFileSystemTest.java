@@ -7,6 +7,7 @@ import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
 import com.rawcod.jerminal.returnvalue.parse.entry.ParseEntryReturnValue;
 import org.junit.Before;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.Arrays;
@@ -26,14 +27,18 @@ public class AbstractFileSystemTest {
     protected ShellFileSystemBuilder builder;
     protected ShellFileSystem fileSystem;
 
+    @Mock
+    protected CurrentDirectoryContainer currentDirectoryContainer;
+
     @Before
     public void setUp() {
-        this.builder = new ShellFileSystemBuilder();
+        this.builder = new ShellFileSystemBuilder(currentDirectoryContainer);
         this.fileSystem = null;
     }
 
     protected void build() {
         this.fileSystem = builder.build();
+        when(currentDirectoryContainer.getCurrentDirectory()).thenReturn(fileSystem.getRoot());
     }
 
     protected void add(String path) {
@@ -73,5 +78,10 @@ public class AbstractFileSystemTest {
         final ParseEntryReturnValue returnValue = directory.parseDirectory(name);
         assertTrue("Directory doesn't contain expected child!", returnValue.isSuccess());
         return returnValue.getSuccess().getEntry().getAsDirectory();
+    }
+
+    protected void setCurrentDirectory(String... path) {
+        final ShellDirectory directory = getDirectory(Arrays.asList(path));
+        when(currentDirectoryContainer.getCurrentDirectory()).thenReturn(directory);
     }
 }
