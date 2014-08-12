@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * User: ykrasik
@@ -90,9 +91,16 @@ public class TrieFilterTest extends AbstractTrieTest {
     @Test
     public void testFailedFilter() {
         // All values are invalid, no subTrie expected after filtering.
+        build();
         failedFilter("n"); // Only 1 value and it's illegal.
+
+        build();
         failedFilter("notOkValue"); // Only 1 value and it's illegal.
+
+        build();
         failedFilter("in"); // invalid1, invalid2
+
+        build();
         failedFilter("thisValueIsNot"); // thisValueIsNotOk, thisValueIsNotOj, thisValueIsNotOk2
     }
 
@@ -102,7 +110,7 @@ public class TrieFilterTest extends AbstractTrieTest {
     }
 
     private void failedFilter(String prefix) {
-        assertFalse("Unexpected subTrie for filtered prefix: " + prefix, filter(prefix).isEmpty());
+        assertTrue("Unexpected subTrie for filtered prefix: " + prefix, filter(prefix).isEmpty());
     }
 
     private Trie<String> filter(String prefix) {

@@ -1,8 +1,5 @@
 package com.rawcod.jerminal.command.parameters;
 
-import com.google.common.base.Optional;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteErrors;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.ParseErrors;
 import com.rawcod.jerminal.returnvalue.parse.param.ParseParamValueReturnValue;
 
@@ -38,19 +35,8 @@ public abstract class AbstractMandatoryCommandParam implements CommandParam {
     }
 
     @Override
-    public ParseParamValueReturnValue parse(Optional<String> rawValue, ParseParamContext context) {
-        if (!rawValue.isPresent()) {
-            return ParseErrors.paramNotBound(name);
-        }
-        return parse(rawValue.get(), context);
-    }
-
-    @Override
-    public AutoCompleteReturnValue autoComplete(Optional<String> prefix, ParseParamContext context) {
-        if (!prefix.isPresent()) {
-            return AutoCompleteErrors.paramNotBound(name);
-        }
-        return autoComplete(prefix.get(), context);
+    public ParseParamValueReturnValue unbound(ParseParamContext context) {
+        return ParseErrors.paramNotBound(name);
     }
 
     @Override
@@ -60,8 +46,6 @@ public abstract class AbstractMandatoryCommandParam implements CommandParam {
     }
 
     protected abstract String getExternalFormType();
-    protected abstract ParseParamValueReturnValue parse(String rawValue, ParseParamContext context);
-    protected abstract AutoCompleteReturnValue autoComplete(String prefix, ParseParamContext context);
 
     @Override
     public String toString() {

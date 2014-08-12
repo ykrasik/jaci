@@ -27,7 +27,7 @@ public class BooleanParam extends StringParam {
     }
 
     @Override
-    protected ParseParamValueReturnValue parse(String rawValue, ParseParamContext context) {
+    public ParseParamValueReturnValue parse(String rawValue, ParseParamContext context) {
         final ParseParamValueReturnValue returnValue = super.parse(rawValue, context);
         if (returnValue.isFailure()) {
             return returnValue;

@@ -1,10 +1,9 @@
 package com.rawcod.jerminal.command.parameters.optional;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
 import com.rawcod.jerminal.command.parameters.CommandParam;
-import com.rawcod.jerminal.command.parameters.ParseParamContext;
 import com.rawcod.jerminal.command.parameters.ParamType;
+import com.rawcod.jerminal.command.parameters.ParseParamContext;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.param.ParseParamValueReturnValue;
 
@@ -45,15 +44,17 @@ public class OptionalParam<T> implements CommandParam {
     }
 
     @Override
-    public ParseParamValueReturnValue parse(Optional<String> rawValue, ParseParamContext context) {
-        if (rawValue.isPresent()) {
-            return delegate.parse(rawValue, context);
-        }
+    public ParseParamValueReturnValue parse(String rawValue, ParseParamContext context) {
+        return delegate.parse(rawValue, context);
+    }
+
+    @Override
+    public ParseParamValueReturnValue unbound(ParseParamContext context) {
         return ParseParamValueReturnValue.success(defaultValueSupplier.get());
     }
 
     @Override
-    public AutoCompleteReturnValue autoComplete(Optional<String> prefix, ParseParamContext context) {
+    public AutoCompleteReturnValue autoComplete(String prefix, ParseParamContext context) {
         return delegate.autoComplete(prefix, context);
     }
 

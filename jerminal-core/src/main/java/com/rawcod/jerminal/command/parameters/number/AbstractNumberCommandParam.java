@@ -18,7 +18,7 @@ public abstract class AbstractNumberCommandParam<T> extends AbstractMandatoryCom
     }
 
     @Override
-    protected ParseParamValueReturnValue parse(String rawValue, ParseParamContext context) {
+    public ParseParamValueReturnValue parse(String rawValue, ParseParamContext context) {
         try {
             final T parsedValue = parseNumber(rawValue);
             return ParseParamValueReturnValue.success(parsedValue);
@@ -28,7 +28,7 @@ public abstract class AbstractNumberCommandParam<T> extends AbstractMandatoryCom
     }
 
     @Override
-    protected AutoCompleteReturnValue autoComplete(String prefix, ParseParamContext context) {
+    public AutoCompleteReturnValue autoComplete(String prefix, ParseParamContext context) {
         // Integers cannot be auto-completed.
         return AutoCompleteErrors.noPossibleValuesForNumberParam(getName());
     }

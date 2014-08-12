@@ -31,7 +31,7 @@ public class StringParam extends AbstractMandatoryCommandParam {
     }
 
     @Override
-    protected ParseParamValueReturnValue parse(String rawValue, ParseParamContext context) {
+    public ParseParamValueReturnValue parse(String rawValue, ParseParamContext context) {
         final Trie<String> values = getValues();
 
         // If the possible values trie is empty, all values are accepted.
@@ -46,7 +46,7 @@ public class StringParam extends AbstractMandatoryCommandParam {
     }
 
     @Override
-    protected AutoCompleteReturnValue autoComplete(String prefix, ParseParamContext context) {
+    public AutoCompleteReturnValue autoComplete(String prefix, ParseParamContext context) {
         final Trie<String> values = getValues();
         final Trie<AutoCompleteType> possibilities = values.subTrie(prefix).map(AutoCompleteMappers.commandParamValueStringMapper());
         return AutoCompleteReturnValue.success(prefix, possibilities);

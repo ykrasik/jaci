@@ -1,6 +1,5 @@
 package com.rawcod.jerminal.command.parameters;
 
-import com.google.common.base.Optional;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.param.ParseParamValueReturnValue;
 
@@ -15,6 +14,7 @@ public interface CommandParam {
     ParamType getType();
     String getExternalForm();
 
-    ParseParamValueReturnValue parse(Optional<String> rawValue, ParseParamContext context);
-    AutoCompleteReturnValue autoComplete(Optional<String> prefix, ParseParamContext context);
+    ParseParamValueReturnValue parse(String rawValue, ParseParamContext context);
+    ParseParamValueReturnValue unbound(ParseParamContext context);
+    AutoCompleteReturnValue autoComplete(String prefix, ParseParamContext context);
 }

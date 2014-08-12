@@ -19,7 +19,7 @@ public abstract class AbstractEntryCommandParam extends AbstractMandatoryCommand
     }
 
     @Override
-    protected ParseParamValueReturnValue parse(String rawValue, ParseParamContext context) {
+    public ParseParamValueReturnValue parse(String rawValue, ParseParamContext context) {
         final ShellFileSystem fileSystem = context.getFileSystem();
         final ParseEntryReturnValue returnValue = doParse(rawValue, fileSystem);
         if (returnValue.isFailure()) {
@@ -31,7 +31,7 @@ public abstract class AbstractEntryCommandParam extends AbstractMandatoryCommand
     }
 
     @Override
-    protected AutoCompleteReturnValue autoComplete(String prefix, ParseParamContext context) {
+    public AutoCompleteReturnValue autoComplete(String prefix, ParseParamContext context) {
         final ShellFileSystem fileSystem = context.getFileSystem();
         return doAutoComplete(prefix, fileSystem);
     }

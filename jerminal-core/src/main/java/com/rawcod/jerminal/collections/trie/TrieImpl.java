@@ -48,7 +48,7 @@ public class TrieImpl<T> implements Trie<T> {
     @Override
     public Optional<T> get(String word) {
         final TrieNode<T> node = getNode(word);
-        return node != null ? Optional.of(node.getValue()) : Optional.<T>absent();
+        return node != null ? Optional.fromNullable(node.getValue()) : Optional.<T>absent();
     }
 
     @Override

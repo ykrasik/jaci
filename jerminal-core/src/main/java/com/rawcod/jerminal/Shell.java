@@ -4,11 +4,15 @@ import com.google.common.base.Optional;
 import com.rawcod.jerminal.collections.trie.Trie;
 import com.rawcod.jerminal.command.CommandArgs;
 import com.rawcod.jerminal.command.parameters.ParseParamContext;
+import com.rawcod.jerminal.exception.ShellException;
 import com.rawcod.jerminal.filesystem.ShellFileSystem;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
 import com.rawcod.jerminal.output.OutputProcessor;
-import com.rawcod.jerminal.returnvalue.autocomplete.*;
+import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteErrors;
+import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue.AutoCompleteReturnValueSuccess;
+import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValueFailure;
+import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteType;
 import com.rawcod.jerminal.returnvalue.execute.flow.ExecuteReturnValue;
 import com.rawcod.jerminal.returnvalue.execute.flow.ExecuteReturnValueFailure;
 import com.rawcod.jerminal.returnvalue.execute.flow.ExecuteReturnValueSuccess;
@@ -117,7 +121,9 @@ public class Shell {
         if (numPossibilities == 1) {
             // Only a single word is possible.
             final String singlePossibility = possibilitiesMap.keySet().iterator().next();
-            autoCompleteAddition = getAutoCompleteAddition(prefix, singlePossibility);
+            final AutoCompleteType type = possibilitiesMap.get(singlePossibility);
+            final char suffix = getSinglePossibilitySuffix(type);
+            autoCompleteAddition = getAutoCompleteAddition(prefix, singlePossibility) + suffix;
             suggestions = Optional.absent();
         } else {
             // Multiple words are possible.
@@ -135,6 +141,17 @@ public class Shell {
 
         final String newCommandLine = rawCommandLine + autoCompleteAddition;
         outputProcessor.autoCompleteSuccess(newCommandLine, suggestions);
+    }
+
+    private char getSinglePossibilitySuffix(AutoCompleteType type) {
+        // FIXME: Where to place these constants?
+        switch (type) {
+            case DIRECTORY: return '/';
+            case COMMAND: return ' ';
+            case COMMAND_PARAM_NAME: return '=';
+            case COMMAND_PARAM_VALUE: return ' ';
+            default: throw new ShellException("Invalid AutoCompleteType: %s", type);
+        }
     }
 
     private String getAutoCompleteAddition(String prefix, String autoCompletedPrefix) {

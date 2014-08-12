@@ -73,19 +73,13 @@ public class CommandParamManager {
         // Do this by having them parse an empty value.
         // It is up to the param to decide whether this is legal.
         for (CommandParam unboundParam : unboundParams) {
-            final Object value;
-            if (unboundParam.getType() == ParamType.FLAG) {
-                // If a flag is unbound, it defaults to false.
-                value = false;
-            } else {
-                final ParseParamValueReturnValue returnValue = unboundParam.parse(Optional.<String>absent(), context);
-                if (returnValue.isFailure()) {
-                    return ParseCommandArgsReturnValue.failure(returnValue.getFailure());
-                }
-
-                // Param has been bound.
-                value = returnValue.getSuccess().getValue();
+            final ParseParamValueReturnValue returnValue = unboundParam.unbound(context);
+            if (returnValue.isFailure()) {
+                return ParseCommandArgsReturnValue.failure(returnValue.getFailure());
             }
+
+            // Param has been bound.
+            final Object value = returnValue.getSuccess().getValue();
             boundParams.put(unboundParam.getName(), value);
         }
 
@@ -141,8 +135,12 @@ public class CommandParamManager {
         }
         final CommandParam param = paramOptional.get();
 
+        if (!containsDelimiter && param.getType() == ParamType.FLAG) {
+            return ParseParamReturnValue.success(param, true);
+        }
+
         // Use the rest of the rawArg as the value, without the '=' (if present).
-        final Optional<String> rawValue = extractValue(rawArg, indexOfDelimiter);
+        final String rawValue = rawArg.substring(indexOfDelimiter + 1);
 
         final ParseParamValueReturnValue returnValue = param.parse(rawValue, context);
         if (returnValue.isFailure()) {
@@ -194,7 +192,7 @@ public class CommandParamManager {
 
             // The param is valid and unbound, autoComplete it's value.
             final CommandParam param = paramOptional.get();
-            final Optional<String> rawValue = extractValue(rawArg, indexOfDelimiter);
+            final String rawValue = rawArg.substring(indexOfDelimiter + 1);
             return param.autoComplete(rawValue, context);
         } else {
             return autoCompleteParamName(rawParamName, boundParams);
@@ -206,15 +204,6 @@ public class CommandParamManager {
         final Trie<CommandParam> filteredParams = prefixParams.filter(new BoundParamsFilter(boundParams));
         final Trie<AutoCompleteType> paramNamePossibilities = filteredParams.map(AutoCompleteMappers.commandParamNameMapper());
         return AutoCompleteReturnValue.success(prefix, paramNamePossibilities);
-    }
-
-    private Optional<String> extractValue(String arg, int indexOfDelimiter) {
-        if (indexOfDelimiter == -1) {
-            return Optional.absent();
-        }
-
-        final String value = arg.substring(indexOfDelimiter + 1);
-        return Optional.of(value);
     }
 
     /**

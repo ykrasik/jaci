@@ -51,7 +51,7 @@ public class TrieUnionTest extends AbstractTrieTest {
         assertNotEmpty();
         assertWords("single");
         assertLongestPrefix("single");
-        assertSame(trie2, this.trie);
+        assertSame(trie1, this.trie);
     }
 
     @Test
