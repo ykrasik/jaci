@@ -12,6 +12,7 @@ import com.rawcod.jerminal.command.CommandExecutor;
 import com.rawcod.jerminal.command.ExecuteContext;
 import com.rawcod.jerminal.command.parameters.bool.BooleanParamBuilder;
 import com.rawcod.jerminal.command.parameters.number.IntegerParamBuilder;
+import com.rawcod.jerminal.command.parameters.string.StringParamBuilder;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommandBuilder;
 import com.rawcod.jerminal.returnvalue.execute.executor.ExecutorReturnValue;
 
@@ -87,7 +88,28 @@ public class JerminalLibGdxExample extends ApplicationAdapter {
                         return success();
                     }
                 })
-                .build()
+                .build(),
+            new ShellCommandBuilder("test")
+              .setDescription("test Command")
+              .addParam(
+                  new StringParamBuilder("stringy")
+                    .setConstantPossibleValues("test1", "value2", "param3")
+                    .build()
+              )
+              .addParam(
+                  new BooleanParamBuilder("booleany")
+                    .build()
+              )
+              .setExecutor(new CommandExecutor() {
+                  @Override
+                  public ExecutorReturnValue execute(CommandArgs args, ExecuteContext context) {
+                      final String str = args.getString("stringy");
+                      final boolean bool = args.getBool("booleany");
+                      context.println("yay: string = %s, bool = %s", str, bool);
+                      return success();
+                  }
+              })
+              .build()
         );
     }
 

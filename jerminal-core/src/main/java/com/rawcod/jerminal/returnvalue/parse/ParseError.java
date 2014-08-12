@@ -15,6 +15,7 @@ public enum ParseError {
     INVALID_PARAM_VALUE,
     PARAM_NOT_BOUND,
     PARAM_ALREADY_BOUND,
+    NO_MORE_PARAMS,
 
     INTERNAL_ERROR
 }

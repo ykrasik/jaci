@@ -27,7 +27,7 @@ public final class ParseErrors {
         final String entryType = directory ? "directory" : "command";
         return ParseEntryReturnValue.failure(from(
             ParseError.INVALID_ENTRY,
-            "Parse error: Directory '%s' doesn't contain %s '%s'.", directoryName, entryType, entry
+            "Parse error: Directory '%s' doesn't contain %s '%s'", directoryName, entryType, entry
         ));
     }
 
@@ -57,28 +57,35 @@ public final class ParseErrors {
     public static ParseParamValueReturnValue invalidParamValue(String paramName, String value) {
         return ParseParamValueReturnValue.failure(from(
             ParseError.INVALID_PARAM_VALUE,
-            "Parse error: Invalid value for param '%s': '%s'.", paramName, value
+            "Parse error: Invalid value for param '%s': '%s'", paramName, value
         ));
     }
 
     public static ParseParamValueReturnValue invalidFlagValue(String paramName) {
         return ParseParamValueReturnValue.failure(from(
             ParseError.INVALID_PARAM_VALUE,
-            "Parse error: Flag params take no value: '%s'.", paramName
+            "Parse error: Flag params take no value: '%s'", paramName
         ));
     }
 
     public static ParseParamValueReturnValue paramNotBound(String paramName) {
         return ParseParamValueReturnValue.failure(from(
             ParseError.PARAM_NOT_BOUND,
-            "Parse error: Mandatory parameter was not bound: %s", paramName
+            "Parse error: Mandatory parameter was not bound: '%s'", paramName
         ));
     }
 
     public static ParseBoundParamsReturnValue paramAlreadyBound(String paramName, Object value) {
         return ParseBoundParamsReturnValue.failure(from(
             ParseError.PARAM_ALREADY_BOUND,
-            "Parse error: Param '%s' is already bound to a value: '%s", paramName, value
+            "Parse error: Param '%s' is already bound to a value: '%s'", paramName, value
+        ));
+    }
+
+    public static ParseParamReturnValue noMoreParams() {
+        return ParseParamReturnValue.failure(from(
+            ParseError.NO_MORE_PARAMS,
+            "Parse error: Command does not accept any more parameters."
         ));
     }
 

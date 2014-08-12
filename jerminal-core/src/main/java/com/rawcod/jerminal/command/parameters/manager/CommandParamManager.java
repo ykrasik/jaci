@@ -4,6 +4,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.rawcod.jerminal.collections.trie.Trie;
 import com.rawcod.jerminal.collections.trie.TrieBuilder;
+import com.rawcod.jerminal.collections.trie.TrieImpl;
 import com.rawcod.jerminal.command.CommandArgs;
 import com.rawcod.jerminal.command.parameters.CommandParam;
 import com.rawcod.jerminal.command.parameters.ParamType;
@@ -90,10 +91,10 @@ public class CommandParamManager {
     private ParseBoundParamsReturnValue parseBoundParams(List<String> args, ParseParamContext context) {
         // Parse all args that have been passed.
         // Keep track of all params that are unbound.
+        final List<CommandParam> unboundParams = new ArrayList<>(orderedParams);
         final Map<String, Object> boundParams = new HashMap<>(args.size());
-        final Set<CommandParam> unboundParams = new HashSet<>(orderedParams);
         for (String rawArg : args) {
-            final ParseParamReturnValue returnValue = parseParam(rawArg, boundParams, context);
+            final ParseParamReturnValue returnValue = parseParam(rawArg, unboundParams, boundParams, context);
             if (returnValue.isFailure()) {
                 return ParseBoundParamsReturnValue.failure(returnValue.getFailure());
             }
@@ -116,31 +117,42 @@ public class CommandParamManager {
     }
 
     private ParseParamReturnValue parseParam(String rawArg,
+                                             List<CommandParam> unboundParams,
                                              Map<String, Object> boundParams,
                                              ParseParamContext context) {
-        // rawArg is expected to be from the form "{name}={value}".
-        // The "={value}" part is optional for some params (for example, flags).
+        if (unboundParams.isEmpty()) {
+            return ParseErrors.noMoreParams();
+        }
+
+        // rawArg is expected to be either:
+        // 1. A value that is accepted by the next param in unboundParams.
+        // 2. A tuple of the form "{name}={value}", which can assign a value to any other param.
         final int indexOfDelimiter = rawArg.indexOf(ARG_VALUE_DELIMITER);
         final boolean containsDelimiter = indexOfDelimiter != -1;
 
         // Extract the param name from rawArg.
-        final String paramName = rawArg.substring(0, containsDelimiter ? indexOfDelimiter : rawArg.length());
-
-        // Since the "={value}" part is optional, the rawValue is calculated as follows:
-        // 1. If rawArg contained a '=', the rawValue is considered present and equal to whatever came after the '='.
-        // 2. If rawArg didn't contain a '=', the rawValue is considered absent.
-        final Optional<CommandParam> paramOptional = params.get(paramName);
-        if (!paramOptional.isPresent()) {
-            return ParseErrors.invalidParam(paramName);
+        final CommandParam param;
+        final String rawValue;
+        if (containsDelimiter) {
+            // rawArg contains a delimiter, the part before the '=' is expected to be a valid, unbound param.
+            final String paramName = rawArg.substring(0, indexOfDelimiter);
+            final Optional<CommandParam> paramOptional = params.get(paramName);
+            if (!paramOptional.isPresent()) {
+                return ParseErrors.invalidParam(paramName);
+            }
+            if (boundParams.containsKey(paramName)) {
+                return ParseParamReturnValue.failure(ParseErrors.paramAlreadyBound(paramName, boundParams.get(paramName)).getFailure());
+            }
+            param = paramOptional.get();
+            rawValue = rawArg.substring(indexOfDelimiter + 1);
+        } else {
+            param = unboundParams.get(0);
+            rawValue = rawArg;
         }
-        final CommandParam param = paramOptional.get();
 
         if (!containsDelimiter && param.getType() == ParamType.FLAG) {
             return ParseParamReturnValue.success(param, true);
         }
-
-        // Use the rest of the rawArg as the value, without the '=' (if present).
-        final String rawValue = rawArg.substring(indexOfDelimiter + 1);
 
         final ParseParamValueReturnValue returnValue = param.parse(rawValue, context);
         if (returnValue.isFailure()) {
@@ -163,47 +175,76 @@ public class CommandParamManager {
             return AutoCompleteErrors.parseError(parseBoundParams.getFailure());
         }
 
-        final Map<String, Object> boundParams = parseBoundParams.getSuccess().getBoundParams();
-        return autoCompleteArg(autoCompleteArg, boundParams, context);
+        final ParseBoundParamsReturnValueSuccess success = parseBoundParams.getSuccess();
+        final List<CommandParam> unboundParams = success.getUnboundParams();
+        final Map<String, Object> boundParams = success.getBoundParams();
+        return autoCompleteArg(autoCompleteArg, unboundParams, boundParams, context);
     }
 
     private AutoCompleteReturnValue autoCompleteArg(String rawArg,
+                                                    List<CommandParam> unboundParams,
                                                     Map<String, Object> boundParams,
                                                     ParseParamContext context) {
-        // rawArg is expected to be from the form "{name}={value}".
-        // The "={value}" part is optional for some params (for example, flags).
+        if (unboundParams.isEmpty()) {
+            return AutoCompleteErrors.parseError(ParseErrors.noMoreParams().getFailure());
+        }
+
+        // rawArg is expected to be either:
+        // 1. A value that is accepted by the next param in unboundParams.
+        // 2. A tuple of the form "{name}={value}", which can assign a value to any other param.
         final int indexOfDelimiter = rawArg.indexOf(ARG_VALUE_DELIMITER);
         final boolean containsDelimiter = indexOfDelimiter != -1;
 
-        // Extract the param name part from rawArg.
-        final String rawParamName = rawArg.substring(0, containsDelimiter ? indexOfDelimiter : rawArg.length());
-
-        // We are either autoCompleting a param name or it's value. Determine which.
+        // Extract the param name from rawArg.
         if (containsDelimiter) {
-            // rawArg had a '=', we are autoCompleting the param value.
-            // The paramName is expected to be valid and unbound.
-            final Optional<CommandParam> paramOptional = params.get(rawParamName);
+            // rawArg contains a delimiter, the part before the '=' is expected to be a valid, unbound param.
+            final String paramName = rawArg.substring(0, indexOfDelimiter);
+            final Optional<CommandParam> paramOptional = params.get(paramName);
             if (!paramOptional.isPresent()) {
-                return AutoCompleteErrors.invalidParam(rawParamName);
+                return AutoCompleteErrors.parseError(ParseErrors.invalidParam(paramName).getFailure());
             }
-            if (boundParams.containsKey(rawParamName)) {
-                return AutoCompleteErrors.paramAlreadyBound(rawParamName, boundParams.get(rawParamName));
+            if (boundParams.containsKey(paramName)) {
+                return AutoCompleteErrors.parseError(ParseParamReturnValue.failure(ParseErrors.paramAlreadyBound(paramName, boundParams.get(paramName)).getFailure()).getFailure());
             }
 
-            // The param is valid and unbound, autoComplete it's value.
             final CommandParam param = paramOptional.get();
             final String rawValue = rawArg.substring(indexOfDelimiter + 1);
             return param.autoComplete(rawValue, context);
         } else {
-            return autoCompleteParamName(rawParamName, boundParams);
+            return autoCompleteParamNameOrValue(rawArg, unboundParams, boundParams, context);
         }
     }
 
-    private AutoCompleteReturnValue autoCompleteParamName(String prefix, Map<String, Object> boundParams) {
+    private AutoCompleteReturnValue autoCompleteParamNameOrValue(String prefix,
+                                                                 List<CommandParam> unboundParams,
+                                                                 Map<String, Object> boundParams,
+                                                                 ParseParamContext context) {
+        final CommandParam possibleParam = unboundParams.get(0);
+        final Trie<AutoCompleteType> paramNamePossibilities = autoCompleteParamName(prefix, boundParams);
+        final Trie<AutoCompleteType> paramValuePossibilities = autoCompleteParamValue(possibleParam, prefix, context);
+        final Trie<AutoCompleteType> possibilities = paramNamePossibilities.union(paramValuePossibilities);
+        if (possibilities.isEmpty()) {
+            return AutoCompleteErrors.noPossibleValuesForPrefix(prefix);
+        } else {
+            return AutoCompleteReturnValue.success(prefix, possibilities);
+        }
+    }
+
+    private Trie<AutoCompleteType> autoCompleteParamName(String prefix, Map<String, Object> boundParams) {
         final Trie<CommandParam> prefixParams = params.subTrie(prefix);
         final Trie<CommandParam> filteredParams = prefixParams.filter(new BoundParamsFilter(boundParams));
-        final Trie<AutoCompleteType> paramNamePossibilities = filteredParams.map(AutoCompleteMappers.commandParamNameMapper());
-        return AutoCompleteReturnValue.success(prefix, paramNamePossibilities);
+        return filteredParams.map(AutoCompleteMappers.commandParamNameMapper());
+    }
+
+    private Trie<AutoCompleteType> autoCompleteParamValue(CommandParam param,
+                                                          String prefix,
+                                                          ParseParamContext context) {
+        final AutoCompleteReturnValue returnValue = param.autoComplete(prefix, context);
+        if (returnValue.isSuccess()) {
+            return returnValue.getSuccess().getPossibilities();
+        } else {
+            return TrieImpl.emptyTrie();
+        }
     }
 
     /**

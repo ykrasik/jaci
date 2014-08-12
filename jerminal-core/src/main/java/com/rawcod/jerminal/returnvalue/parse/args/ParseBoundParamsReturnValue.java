@@ -8,7 +8,7 @@ import com.rawcod.jerminal.returnvalue.SuccessImpl;
 import com.rawcod.jerminal.returnvalue.parse.ParseReturnValueFailure;
 import com.rawcod.jerminal.returnvalue.parse.args.ParseBoundParamsReturnValue.ParseBoundParamsReturnValueSuccess;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -25,7 +25,7 @@ public class ParseBoundParamsReturnValue extends ReturnValueImpl<ParseBoundParam
 
 
     public static ParseBoundParamsReturnValue success(Map<String, Object> parsedArgs,
-                                                      Collection<CommandParam> unboundParams) {
+                                                      List<CommandParam> unboundParams) {
         return new ParseBoundParamsReturnValue(new ParseBoundParamsReturnValueSuccess(parsedArgs, unboundParams));
     }
 
@@ -36,10 +36,10 @@ public class ParseBoundParamsReturnValue extends ReturnValueImpl<ParseBoundParam
 
     public static class ParseBoundParamsReturnValueSuccess extends SuccessImpl {
         private final Map<String, Object> boundParams;
-        private final Collection<CommandParam> unboundParams;
+        private final List<CommandParam> unboundParams;
 
         private ParseBoundParamsReturnValueSuccess(Map<String, Object> boundParams,
-                                                   Collection<CommandParam> unboundParams) {
+                                                   List<CommandParam> unboundParams) {
             this.boundParams = checkNotNull(boundParams, "boundParams");
             this.unboundParams = checkNotNull(unboundParams, "unboundParams");
         }
@@ -48,7 +48,7 @@ public class ParseBoundParamsReturnValue extends ReturnValueImpl<ParseBoundParam
             return boundParams;
         }
 
-        public Collection<CommandParam> getUnboundParams() {
+        public List<CommandParam> getUnboundParams() {
             return unboundParams;
         }
 
