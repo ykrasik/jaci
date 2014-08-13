@@ -1,6 +1,7 @@
 package com.rawcod.jerminal.filesystem;
 
 import com.google.common.collect.ObjectArrays;
+import com.rawcod.jerminal.exception.ParseException;
 import com.rawcod.jerminal.exception.ShellException;
 import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
 import org.junit.Test;
@@ -225,7 +226,11 @@ public class FileSystemBuilderTest extends AbstractFileSystemTest {
         final String commandName = pathElements.get(pathElements.size() - 1);
         final ShellDirectory directory = getDirectory(pathToDirectory);
         if (commandName != null) {
-            assertTrue("Directory doesn't contain expected command!", directory.parseCommand(commandName).isSuccess());
+            try {
+                directory.parseCommand(commandName);
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 

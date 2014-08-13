@@ -4,22 +4,17 @@ import com.google.common.base.Optional;
 import com.rawcod.jerminal.collections.trie.Trie;
 import com.rawcod.jerminal.command.CommandArgs;
 import com.rawcod.jerminal.command.parameters.ParseParamContext;
+import com.rawcod.jerminal.exception.ParseException;
 import com.rawcod.jerminal.exception.ShellException;
 import com.rawcod.jerminal.filesystem.ShellFileSystem;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
 import com.rawcod.jerminal.output.OutputProcessor;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteErrors;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue.AutoCompleteReturnValueSuccess;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValueFailure;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteType;
 import com.rawcod.jerminal.returnvalue.execute.flow.ExecuteReturnValue;
 import com.rawcod.jerminal.returnvalue.execute.flow.ExecuteReturnValueFailure;
 import com.rawcod.jerminal.returnvalue.execute.flow.ExecuteReturnValueSuccess;
-import com.rawcod.jerminal.returnvalue.parse.args.ParseCommandArgsReturnValue;
-import com.rawcod.jerminal.returnvalue.parse.entry.ParseEntryReturnValue;
-import com.rawcod.jerminal.returnvalue.parse.flow.ParseReturnValue;
-import com.rawcod.jerminal.returnvalue.parse.flow.ParseReturnValue.ParseReturnValueSuccess;
+import com.rawcod.jerminal.returnvalue.parse.ParseError;
 import com.rawcod.jerminal.returnvalue.suggestion.Suggestions;
 import com.rawcod.jerminal.util.CommandLineUtils;
 
@@ -68,17 +63,18 @@ public class Shell {
         final List<String> commandLine = CommandLineUtils.splitCommandLineForAutoComplete(rawCommandLine);
 
         // Do the actual autoCompletion.
-        final AutoCompleteReturnValue returnValue = doAutoComplete(commandLine);
-        if (returnValue.isSuccess()) {
-            final AutoCompleteReturnValueSuccess success = returnValue.getSuccess();
-            handleAutoCompleteSuccess(success, rawCommandLine);
-        } else {
-            final AutoCompleteReturnValueFailure failure = returnValue.getFailure();
-            outputProcessor.autoCompleteFailure(failure);
+        try {
+            final AutoCompleteReturnValue returnValue = doAutoComplete(commandLine);
+            handleAutoComplete(returnValue, rawCommandLine);
+        } catch (ParseException e) {
+            final ParseError error = e.getError();
+            final String message = e.getMessage();
+            final Optional<Suggestions> suggestions = e.getSuggestions();
+            outputProcessor.parseError(error, message, suggestions);
         }
     }
 
-    private AutoCompleteReturnValue doAutoComplete(List<String> commandLine) {
+    private AutoCompleteReturnValue doAutoComplete(List<String> commandLine) throws ParseException {
         // The first arg of the commandLine must be a path to a command.
         final String rawPath = commandLine.get(0);
 
@@ -89,30 +85,24 @@ public class Shell {
             return fileSystem.autoCompletePath(rawPath);
         }
 
-        // The first arg is not the only arg on the commandLine,
-        // it is expected to be a valid path to a command.
-        final ParseEntryReturnValue returnValue = fileSystem.parsePathToCommand(rawPath);
-        if (returnValue.isFailure()) {
-            // Couldn't parse the command successfully.
-            return AutoCompleteErrors.parseError(returnValue.getFailure());
-        }
+        // The first arg is not the only arg on the commandLine,  it is expected to be a valid path to a command.
+        final ShellCommand command = fileSystem.parsePathToCommand(rawPath);
 
         // AutoComplete the command args.
         // The args start from the 2nd commandLine element (the first was the command).
         final ParseParamContext context = new ParseParamContext(fileSystem);
-        final ShellCommand command = returnValue.getSuccess().getEntry().getAsCommand();
         final List<String> args = commandLine.subList(1, commandLine.size());
         return command.getParamManager().autoCompleteArgs(args, context);
     }
 
-    private void handleAutoCompleteSuccess(AutoCompleteReturnValueSuccess success, String rawCommandLine) {
-        final String prefix = success.getPrefix();
-        final Trie<AutoCompleteType> possibilities = success.getPossibilities();
+    private void handleAutoComplete(AutoCompleteReturnValue returnValue, String rawCommandLine) {
+        final String prefix = returnValue.getPrefix();
+        final Trie<AutoCompleteType> possibilities = returnValue.getPossibilities();
         final Map<String, AutoCompleteType> possibilitiesMap = possibilities.toMap();
         final int numPossibilities = possibilitiesMap.size();
         if (numPossibilities == 0) {
-            final AutoCompleteReturnValueFailure failure = AutoCompleteErrors.noPossibleValuesForPrefix(prefix).getFailure();
-            outputProcessor.autoCompleteFailure(failure);
+            final String message = String.format("AutoComplete Error: Not possible for prefix '%s'", prefix);
+            outputProcessor.autoCompleteNotPossible(message);
             return;
         }
 
@@ -120,6 +110,7 @@ public class Shell {
         final Optional<Suggestions> suggestions;
         if (numPossibilities == 1) {
             // Only a single word is possible.
+            // Let's be helpful - depending on the autoCompleteType, add a suffix.
             final String singlePossibility = possibilitiesMap.keySet().iterator().next();
             final AutoCompleteType type = possibilitiesMap.get(singlePossibility);
             final char suffix = getSinglePossibilitySuffix(type);
@@ -132,11 +123,7 @@ public class Shell {
             autoCompleteAddition = getAutoCompleteAddition(prefix, longestPrefix);
 
             // Catalogue the suggestions according to their type.
-            final Suggestions autoCompleteSuggestions = new Suggestions();
-            for (Entry<String, AutoCompleteType> entry : possibilitiesMap.entrySet()) {
-                autoCompleteSuggestions.addSuggestion(entry.getValue(), entry.getKey());
-            }
-            suggestions = Optional.of(autoCompleteSuggestions);
+            suggestions = Optional.of(createAutoCompleteSuggestions(possibilitiesMap));
         }
 
         final String newCommandLine = rawCommandLine + autoCompleteAddition;
@@ -155,6 +142,14 @@ public class Shell {
         }
     }
 
+    private Suggestions createAutoCompleteSuggestions(Map<String, AutoCompleteType> possibilitiesMap) {
+        final Suggestions autoCompleteSuggestions = new Suggestions();
+        for (Entry<String, AutoCompleteType> entry : possibilitiesMap.entrySet()) {
+            autoCompleteSuggestions.addSuggestion(entry.getValue(), entry.getKey());
+        }
+        return autoCompleteSuggestions;
+    }
+
     private String getAutoCompleteAddition(String prefix, String autoCompletedPrefix) {
         return autoCompletedPrefix.substring(prefix.length());
     }
@@ -168,18 +163,30 @@ public class Shell {
             return;
         }
 
-        // Save command in history
-        commandHistory.pushCommand(rawCommandLine);
-
         // Parse commandLine.
-        final ParseReturnValue parseReturnValue = parseCommandLine(commandLine);
-        if (parseReturnValue.isFailure()) {
-            outputProcessor.parseFailure(parseReturnValue.getFailure());
+        final ShellCommand command;
+        final CommandArgs args;
+        try {
+            // The first arg of the commandLine must be a path to a command.
+            final String pathToCommand = commandLine.get(0);
+            command = fileSystem.parsePathToCommand(pathToCommand);
+
+            // Parse the command args.
+            // The command args start from the 2nd commandLine element (the first was the command).
+            final List<String> rawArgs = commandLine.subList(1, commandLine.size());
+            final ParseParamContext context = new ParseParamContext(fileSystem);
+            args = command.getParamManager().parseCommandArgs(rawArgs, context);
+        } catch (ParseException e) {
+            outputProcessor.parseError(e.getError(), e.getMessage(), e.getSuggestions());
             return;
         }
 
+        // Successfully parsed commandLine.
+        // Save command in history.
+        commandHistory.pushCommand(rawCommandLine);
+
         // Execute the command.
-        final ExecuteReturnValue executeReturnValue = doExecute(parseReturnValue.getSuccess());
+        final ExecuteReturnValue executeReturnValue = command.execute(args);
         if (executeReturnValue.isSuccess()) {
             final ExecuteReturnValueSuccess success = executeReturnValue.getSuccess();
             outputProcessor.executeSuccess(success);
@@ -187,36 +194,5 @@ public class Shell {
             final ExecuteReturnValueFailure failure = executeReturnValue.getFailure();
             outputProcessor.executeFailure(failure);
         }
-    }
-
-    private ExecuteReturnValue doExecute(ParseReturnValueSuccess success) {
-        final ShellCommand command = success.getCommand();
-        final CommandArgs args = success.getArgs();
-        return command.execute(args);
-    }
-
-    private ParseReturnValue parseCommandLine(List<String> commandLine) {
-        // The first arg of the commandLine must be a path to a command.
-        final String rawPath = commandLine.get(0);
-
-        // Parse the path to the command.
-        final ParseEntryReturnValue parseCommandReturnValue = fileSystem.parsePathToCommand(rawPath);
-        if (parseCommandReturnValue.isFailure()) {
-            // Failed to parse the command.
-            return ParseReturnValue.failure(parseCommandReturnValue.getFailure());
-        }
-        final ShellCommand command = parseCommandReturnValue.getSuccess().getEntry().getAsCommand();
-
-        // Parse the command args.
-        // The command args start from the 2nd commandLine element (the first was the command).
-        final List<String> args = commandLine.subList(1, commandLine.size());
-        final ParseParamContext context = new ParseParamContext(fileSystem);
-        final ParseCommandArgsReturnValue parseArgsReturnValue = command.getParamManager().parseCommandArgs(args, context);
-        if (parseArgsReturnValue.isFailure()) {
-            return ParseReturnValue.failure(parseArgsReturnValue.getFailure());
-        }
-
-        final CommandArgs parsedArgs = parseArgsReturnValue.getSuccess().getArgs();
-        return ParseReturnValue.success(command, parsedArgs);
     }
 }

@@ -4,7 +4,6 @@ import com.google.common.base.Joiner;
 import com.rawcod.jerminal.command.view.ShellCommandView;
 import com.rawcod.jerminal.filesystem.entry.view.ShellEntryView;
 import com.rawcod.jerminal.output.OutputHandler;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteError;
 import com.rawcod.jerminal.returnvalue.execute.ExecuteError;
 import com.rawcod.jerminal.returnvalue.parse.ParseError;
 
@@ -45,7 +44,7 @@ public class TerminalOutputHandler implements OutputHandler {
     }
 
     @Override
-    public void autoCompleteError(AutoCompleteError error, String errorMessage) {
+    public void autoCompleteNotPossible(String errorMessage) {
         printError(errorMessage);
     }
 

@@ -1,8 +1,5 @@
 package com.rawcod.jerminal.filesystem.entry;
 
-import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
-import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
-
 /**
  * User: ykrasik
  * Date: 06/01/14
@@ -12,6 +9,4 @@ public interface ShellEntry {
     String getDescription();
 
     boolean isDirectory();
-    ShellDirectory getAsDirectory();
-    ShellCommand getAsCommand();
 }

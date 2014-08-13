@@ -2,13 +2,11 @@ package com.rawcod.jerminal.filesystem;
 
 import com.rawcod.jerminal.collections.trie.Trie;
 import com.rawcod.jerminal.collections.trie.TrieBuilder;
+import com.rawcod.jerminal.exception.ParseException;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
 import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
-import com.rawcod.jerminal.returnvalue.parse.entry.ParseEntryReturnValue;
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.junit.Assert.assertTrue;
 
 /**
  * User: ykrasik
@@ -68,8 +66,11 @@ public class FileSystemWithoutGlobalCommandsTest extends AbstractFileSystemTest 
         }
         for (String command : commands) {
             final String path = basePathToUse + command;
-            final ParseEntryReturnValue returnValue = fileSystem.parsePathToCommand(path);
-            assertTrue("Failed parsing path to command: " + path, returnValue.isSuccess());
+            try {
+                fileSystem.parsePathToCommand(path);
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

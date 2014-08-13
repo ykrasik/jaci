@@ -1,18 +1,17 @@
 package com.rawcod.jerminal.filesystem.entry.directory;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.rawcod.jerminal.collections.trie.Trie;
 import com.rawcod.jerminal.collections.trie.TrieBuilder;
+import com.rawcod.jerminal.exception.ParseException;
 import com.rawcod.jerminal.exception.ShellException;
 import com.rawcod.jerminal.filesystem.entry.AbstractShellEntry;
 import com.rawcod.jerminal.filesystem.entry.ShellEntry;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteErrors;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteMappers;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteType;
 import com.rawcod.jerminal.returnvalue.parse.ParseErrors;
-import com.rawcod.jerminal.returnvalue.parse.entry.ParseEntryReturnValue;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -23,8 +22,14 @@ import java.util.Map;
  * Date: 06/01/14
  */
 public class ShellDirectoryImpl extends AbstractShellEntry implements ShellDirectory {
-    private final Trie<ShellEntry> allEntries;
-    private final Trie<ShellEntry> directories;
+    private static final Predicate<ShellEntry> DIRECTORY_FILTER = new Predicate<ShellEntry>() {
+        @Override
+        public boolean apply(ShellEntry input) {
+            return input.isDirectory();
+        }
+    };
+
+    private final Trie<ShellEntry> entries;
 
     private ShellDirectory parent;
 
@@ -36,10 +41,8 @@ public class ShellDirectoryImpl extends AbstractShellEntry implements ShellDirec
 
         final TrieBuilder<ShellEntry> trieBuilder = new TrieBuilder<>();
         trieBuilder.addAll(directories);
-        this.directories = trieBuilder.build();
-
         trieBuilder.addAll(commands);
-        this.allEntries = trieBuilder.build();
+        this.entries = trieBuilder.build();
     }
 
     void setParent(ShellDirectory parent) {
@@ -55,24 +58,13 @@ public class ShellDirectoryImpl extends AbstractShellEntry implements ShellDirec
     }
 
     @Override
-    public ShellDirectory getAsDirectory() {
-        return this;
-    }
-
-    @Override
-    public ShellCommand getAsCommand() {
-        final String message = String.format("'%s' is a directory, not a command!", getName());
-        throw new IllegalStateException(message);
-    }
-
-    @Override
     public boolean isEmpty() {
-        return allEntries.isEmpty();
+        return entries.isEmpty();
     }
 
     @Override
     public Collection<ShellEntry> getChildren() {
-        return Collections.unmodifiableCollection(allEntries.getValues());
+        return Collections.unmodifiableCollection(entries.getValues());
     }
 
     @Override
@@ -81,70 +73,66 @@ public class ShellDirectoryImpl extends AbstractShellEntry implements ShellDirec
     }
 
     @Override
-    public ParseEntryReturnValue parseCommand(String rawCommand) {
-        return doParseEntry(rawCommand, false);
+    public ShellCommand parseCommand(String rawCommand) throws ParseException {
+        return (ShellCommand) doParseEntry(rawCommand, false);
     }
 
     @Override
-    public ParseEntryReturnValue parseDirectory(String rawDirectory) {
-        return doParseEntry(rawDirectory, true);
+    public ShellDirectory parseDirectory(String rawDirectory) throws ParseException {
+        return (ShellDirectory) doParseEntry(rawDirectory, true);
     }
 
-    private ParseEntryReturnValue doParseEntry(String rawEntry, boolean isDirectory) {
-        // Check special characters and children.
-        final Optional<ShellEntry> childEntryOptional = allEntries.get(rawEntry);
+    private ShellEntry doParseEntry(String rawEntry, boolean isDirectory) throws ParseException {
+        final Optional<ShellEntry> childEntryOptional = entries.get(rawEntry);
         if (!childEntryOptional.isPresent()) {
             // Give a meaningful error message.
             if (isEmpty()) {
-                return ParseErrors.emptyDirectory(getName());
+                throw ParseErrors.emptyDirectory(getName());
             } else {
-                return ParseErrors.directoryDoesNotContainEntry(getName(), rawEntry, isDirectory);
+                throw ParseErrors.directoryDoesNotContainEntry(getName(), rawEntry, isDirectory);
             }
         }
 
-        // Child entry exists, check that it is what we are looking for..
+        // Child entry exists, check that it is what we are looking for.
         final ShellEntry childEntry = childEntryOptional.get();
-        if (childEntry.isDirectory() != isDirectory) {
-            return ParseErrors.invalidAccessToEntry(childEntry.getName(), isDirectory);
+        if (childEntry.isDirectory() == isDirectory) {
+            return childEntry;
+        } else {
+            throw ParseErrors.invalidAccessToEntry(childEntry.getName(), isDirectory);
         }
-
-        return ParseEntryReturnValue.success(childEntry);
     }
 
     @Override
-    public AutoCompleteReturnValue autoCompleteDirectory(String prefix) {
+    public Trie<AutoCompleteType> autoCompleteDirectory(String prefix) throws ParseException {
         return doAutoCompleteEntry(prefix, true);
     }
 
     @Override
-    public AutoCompleteReturnValue autoCompleteEntry(String prefix) {
+    public Trie<AutoCompleteType> autoCompleteEntry(String prefix) throws ParseException {
         return doAutoCompleteEntry(prefix, false);
     }
 
-    private AutoCompleteReturnValue doAutoCompleteEntry(String prefix, boolean isDirectory) {
+    private Trie<AutoCompleteType> doAutoCompleteEntry(String prefix, boolean isDirectory) throws ParseException {
         // There are 2 ways to autoComplete an entry -
-        // Either only show only directories, or show all entries (directories and commands).
+        // Either show only directories, or show all entries (directories and commands).
         // Note - special characters are never autoCompleted.
         final Trie<ShellEntry> childrenTrie;
         if (isDirectory) {
-            childrenTrie = directories;
+            childrenTrie = entries.filter(DIRECTORY_FILTER);
         } else {
-            childrenTrie = allEntries;
+            childrenTrie = entries;
         }
 
         // Get all children possible with this prefix.
-        final Trie<ShellEntry> possibleChildren = childrenTrie.subTrie(prefix);
+        final Trie<AutoCompleteType> possibleChildren = childrenTrie.subTrie(prefix).map(AutoCompleteMappers.entryMapper());
         if (possibleChildren.isEmpty()) {
             // Give a meaningful error message.
             if (isEmpty()) {
-                return AutoCompleteErrors.emptyDirectory(getName());
-            } else {
-                return AutoCompleteErrors.noPossibleValuesForDirectoryWithPrefix(getName(), prefix, isDirectory);
+                throw ParseErrors.emptyDirectory(getName());
             }
         }
 
-        final Trie<AutoCompleteType> childrenPossibilities = possibleChildren.map(AutoCompleteMappers.entryMapper());
-        return AutoCompleteReturnValue.success(prefix, childrenPossibilities);
+        return possibleChildren;
     }
 
 }

@@ -1,7 +1,7 @@
 package com.rawcod.jerminal.command.parameters;
 
+import com.rawcod.jerminal.exception.ParseException;
 import com.rawcod.jerminal.returnvalue.parse.ParseErrors;
-import com.rawcod.jerminal.returnvalue.parse.param.ParseParamValueReturnValue;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -10,7 +10,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Date: 25/07/2014
  * Time: 16:19
  */
-public abstract class AbstractMandatoryCommandParam implements CommandParam {
+public abstract class AbstractMandatoryCommandParam<T> implements CommandParam {
     private final String name;
     private final String description;
 
@@ -35,8 +35,8 @@ public abstract class AbstractMandatoryCommandParam implements CommandParam {
     }
 
     @Override
-    public ParseParamValueReturnValue unbound(ParseParamContext context) {
-        return ParseErrors.paramNotBound(name);
+    public T unbound(ParseParamContext context) throws ParseException {
+        throw ParseErrors.paramNotBound(name);
     }
 
     @Override

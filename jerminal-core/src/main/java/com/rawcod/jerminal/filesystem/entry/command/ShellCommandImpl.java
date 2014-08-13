@@ -6,7 +6,6 @@ import com.rawcod.jerminal.command.ExecuteContext;
 import com.rawcod.jerminal.command.parameters.CommandParam;
 import com.rawcod.jerminal.command.parameters.manager.CommandParamManager;
 import com.rawcod.jerminal.filesystem.entry.AbstractShellEntry;
-import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
 import com.rawcod.jerminal.returnvalue.execute.executor.ExecutorReturnValue;
 import com.rawcod.jerminal.returnvalue.execute.executor.ExecutorReturnValue.ExecutorReturnValueFailure;
 import com.rawcod.jerminal.returnvalue.execute.executor.ExecutorReturnValue.ExecutorReturnValueSuccess;
@@ -39,17 +38,6 @@ public class ShellCommandImpl extends AbstractShellEntry implements ShellCommand
     @Override
     public boolean isDirectory() {
         return false;
-    }
-
-    @Override
-    public ShellDirectory getAsDirectory() {
-        final String message = String.format("'%s' is a command, not a directory!", getName());
-        throw new IllegalStateException(message);
-    }
-
-    @Override
-    public ShellCommand getAsCommand() {
-        return this;
     }
 
     @Override

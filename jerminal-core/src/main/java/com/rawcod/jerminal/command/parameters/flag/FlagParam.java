@@ -3,10 +3,9 @@ package com.rawcod.jerminal.command.parameters.flag;
 import com.rawcod.jerminal.command.parameters.CommandParam;
 import com.rawcod.jerminal.command.parameters.ParamType;
 import com.rawcod.jerminal.command.parameters.ParseParamContext;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteErrors;
+import com.rawcod.jerminal.exception.ParseException;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.ParseErrors;
-import com.rawcod.jerminal.returnvalue.parse.param.ParseParamValueReturnValue;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -45,18 +44,18 @@ public class FlagParam implements CommandParam {
     }
 
     @Override
-    public ParseParamValueReturnValue parse(String rawValue, ParseParamContext context) {
-        return ParseErrors.invalidFlagValue(getName());
+    public Boolean parse(String rawValue, ParseParamContext context) throws ParseException {
+        throw ParseErrors.invalidFlagValue(getName());
     }
 
     @Override
-    public ParseParamValueReturnValue unbound(ParseParamContext context) {
-        return ParseParamValueReturnValue.success(false);
+    public Boolean unbound(ParseParamContext context) throws ParseException {
+        return false;
     }
 
     @Override
-    public AutoCompleteReturnValue autoComplete(String prefix, ParseParamContext context) {
-        return AutoCompleteErrors.invalidFlagValue(getName());
+    public AutoCompleteReturnValue autoComplete(String prefix, ParseParamContext context) throws ParseException {
+        throw ParseErrors.invalidFlagValue(getName());
     }
 
     @Override

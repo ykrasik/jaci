@@ -3,14 +3,11 @@ package com.rawcod.jerminal.output;
 import com.google.common.base.Optional;
 import com.rawcod.jerminal.command.view.ShellCommandView;
 import com.rawcod.jerminal.filesystem.entry.view.ShellEntryView;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteError;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValueFailure;
-import com.rawcod.jerminal.returnvalue.suggestion.Suggestions;
 import com.rawcod.jerminal.returnvalue.execute.ExecuteError;
 import com.rawcod.jerminal.returnvalue.execute.flow.ExecuteReturnValueFailure;
 import com.rawcod.jerminal.returnvalue.execute.flow.ExecuteReturnValueSuccess;
 import com.rawcod.jerminal.returnvalue.parse.ParseError;
-import com.rawcod.jerminal.returnvalue.parse.ParseReturnValueFailure;
+import com.rawcod.jerminal.returnvalue.suggestion.Suggestions;
 
 import java.util.List;
 
@@ -39,10 +36,9 @@ public class OutputProcessor {
         outputHandler.handleBlankCommandLine();
     }
 
-    public void parseFailure(ParseReturnValueFailure failure) {
-        final ParseError error = failure.getError();
-        final String errorMessage = failure.getErrorMessage();
-        outputHandler.parseError(error, errorMessage);
+    public void parseError(ParseError error, String message, Optional<Suggestions> suggestions) {
+        outputHandler.parseError(error, message);
+        displaySuggestionsIfApplicable(suggestions);
     }
 
     public void autoCompleteSuccess(String newCommandLine, Optional<Suggestions> suggestions) {
@@ -51,18 +47,8 @@ public class OutputProcessor {
         displaySuggestionsIfApplicable(suggestions);
     }
 
-    public void autoCompleteFailure(AutoCompleteReturnValueFailure failure) {
-        final String errorMessage = failure.getErrorMessage();
-        final Optional<ParseError> parseError = failure.getParseError();
-        if (parseError.isPresent()) {
-            outputHandler.parseError(parseError.get(), errorMessage);
-        } else {
-            final AutoCompleteError error = failure.getError();
-            outputHandler.autoCompleteError(error, errorMessage);
-        }
-
-        final Optional<Suggestions> suggestions = failure.getSuggestions();
-        displaySuggestionsIfApplicable(suggestions);
+    public void autoCompleteNotPossible(String message) {
+        outputHandler.autoCompleteNotPossible(message);
     }
 
     public void executeSuccess(ExecuteReturnValueSuccess success) {
@@ -96,21 +82,24 @@ public class OutputProcessor {
         outputHandler.displayShellCommandView(shellCommandView);
     }
 
-    private void displaySuggestionsIfApplicable(Optional<Suggestions> suggestionsOptional) {
-        if (suggestionsOptional.isPresent()) {
-            final Suggestions suggestions = suggestionsOptional.get();
-            final List<String> directorySuggestions = suggestions.getDirectorySuggestions();
-            final List<String> commandSuggestions = suggestions.getCommandSuggestions();
-            final List<String> paramNameSuggestions = suggestions.getParamNameSuggestions();
-            final List<String> paramValueSuggestions = suggestions.getParamValueSuggestions();
-
-            outputHandler.displaySuggestions(
-                directorySuggestions,
-                commandSuggestions,
-                paramNameSuggestions,
-                paramValueSuggestions
-            );
+    private void displaySuggestionsIfApplicable(Optional<Suggestions> suggestions) {
+        if (suggestions.isPresent()) {
+            displaySuggestions(suggestions.get());
         }
+    }
+
+    private void displaySuggestions(Suggestions suggestions) {
+        final List<String> directorySuggestions = suggestions.getDirectorySuggestions();
+        final List<String> commandSuggestions = suggestions.getCommandSuggestions();
+        final List<String> paramNameSuggestions = suggestions.getParamNameSuggestions();
+        final List<String> paramValueSuggestions = suggestions.getParamValueSuggestions();
+
+        outputHandler.displaySuggestions(
+            directorySuggestions,
+            commandSuggestions,
+            paramNameSuggestions,
+            paramValueSuggestions
+        );
     }
 
     private void displayCommandOutputIfApplicable(List<String> output) {

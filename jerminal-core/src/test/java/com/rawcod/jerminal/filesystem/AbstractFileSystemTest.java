@@ -2,9 +2,9 @@ package com.rawcod.jerminal.filesystem;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
+import com.rawcod.jerminal.exception.ParseException;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
 import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
-import com.rawcod.jerminal.returnvalue.parse.entry.ParseEntryReturnValue;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -13,7 +13,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -75,9 +74,11 @@ public class AbstractFileSystemTest {
     }
 
     protected ShellDirectory getChild(ShellDirectory directory, String name) {
-        final ParseEntryReturnValue returnValue = directory.parseDirectory(name);
-        assertTrue("Directory doesn't contain expected child!", returnValue.isSuccess());
-        return returnValue.getSuccess().getEntry().getAsDirectory();
+        try {
+            return directory.parseDirectory(name);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     protected void setCurrentDirectory(String... path) {

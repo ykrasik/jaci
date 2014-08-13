@@ -1,8 +1,10 @@
 package com.rawcod.jerminal.filesystem.entry.directory;
 
+import com.rawcod.jerminal.collections.trie.Trie;
+import com.rawcod.jerminal.exception.ParseException;
 import com.rawcod.jerminal.filesystem.entry.ShellEntry;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
-import com.rawcod.jerminal.returnvalue.parse.entry.ParseEntryReturnValue;
+import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
+import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteType;
 
 import java.util.Collection;
 
@@ -16,9 +18,9 @@ public interface ShellDirectory extends ShellEntry {
     Collection<ShellEntry> getChildren();
     ShellDirectory getParent();
 
-    ParseEntryReturnValue parseCommand(String rawCommand);
-    ParseEntryReturnValue parseDirectory(String rawDirectory);
+    ShellCommand parseCommand(String rawCommand) throws ParseException;
+    ShellDirectory parseDirectory(String rawDirectory) throws ParseException;
 
-    AutoCompleteReturnValue autoCompleteDirectory(String prefix);
-    AutoCompleteReturnValue autoCompleteEntry(String prefix);
+    Trie<AutoCompleteType> autoCompleteDirectory(String prefix) throws ParseException;
+    Trie<AutoCompleteType> autoCompleteEntry(String prefix) throws ParseException;
 }

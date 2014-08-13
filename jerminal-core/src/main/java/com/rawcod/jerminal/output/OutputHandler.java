@@ -2,7 +2,6 @@ package com.rawcod.jerminal.output;
 
 import com.rawcod.jerminal.command.view.ShellCommandView;
 import com.rawcod.jerminal.filesystem.entry.view.ShellEntryView;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteError;
 import com.rawcod.jerminal.returnvalue.execute.ExecuteError;
 import com.rawcod.jerminal.returnvalue.parse.ParseError;
 
@@ -20,7 +19,8 @@ public interface OutputHandler {
     void handleBlankCommandLine();
 
     void parseError(ParseError error, String errorMessage);
-    void autoCompleteError(AutoCompleteError error, String errorMessage);
+    void autoCompleteNotPossible(String errorMessage);
+
     void executeError(ExecuteError error, String errorMessage);
     void executeUnhandledException(Exception e);
 

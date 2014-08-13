@@ -1,7 +1,7 @@
 package com.rawcod.jerminal.command.parameters;
 
+import com.rawcod.jerminal.exception.ParseException;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
-import com.rawcod.jerminal.returnvalue.parse.param.ParseParamValueReturnValue;
 
 /**
  * User: ykrasik
@@ -14,7 +14,7 @@ public interface CommandParam {
     ParamType getType();
     String getExternalForm();
 
-    ParseParamValueReturnValue parse(String rawValue, ParseParamContext context);
-    ParseParamValueReturnValue unbound(ParseParamContext context);
-    AutoCompleteReturnValue autoComplete(String prefix, ParseParamContext context);
+    Object parse(String rawValue, ParseParamContext context) throws ParseException;
+    Object unbound(ParseParamContext context) throws ParseException;
+    AutoCompleteReturnValue autoComplete(String prefix, ParseParamContext context) throws ParseException;
 }

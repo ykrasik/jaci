@@ -112,7 +112,7 @@ public class DefaultGlobalCommandFactory {
         for (ShellEntry child : children) {
             final ShellEntryView childToAdd;
             if (child.isDirectory() && recursive) {
-                childToAdd = listDirectory(child.getAsDirectory(), true);
+                childToAdd = listDirectory((ShellDirectory) child, true);
             } else {
                 childToAdd = new ShellEntryViewImpl(child.getName(), child.getDescription(), child.isDirectory(), Collections.<ShellEntryView>emptyList());
             }

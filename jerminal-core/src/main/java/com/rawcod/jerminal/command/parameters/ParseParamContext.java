@@ -8,6 +8,7 @@ import com.rawcod.jerminal.filesystem.ShellFileSystem;
  * Date: 19/07/2014
  * Time: 16:24
  */
+// FIXME: Get rid of this hideousness.
 public class ParseParamContext {
     private final ShellFileSystem fileSystem;
 
