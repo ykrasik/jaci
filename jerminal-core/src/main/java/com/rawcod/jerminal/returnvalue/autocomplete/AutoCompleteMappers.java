@@ -2,6 +2,7 @@ package com.rawcod.jerminal.returnvalue.autocomplete;
 
 import com.google.common.base.Function;
 import com.rawcod.jerminal.command.parameters.CommandParam;
+import com.rawcod.jerminal.command.parameters.ParamType;
 import com.rawcod.jerminal.filesystem.entry.ShellEntry;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
 
@@ -32,7 +33,7 @@ public final class AutoCompleteMappers {
     private static final Function<CommandParam, AutoCompleteType> COMMAND_PARAM_MAPPER = new Function<CommandParam, AutoCompleteType>() {
         @Override
         public AutoCompleteType apply(CommandParam input) {
-            return AutoCompleteType.COMMAND_PARAM_NAME;
+            return input.getType() == ParamType.FLAG ? AutoCompleteType.COMMAND_PARAM_FLAG : AutoCompleteType.COMMAND_PARAM_NAME;
         }
     };
 

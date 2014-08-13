@@ -9,5 +9,6 @@ public enum AutoCompleteType {
     DIRECTORY,
     COMMAND,
     COMMAND_PARAM_NAME,
-    COMMAND_PARAM_VALUE
+    COMMAND_PARAM_VALUE,
+    COMMAND_PARAM_FLAG
 }

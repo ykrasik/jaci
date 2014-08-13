@@ -219,32 +219,38 @@ public class CommandParamManager {
                                                                  List<CommandParam> unboundParams,
                                                                  Map<String, Object> boundParams,
                                                                  ParseParamContext context) {
+        // There are 2 things that we don't want to do:
+        // 1. Offer to autoComplete the name of the last unbound param (just go straight to it's value).
+        // 2. Mask autoComplete errors in the absence of other autoComplete possibilities.
+
+        final Trie<AutoCompleteType> paramNamePossibilities;
         final CommandParam possibleParam = unboundParams.get(0);
-        final Trie<AutoCompleteType> paramNamePossibilities = autoCompleteParamName(prefix, boundParams);
-        final Trie<AutoCompleteType> paramValuePossibilities = autoCompleteParamValue(possibleParam, prefix, context);
-        final Trie<AutoCompleteType> possibilities = paramNamePossibilities.union(paramValuePossibilities);
-        if (possibilities.isEmpty()) {
-            return AutoCompleteErrors.noPossibleValuesForPrefix(prefix);
+        if (unboundParams.size() == 1 ) {
+            paramNamePossibilities = TrieImpl.emptyTrie();
         } else {
-            return AutoCompleteReturnValue.success(prefix, possibilities);
+            paramNamePossibilities = autoCompleteParamName(prefix, boundParams);
         }
+
+        final AutoCompleteReturnValue autoCompleteValue = possibleParam.autoComplete(prefix, context);
+        if (autoCompleteValue.isFailure()) {
+            // Failed to autoComplete the paramValue.
+            // If we have possible paramName suggestions, use them instead. Otherwise, return the failure.
+            if (paramNamePossibilities.isEmpty()) {
+                return autoCompleteValue;
+            } else {
+                return AutoCompleteReturnValue.success(prefix, paramNamePossibilities);
+            }
+        }
+
+        // Return a union of the possible paramNames and paramValues.
+        final Trie<AutoCompleteType> unifiedPossibilities = autoCompleteValue.getSuccess().getPossibilities().union(paramNamePossibilities);
+        return AutoCompleteReturnValue.success(prefix, unifiedPossibilities);
     }
 
     private Trie<AutoCompleteType> autoCompleteParamName(String prefix, Map<String, Object> boundParams) {
         final Trie<CommandParam> prefixParams = params.subTrie(prefix);
         final Trie<CommandParam> filteredParams = prefixParams.filter(new BoundParamsFilter(boundParams));
         return filteredParams.map(AutoCompleteMappers.commandParamNameMapper());
-    }
-
-    private Trie<AutoCompleteType> autoCompleteParamValue(CommandParam param,
-                                                          String prefix,
-                                                          ParseParamContext context) {
-        final AutoCompleteReturnValue returnValue = param.autoComplete(prefix, context);
-        if (returnValue.isSuccess()) {
-            return returnValue.getSuccess().getPossibilities();
-        } else {
-            return TrieImpl.emptyTrie();
-        }
     }
 
     /**

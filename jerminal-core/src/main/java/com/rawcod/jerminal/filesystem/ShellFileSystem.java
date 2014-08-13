@@ -88,6 +88,17 @@ public class ShellFileSystem {
         final String rawEntry = splitPath.get(splitPath.size() - 1);
         final ParseEntryReturnValue returnValue;
         if (directory) {
+            if (THIS.equals(rawEntry)) {
+                return ParseEntryReturnValue.success(lastDir);
+            }
+            if (PARENT.equals(rawEntry)) {
+                final ShellDirectory parent = lastDir.getParent();
+                if (parent != null) {
+                    return ParseEntryReturnValue.success(parent);
+                } else {
+                    return ParseErrors.directoryDoesNotHaveParent(lastDir.getName());
+                }
+            }
             returnValue = lastDir.parseDirectory(rawEntry);
         } else {
             returnValue = lastDir.parseCommand(rawEntry);

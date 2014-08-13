@@ -149,6 +149,7 @@ public class Shell {
             case DIRECTORY: return '/';
             case COMMAND: return ' ';
             case COMMAND_PARAM_NAME: return '=';
+            case COMMAND_PARAM_FLAG: // Fallthrough
             case COMMAND_PARAM_VALUE: return ' ';
             default: throw new ShellException("Invalid AutoCompleteType: %s", type);
         }

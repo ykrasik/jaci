@@ -46,7 +46,8 @@ public class Suggestions {
         switch (type) {
             case DIRECTORY: suggestions = directorySuggestions; break;
             case COMMAND: suggestions = commandSuggestions; break;
-            case COMMAND_PARAM_NAME: suggestions = paramNameSuggestions; break;
+            case COMMAND_PARAM_NAME: // Fallthrough
+            case COMMAND_PARAM_FLAG: suggestions = paramNameSuggestions; break;
             case COMMAND_PARAM_VALUE: suggestions = paramValueSuggestions; break;
             default: throw new ShellException("Invalid AutoCompleteType: %s", type);
         }
