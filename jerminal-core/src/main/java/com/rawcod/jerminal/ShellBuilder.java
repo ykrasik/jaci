@@ -1,5 +1,6 @@
 package com.rawcod.jerminal;
 
+import com.google.common.base.Supplier;
 import com.rawcod.jerminal.command.factory.ControlCommandFactory;
 import com.rawcod.jerminal.filesystem.ShellFileSystem;
 import com.rawcod.jerminal.filesystem.ShellFileSystemBuilder;
@@ -18,10 +19,14 @@ import java.util.Set;
  * Time: 21:20
  */
 public class ShellBuilder {
+    private static final String VERSION = "0.1";
+    private static final String DEFAULT_WELCOME_MESSAGE = "Welcome to Jerminal v" + VERSION + "!\n\n";
+
     private final OutputProcessor outputProcessor;
     private final ShellFileSystemBuilder fileSystemBuilder;
     private final ShellFileSystemPromise fileSystemPromise;
 
+    private String welcomeMessage = DEFAULT_WELCOME_MESSAGE;
     private int maxCommandHistory = 20;
 
     public ShellBuilder(Terminal terminal) {
@@ -41,11 +46,16 @@ public class ShellBuilder {
         final ShellFileSystem fileSystem = fileSystemBuilder.build();
         fileSystemPromise.setFileSystem(fileSystem);
         final ShellCommandHistory commandHistory = new ShellCommandHistory(maxCommandHistory);
-        return new Shell(outputProcessor, fileSystem, commandHistory);
+        return new Shell(outputProcessor, fileSystem, commandHistory, welcomeMessage);
     }
 
     public ShellBuilder setMaxCommandHistory(int maxCommandHistory) {
         this.maxCommandHistory = maxCommandHistory;
+        return this;
+    }
+
+    public ShellBuilder setWelcomeMessage(String welcomeMessage) {
+       this.welcomeMessage = welcomeMessage;
         return this;
     }
 
@@ -67,5 +77,14 @@ public class ShellBuilder {
     public ShellBuilder addGlobalCommands(Collection<ShellCommand> globalCommands) {
         fileSystemBuilder.addGlobalCommands(globalCommands);
         return this;
+    }
+
+    private static class DefaultWelcomeMessageSupplier implements Supplier<String> {
+        private static final String VERSION = "0.1";
+
+        @Override
+        public String get() {
+            return "Welcome to Jerminal v" + VERSION + ".\n\n\n";
+        }
     }
 }

@@ -128,7 +128,7 @@ public class ShellFileSystemImpl implements ShellFileSystem {
         final String rawEntry = rawPath.substring(delimiterIndex + 1);
         final ShellDirectory lastDirectory = parsePathToDirectory(pathToLastDirectory);
         final Trie<AutoCompleteType> possibilities = lastDirectory.autoCompleteDirectory(rawEntry);
-        return new AutoCompleteReturnValue(rawPath, possibilities);
+        return new AutoCompleteReturnValue(rawEntry, possibilities);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.rawcod.jerminal.command.parameters;
 
 import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
 import com.rawcod.jerminal.collections.trie.Trie;
 import com.rawcod.jerminal.collections.trie.TrieBuilder;
 
@@ -18,41 +19,16 @@ public final class Params {
     }
 
     public static <T> Supplier<T> constValueSupplier(T defaultValue) {
-        return new ConstDefaultValueSupplier<>(defaultValue);
+        return Suppliers.ofInstance(checkNotNull(defaultValue, "defaultValue"));
     }
 
     public static Supplier<Trie<String>> constStringValuesSupplier(List<String> possibleValues) {
-        return new ConstStringValuesSupplier(possibleValues);
+        final Trie<String> trie = toTrie(checkNotNull(possibleValues, "possibleValues"));
+        return Suppliers.ofInstance(trie);
     }
 
     public static Supplier<Trie<String>> dynamicStringValuesSupplier(Supplier<List<String>> supplier) {
         return new DynamicStringValuesSupplier(supplier);
-    }
-
-    private static class ConstDefaultValueSupplier<T> implements Supplier<T> {
-        private final T defaultValue;
-
-        private ConstDefaultValueSupplier(T defaultValue) {
-            this.defaultValue = checkNotNull(defaultValue, "defaultValue");
-        }
-
-        @Override
-        public T get() {
-            return defaultValue;
-        }
-    }
-
-    private static class ConstStringValuesSupplier implements Supplier<Trie<String>> {
-        private final Trie<String> trie;
-
-        private ConstStringValuesSupplier(List<String> possibleValues) {
-            this.trie = toTrie(checkNotNull(possibleValues, "possibleValues"));
-        }
-
-        @Override
-        public Trie<String> get() {
-            return trie;
-        }
     }
 
     private static class DynamicStringValuesSupplier implements Supplier<Trie<String>> {

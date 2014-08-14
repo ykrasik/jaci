@@ -29,10 +29,17 @@ public class Shell {
     private final ShellFileSystem fileSystem;
     private final ShellCommandHistory commandHistory;
 
-    Shell(OutputProcessor outputProcessor, ShellFileSystem fileSystem, ShellCommandHistory commandHistory) {
+    Shell(OutputProcessor outputProcessor,
+          ShellFileSystem fileSystem,
+          ShellCommandHistory commandHistory,
+          String welcomeMessage) {
         this.outputProcessor = outputProcessor;
         this.fileSystem = fileSystem;
         this.commandHistory = commandHistory;
+
+        // Init.
+        outputProcessor.clearCommandLine();
+        outputProcessor.displayWelcomeMessage(welcomeMessage);
     }
 
     public void clearCommandLine() {

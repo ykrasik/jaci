@@ -12,6 +12,8 @@ import java.util.List;
  * Time: 11:58
  */
 public interface OutputProcessor {
+    void displayWelcomeMessage(String welcomeMessage);
+
     void clearCommandLine();
     void setCommandLine(String commandLine);
 

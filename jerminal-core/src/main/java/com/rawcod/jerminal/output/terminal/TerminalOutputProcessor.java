@@ -24,6 +24,11 @@ public class TerminalOutputProcessor implements OutputProcessor {
     }
 
     @Override
+    public void displayWelcomeMessage(String welcomeMessage) {
+        print(welcomeMessage);
+    }
+
+    @Override
     public void clearCommandLine() {
         terminal.clearCommandLine();
     }
