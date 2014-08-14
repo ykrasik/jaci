@@ -5,7 +5,9 @@ import com.rawcod.jerminal.filesystem.ShellFileSystem;
 import com.rawcod.jerminal.filesystem.ShellFileSystemBuilder;
 import com.rawcod.jerminal.filesystem.ShellFileSystemPromise;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
-import com.rawcod.jerminal.output.OutputHandler;
+import com.rawcod.jerminal.output.OutputProcessor;
+import com.rawcod.jerminal.output.terminal.Terminal;
+import com.rawcod.jerminal.output.terminal.TerminalOutputProcessor;
 
 import java.util.Collection;
 import java.util.Set;
@@ -16,18 +18,22 @@ import java.util.Set;
  * Time: 21:20
  */
 public class ShellBuilder {
-    private final OutputHandler outputHandler;
+    private final OutputProcessor outputProcessor;
     private final ShellFileSystemBuilder fileSystemBuilder;
     private final ShellFileSystemPromise fileSystemPromise;
 
     private int maxCommandHistory = 20;
 
-    public ShellBuilder(OutputHandler outputHandler) {
-        this.outputHandler = outputHandler;
+    public ShellBuilder(Terminal terminal) {
+        this(new TerminalOutputProcessor(terminal));
+    }
+
+    public ShellBuilder(OutputProcessor outputProcessor) {
+        this.outputProcessor = outputProcessor;
         this.fileSystemBuilder = new ShellFileSystemBuilder();
         this.fileSystemPromise = new ShellFileSystemPromise();
 
-        final Set<ShellCommand> controlCommands = new ControlCommandFactory(fileSystemPromise, outputHandler).createControlCommands();
+        final Set<ShellCommand> controlCommands = new ControlCommandFactory(fileSystemPromise, outputProcessor).createControlCommands();
         fileSystemBuilder.addGlobalCommands(controlCommands);
     }
 
@@ -35,7 +41,7 @@ public class ShellBuilder {
         final ShellFileSystem fileSystem = fileSystemBuilder.build();
         fileSystemPromise.setFileSystem(fileSystem);
         final ShellCommandHistory commandHistory = new ShellCommandHistory(maxCommandHistory);
-        return new Shell(outputHandler, fileSystem, commandHistory);
+        return new Shell(outputProcessor, fileSystem, commandHistory);
     }
 
     public ShellBuilder setMaxCommandHistory(int maxCommandHistory) {

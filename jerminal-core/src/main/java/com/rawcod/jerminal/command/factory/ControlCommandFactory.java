@@ -20,7 +20,7 @@ import com.rawcod.jerminal.filesystem.entry.command.ShellCommandBuilder;
 import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
 import com.rawcod.jerminal.filesystem.entry.view.ShellEntryView;
 import com.rawcod.jerminal.filesystem.entry.view.ShellEntryViewImpl;
-import com.rawcod.jerminal.output.OutputHandler;
+import com.rawcod.jerminal.output.OutputProcessor;
 
 import java.util.*;
 
@@ -37,11 +37,11 @@ public class ControlCommandFactory {
     private static final ShellEntryViewComparator COMPARATOR = new ShellEntryViewComparator();
 
     private final ShellFileSystem fileSystem;
-    private final OutputHandler outputHandler;
+    private final OutputProcessor outputProcessor;
 
-    public ControlCommandFactory(ShellFileSystem fileSystem, OutputHandler outputHandler) {
+    public ControlCommandFactory(ShellFileSystem fileSystem, OutputProcessor outputProcessor) {
         this.fileSystem = fileSystem;
-        this.outputHandler = outputHandler;
+        this.outputProcessor = outputProcessor;
     }
 
     public Set<ShellCommand> createControlCommands() {
@@ -98,7 +98,7 @@ public class ControlCommandFactory {
                     final ShellDirectory directory = args.getDirectory(dirArgName);
                     final boolean recursive = args.getBool(recursiveArgName);
                     final ShellEntryView shellEntryView = listDirectory(directory, recursive);
-                    outputHandler.displayShellEntryView(shellEntryView);
+                    outputProcessor.displayShellEntryView(shellEntryView);
                 }
             })
             .build();
@@ -134,7 +134,7 @@ public class ControlCommandFactory {
                 public void execute(CommandArgs args, OutputBuffer output) throws ExecuteException {
                     final ShellCommand command = args.getFile(commandArgName);
                     final ShellCommandView shellCommandView = describeCommand(command);
-                    outputHandler.displayShellCommandView(shellCommandView);
+                    outputProcessor.displayShellCommandView(shellCommandView);
                 }
             })
             .build();

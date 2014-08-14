@@ -9,7 +9,7 @@ import com.rawcod.jerminal.exception.ParseException;
 import com.rawcod.jerminal.exception.ShellException;
 import com.rawcod.jerminal.filesystem.ShellFileSystem;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
-import com.rawcod.jerminal.output.OutputHandler;
+import com.rawcod.jerminal.output.OutputProcessor;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteType;
 import com.rawcod.jerminal.returnvalue.suggestion.Suggestions;
@@ -25,18 +25,18 @@ import java.util.Map.Entry;
 * Time: 19:26
 */
 public class Shell {
-    private final OutputHandler outputHandler;
+    private final OutputProcessor outputProcessor;
     private final ShellFileSystem fileSystem;
     private final ShellCommandHistory commandHistory;
 
-    Shell(OutputHandler outputHandler, ShellFileSystem fileSystem, ShellCommandHistory commandHistory) {
-        this.outputHandler = outputHandler;
+    Shell(OutputProcessor outputProcessor, ShellFileSystem fileSystem, ShellCommandHistory commandHistory) {
+        this.outputProcessor = outputProcessor;
         this.fileSystem = fileSystem;
         this.commandHistory = commandHistory;
     }
 
     public void clearCommandLine() {
-        outputHandler.clearCommandLine();
+        outputProcessor.clearCommandLine();
     }
 
     public void showPrevCommand() {
@@ -52,7 +52,7 @@ public class Shell {
     private void doShowCommand(Optional<String> commandOptional) {
         if (commandOptional.isPresent()) {
             final String command = commandOptional.get();
-            outputHandler.setCommandLine(command);
+            outputProcessor.setCommandLine(command);
         }
     }
 
@@ -65,7 +65,7 @@ public class Shell {
             final AutoCompleteReturnValue returnValue = doAutoComplete(commandLine);
             handleAutoComplete(returnValue, rawCommandLine);
         } catch (ParseException e) {
-            outputHandler.parseError(e.getError(), e.getMessage());
+            outputProcessor.parseError(e.getError(), e.getMessage());
             displaySuggestionsIfApplicable(e.getSuggestions());
         }
     }
@@ -97,7 +97,7 @@ public class Shell {
         final int numPossibilities = possibilitiesMap.size();
         if (numPossibilities == 0) {
             final String message = String.format("AutoComplete Error: Not possible for prefix '%s'", prefix);
-            outputHandler.autoCompleteNotPossible(message);
+            outputProcessor.autoCompleteNotPossible(message);
             return;
         }
 
@@ -122,7 +122,7 @@ public class Shell {
         }
 
         final String newCommandLine = rawCommandLine + autoCompleteAddition;
-        outputHandler.setCommandLine(newCommandLine);
+        outputProcessor.setCommandLine(newCommandLine);
         displaySuggestionsIfApplicable(suggestions);
     }
 
@@ -156,7 +156,7 @@ public class Shell {
         if (commandLine.size() == 1 && commandLine.get(0).isEmpty()) {
             // Received a commandLine that is either empty or full of spaces.
             clearCommandLine();
-            outputHandler.handleBlankCommandLine();
+            outputProcessor.handleBlankCommandLine();
             return;
         }
 
@@ -173,7 +173,7 @@ public class Shell {
             final List<String> rawArgs = commandLine.subList(1, commandLine.size());
             args = command.parseCommandArgs(rawArgs);
         } catch (ParseException e) {
-            outputHandler.parseError(e.getError(), e.getMessage());
+            outputProcessor.parseError(e.getError(), e.getMessage());
             displaySuggestionsIfApplicable(e.getSuggestions());
             return;
         }
@@ -191,15 +191,16 @@ public class Shell {
                 output.println("Command '%s' executed successfully.", command.getName());
             }
             displayCommandOutput(output);
-            outputHandler.displayCommandOutput(output.getOutputBuffer());
+            outputProcessor.displayCommandOutput(output.getOutputBuffer());
         } catch (ExecuteException e) {
             displayCommandOutput(output);
-            outputHandler.executeError(e.getMessage());
+            outputProcessor.executeError(e.getMessage());
         } catch (Exception e) {
             output.println("Command '%s' terminated with an unhandled exception!", command.getName());
             displayCommandOutput(output);
-            outputHandler.executeUnhandledException(e);
+            outputProcessor.executeUnhandledException(e);
         }
+        // TODO: Display command output in a finally block?
     }
 
     private void displaySuggestionsIfApplicable(Optional<Suggestions> suggestions) {
@@ -214,7 +215,7 @@ public class Shell {
         final List<String> paramNameSuggestions = suggestions.getParamNameSuggestions();
         final List<String> paramValueSuggestions = suggestions.getParamValueSuggestions();
 
-        outputHandler.displaySuggestions(
+        outputProcessor.displaySuggestions(
             directorySuggestions,
             commandSuggestions,
             paramNameSuggestions,
@@ -225,7 +226,7 @@ public class Shell {
     private void displayCommandOutput(OutputBufferImpl outputBuffer) {
         if (!outputBuffer.isEmpty()) {
             final List<String> output = outputBuffer.getOutputBuffer();
-            outputHandler.displayCommandOutput(output);
+            outputProcessor.displayCommandOutput(output);
         }
     }
 }

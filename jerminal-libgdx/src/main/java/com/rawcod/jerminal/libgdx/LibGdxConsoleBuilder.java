@@ -4,7 +4,6 @@ import com.badlogic.gdx.Input.Keys;
 import com.rawcod.jerminal.Shell;
 import com.rawcod.jerminal.ShellBuilder;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
-import com.rawcod.jerminal.output.terminal.TerminalOutputHandler;
 
 /**
  * User: ykrasik
@@ -22,7 +21,7 @@ public class LibGdxConsoleBuilder {
                                 int maxBufferEntries,
                                 LibGdxConsoleWidgetFactory widgetFactory) {
         this.terminal = new LibGdxTerminal(width, height, maxBufferEntries, widgetFactory);
-        this.builder = new ShellBuilder(new TerminalOutputHandler(terminal));
+        this.builder = new ShellBuilder(terminal);
     }
 
     public LibGdxConsole build() {

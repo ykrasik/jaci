@@ -4,7 +4,7 @@ import com.google.common.base.Joiner;
 import com.rawcod.jerminal.command.view.ShellCommandParamView;
 import com.rawcod.jerminal.command.view.ShellCommandView;
 import com.rawcod.jerminal.filesystem.entry.view.ShellEntryView;
-import com.rawcod.jerminal.output.OutputHandler;
+import com.rawcod.jerminal.output.OutputProcessor;
 import com.rawcod.jerminal.returnvalue.parse.ParseError;
 
 import java.util.List;
@@ -12,14 +12,14 @@ import java.util.List;
 /**
  * User: ykrasik
  * Date: 05/08/2014
- * Time: 00:28
+ * Time: 18:28
  */
-public class TerminalOutputHandler implements OutputHandler {
+public class TerminalOutputProcessor implements OutputProcessor {
     private static final Joiner JOINER = Joiner.on(',').skipNulls();
 
     protected final Terminal terminal;
 
-    public TerminalOutputHandler(Terminal terminal) {
+    public TerminalOutputProcessor(Terminal terminal) {
         this.terminal = terminal;
     }
 

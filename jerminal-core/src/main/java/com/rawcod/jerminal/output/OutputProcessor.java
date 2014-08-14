@@ -11,7 +11,7 @@ import java.util.List;
  * Date: 19/07/2014
  * Time: 11:58
  */
-public interface OutputHandler {
+public interface OutputProcessor {
     void clearCommandLine();
     void setCommandLine(String commandLine);
 
