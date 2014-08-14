@@ -8,14 +8,12 @@ import com.rawcod.jerminal.collections.trie.TrieImpl;
 import com.rawcod.jerminal.command.CommandArgs;
 import com.rawcod.jerminal.command.parameters.CommandParam;
 import com.rawcod.jerminal.command.parameters.ParamType;
-import com.rawcod.jerminal.command.parameters.ParseParamContext;
 import com.rawcod.jerminal.exception.ParseException;
 import com.rawcod.jerminal.exception.ShellException;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteMappers;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteType;
 import com.rawcod.jerminal.returnvalue.parse.ParseErrors;
-import com.rawcod.jerminal.returnvalue.parse.ParsedParam;
 
 import java.util.*;
 
@@ -54,31 +52,31 @@ public class CommandParamManager {
         return positionalParams;
     }
 
-    public CommandArgs parseCommandArgs(List<String> args, ParseParamContext context) throws ParseException {
+    public CommandArgs parseCommandArgs(List<String> args) throws ParseException {
         // Parse all params that have been bound.
-        final List<CommandParam> unboundParams = new ArrayList<>(positionalParams);
-        final Map<String, Object> boundParams = new HashMap<>(args.size());
-        parseBoundParams(args, unboundParams, boundParams, context);
+        final BoundParams returnValue = parseBoundParams(args);
+        final List<CommandParam> unboundParams = returnValue.getUnboundParams();
+        final Map<String, Object> boundParams = returnValue.getBoundParams();
 
         // Bind the remaining unbound params.
         // Do this by having them parse an empty value.
         // It is up to the param to decide whether this is legal.
         for (CommandParam unboundParam : unboundParams) {
-            final Object value = unboundParam.unbound(context);
+            final Object value = unboundParam.unbound();
             boundParams.put(unboundParam.getName(), value);
         }
 
         return new CommandArgs(boundParams);
     }
 
-    private void parseBoundParams(List<String> args,
-                                  List<CommandParam> unboundParams,
-                                  Map<String, Object> boundParams,
-                                  ParseParamContext context) throws ParseException {
+    private BoundParams parseBoundParams(List<String> args) throws ParseException {
         // Parse all args that have been passed.
         // Keep track of all params that are unbound.
+        final List<CommandParam> unboundParams = new ArrayList<>(positionalParams);
+        final Map<String, Object> boundParams = new HashMap<>(args.size());
+
         for (String rawArg : args) {
-            final ParsedParam parsedParam = parseParam(rawArg, unboundParams, boundParams, context);
+            final ParsedParam parsedParam = parseParam(rawArg, unboundParams, boundParams);
             final CommandParam param = parsedParam.getParam();
             final Object value = parsedParam.getValue();
 
@@ -86,12 +84,13 @@ public class CommandParamManager {
             boundParams.put(param.getName(), value);
             unboundParams.remove(param);
         }
+
+        return new BoundParams(unboundParams, boundParams);
     }
 
     private ParsedParam parseParam(String rawArg,
                                    List<CommandParam> unboundParams,
-                                   Map<String, Object> boundParams,
-                                   ParseParamContext context) throws ParseException {
+                                   Map<String, Object> boundParams) throws ParseException {
         if (unboundParams.isEmpty()) {
             throw ParseErrors.noMoreParams();
         }
@@ -115,7 +114,7 @@ public class CommandParamManager {
 
             // Try to parse rawArg as the value of the next positional param.
             final CommandParam nextPositionalParam = unboundParams.get(0);
-            final Object value = nextPositionalParam.parse(rawArg, context);
+            final Object value = nextPositionalParam.parse(rawArg);
             return new ParsedParam(nextPositionalParam, value);
         }
 
@@ -124,7 +123,7 @@ public class CommandParamManager {
         final CommandParam param = parseUnboundParam(paramName, boundParams);
 
         final String rawValue = rawArg.substring(delimiterIndex + 1);
-        final Object value = param.parse(rawValue, context);
+        final Object value = param.parse(rawValue);
 
         return new ParsedParam(param, value);
     }
@@ -140,24 +139,23 @@ public class CommandParamManager {
         return paramOptional.get();
     }
 
-    public AutoCompleteReturnValue autoCompleteArgs(List<String> args, ParseParamContext context) throws ParseException {
+    public AutoCompleteReturnValue autoCompleteArgs(List<String> args) throws ParseException {
         // Only the last arg is up for autoCompletion, the rest are expected to be valid args.
         final List<String> argsToBeParsed = args.subList(0, args.size() - 1);
         final String rawArg = args.get(args.size() - 1);
 
         // Parse all params that have been bound.
-        final List<CommandParam> unboundParams = new ArrayList<>(positionalParams);
-        final Map<String, Object> boundParams = new HashMap<>(args.size());
-        parseBoundParams(argsToBeParsed, unboundParams, boundParams, context);
+        final BoundParams returnValue = parseBoundParams(argsToBeParsed);
+        final List<CommandParam> unboundParams = returnValue.getUnboundParams();
+        final Map<String, Object> boundParams = returnValue.getBoundParams();
 
         // AutoComplete rawArg.
-        return autoCompleteArg(rawArg, unboundParams, boundParams, context);
+        return autoCompleteArg(rawArg, unboundParams, boundParams);
     }
 
     private AutoCompleteReturnValue autoCompleteArg(String rawArg,
                                                     List<CommandParam> unboundParams,
-                                                    Map<String, Object> boundParams,
-                                                    ParseParamContext context) throws ParseException {
+                                                    Map<String, Object> boundParams) throws ParseException {
         if (unboundParams.isEmpty()) {
             throw ParseErrors.noMoreParams();
         }
@@ -167,7 +165,7 @@ public class CommandParamManager {
         // 2. A tuple of the form "{name}={value}", which can assign a value to any other param.
         final int delimiterIndex = rawArg.indexOf(ARG_VALUE_DELIMITER);
         if (delimiterIndex == -1) {
-            return autoCompleteParamNameOrValue(rawArg, unboundParams, boundParams, context);
+            return autoCompleteParamNameOrValue(rawArg, unboundParams, boundParams);
         }
 
         // rawArg contains a delimiter, the part before the '=' is expected to be a valid, unbound param.
@@ -175,13 +173,12 @@ public class CommandParamManager {
         final CommandParam param = parseUnboundParam(paramName, boundParams);
 
         final String rawValue = rawArg.substring(delimiterIndex + 1);
-        return param.autoComplete(rawValue, context);
+        return param.autoComplete(rawValue);
     }
 
     private AutoCompleteReturnValue autoCompleteParamNameOrValue(String prefix,
                                                                  List<CommandParam> unboundParams,
-                                                                 Map<String, Object> boundParams,
-                                                                 ParseParamContext context) throws ParseException {
+                                                                 Map<String, Object> boundParams) throws ParseException {
         // prefix does not contain a delimiter.
         // It can either be the value of the next positional param or the name of any unbound param.
         // However, there are 2 things that we don't want to do:
@@ -195,7 +192,7 @@ public class CommandParamManager {
         // unless we have other autoComplete possibilities available.
         try {
             final CommandParam nextPositionalParam = unboundParams.get(0);
-            final AutoCompleteReturnValue returnValue = nextPositionalParam.autoComplete(prefix, context);
+            final AutoCompleteReturnValue returnValue = nextPositionalParam.autoComplete(prefix);
             final Trie<AutoCompleteType> valuePossibilities = returnValue.getPossibilities();
             final Trie<AutoCompleteType> possibilities = valuePossibilities.union(paramNamePossibilities);
             return new AutoCompleteReturnValue(prefix, possibilities);

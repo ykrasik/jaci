@@ -1,7 +1,7 @@
 package com.rawcod.jerminal.filesystem.entry.directory;
 
 import com.rawcod.jerminal.exception.ShellException;
-import com.rawcod.jerminal.filesystem.ShellFileSystem;
+import com.rawcod.jerminal.filesystem.ShellFileSystemImpl;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
 
 import java.util.Arrays;
@@ -94,7 +94,7 @@ public class ShellDirectoryBuilder {
     }
 
     private void assertLegalName(String name) {
-        if (!ShellFileSystem.isLegalName(name)) {
+        if (!ShellFileSystemImpl.isLegalName(name)) {
             throw new ShellException("Illegal name for entry: '%s'", name);
         }
     }

@@ -35,7 +35,7 @@ public abstract class AbstractMandatoryCommandParam<T> implements CommandParam {
     }
 
     @Override
-    public T unbound(ParseParamContext context) throws ParseException {
+    public T unbound() throws ParseException {
         throw ParseErrors.paramNotBound(name);
     }
 

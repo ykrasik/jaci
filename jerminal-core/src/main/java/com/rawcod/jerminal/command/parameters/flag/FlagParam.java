@@ -2,7 +2,6 @@ package com.rawcod.jerminal.command.parameters.flag;
 
 import com.rawcod.jerminal.command.parameters.CommandParam;
 import com.rawcod.jerminal.command.parameters.ParamType;
-import com.rawcod.jerminal.command.parameters.ParseParamContext;
 import com.rawcod.jerminal.exception.ParseException;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.ParseErrors;
@@ -44,17 +43,17 @@ public class FlagParam implements CommandParam {
     }
 
     @Override
-    public Boolean parse(String rawValue, ParseParamContext context) throws ParseException {
+    public Boolean parse(String rawValue) throws ParseException {
         throw ParseErrors.invalidFlagValue(getName());
     }
 
     @Override
-    public Boolean unbound(ParseParamContext context) throws ParseException {
+    public Boolean unbound() throws ParseException {
         return false;
     }
 
     @Override
-    public AutoCompleteReturnValue autoComplete(String prefix, ParseParamContext context) throws ParseException {
+    public AutoCompleteReturnValue autoComplete(String prefix) throws ParseException {
         throw ParseErrors.invalidFlagValue(getName());
     }
 

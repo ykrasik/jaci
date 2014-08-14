@@ -1,7 +1,6 @@
 package com.rawcod.jerminal.command.parameters.number;
 
 import com.rawcod.jerminal.command.parameters.AbstractMandatoryCommandParam;
-import com.rawcod.jerminal.command.parameters.ParseParamContext;
 import com.rawcod.jerminal.exception.ParseException;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
 import com.rawcod.jerminal.returnvalue.parse.ParseErrors;
@@ -17,7 +16,7 @@ public abstract class AbstractNumberCommandParam<T> extends AbstractMandatoryCom
     }
 
     @Override
-    public T parse(String rawValue, ParseParamContext context) throws ParseException {
+    public T parse(String rawValue) throws ParseException {
         try {
             return parseNumber(rawValue);
         } catch (NumberFormatException ignored) {
@@ -26,7 +25,7 @@ public abstract class AbstractNumberCommandParam<T> extends AbstractMandatoryCom
     }
 
     @Override
-    public AutoCompleteReturnValue autoComplete(String prefix, ParseParamContext context) throws ParseException {
+    public AutoCompleteReturnValue autoComplete(String prefix) throws ParseException {
         // Numbers cannot be auto-completed.
         throw ParseErrors.invalidParamValue(getExternalForm(), prefix);
     }

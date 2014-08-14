@@ -3,7 +3,6 @@ package com.rawcod.jerminal;
 import com.google.common.base.Optional;
 import com.rawcod.jerminal.collections.trie.Trie;
 import com.rawcod.jerminal.command.CommandArgs;
-import com.rawcod.jerminal.command.parameters.ParseParamContext;
 import com.rawcod.jerminal.exception.ParseException;
 import com.rawcod.jerminal.exception.ShellException;
 import com.rawcod.jerminal.filesystem.ShellFileSystem;
@@ -90,9 +89,8 @@ public class Shell {
 
         // AutoComplete the command args.
         // The args start from the 2nd commandLine element (the first was the command).
-        final ParseParamContext context = new ParseParamContext(fileSystem);
         final List<String> args = commandLine.subList(1, commandLine.size());
-        return command.getParamManager().autoCompleteArgs(args, context);
+        return command.getParamManager().autoCompleteArgs(args);
     }
 
     private void handleAutoComplete(AutoCompleteReturnValue returnValue, String rawCommandLine) {
@@ -174,8 +172,7 @@ public class Shell {
             // Parse the command args.
             // The command args start from the 2nd commandLine element (the first was the command).
             final List<String> rawArgs = commandLine.subList(1, commandLine.size());
-            final ParseParamContext context = new ParseParamContext(fileSystem);
-            args = command.getParamManager().parseCommandArgs(rawArgs, context);
+            args = command.getParamManager().parseCommandArgs(rawArgs);
         } catch (ParseException e) {
             outputProcessor.parseError(e.getError(), e.getMessage(), e.getSuggestions());
             return;

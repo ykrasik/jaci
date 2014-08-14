@@ -1,4 +1,4 @@
-package com.rawcod.jerminal.returnvalue.parse;
+package com.rawcod.jerminal.command.parameters.manager;
 
 import com.google.common.base.Objects;
 import com.rawcod.jerminal.command.parameters.CommandParam;
@@ -13,28 +13,29 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Date: 19/07/2014
  * Time: 14:06
  */
-public class ParseBoundParamsReturnValue {
-    private final Map<String, Object> boundParams;
+public class BoundParams {
     private final List<CommandParam> unboundParams;
+    private final Map<String, Object> boundParams;
 
-    public ParseBoundParamsReturnValue(Map<String, Object> boundParams, List<CommandParam> unboundParams) {
-        this.boundParams = checkNotNull(boundParams, "boundParams");
+    public BoundParams(List<CommandParam> unboundParams,
+                       Map<String, Object> boundParams) {
         this.unboundParams = checkNotNull(unboundParams, "unboundParams");
-    }
-
-    public Map<String, Object> getBoundParams() {
-        return boundParams;
+        this.boundParams = checkNotNull(boundParams, "boundParams");
     }
 
     public List<CommandParam> getUnboundParams() {
         return unboundParams;
     }
 
+    public Map<String, Object> getBoundParams() {
+        return boundParams;
+    }
+
     @Override
     public String toString() {
         return Objects.toStringHelper(this)
-            .add("boundParams", boundParams)
             .add("unboundParams", unboundParams)
+            .add("boundParams", boundParams)
             .toString();
     }
 }

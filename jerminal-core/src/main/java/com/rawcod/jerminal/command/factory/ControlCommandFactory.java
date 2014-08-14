@@ -12,7 +12,7 @@ import com.rawcod.jerminal.command.view.ShellCommandParamView;
 import com.rawcod.jerminal.command.view.ShellCommandParamViewImpl;
 import com.rawcod.jerminal.command.view.ShellCommandView;
 import com.rawcod.jerminal.command.view.ShellCommandViewImpl;
-import com.rawcod.jerminal.filesystem.CurrentDirectoryContainer;
+import com.rawcod.jerminal.filesystem.ShellFileSystem;
 import com.rawcod.jerminal.filesystem.entry.ShellEntry;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommandBuilder;
@@ -29,22 +29,22 @@ import java.util.*;
  * Date: 27/07/2014
  * Time: 23:55
  */
-public class DefaultGlobalCommandFactory {
+public class ControlCommandFactory {
     private static final String CHANGE_DIRECTORY_COMMAND_NAME = "cd";
     private static final String LIST_DIRECTORY_COMMAND_NAME = "ls";
     private static final String DESCRIBE_COMMAND_COMMAND_NAME = "man";
 
     private static final ShellEntryViewComparator COMPARATOR = new ShellEntryViewComparator();
 
-    private final CurrentDirectoryContainer currentDirectoryContainer;
+    private final ShellFileSystem fileSystem;
     private final OutputProcessor outputProcessor;
 
-    public DefaultGlobalCommandFactory(CurrentDirectoryContainer currentDirectoryContainer, OutputProcessor outputProcessor) {
-        this.currentDirectoryContainer = currentDirectoryContainer;
+    public ControlCommandFactory(ShellFileSystem fileSystem, OutputProcessor outputProcessor) {
+        this.fileSystem = fileSystem;
         this.outputProcessor = outputProcessor;
     }
 
-    public Set<ShellCommand> createDefaultGlobalCommands() {
+    public Set<ShellCommand> createControlCommands() {
         final Set<ShellCommand> globalCommands = new HashSet<>();
         globalCommands.add(createChangeDirectoryCommand());
         globalCommands.add(createListDirectoryCommand());
@@ -57,7 +57,7 @@ public class DefaultGlobalCommandFactory {
         return new ShellCommandBuilder(CHANGE_DIRECTORY_COMMAND_NAME)
             .setDescription("Change current directory")
             .addParam(
-                new DirectoryParamBuilder(dirArgName)
+                new DirectoryParamBuilder(dirArgName, fileSystem)
                     .setDescription("Directory to change to")
                     .build()
             )
@@ -65,7 +65,7 @@ public class DefaultGlobalCommandFactory {
                 @Override
                 public ExecutorReturnValue execute(CommandArgs args, ExecuteContext context) {
                     final ShellDirectory directory = args.getDirectory(dirArgName);
-                    currentDirectoryContainer.setCurrentDirectory(directory);
+                    fileSystem.setCurrentDirectory(directory);
                     return success();
                 }
             })
@@ -78,12 +78,12 @@ public class DefaultGlobalCommandFactory {
         return new ShellCommandBuilder(LIST_DIRECTORY_COMMAND_NAME)
             .setDescription("List directory content")
             .addParam(
-                new DirectoryParamBuilder(dirArgName)
+                new DirectoryParamBuilder(dirArgName, fileSystem)
                     .setDescription("Directory to list")
                     .setOptional(new Supplier<ShellDirectory>() {
                         @Override
                         public ShellDirectory get() {
-                            return currentDirectoryContainer.getCurrentDirectory();
+                            return fileSystem.getCurrentDirectory();
                         }
                     })
                     .build()
@@ -127,7 +127,7 @@ public class DefaultGlobalCommandFactory {
         return new ShellCommandBuilder(DESCRIBE_COMMAND_COMMAND_NAME)
             .setDescription("Describe command")
             .addParam(
-                new FileParamBuilder(commandArgName)
+                new FileParamBuilder(commandArgName, fileSystem)
                     .setDescription("Command to describe")
                     .build()
             )

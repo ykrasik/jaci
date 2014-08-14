@@ -3,7 +3,6 @@ package com.rawcod.jerminal.command.parameters.optional;
 import com.google.common.base.Supplier;
 import com.rawcod.jerminal.command.parameters.CommandParam;
 import com.rawcod.jerminal.command.parameters.ParamType;
-import com.rawcod.jerminal.command.parameters.ParseParamContext;
 import com.rawcod.jerminal.exception.ParseException;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
 
@@ -44,18 +43,18 @@ public class OptionalParam<T> implements CommandParam {
     }
 
     @Override
-    public Object parse(String rawValue, ParseParamContext context) throws ParseException {
-        return delegate.parse(rawValue, context);
+    public Object parse(String rawValue) throws ParseException {
+        return delegate.parse(rawValue);
     }
 
     @Override
-    public Object unbound(ParseParamContext context) throws ParseException {
+    public Object unbound() throws ParseException {
         return defaultValueSupplier.get();
     }
 
     @Override
-    public AutoCompleteReturnValue autoComplete(String prefix, ParseParamContext context) throws ParseException {
-        return delegate.autoComplete(prefix, context);
+    public AutoCompleteReturnValue autoComplete(String prefix) throws ParseException {
+        return delegate.autoComplete(prefix);
     }
 
     @Override

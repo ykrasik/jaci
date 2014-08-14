@@ -1,4 +1,4 @@
-package com.rawcod.jerminal.returnvalue.parse;
+package com.rawcod.jerminal.command.parameters.manager;
 
 import com.google.common.base.Objects;
 import com.rawcod.jerminal.command.parameters.CommandParam;

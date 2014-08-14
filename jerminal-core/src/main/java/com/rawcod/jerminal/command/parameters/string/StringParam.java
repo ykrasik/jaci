@@ -3,7 +3,6 @@ package com.rawcod.jerminal.command.parameters.string;
 import com.google.common.base.Supplier;
 import com.rawcod.jerminal.collections.trie.Trie;
 import com.rawcod.jerminal.command.parameters.AbstractMandatoryCommandParam;
-import com.rawcod.jerminal.command.parameters.ParseParamContext;
 import com.rawcod.jerminal.exception.ParseException;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteMappers;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
@@ -31,7 +30,7 @@ public class StringParam extends AbstractMandatoryCommandParam<String> {
     }
 
     @Override
-    public String parse(String rawValue, ParseParamContext context) throws ParseException {
+    public String parse(String rawValue) throws ParseException {
         final Trie<String> values = getValues();
 
         // If the possible values trie is empty, all values are accepted.
@@ -46,7 +45,7 @@ public class StringParam extends AbstractMandatoryCommandParam<String> {
     }
 
     @Override
-    public AutoCompleteReturnValue autoComplete(String prefix, ParseParamContext context) throws ParseException {
+    public AutoCompleteReturnValue autoComplete(String prefix) throws ParseException {
         final Trie<String> values = getValues();
         final Trie<String> prefixTrie = values.subTrie(prefix);
         final Trie<AutoCompleteType> possibilities = prefixTrie.map(AutoCompleteMappers.commandParamValueStringMapper());

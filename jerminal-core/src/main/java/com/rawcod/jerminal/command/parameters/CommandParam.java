@@ -14,7 +14,7 @@ public interface CommandParam {
     ParamType getType();
     String getExternalForm();
 
-    Object parse(String rawValue, ParseParamContext context) throws ParseException;
-    Object unbound(ParseParamContext context) throws ParseException;
-    AutoCompleteReturnValue autoComplete(String prefix, ParseParamContext context) throws ParseException;
+    Object parse(String rawValue) throws ParseException;
+    Object unbound() throws ParseException;
+    AutoCompleteReturnValue autoComplete(String prefix) throws ParseException;
 }

@@ -45,14 +45,14 @@ public final class ParseErrors {
     public static ParseException invalidParam(String paramName) {
         return new ParseException(
             ParseError.INVALID_PARAM,
-            "Parse error: Invalid param: '%s'", paramName
+            "Parse error: Invalid parameter: '%s'", paramName
         );
     }
 
     public static ParseException invalidParamValue(String paramName, String value) {
         return new ParseException(
             ParseError.INVALID_PARAM_VALUE,
-            "Parse error: Invalid value for param '%s': '%s'", paramName, value
+            "Parse error: Invalid value for parameter '%s': '%s'", paramName, value
         );
     }
 
@@ -73,7 +73,7 @@ public final class ParseErrors {
     public static ParseException paramAlreadyBound(String paramName, Object value) {
         return new ParseException(
             ParseError.PARAM_ALREADY_BOUND,
-            "Parse error: Param '%s' is already bound to a value: '%s'", paramName, value
+            "Parse error: Parameter '%s' is already bound to a value: '%s'", paramName, value
         );
     }
 

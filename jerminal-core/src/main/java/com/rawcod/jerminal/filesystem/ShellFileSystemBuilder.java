@@ -25,18 +25,16 @@ public class ShellFileSystemBuilder {
 
     private final ShellDirectoryBuilder rootBuilder;
     private final TrieBuilder<ShellCommand> globalCommandsBuilder;
-    private final CurrentDirectoryContainer currentDirectoryContainer;
 
-    public ShellFileSystemBuilder(CurrentDirectoryContainer currentDirectoryContainer) {
+    public ShellFileSystemBuilder() {
         this.rootBuilder = new ShellDirectoryBuilder("root", "root");
         this.globalCommandsBuilder = new TrieBuilder<>();
-        this.currentDirectoryContainer = currentDirectoryContainer;
     }
 
     public ShellFileSystem build() {
         final ShellDirectory root = rootBuilder.build();
         final Trie<ShellCommand> globalCommands = globalCommandsBuilder.build();
-        return new ShellFileSystem(root, globalCommands, currentDirectoryContainer);
+        return new ShellFileSystemImpl(root, globalCommands);
     }
 
     public ShellFileSystemBuilder add(ShellCommand... commands) {

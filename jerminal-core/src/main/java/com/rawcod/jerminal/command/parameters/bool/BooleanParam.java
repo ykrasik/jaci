@@ -3,7 +3,6 @@ package com.rawcod.jerminal.command.parameters.bool;
 import com.rawcod.jerminal.collections.trie.Trie;
 import com.rawcod.jerminal.collections.trie.TrieBuilder;
 import com.rawcod.jerminal.command.parameters.AbstractMandatoryCommandParam;
-import com.rawcod.jerminal.command.parameters.ParseParamContext;
 import com.rawcod.jerminal.exception.ParseException;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteMappers;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
@@ -27,7 +26,7 @@ public class BooleanParam extends AbstractMandatoryCommandParam<Boolean> {
     }
 
     @Override
-    public Boolean parse(String rawValue, ParseParamContext context) throws ParseException {
+    public Boolean parse(String rawValue) throws ParseException {
         if (VALUES.contains(rawValue)) {
             return Boolean.parseBoolean(rawValue);
         }
@@ -38,7 +37,7 @@ public class BooleanParam extends AbstractMandatoryCommandParam<Boolean> {
     }
 
     @Override
-    public AutoCompleteReturnValue autoComplete(String prefix, ParseParamContext context) throws ParseException {
+    public AutoCompleteReturnValue autoComplete(String prefix) throws ParseException {
         final Trie<AutoCompleteType> possibilities = VALUES.subTrie(prefix).map(AutoCompleteMappers.commandParamValueStringMapper());
         return new AutoCompleteReturnValue(prefix, possibilities);
     }

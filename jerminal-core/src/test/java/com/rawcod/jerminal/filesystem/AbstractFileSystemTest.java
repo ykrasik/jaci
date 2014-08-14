@@ -7,7 +7,6 @@ import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
 import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
 import org.junit.Before;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.Arrays;
@@ -26,18 +25,14 @@ public class AbstractFileSystemTest {
     protected ShellFileSystemBuilder builder;
     protected ShellFileSystem fileSystem;
 
-    @Mock
-    protected CurrentDirectoryContainer currentDirectoryContainer;
-
     @Before
     public void setUp() {
-        this.builder = new ShellFileSystemBuilder(currentDirectoryContainer);
+        this.builder = new ShellFileSystemBuilder();
         this.fileSystem = null;
     }
 
     protected void build() {
         this.fileSystem = builder.build();
-        when(currentDirectoryContainer.getCurrentDirectory()).thenReturn(fileSystem.getRoot());
     }
 
     protected void add(String path) {
@@ -83,6 +78,6 @@ public class AbstractFileSystemTest {
 
     protected void setCurrentDirectory(String... path) {
         final ShellDirectory directory = getDirectory(Arrays.asList(path));
-        when(currentDirectoryContainer.getCurrentDirectory()).thenReturn(directory);
+        fileSystem.setCurrentDirectory(directory);
     }
 }

@@ -4,6 +4,7 @@ import com.google.common.base.Supplier;
 import com.rawcod.jerminal.command.parameters.CommandParam;
 import com.rawcod.jerminal.command.parameters.Params;
 import com.rawcod.jerminal.command.parameters.optional.OptionalParam;
+import com.rawcod.jerminal.filesystem.ShellFileSystem;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
 
 /**
@@ -13,15 +14,18 @@ import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
  */
 public class FileParamBuilder {
     private final String name;
+    private final ShellFileSystem fileSystem;
+
     private String description = "file";
     private Supplier<ShellCommand> defaultValueSupplier;
 
-    public FileParamBuilder(String name) {
+    public FileParamBuilder(String name, ShellFileSystem fileSystem) {
         this.name = name;
+        this.fileSystem = fileSystem;
     }
 
     public CommandParam build() {
-        final CommandParam param = new FileParam(name, description);
+        final CommandParam param = new FileParam(name, description, fileSystem);
         if (defaultValueSupplier == null) {
             return param;
         }

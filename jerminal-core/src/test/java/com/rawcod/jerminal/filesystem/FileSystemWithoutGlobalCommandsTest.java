@@ -1,10 +1,6 @@
 package com.rawcod.jerminal.filesystem;
 
-import com.rawcod.jerminal.collections.trie.Trie;
-import com.rawcod.jerminal.collections.trie.TrieBuilder;
 import com.rawcod.jerminal.exception.ParseException;
-import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
-import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -31,10 +27,6 @@ public class FileSystemWithoutGlobalCommandsTest extends AbstractFileSystemTest 
         add("dir1/folder");
 
         build();
-
-        final ShellDirectory root = this.fileSystem.getRoot();
-        final Trie<ShellCommand> globalCommands = new TrieBuilder<ShellCommand>().build();
-        this.fileSystem = new ShellFileSystem(root, globalCommands, currentDirectoryContainer);
     }
 
     @Test
