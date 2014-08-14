@@ -217,9 +217,13 @@ public class ShellCommandImpl extends AbstractShellEntry implements ShellCommand
         try {
             final CommandParam nextPositionalParam = unboundParams.get(0);
             final AutoCompleteReturnValue returnValue = nextPositionalParam.autoComplete(prefix);
-            final Trie<AutoCompleteType> valuePossibilities = returnValue.getPossibilities();
-            final Trie<AutoCompleteType> possibilities = valuePossibilities.union(paramNamePossibilities);
-            return new AutoCompleteReturnValue(prefix, possibilities);
+            if (paramNamePossibilities.isEmpty()) {
+                return returnValue;
+            } else {
+                final Trie<AutoCompleteType> valuePossibilities = returnValue.getPossibilities();
+                final Trie<AutoCompleteType> possibilities = valuePossibilities.union(paramNamePossibilities);
+                return new AutoCompleteReturnValue(prefix, possibilities);
+            }
         } catch (ParseException e) {
             if (!paramNamePossibilities.isEmpty()) {
                 return new AutoCompleteReturnValue(prefix, paramNamePossibilities);

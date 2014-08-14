@@ -188,6 +188,7 @@ public class Shell {
         // Successfully parsed commandLine.
         // Save command in history.
         commandHistory.pushCommand(rawCommandLine);
+        outputProcessor.clearCommandLine();
 
         // Execute the command.
         final OutputBufferImpl output = new OutputBufferImpl();
@@ -198,7 +199,6 @@ public class Shell {
                 output.println("Command '%s' executed successfully.", command.getName());
             }
             displayCommandOutput(output);
-            outputProcessor.displayCommandOutput(output.getOutputBuffer());
         } catch (ExecuteException e) {
             displayCommandOutput(output);
             outputProcessor.executeError(e.getMessage());

@@ -158,7 +158,7 @@ public class ShellFileSystemImpl implements ShellFileSystem {
         }
 
         final Trie<AutoCompleteType> possibilities = lastDirectory.autoCompleteEntry(rawEntry);
-        return new AutoCompleteReturnValue(rawPath, possibilities);
+        return new AutoCompleteReturnValue(rawEntry, possibilities);
     }
 
     public static boolean isLegalName(String name) {

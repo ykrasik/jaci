@@ -88,10 +88,10 @@ public class JerminalLibGdxExample extends ApplicationAdapter {
                     }
                 })
                 .build(),
-            new ShellCommandBuilder("test")
+            new ShellCommandBuilder("nestCommand")
               .setDescription("test Command")
               .addParam(
-                  new StringParamBuilder("stringy")
+                  new StringParamBuilder("nested")
                     .setConstantPossibleValues("test1", "value2", "param3")
                     .build()
               )
