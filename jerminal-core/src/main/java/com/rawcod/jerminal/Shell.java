@@ -3,17 +3,15 @@ package com.rawcod.jerminal;
 import com.google.common.base.Optional;
 import com.rawcod.jerminal.collections.trie.Trie;
 import com.rawcod.jerminal.command.CommandArgs;
+import com.rawcod.jerminal.command.OutputBufferImpl;
+import com.rawcod.jerminal.exception.ExecuteException;
 import com.rawcod.jerminal.exception.ParseException;
 import com.rawcod.jerminal.exception.ShellException;
 import com.rawcod.jerminal.filesystem.ShellFileSystem;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
-import com.rawcod.jerminal.output.OutputProcessor;
+import com.rawcod.jerminal.output.OutputHandler;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteType;
-import com.rawcod.jerminal.returnvalue.execute.flow.ExecuteReturnValue;
-import com.rawcod.jerminal.returnvalue.execute.flow.ExecuteReturnValueFailure;
-import com.rawcod.jerminal.returnvalue.execute.flow.ExecuteReturnValueSuccess;
-import com.rawcod.jerminal.returnvalue.parse.ParseError;
 import com.rawcod.jerminal.returnvalue.suggestion.Suggestions;
 import com.rawcod.jerminal.util.CommandLineUtils;
 
@@ -23,21 +21,22 @@ import java.util.Map.Entry;
 
 /**
 * User: ykrasik
-* Date: 05/01/14
+* Date: 14/08/14
+* Time: 19:26
 */
 public class Shell {
-    private final OutputProcessor outputProcessor;
+    private final OutputHandler outputHandler;
     private final ShellFileSystem fileSystem;
     private final ShellCommandHistory commandHistory;
 
-    Shell(OutputProcessor outputProcessor, ShellFileSystem fileSystem, ShellCommandHistory commandHistory) {
-        this.outputProcessor = outputProcessor;
+    Shell(OutputHandler outputHandler, ShellFileSystem fileSystem, ShellCommandHistory commandHistory) {
+        this.outputHandler = outputHandler;
         this.fileSystem = fileSystem;
         this.commandHistory = commandHistory;
     }
 
     public void clearCommandLine() {
-        outputProcessor.clearCommandLine();
+        outputHandler.clearCommandLine();
     }
 
     public void showPrevCommand() {
@@ -53,7 +52,7 @@ public class Shell {
     private void doShowCommand(Optional<String> commandOptional) {
         if (commandOptional.isPresent()) {
             final String command = commandOptional.get();
-            outputProcessor.setCommandLine(command);
+            outputHandler.setCommandLine(command);
         }
     }
 
@@ -66,10 +65,8 @@ public class Shell {
             final AutoCompleteReturnValue returnValue = doAutoComplete(commandLine);
             handleAutoComplete(returnValue, rawCommandLine);
         } catch (ParseException e) {
-            final ParseError error = e.getError();
-            final String message = e.getMessage();
-            final Optional<Suggestions> suggestions = e.getSuggestions();
-            outputProcessor.parseError(error, message, suggestions);
+            outputHandler.parseError(e.getError(), e.getMessage());
+            displaySuggestionsIfApplicable(e.getSuggestions());
         }
     }
 
@@ -90,7 +87,7 @@ public class Shell {
         // AutoComplete the command args.
         // The args start from the 2nd commandLine element (the first was the command).
         final List<String> args = commandLine.subList(1, commandLine.size());
-        return command.getParamManager().autoCompleteArgs(args);
+        return command.autoCompleteArgs(args);
     }
 
     private void handleAutoComplete(AutoCompleteReturnValue returnValue, String rawCommandLine) {
@@ -100,7 +97,7 @@ public class Shell {
         final int numPossibilities = possibilitiesMap.size();
         if (numPossibilities == 0) {
             final String message = String.format("AutoComplete Error: Not possible for prefix '%s'", prefix);
-            outputProcessor.autoCompleteNotPossible(message);
+            outputHandler.autoCompleteNotPossible(message);
             return;
         }
 
@@ -125,7 +122,8 @@ public class Shell {
         }
 
         final String newCommandLine = rawCommandLine + autoCompleteAddition;
-        outputProcessor.autoCompleteSuccess(newCommandLine, suggestions);
+        outputHandler.setCommandLine(newCommandLine);
+        displaySuggestionsIfApplicable(suggestions);
     }
 
     private char getSinglePossibilitySuffix(AutoCompleteType type) {
@@ -157,7 +155,8 @@ public class Shell {
         final List<String> commandLine = CommandLineUtils.splitCommandLineForExecute(rawCommandLine);
         if (commandLine.size() == 1 && commandLine.get(0).isEmpty()) {
             // Received a commandLine that is either empty or full of spaces.
-            outputProcessor.blankCommandLine();
+            clearCommandLine();
+            outputHandler.handleBlankCommandLine();
             return;
         }
 
@@ -172,9 +171,10 @@ public class Shell {
             // Parse the command args.
             // The command args start from the 2nd commandLine element (the first was the command).
             final List<String> rawArgs = commandLine.subList(1, commandLine.size());
-            args = command.getParamManager().parseCommandArgs(rawArgs);
+            args = command.parseCommandArgs(rawArgs);
         } catch (ParseException e) {
-            outputProcessor.parseError(e.getError(), e.getMessage(), e.getSuggestions());
+            outputHandler.parseError(e.getError(), e.getMessage());
+            displaySuggestionsIfApplicable(e.getSuggestions());
             return;
         }
 
@@ -183,13 +183,49 @@ public class Shell {
         commandHistory.pushCommand(rawCommandLine);
 
         // Execute the command.
-        final ExecuteReturnValue executeReturnValue = command.execute(args);
-        if (executeReturnValue.isSuccess()) {
-            final ExecuteReturnValueSuccess success = executeReturnValue.getSuccess();
-            outputProcessor.executeSuccess(success);
-        } else {
-            final ExecuteReturnValueFailure failure = executeReturnValue.getFailure();
-            outputProcessor.executeFailure(failure);
+        final OutputBufferImpl output = new OutputBufferImpl();
+        try {
+            command.execute(args, output);
+            if (output.isEmpty()) {
+                // Add a default message if the command didn't print anything.
+                output.println("Command '%s' executed successfully.", command.getName());
+            }
+            displayCommandOutput(output);
+            outputHandler.displayCommandOutput(output.getOutputBuffer());
+        } catch (ExecuteException e) {
+            displayCommandOutput(output);
+            outputHandler.executeError(e.getMessage());
+        } catch (Exception e) {
+            output.println("Command '%s' terminated with an unhandled exception!", command.getName());
+            displayCommandOutput(output);
+            outputHandler.executeUnhandledException(e);
+        }
+    }
+
+    private void displaySuggestionsIfApplicable(Optional<Suggestions> suggestions) {
+        if (suggestions.isPresent()) {
+            displaySuggestions(suggestions.get());
+        }
+    }
+
+    private void displaySuggestions(Suggestions suggestions) {
+        final List<String> directorySuggestions = suggestions.getDirectorySuggestions();
+        final List<String> commandSuggestions = suggestions.getCommandSuggestions();
+        final List<String> paramNameSuggestions = suggestions.getParamNameSuggestions();
+        final List<String> paramValueSuggestions = suggestions.getParamValueSuggestions();
+
+        outputHandler.displaySuggestions(
+            directorySuggestions,
+            commandSuggestions,
+            paramNameSuggestions,
+            paramValueSuggestions
+        );
+    }
+
+    private void displayCommandOutput(OutputBufferImpl outputBuffer) {
+        if (!outputBuffer.isEmpty()) {
+            final List<String> output = outputBuffer.getOutputBuffer();
+            outputHandler.displayCommandOutput(output);
         }
     }
 }

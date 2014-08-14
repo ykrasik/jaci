@@ -1,10 +1,12 @@
 package com.rawcod.jerminal.filesystem.entry.command;
 
 import com.rawcod.jerminal.command.CommandArgs;
+import com.rawcod.jerminal.command.OutputBuffer;
 import com.rawcod.jerminal.command.parameters.CommandParam;
-import com.rawcod.jerminal.command.parameters.manager.CommandParamManager;
+import com.rawcod.jerminal.exception.ExecuteException;
+import com.rawcod.jerminal.exception.ParseException;
 import com.rawcod.jerminal.filesystem.entry.ShellEntry;
-import com.rawcod.jerminal.returnvalue.execute.flow.ExecuteReturnValue;
+import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
 
 import java.util.List;
 
@@ -16,7 +18,8 @@ import java.util.List;
 public interface ShellCommand extends ShellEntry {
     List<CommandParam> getParams();
 
-    CommandParamManager getParamManager();
+    CommandArgs parseCommandArgs(List<String> args) throws ParseException;
+    AutoCompleteReturnValue autoCompleteArgs(List<String> args) throws ParseException;
 
-    ExecuteReturnValue execute(CommandArgs args);
+    void execute(CommandArgs args, OutputBuffer output) throws ExecuteException;
 }

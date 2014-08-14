@@ -1,4 +1,4 @@
-package com.rawcod.jerminal.command.parameters.manager;
+package com.rawcod.jerminal.filesystem.entry.command;
 
 import com.google.common.base.Objects;
 import com.rawcod.jerminal.command.parameters.CommandParam;

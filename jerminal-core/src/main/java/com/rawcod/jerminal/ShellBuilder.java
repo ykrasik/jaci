@@ -6,7 +6,6 @@ import com.rawcod.jerminal.filesystem.ShellFileSystemBuilder;
 import com.rawcod.jerminal.filesystem.ShellFileSystemPromise;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
 import com.rawcod.jerminal.output.OutputHandler;
-import com.rawcod.jerminal.output.OutputProcessor;
 
 import java.util.Collection;
 import java.util.Set;
@@ -17,18 +16,18 @@ import java.util.Set;
  * Time: 21:20
  */
 public class ShellBuilder {
-    private final OutputProcessor outputProcessor;
+    private final OutputHandler outputHandler;
     private final ShellFileSystemBuilder fileSystemBuilder;
     private final ShellFileSystemPromise fileSystemPromise;
 
     private int maxCommandHistory = 20;
 
     public ShellBuilder(OutputHandler outputHandler) {
-        this.outputProcessor = new OutputProcessor(outputHandler);
+        this.outputHandler = outputHandler;
         this.fileSystemBuilder = new ShellFileSystemBuilder();
         this.fileSystemPromise = new ShellFileSystemPromise();
 
-        final Set<ShellCommand> controlCommands = new ControlCommandFactory(fileSystemPromise, outputProcessor).createControlCommands();
+        final Set<ShellCommand> controlCommands = new ControlCommandFactory(fileSystemPromise, outputHandler).createControlCommands();
         fileSystemBuilder.addGlobalCommands(controlCommands);
     }
 
@@ -36,7 +35,7 @@ public class ShellBuilder {
         final ShellFileSystem fileSystem = fileSystemBuilder.build();
         fileSystemPromise.setFileSystem(fileSystem);
         final ShellCommandHistory commandHistory = new ShellCommandHistory(maxCommandHistory);
-        return new Shell(outputProcessor, fileSystem, commandHistory);
+        return new Shell(outputHandler, fileSystem, commandHistory);
     }
 
     public ShellBuilder setMaxCommandHistory(int maxCommandHistory) {

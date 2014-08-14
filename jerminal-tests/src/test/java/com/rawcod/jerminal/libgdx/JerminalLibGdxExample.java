@@ -9,12 +9,12 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.rawcod.jerminal.command.CommandArgs;
 import com.rawcod.jerminal.command.CommandExecutor;
-import com.rawcod.jerminal.command.ExecuteContext;
+import com.rawcod.jerminal.command.OutputBuffer;
 import com.rawcod.jerminal.command.parameters.bool.BooleanParamBuilder;
 import com.rawcod.jerminal.command.parameters.number.IntegerParamBuilder;
 import com.rawcod.jerminal.command.parameters.string.StringParamBuilder;
+import com.rawcod.jerminal.exception.ExecuteException;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommandBuilder;
-import com.rawcod.jerminal.returnvalue.execute.executor.ExecutorReturnValue;
 
 /**
  * User: ykrasik
@@ -81,11 +81,10 @@ public class JerminalLibGdxExample extends ApplicationAdapter {
                 )
                 .setExecutor(new CommandExecutor() {
                     @Override
-                    public ExecutorReturnValue execute(CommandArgs args, ExecuteContext context) {
+                    public void execute(CommandArgs args, OutputBuffer output) throws ExecuteException {
                         final int integer = args.getInt("mandatoryInt");
                         final boolean bool = args.getBool("optionalBool");
-                        context.println("yay: int = %d, bool = %s", integer, bool);
-                        return success();
+                        output.println("yay: int = %d, bool = %s", integer, bool);
                     }
                 })
                 .build(),
@@ -102,11 +101,10 @@ public class JerminalLibGdxExample extends ApplicationAdapter {
               )
               .setExecutor(new CommandExecutor() {
                   @Override
-                  public ExecutorReturnValue execute(CommandArgs args, ExecuteContext context) {
+                  public void execute(CommandArgs args, OutputBuffer output) throws ExecuteException {
                       final String str = args.getString("stringy");
                       final boolean bool = args.getBool("booleany");
-                      context.println("yay: string = %s, bool = %s", str, bool);
-                      return success();
+                      output.println("yay: string = %s, bool = %s", str, bool);
                   }
               })
               .build()

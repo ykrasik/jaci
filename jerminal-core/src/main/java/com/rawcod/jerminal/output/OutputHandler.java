@@ -2,7 +2,6 @@ package com.rawcod.jerminal.output;
 
 import com.rawcod.jerminal.command.view.ShellCommandView;
 import com.rawcod.jerminal.filesystem.entry.view.ShellEntryView;
-import com.rawcod.jerminal.returnvalue.execute.ExecuteError;
 import com.rawcod.jerminal.returnvalue.parse.ParseError;
 
 import java.util.List;
@@ -21,7 +20,7 @@ public interface OutputHandler {
     void parseError(ParseError error, String errorMessage);
     void autoCompleteNotPossible(String errorMessage);
 
-    void executeError(ExecuteError error, String errorMessage);
+    void executeError(String errorMessage);
     void executeUnhandledException(Exception e);
 
     void displaySuggestions(List<String> directorySuggestions,
