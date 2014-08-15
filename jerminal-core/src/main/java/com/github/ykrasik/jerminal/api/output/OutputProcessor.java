@@ -95,4 +95,6 @@ public interface OutputProcessor {
      * The user requested to display information about a command.
      */
     void displayShellCommandView(ShellCommandView shellCommandView);
+
+    // TODO: Add a 'setPath' call, for 'cd'.
 }

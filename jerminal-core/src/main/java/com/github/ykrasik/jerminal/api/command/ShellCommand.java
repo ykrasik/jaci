@@ -16,8 +16,6 @@
 
 package com.github.ykrasik.jerminal.api.command;
 
-import com.rawcod.jerminal.command.CommandArgs;
-import com.rawcod.jerminal.command.OutputBuffer;
 import com.rawcod.jerminal.command.parameters.CommandParam;
 import com.rawcod.jerminal.exception.ExecuteException;
 import com.rawcod.jerminal.exception.ParseException;

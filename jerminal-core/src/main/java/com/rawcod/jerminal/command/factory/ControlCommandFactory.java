@@ -1,9 +1,9 @@
 package com.rawcod.jerminal.command.factory;
 
 import com.google.common.base.Supplier;
-import com.rawcod.jerminal.command.CommandArgs;
-import com.rawcod.jerminal.command.CommandExecutor;
-import com.rawcod.jerminal.command.OutputBuffer;
+import com.github.ykrasik.jerminal.api.command.CommandArgs;
+import com.github.ykrasik.jerminal.api.command.CommandExecutor;
+import com.github.ykrasik.jerminal.api.command.OutputBuffer;
 import com.rawcod.jerminal.command.parameters.CommandParam;
 import com.rawcod.jerminal.command.parameters.entry.DirectoryParamBuilder;
 import com.rawcod.jerminal.command.parameters.entry.FileParamBuilder;
@@ -153,6 +153,8 @@ public class ControlCommandFactory {
         }
         return paramViews;
     }
+
+    // TODO: Add a 'pwd' command.
 
     private static class ShellEntryViewComparator implements Comparator<ShellEntryView> {
         @Override

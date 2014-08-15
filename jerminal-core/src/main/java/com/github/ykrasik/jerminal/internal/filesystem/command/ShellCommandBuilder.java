@@ -17,9 +17,9 @@
 package com.github.ykrasik.jerminal.internal.filesystem.command;
 
 import com.github.ykrasik.jerminal.api.command.ShellCommand;
-import com.rawcod.jerminal.command.CommandArgs;
-import com.rawcod.jerminal.command.CommandExecutor;
-import com.rawcod.jerminal.command.OutputBuffer;
+import com.github.ykrasik.jerminal.api.command.CommandArgs;
+import com.github.ykrasik.jerminal.api.command.CommandExecutor;
+import com.github.ykrasik.jerminal.api.command.OutputBuffer;
 import com.rawcod.jerminal.command.parameters.CommandParam;
 import com.rawcod.jerminal.exception.ExecuteException;
 

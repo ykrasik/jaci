@@ -1,9 +1,9 @@
 package com.rawcod.jerminal.command.factory;
 
 import com.google.common.base.Supplier;
-import com.rawcod.jerminal.command.CommandArgs;
-import com.rawcod.jerminal.command.CommandExecutor;
-import com.rawcod.jerminal.command.OutputBuffer;
+import com.github.ykrasik.jerminal.api.command.CommandArgs;
+import com.github.ykrasik.jerminal.api.command.CommandExecutor;
+import com.github.ykrasik.jerminal.api.command.OutputBuffer;
 import com.rawcod.jerminal.command.parameters.bool.BooleanParamBuilder;
 import com.rawcod.jerminal.exception.ExecuteException;
 import com.github.ykrasik.jerminal.api.command.ShellCommand;
