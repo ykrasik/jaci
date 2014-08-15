@@ -2,9 +2,9 @@ package com.rawcod.jerminal.filesystem.entry.command;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import com.rawcod.jerminal.collections.trie.Trie;
-import com.rawcod.jerminal.collections.trie.TrieBuilder;
-import com.rawcod.jerminal.collections.trie.TrieImpl;
+import com.github.ykrasik.jerminal.collections.trie.Trie;
+import com.github.ykrasik.jerminal.collections.trie.TrieBuilder;
+import com.github.ykrasik.jerminal.collections.trie.TrieImpl;
 import com.rawcod.jerminal.command.CommandArgs;
 import com.rawcod.jerminal.command.CommandExecutor;
 import com.rawcod.jerminal.command.OutputBuffer;

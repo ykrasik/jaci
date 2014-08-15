@@ -1,4 +1,20 @@
-package com.rawcod.jerminal.collections.trie.node;
+/*
+* Copyright (C) 2014 Yevgeny Krasik
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+
+package com.github.ykrasik.jerminal.collections.trie.node;
 
 import com.rawcod.jerminal.exception.ShellException;
 
@@ -9,9 +25,10 @@ import java.util.Map.Entry;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * User: ykrasik
- * Date: 11/08/2014
- * Time: 00:30
+ * A builder for a {@link TrieNode}.<br>
+ * {@link TrieNode}s are <b>immutable</b> once built.
+ *
+ * @author Yevgeny Krasik
  */
 public class TrieNodeBuilder<T> {
     private final char character;

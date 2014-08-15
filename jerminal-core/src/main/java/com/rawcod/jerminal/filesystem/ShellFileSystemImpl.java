@@ -2,7 +2,7 @@ package com.rawcod.jerminal.filesystem;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
-import com.rawcod.jerminal.collections.trie.Trie;
+import com.github.ykrasik.jerminal.collections.trie.Trie;
 import com.rawcod.jerminal.exception.ParseException;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
 import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;

@@ -3,7 +3,7 @@ package com.rawcod.jerminal.libgdx;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
-import com.rawcod.jerminal.Shell;
+import com.github.ykrasik.jerminal.api.Shell;
 
 /**
  * User: ykrasik
@@ -50,10 +50,10 @@ public class LibGdxConsole implements InputProcessor {
 
         switch (keycode) {
             case Keys.DPAD_UP:
-                shell.showPrevCommand();
+                shell.showPrevCommandLine();
                 return true;
             case Keys.DPAD_DOWN:
-                shell.showNextCommand();
+                shell.showNextCommandLine();
                 return true;
             case Keys.ENTER:
                 shell.execute(terminal.readCommandLine());

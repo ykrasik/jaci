@@ -2,8 +2,8 @@ package com.rawcod.jerminal.filesystem.entry.directory;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import com.rawcod.jerminal.collections.trie.Trie;
-import com.rawcod.jerminal.collections.trie.TrieBuilder;
+import com.github.ykrasik.jerminal.collections.trie.Trie;
+import com.github.ykrasik.jerminal.collections.trie.TrieBuilder;
 import com.rawcod.jerminal.exception.ParseException;
 import com.rawcod.jerminal.exception.ShellException;
 import com.rawcod.jerminal.filesystem.entry.AbstractShellEntry;

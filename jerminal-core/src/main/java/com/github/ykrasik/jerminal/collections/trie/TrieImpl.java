@@ -1,17 +1,38 @@
-package com.rawcod.jerminal.collections.trie;
+/*
+ * Copyright (C) 2014 Yevgeny Krasik
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.github.ykrasik.jerminal.collections.trie;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import com.rawcod.jerminal.collections.trie.node.TrieNode;
-import com.rawcod.jerminal.collections.trie.node.TrieNodeBuilder;
-import com.rawcod.jerminal.collections.trie.node.TrieNodeImpl;
-import com.rawcod.jerminal.collections.trie.visitor.CollectorTrieVisitor;
-import com.rawcod.jerminal.collections.trie.visitor.TrieVisitor;
+import com.github.ykrasik.jerminal.collections.trie.node.TrieNode;
+import com.github.ykrasik.jerminal.collections.trie.node.TrieNodeBuilder;
+import com.github.ykrasik.jerminal.collections.trie.node.TrieNodeImpl;
+import com.github.ykrasik.jerminal.collections.trie.visitor.MapTrieVisitor;
+import com.github.ykrasik.jerminal.collections.trie.visitor.TrieVisitor;
 import com.rawcod.jerminal.exception.ShellException;
 
 import java.util.*;
 
+/**
+ * An implementation for a {@link Trie}. <b>Immutable</b>.
+ *
+ * @author Yevgeny Krasik
+ */
 public class TrieImpl<T> implements Trie<T> {
     private static final Trie<?> EMPTY_TRIE = new TrieImpl<>(new TrieNodeBuilder<>().build());
 
@@ -57,9 +78,9 @@ public class TrieImpl<T> implements Trie<T> {
             return Collections.emptyList();
         }
 
-        final CollectorTrieVisitor<T> collector = new CollectorTrieVisitor<>();
-        visitWords(collector);
-        return collector.getMap().keySet();
+        final MapTrieVisitor<T> visitor = new MapTrieVisitor<>();
+        visitWords(visitor);
+        return visitor.getMap().keySet();
     }
 
     @Override
@@ -68,9 +89,9 @@ public class TrieImpl<T> implements Trie<T> {
             return Collections.emptyList();
         }
 
-        final CollectorTrieVisitor<T> collector = new CollectorTrieVisitor<>();
-        visitWords(collector);
-        return collector.getMap().values();
+        final MapTrieVisitor<T> visitor = new MapTrieVisitor<>();
+        visitWords(visitor);
+        return visitor.getMap().values();
     }
 
     @Override
@@ -281,9 +302,9 @@ public class TrieImpl<T> implements Trie<T> {
             return Collections.emptyMap();
         }
 
-        final CollectorTrieVisitor<T> collector = new CollectorTrieVisitor<>();
-        visitWords(collector);
-        return collector.getMap();
+        final MapTrieVisitor<T> visitor = new MapTrieVisitor<>();
+        visitWords(visitor);
+        return visitor.getMap();
     }
 
     private TrieNode<T> getNode(String prefix) {
@@ -299,6 +320,9 @@ public class TrieImpl<T> implements Trie<T> {
         return currentNode;
     }
 
+    /**
+     * Returns an empty {@link Trie}.
+     */
     @SuppressWarnings("unchecked")
     public static <T> Trie<T> emptyTrie() {
         return (Trie<T>) EMPTY_TRIE;

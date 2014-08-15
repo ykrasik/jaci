@@ -1,6 +1,6 @@
 package com.rawcod.jerminal.filesystem.entry.directory;
 
-import com.rawcod.jerminal.collections.trie.Trie;
+import com.github.ykrasik.jerminal.collections.trie.Trie;
 import com.rawcod.jerminal.exception.ParseException;
 import com.rawcod.jerminal.filesystem.entry.ShellEntry;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;

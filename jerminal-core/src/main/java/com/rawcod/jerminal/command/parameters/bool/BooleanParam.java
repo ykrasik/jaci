@@ -1,7 +1,7 @@
 package com.rawcod.jerminal.command.parameters.bool;
 
-import com.rawcod.jerminal.collections.trie.Trie;
-import com.rawcod.jerminal.collections.trie.TrieBuilder;
+import com.github.ykrasik.jerminal.collections.trie.Trie;
+import com.github.ykrasik.jerminal.collections.trie.TrieBuilder;
 import com.rawcod.jerminal.command.parameters.AbstractMandatoryCommandParam;
 import com.rawcod.jerminal.exception.ParseException;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteMappers;

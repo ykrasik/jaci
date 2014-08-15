@@ -2,8 +2,8 @@ package com.rawcod.jerminal.command.parameters;
 
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
-import com.rawcod.jerminal.collections.trie.Trie;
-import com.rawcod.jerminal.collections.trie.TrieBuilder;
+import com.github.ykrasik.jerminal.collections.trie.Trie;
+import com.github.ykrasik.jerminal.collections.trie.TrieBuilder;
 
 import java.util.List;
 

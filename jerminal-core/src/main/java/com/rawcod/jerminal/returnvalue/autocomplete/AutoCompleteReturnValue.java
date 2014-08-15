@@ -1,7 +1,7 @@
 package com.rawcod.jerminal.returnvalue.autocomplete;
 
 import com.google.common.base.Objects;
-import com.rawcod.jerminal.collections.trie.Trie;
+import com.github.ykrasik.jerminal.collections.trie.Trie;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

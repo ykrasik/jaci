@@ -1,7 +1,7 @@
 package com.rawcod.jerminal.command.parameters.string;
 
 import com.google.common.base.Supplier;
-import com.rawcod.jerminal.collections.trie.Trie;
+import com.github.ykrasik.jerminal.collections.trie.Trie;
 import com.rawcod.jerminal.command.parameters.CommandParam;
 import com.rawcod.jerminal.command.parameters.Params;
 import com.rawcod.jerminal.command.parameters.optional.OptionalParam;

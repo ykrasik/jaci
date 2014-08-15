@@ -1,7 +1,24 @@
-package com.rawcod.jerminal;
+/*
+ * Copyright (C) 2014 Yevgeny Krasik
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
+package com.github.ykrasik.jerminal.internal;
+
+import com.github.ykrasik.jerminal.api.Shell;
 import com.google.common.base.Optional;
-import com.rawcod.jerminal.collections.trie.Trie;
+import com.github.ykrasik.jerminal.collections.trie.Trie;
 import com.rawcod.jerminal.command.CommandArgs;
 import com.rawcod.jerminal.command.OutputBufferImpl;
 import com.rawcod.jerminal.exception.ExecuteException;
@@ -20,39 +37,42 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 /**
-* User: ykrasik
-* Date: 14/08/14
-* Time: 19:26
-*/
-public class Shell {
+ * An implementation for a {@link Shell}.
+ *
+ * @author Yevgeny Krasik
+ */
+public class ShellImpl implements Shell {
     private final OutputProcessor outputProcessor;
     private final ShellFileSystem fileSystem;
-    private final ShellCommandHistory commandHistory;
+    private final CommandLineHistory commandLineHistory;
 
-    Shell(OutputProcessor outputProcessor,
-          ShellFileSystem fileSystem,
-          ShellCommandHistory commandHistory,
-          String welcomeMessage) {
+    public ShellImpl(OutputProcessor outputProcessor,
+                     ShellFileSystem fileSystem,
+                     CommandLineHistory commandLineHistory,
+                     String welcomeMessage) {
         this.outputProcessor = outputProcessor;
         this.fileSystem = fileSystem;
-        this.commandHistory = commandHistory;
+        this.commandLineHistory = commandLineHistory;
 
         // Init.
         outputProcessor.clearCommandLine();
         outputProcessor.displayWelcomeMessage(welcomeMessage);
     }
 
+    @Override
     public void clearCommandLine() {
         outputProcessor.clearCommandLine();
     }
 
-    public void showPrevCommand() {
-        final Optional<String> prevCommand = commandHistory.getPrevCommand();
+    @Override
+    public void showPrevCommandLine() {
+        final Optional<String> prevCommand = commandLineHistory.getPrevCommandLine();
         doShowCommand(prevCommand);
     }
 
-    public void showNextCommand() {
-        final Optional<String> nextCommand = commandHistory.getNextCommand();
+    @Override
+    public void showNextCommandLine() {
+        final Optional<String> nextCommand = commandLineHistory.getNextCommandLine();
         doShowCommand(nextCommand);
     }
 
@@ -63,6 +83,7 @@ public class Shell {
         }
     }
 
+    @Override
     public void autoComplete(String rawCommandLine) {
         // Split the commandLine for autoComplete.
         final List<String> commandLine = CommandLineUtils.splitCommandLineForAutoComplete(rawCommandLine);
@@ -157,6 +178,7 @@ public class Shell {
         return autoCompletedPrefix.substring(prefix.length());
     }
 
+    @Override
     public void execute(String rawCommandLine) {
         // Split the commandLine.
         final List<String> commandLine = CommandLineUtils.splitCommandLineForExecute(rawCommandLine);
@@ -187,7 +209,7 @@ public class Shell {
 
         // Successfully parsed commandLine.
         // Save command in history.
-        commandHistory.pushCommand(rawCommandLine);
+        commandLineHistory.pushCommandLine(rawCommandLine);
         outputProcessor.clearCommandLine();
 
         // Execute the command.

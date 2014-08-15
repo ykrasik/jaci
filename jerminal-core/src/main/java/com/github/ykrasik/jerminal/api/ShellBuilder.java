@@ -1,6 +1,23 @@
-package com.rawcod.jerminal;
+/*
+ * Copyright (C) 2014 Yevgeny Krasik
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-import com.google.common.base.Supplier;
+package com.github.ykrasik.jerminal.api;
+
+import com.github.ykrasik.jerminal.internal.CommandLineHistory;
+import com.github.ykrasik.jerminal.internal.ShellImpl;
 import com.rawcod.jerminal.command.factory.ControlCommandFactory;
 import com.rawcod.jerminal.filesystem.ShellFileSystem;
 import com.rawcod.jerminal.filesystem.ShellFileSystemBuilder;
@@ -14,9 +31,9 @@ import java.util.Collection;
 import java.util.Set;
 
 /**
- * User: ykrasik
- * Date: 11/08/2014
- * Time: 21:20
+ * A builder for a {@link Shell}.
+ *
+ * @author Yevgeny Krasik
  */
 public class ShellBuilder {
     private static final String VERSION = "0.1";
@@ -27,7 +44,7 @@ public class ShellBuilder {
     private final ShellFileSystemPromise fileSystemPromise;
 
     private String welcomeMessage = DEFAULT_WELCOME_MESSAGE;
-    private int maxCommandHistory = 20;
+    private int maxCommandLineHistory = 20;
 
     public ShellBuilder(Terminal terminal) {
         this(new TerminalOutputProcessor(terminal));
@@ -45,12 +62,12 @@ public class ShellBuilder {
     public Shell build() {
         final ShellFileSystem fileSystem = fileSystemBuilder.build();
         fileSystemPromise.setFileSystem(fileSystem);
-        final ShellCommandHistory commandHistory = new ShellCommandHistory(maxCommandHistory);
-        return new Shell(outputProcessor, fileSystem, commandHistory, welcomeMessage);
+        final CommandLineHistory commandHistory = new CommandLineHistory(maxCommandLineHistory);
+        return new ShellImpl(outputProcessor, fileSystem, commandHistory, welcomeMessage);
     }
 
-    public ShellBuilder setMaxCommandHistory(int maxCommandHistory) {
-        this.maxCommandHistory = maxCommandHistory;
+    public ShellBuilder setMaxCommandLineHistory(int maxCommandLineHistory) {
+        this.maxCommandLineHistory = maxCommandLineHistory;
         return this;
     }
 
@@ -77,14 +94,5 @@ public class ShellBuilder {
     public ShellBuilder addGlobalCommands(Collection<ShellCommand> globalCommands) {
         fileSystemBuilder.addGlobalCommands(globalCommands);
         return this;
-    }
-
-    private static class DefaultWelcomeMessageSupplier implements Supplier<String> {
-        private static final String VERSION = "0.1";
-
-        @Override
-        public String get() {
-            return "Welcome to Jerminal v" + VERSION + ".\n\n\n";
-        }
     }
 }

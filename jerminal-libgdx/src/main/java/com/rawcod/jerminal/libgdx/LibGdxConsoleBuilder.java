@@ -1,8 +1,8 @@
 package com.rawcod.jerminal.libgdx;
 
 import com.badlogic.gdx.Input.Keys;
-import com.rawcod.jerminal.Shell;
-import com.rawcod.jerminal.ShellBuilder;
+import com.github.ykrasik.jerminal.api.Shell;
+import com.github.ykrasik.jerminal.api.ShellBuilder;
 import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
 
 /**
@@ -30,7 +30,7 @@ public class LibGdxConsoleBuilder {
     }
 
     public LibGdxConsoleBuilder setMaxCommandHistory(int maxCommandHistory) {
-        builder.setMaxCommandHistory(maxCommandHistory);
+        builder.setMaxCommandLineHistory(maxCommandHistory);
         return this;
     }
 
