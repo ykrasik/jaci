@@ -14,20 +14,25 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.internal.filesystem;
-
-import com.github.ykrasik.jerminal.internal.Describable;
+package com.github.ykrasik.jerminal.api.command.parameter.numeric;
 
 /**
- * Represents an entry in a {@link ShellFileSystem}.<br>
- * Can be either a {@link com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectory directory}
- * or a {@link com.github.ykrasik.jerminal.api.command.ShellCommand command}.
+ * A {@link com.github.ykrasik.jerminal.api.command.parameter.CommandParam CommandParam} that parses integer values.
  *
  * @author Yevgeny Krasik
  */
-public interface ShellEntry extends Describable {
-    /**
-     * Returns 'true' if this {@link ShellEntry entry} is a directory that can contain other {@link ShellEntry entries}.
-     */
-    boolean isDirectory();
+public class IntegerParam extends AbstractNumericCommandParam<Integer> {
+    public IntegerParam(String name, String description) {
+        super(name, description);
+    }
+
+    @Override
+    protected String getExternalFormType() {
+        return "int";
+    }
+
+    @Override
+    protected Integer parseNumber(String rawValue) {
+        return Integer.parseInt(rawValue);
+    }
 }

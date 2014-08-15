@@ -16,18 +16,18 @@
 
 package com.github.ykrasik.jerminal.internal.filesystem.command;
 
+import com.github.ykrasik.jerminal.api.command.CommandArgs;
+import com.github.ykrasik.jerminal.api.command.CommandExecutor;
+import com.github.ykrasik.jerminal.api.command.OutputBuffer;
 import com.github.ykrasik.jerminal.api.command.ShellCommand;
 import com.github.ykrasik.jerminal.collections.trie.Trie;
 import com.github.ykrasik.jerminal.collections.trie.TrieBuilder;
 import com.github.ykrasik.jerminal.collections.trie.TrieImpl;
-import com.github.ykrasik.jerminal.internal.filesystem.AbstractShellEntry;
+import com.github.ykrasik.jerminal.internal.AbstractDescribable;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import com.github.ykrasik.jerminal.api.command.CommandArgs;
-import com.github.ykrasik.jerminal.api.command.CommandExecutor;
-import com.github.ykrasik.jerminal.api.command.OutputBuffer;
-import com.rawcod.jerminal.command.parameters.CommandParam;
-import com.rawcod.jerminal.command.parameters.ParamType;
+import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
+import com.github.ykrasik.jerminal.internal.command.parameter.ParamType;
 import com.rawcod.jerminal.exception.ExecuteException;
 import com.rawcod.jerminal.exception.ParseException;
 import com.rawcod.jerminal.exception.ShellException;
@@ -45,7 +45,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Yevgeny Krasik
  */
-public class ShellCommandImpl extends AbstractShellEntry implements ShellCommand {
+public class ShellCommandImpl extends AbstractDescribable implements ShellCommand {
     private static final char ARG_VALUE_DELIMITER = '=';
 
     private final CommandExecutor executor;

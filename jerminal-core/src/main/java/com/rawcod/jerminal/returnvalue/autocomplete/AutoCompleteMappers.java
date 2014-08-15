@@ -1,8 +1,8 @@
 package com.rawcod.jerminal.returnvalue.autocomplete;
 
 import com.google.common.base.Function;
-import com.rawcod.jerminal.command.parameters.CommandParam;
-import com.rawcod.jerminal.command.parameters.ParamType;
+import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
+import com.github.ykrasik.jerminal.internal.command.parameter.ParamType;
 import com.github.ykrasik.jerminal.internal.filesystem.ShellEntry;
 import com.github.ykrasik.jerminal.api.command.ShellCommand;
 

@@ -14,20 +14,25 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.internal.filesystem;
-
-import com.github.ykrasik.jerminal.internal.Describable;
+package com.github.ykrasik.jerminal.api.command.parameter.numeric;
 
 /**
- * Represents an entry in a {@link ShellFileSystem}.<br>
- * Can be either a {@link com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectory directory}
- * or a {@link com.github.ykrasik.jerminal.api.command.ShellCommand command}.
+ * A {@link com.github.ykrasik.jerminal.api.command.parameter.CommandParam CommandParam} that parses double values.
  *
  * @author Yevgeny Krasik
  */
-public interface ShellEntry extends Describable {
-    /**
-     * Returns 'true' if this {@link ShellEntry entry} is a directory that can contain other {@link ShellEntry entries}.
-     */
-    boolean isDirectory();
+public class DoubleParam extends AbstractNumericCommandParam<Double> {
+    public DoubleParam(String name, String description) {
+        super(name, description);
+    }
+
+    @Override
+    protected String getExternalFormType() {
+        return "double";
+    }
+
+    @Override
+    protected Double parseNumber(String rawValue) {
+        return Double.parseDouble(rawValue);
+    }
 }

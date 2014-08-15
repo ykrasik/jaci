@@ -16,17 +16,18 @@
 
 package com.github.ykrasik.jerminal.internal.filesystem.view;
 
-import com.github.ykrasik.jerminal.internal.filesystem.AbstractShellEntry;
+import com.github.ykrasik.jerminal.api.filesystem.ShellEntryView;
+import com.github.ykrasik.jerminal.internal.AbstractDescribable;
 
 import java.util.Collections;
 import java.util.List;
 
 /**
- * An <b>immutable</b> implementation for a {@link ShellEntryView}.
+ * An <b>immutable</b> implementation for a {@link com.github.ykrasik.jerminal.api.filesystem.ShellEntryView}.
  *
  * @author Yevgeny Krasik
  */
-public class ShellEntryViewImpl extends AbstractShellEntry implements ShellEntryView {
+public class ShellEntryViewImpl extends AbstractDescribable implements ShellEntryView {
     private final boolean directory;
     private final List<ShellEntryView> children;
 

@@ -10,11 +10,11 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.github.ykrasik.jerminal.api.command.CommandArgs;
 import com.github.ykrasik.jerminal.api.command.CommandExecutor;
 import com.github.ykrasik.jerminal.api.command.OutputBuffer;
-import com.rawcod.jerminal.command.parameters.bool.BooleanParamBuilder;
-import com.rawcod.jerminal.command.parameters.number.IntegerParamBuilder;
-import com.rawcod.jerminal.command.parameters.string.StringParamBuilder;
+import com.github.ykrasik.jerminal.api.command.parameter.bool.BooleanParamBuilder;
+import com.github.ykrasik.jerminal.api.command.parameter.numeric.IntegerParamBuilder;
+import com.github.ykrasik.jerminal.api.command.parameter.string.StringParamBuilder;
 import com.rawcod.jerminal.exception.ExecuteException;
-import com.github.ykrasik.jerminal.internal.filesystem.command.ShellCommandBuilder;
+import com.github.ykrasik.jerminal.api.command.ShellCommandBuilder;
 
 /**
  * User: ykrasik

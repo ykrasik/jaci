@@ -16,15 +16,15 @@
 
 package com.github.ykrasik.jerminal.internal.filesystem.directory;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
+import com.github.ykrasik.jerminal.api.command.ShellCommand;
 import com.github.ykrasik.jerminal.collections.trie.Trie;
 import com.github.ykrasik.jerminal.collections.trie.TrieBuilder;
+import com.github.ykrasik.jerminal.internal.AbstractDescribable;
+import com.github.ykrasik.jerminal.internal.filesystem.ShellEntry;
+import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.rawcod.jerminal.exception.ParseException;
 import com.rawcod.jerminal.exception.ShellException;
-import com.github.ykrasik.jerminal.internal.filesystem.AbstractShellEntry;
-import com.github.ykrasik.jerminal.internal.filesystem.ShellEntry;
-import com.github.ykrasik.jerminal.api.command.ShellCommand;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteMappers;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteType;
 import com.rawcod.jerminal.returnvalue.parse.ParseErrors;
@@ -38,7 +38,7 @@ import java.util.Map;
  *
  * @author Yevgeny Krasik
  */
-public class ShellDirectoryImpl extends AbstractShellEntry implements ShellDirectory {
+public class ShellDirectoryImpl extends AbstractDescribable implements ShellDirectory {
     private static final Predicate<ShellEntry> DIRECTORY_FILTER = new Predicate<ShellEntry>() {
         @Override
         public boolean apply(ShellEntry input) {

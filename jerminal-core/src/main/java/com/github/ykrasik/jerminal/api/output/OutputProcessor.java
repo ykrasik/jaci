@@ -16,8 +16,8 @@
 
 package com.github.ykrasik.jerminal.api.output;
 
-import com.rawcod.jerminal.command.view.ShellCommandView;
-import com.github.ykrasik.jerminal.internal.filesystem.view.ShellEntryView;
+import com.github.ykrasik.jerminal.api.command.view.ShellCommandView;
+import com.github.ykrasik.jerminal.api.filesystem.ShellEntryView;
 import com.rawcod.jerminal.returnvalue.parse.ParseError;
 
 import java.util.List;

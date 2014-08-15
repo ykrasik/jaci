@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.internal.filesystem;
-
-import com.github.ykrasik.jerminal.internal.Describable;
+package com.github.ykrasik.jerminal.internal.command.parameter;
 
 /**
- * Represents an entry in a {@link ShellFileSystem}.<br>
- * Can be either a {@link com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectory directory}
- * or a {@link com.github.ykrasik.jerminal.api.command.ShellCommand command}.
+ * The type of a {@link com.github.ykrasik.jerminal.api.command.parameter.CommandParam CommandParam}.
  *
  * @author Yevgeny Krasik
  */
-public interface ShellEntry extends Describable {
-    /**
-     * Returns 'true' if this {@link ShellEntry entry} is a directory that can contain other {@link ShellEntry entries}.
-     */
-    boolean isDirectory();
+public enum ParamType {
+    MANDATORY,
+    OPTIONAL,
+    FLAG
 }

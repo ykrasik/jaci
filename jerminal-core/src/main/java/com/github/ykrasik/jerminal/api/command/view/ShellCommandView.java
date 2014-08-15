@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.internal.filesystem;
+package com.github.ykrasik.jerminal.api.command.view;
 
+import com.github.ykrasik.jerminal.api.command.parameter.view.ShellCommandParamView;
 import com.github.ykrasik.jerminal.internal.Describable;
 
+import java.util.List;
+
 /**
- * Represents an entry in a {@link ShellFileSystem}.<br>
- * Can be either a {@link com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectory directory}
- * or a {@link com.github.ykrasik.jerminal.api.command.ShellCommand command}.
+ * A view of a {@link com.github.ykrasik.jerminal.api.command.ShellCommand ShellCommand} and it's parameters.
  *
  * @author Yevgeny Krasik
  */
-public interface ShellEntry extends Describable {
+public interface ShellCommandView extends Describable {
     /**
-     * Returns 'true' if this {@link ShellEntry entry} is a directory that can contain other {@link ShellEntry entries}.
+     * Returns a view of the command's parameters.
      */
-    boolean isDirectory();
+    List<ShellCommandParamView> getParams();
 }

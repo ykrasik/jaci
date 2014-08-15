@@ -17,9 +17,9 @@
 package com.github.ykrasik.jerminal.api.output.terminal;
 
 import com.google.common.base.Joiner;
-import com.rawcod.jerminal.command.view.ShellCommandParamView;
-import com.rawcod.jerminal.command.view.ShellCommandView;
-import com.github.ykrasik.jerminal.internal.filesystem.view.ShellEntryView;
+import com.github.ykrasik.jerminal.api.command.parameter.view.ShellCommandParamView;
+import com.github.ykrasik.jerminal.api.command.view.ShellCommandView;
+import com.github.ykrasik.jerminal.api.filesystem.ShellEntryView;
 import com.github.ykrasik.jerminal.api.output.OutputProcessor;
 import com.rawcod.jerminal.returnvalue.parse.ParseError;
 

@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.internal.filesystem;
+package com.github.ykrasik.jerminal.api.filesystem;
 
-import com.github.ykrasik.jerminal.internal.Describable;
+import com.github.ykrasik.jerminal.internal.filesystem.ShellEntry;
+
+import java.util.List;
 
 /**
- * Represents an entry in a {@link ShellFileSystem}.<br>
- * Can be either a {@link com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectory directory}
- * or a {@link com.github.ykrasik.jerminal.api.command.ShellCommand command}.
+ * A view of a {@link com.github.ykrasik.jerminal.internal.filesystem.ShellFileSystem fileSystem} hierarchy.
  *
  * @author Yevgeny Krasik
  */
-public interface ShellEntry extends Describable {
+public interface ShellEntryView extends ShellEntry {
     /**
-     * Returns 'true' if this {@link ShellEntry entry} is a directory that can contain other {@link ShellEntry entries}.
+     * Returns the children of this entry. If this entry is not a directory, returns an empty list.
      */
-    boolean isDirectory();
+    List<ShellEntryView> getChildren();
 }
