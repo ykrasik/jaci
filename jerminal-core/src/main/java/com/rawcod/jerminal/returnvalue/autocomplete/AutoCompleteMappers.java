@@ -3,8 +3,8 @@ package com.rawcod.jerminal.returnvalue.autocomplete;
 import com.google.common.base.Function;
 import com.rawcod.jerminal.command.parameters.CommandParam;
 import com.rawcod.jerminal.command.parameters.ParamType;
-import com.rawcod.jerminal.filesystem.entry.ShellEntry;
-import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
+import com.github.ykrasik.jerminal.internal.filesystem.ShellEntry;
+import com.github.ykrasik.jerminal.api.command.ShellCommand;
 
 /**
  * User: ykrasik

@@ -14,7 +14,7 @@ import com.rawcod.jerminal.command.parameters.bool.BooleanParamBuilder;
 import com.rawcod.jerminal.command.parameters.number.IntegerParamBuilder;
 import com.rawcod.jerminal.command.parameters.string.StringParamBuilder;
 import com.rawcod.jerminal.exception.ExecuteException;
-import com.rawcod.jerminal.filesystem.entry.command.ShellCommandBuilder;
+import com.github.ykrasik.jerminal.internal.filesystem.command.ShellCommandBuilder;
 
 /**
  * User: ykrasik

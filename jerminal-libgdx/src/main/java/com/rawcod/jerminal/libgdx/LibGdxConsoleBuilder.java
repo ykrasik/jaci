@@ -3,7 +3,7 @@ package com.rawcod.jerminal.libgdx;
 import com.badlogic.gdx.Input.Keys;
 import com.github.ykrasik.jerminal.api.Shell;
 import com.github.ykrasik.jerminal.api.ShellBuilder;
-import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
+import com.github.ykrasik.jerminal.api.command.ShellCommand;
 
 /**
  * User: ykrasik

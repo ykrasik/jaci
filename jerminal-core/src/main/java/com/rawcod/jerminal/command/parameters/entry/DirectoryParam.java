@@ -2,8 +2,8 @@ package com.rawcod.jerminal.command.parameters.entry;
 
 import com.rawcod.jerminal.command.parameters.AbstractMandatoryCommandParam;
 import com.rawcod.jerminal.exception.ParseException;
-import com.rawcod.jerminal.filesystem.ShellFileSystem;
-import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
+import com.github.ykrasik.jerminal.internal.filesystem.ShellFileSystem;
+import com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectory;
 import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
 
 import static com.google.common.base.Preconditions.checkNotNull;

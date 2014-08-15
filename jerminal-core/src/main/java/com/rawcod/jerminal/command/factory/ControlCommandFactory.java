@@ -13,14 +13,14 @@ import com.rawcod.jerminal.command.view.ShellCommandParamViewImpl;
 import com.rawcod.jerminal.command.view.ShellCommandView;
 import com.rawcod.jerminal.command.view.ShellCommandViewImpl;
 import com.rawcod.jerminal.exception.ExecuteException;
-import com.rawcod.jerminal.filesystem.ShellFileSystem;
-import com.rawcod.jerminal.filesystem.entry.ShellEntry;
-import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
-import com.rawcod.jerminal.filesystem.entry.command.ShellCommandBuilder;
-import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
-import com.rawcod.jerminal.filesystem.entry.view.ShellEntryView;
-import com.rawcod.jerminal.filesystem.entry.view.ShellEntryViewImpl;
-import com.rawcod.jerminal.output.OutputProcessor;
+import com.github.ykrasik.jerminal.internal.filesystem.ShellFileSystem;
+import com.github.ykrasik.jerminal.internal.filesystem.ShellEntry;
+import com.github.ykrasik.jerminal.api.command.ShellCommand;
+import com.github.ykrasik.jerminal.internal.filesystem.command.ShellCommandBuilder;
+import com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectory;
+import com.github.ykrasik.jerminal.internal.filesystem.view.ShellEntryView;
+import com.github.ykrasik.jerminal.internal.filesystem.view.ShellEntryViewImpl;
+import com.github.ykrasik.jerminal.api.output.OutputProcessor;
 
 import java.util.*;
 

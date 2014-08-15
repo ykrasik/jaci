@@ -14,38 +14,31 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.api;
+package com.github.ykrasik.jerminal.api.output.terminal;
 
 /**
- * Processes command lines and sends results to an {@link com.github.ykrasik.jerminal.api.output.OutputProcessor OutputProcessor}.<br>
- * In an MVC architecture, this is the controller.<br>
- * Can be built through a {@link ShellBuilder}.
+ * A simple display, in which everything is printed into text.
  *
  * @author Yevgeny Krasik
  */
-public interface Shell {
+public interface Terminal {
     /**
      * Clear the command line.
      */
     void clearCommandLine();
 
     /**
-     * Set the command line to the previous one from the command line history.
+     * Set the command line to the given command line.
      */
-    void showPrevCommandLine();
+    void setCommandLine(String commandLine);
 
     /**
-     * Set the command line to the next one from the command line history.
+     * Print the message.
      */
-    void showNextCommandLine();
+    void print(String message);
 
     /**
-     * Provide assistance according to the command line.
+     * Print the message as an error.
      */
-    void autoComplete(String commandLine);
-
-    /**
-     * Execute the command line.
-     */
-    void execute(String commandLine);
+    void printError(String message);
 }

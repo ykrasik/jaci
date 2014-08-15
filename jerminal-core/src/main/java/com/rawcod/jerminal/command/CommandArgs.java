@@ -1,8 +1,8 @@
 package com.rawcod.jerminal.command;
 
 import com.rawcod.jerminal.exception.ShellException;
-import com.rawcod.jerminal.filesystem.entry.command.ShellCommand;
-import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
+import com.github.ykrasik.jerminal.api.command.ShellCommand;
+import com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectory;
 
 import java.util.Map;
 

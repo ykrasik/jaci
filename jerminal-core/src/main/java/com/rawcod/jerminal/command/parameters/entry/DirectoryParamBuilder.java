@@ -4,8 +4,8 @@ import com.google.common.base.Supplier;
 import com.rawcod.jerminal.command.parameters.CommandParam;
 import com.rawcod.jerminal.command.parameters.Params;
 import com.rawcod.jerminal.command.parameters.optional.OptionalParam;
-import com.rawcod.jerminal.filesystem.ShellFileSystem;
-import com.rawcod.jerminal.filesystem.entry.directory.ShellDirectory;
+import com.github.ykrasik.jerminal.internal.filesystem.ShellFileSystem;
+import com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectory;
 
 /**
  * User: ykrasik
