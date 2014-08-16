@@ -93,11 +93,17 @@ public class ShellFileSystemImpl implements ShellFileSystem {
         }
 
         // rawPath contains a delimiter.
+        // However, if rawPath ends with the delimiter, it cannot possibly point to a command.
+        if (endsWithDelimiter(rawPath)) {
+            throw pathDoesntPointToCommand(rawPath);
+        }
+
         // Parse the path until the pre-last entry as directories, and let the last directory parse the last entry as a command.
         // So in "path/to/command", parse "path/to" as path to directory "to", and let "to" parse "command".
         final String pathToLastDirectory = rawPath.substring(0, delimiterIndex);
-        final String rawCommand = rawPath.substring(delimiterIndex + 1);
         final ShellDirectory lastDirectory = parsePathToDirectory(pathToLastDirectory);
+
+        final String rawCommand = rawPath.substring(delimiterIndex + 1);
         return lastDirectory.parseCommand(rawCommand);
     }
 
@@ -182,16 +188,24 @@ public class ShellFileSystemImpl implements ShellFileSystem {
     }
 
     private String removeLeadingAndTrailingDelimiter(String str) {
-        final int length = str.length();
-        final boolean leadingDelimiter = length > 0 && str.charAt(0) == DELIMITER;
-        final boolean trailingDelimiter = length >= 1 && str.charAt(length - 1) == DELIMITER;
+        final boolean leadingDelimiter = startsWithDelimiter(str);
+        final boolean trailingDelimiter = endsWithDelimiter(str);
         if (!leadingDelimiter && !trailingDelimiter) {
             return str;
         } else {
             final int startingDelimiterIndex = leadingDelimiter ? 1 : 0;
-            final int endingDelimiterIndex = trailingDelimiter ? Math.max(length - 1, startingDelimiterIndex) : length;
+            final int endingDelimiterIndex = trailingDelimiter ? Math.max(str.length() - 1, startingDelimiterIndex) : str.length();
             return str.substring(startingDelimiterIndex, endingDelimiterIndex);
         }
+    }
+
+    private boolean startsWithDelimiter(String path) {
+        return !path.isEmpty() && path.charAt(0) == DELIMITER;
+    }
+
+    private boolean endsWithDelimiter(String path) {
+        final int length = path.length();
+        return length >= 1 && path.charAt(length - 1) == DELIMITER;
     }
 
     private ParseException directoryDoesNotHaveParent(String directoryName) {
@@ -200,6 +214,14 @@ public class ShellFileSystemImpl implements ShellFileSystem {
             "Directory '%s' doesn't have a parent.", directoryName
         );
     }
+
+    private ParseException pathDoesntPointToCommand(String path) {
+        return new ParseException(
+            ParseError.INVALID_ENTRY,
+            "Path doesn't point to a command: %s", path
+        );
+    }
+
 
     public static boolean isLegalName(String name) {
         return !ILLEGAL_NAMES.contains(name);

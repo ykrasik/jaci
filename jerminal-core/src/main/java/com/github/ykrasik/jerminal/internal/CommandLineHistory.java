@@ -28,6 +28,7 @@ import java.util.Deque;
  */
 public class CommandLineHistory {
     // FIXME: This class needs testing.
+    // FIXME: Wouldn't it be easier to just keep an int index?
     private final Deque<String> prevCommandLines;
     private final Deque<String> nextCommandLines;
 

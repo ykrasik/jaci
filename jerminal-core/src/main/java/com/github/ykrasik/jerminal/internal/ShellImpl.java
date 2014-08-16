@@ -59,47 +59,35 @@ public class ShellImpl implements Shell {
         this.commandLineHistory = commandLineHistory;
 
         // Init.
-        outputProcessor.clearCommandLine();
         outputProcessor.displayWelcomeMessage(welcomeMessage);
     }
 
     @Override
-    public void clearCommandLine() {
-        outputProcessor.clearCommandLine();
+    public Optional<String> getPrevCommandLineFromHistory() {
+        return commandLineHistory.getPrevCommandLine();
     }
 
     @Override
-    public void showPrevCommandLine() {
-        final Optional<String> prevCommand = commandLineHistory.getPrevCommandLine();
-        doShowCommand(prevCommand);
-    }
-
-    @Override
-    public void showNextCommandLine() {
-        final Optional<String> nextCommand = commandLineHistory.getNextCommandLine();
-        doShowCommand(nextCommand);
-    }
-
-    private void doShowCommand(Optional<String> commandOptional) {
-        if (commandOptional.isPresent()) {
-            final String command = commandOptional.get();
-            outputProcessor.setCommandLine(command);
-        }
+    public Optional<String> getNextCommandLineFromHistory() {
+        return commandLineHistory.getNextCommandLine();
     }
 
     // TODO: AutoCompleting should give more assistance: Command info etc.
     // TODO: Rename this to assist.
     @Override
-    public void autoComplete(String rawCommandLine) {
+    public String autoComplete(String rawCommandLine) {
         // Split the commandLine for autoComplete.
         final List<String> commandLine = splitCommandLineForAutoComplete(rawCommandLine);
 
         // Do the actual autoCompletion.
         try {
             final AutoCompleteReturnValue returnValue = doAutoComplete(commandLine);
-            handleAutoComplete(returnValue, rawCommandLine);
+            return getNewCommandLine(returnValue, rawCommandLine);
         } catch (ParseException e) {
             handleParseException(e);
+
+            // There was an error parsing the command line, return the old one.
+            return rawCommandLine;
         }
     }
 
@@ -114,7 +102,7 @@ public class ShellImpl implements Shell {
             return fileSystem.autoCompletePath(rawPath);
         }
 
-        // The first arg is not the only arg on the commandLine,  it is expected to be a valid path to a command.
+        // The first arg is not the only arg on the commandLine, it is expected to be a valid path to a command.
         final ShellCommand command = fileSystem.parsePathToCommand(rawPath);
 
         // AutoComplete the command args.
@@ -123,7 +111,7 @@ public class ShellImpl implements Shell {
         return command.autoCompleteArgs(args);
     }
 
-    private void handleAutoComplete(AutoCompleteReturnValue returnValue, String rawCommandLine) {
+    private String getNewCommandLine(AutoCompleteReturnValue returnValue, String rawCommandLine) {
         final String prefix = returnValue.getPrefix();
         final Trie<AutoCompleteType> possibilities = returnValue.getPossibilities();
         final Map<String, AutoCompleteType> possibilitiesMap = possibilities.toMap();
@@ -131,11 +119,12 @@ public class ShellImpl implements Shell {
         if (numPossibilities == 0) {
             final String message = String.format("AutoComplete Error: Not possible for prefix '%s'", prefix);
             outputProcessor.autoCompleteNotPossible(message);
-            return;
+
+            // AutoComplete didn't give any results, return the old command line.
+            return rawCommandLine;
         }
 
         final String autoCompleteAddition;
-        final Optional<Suggestions> suggestions;
         if (numPossibilities == 1) {
             // Only a single word is possible.
             // Let's be helpful - depending on the autoCompleteType, add a suffix.
@@ -143,20 +132,19 @@ public class ShellImpl implements Shell {
             final AutoCompleteType type = possibilitiesMap.get(singlePossibility);
             final char suffix = getSinglePossibilitySuffix(type);
             autoCompleteAddition = getAutoCompleteAddition(prefix, singlePossibility) + suffix;
-            suggestions = Optional.absent();
         } else {
             // Multiple words are possible.
             // AutoComplete as much as is possible - until the longest common prefix.
             final String longestPrefix = possibilities.getLongestPrefix();
             autoCompleteAddition = getAutoCompleteAddition(prefix, longestPrefix);
 
-            // Catalogue the suggestions according to their type.
-            suggestions = Optional.of(createAutoCompleteSuggestions(possibilitiesMap));
+            // Catalogue the suggestions according to their type and display them.
+            final Suggestions suggestions = createAutoCompleteSuggestions(possibilitiesMap);
+            displaySuggestions(suggestions);
         }
 
-        final String newCommandLine = rawCommandLine + autoCompleteAddition;
-        outputProcessor.setCommandLine(newCommandLine);
-        displaySuggestionsIfApplicable(suggestions);
+        // The new command line is the old command line + autoCompleteAddition.
+        return rawCommandLine + autoCompleteAddition;
     }
 
     private char getSinglePossibilitySuffix(AutoCompleteType type) {
@@ -184,14 +172,13 @@ public class ShellImpl implements Shell {
     }
 
     @Override
-    public void execute(String rawCommandLine) {
+    public String execute(String rawCommandLine) {
         // Split the commandLine.
         final List<String> commandLine = splitCommandLineForExecute(rawCommandLine);
         if (commandLine.size() == 1 && commandLine.get(0).isEmpty()) {
             // Received a commandLine that is either empty or full of spaces.
-            clearCommandLine();
-            outputProcessor.handleBlankCommandLine();
-            return;
+            outputProcessor.displayEmptyLine();
+            return "";
         }
 
         // Parse commandLine.
@@ -208,13 +195,14 @@ public class ShellImpl implements Shell {
             args = command.parseCommandArgs(rawArgs);
         } catch (ParseException e) {
             handleParseException(e);
-            return;
+
+            // There was an error parsing the command line, return the old one.
+            return rawCommandLine;
         }
 
         // Successfully parsed commandLine.
         // Save command in history.
         commandLineHistory.pushCommandLine(rawCommandLine);
-        outputProcessor.clearCommandLine();
 
         // Execute the command.
         final OutputBufferImpl output = new OutputBufferImpl();
@@ -234,6 +222,8 @@ public class ShellImpl implements Shell {
             outputProcessor.executeUnhandledException(e);
         }
         // TODO: Display command output in a finally block?
+        // Command line was successfully parsed, the new command line should be blank.
+        return "";
     }
 
     private void handleParseException(ParseException e) {

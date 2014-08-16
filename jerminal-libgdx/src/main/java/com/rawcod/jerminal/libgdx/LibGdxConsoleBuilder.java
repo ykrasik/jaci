@@ -16,6 +16,7 @@
 
 package com.rawcod.jerminal.libgdx;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.github.ykrasik.jerminal.api.Shell;
 import com.github.ykrasik.jerminal.api.ShellBuilder;
@@ -24,27 +25,41 @@ import com.github.ykrasik.jerminal.api.command.ShellCommand;
 import java.util.Collection;
 
 /**
- * A builder for a {@link LibGdxConsole}.
+ * A builder for a {@link LibGdxJerminalConsole}.
  *
  * @author Yevgeny Krasik
  */
 public class LibGdxConsoleBuilder {
+    private static final int DEFAULT_KEY_CODE = Keys.GRAVE;
+    private static final int DISABLED_KEY_CODE = -2;
+
     private final LibGdxTerminal terminal;
     private final ShellBuilder builder;
+    private final LibGdxConsoleWidgetFactory widgetFactory;
 
-    private int toggleKeycode = Keys.GRAVE;
+    private float width = Gdx.graphics.getWidth();
+    private float height = Gdx.graphics.getHeight();
+    private int toggleKeycode = DEFAULT_KEY_CODE;
 
-    public LibGdxConsoleBuilder(float width,
-                                float height,
-                                int maxBufferEntries,
-                                LibGdxConsoleWidgetFactory widgetFactory) {
-        this.terminal = new LibGdxTerminal(width, height, maxBufferEntries, widgetFactory);
+    public LibGdxConsoleBuilder(LibGdxConsoleWidgetFactory widgetFactory, int maxBufferEntries) {
+        this.widgetFactory = widgetFactory;
+        this.terminal = new LibGdxTerminal(widgetFactory, maxBufferEntries);
         this.builder = new ShellBuilder(terminal);
     }
 
-    public LibGdxConsole build() {
+    public LibGdxJerminalConsole build() {
         final Shell shell = builder.build();
-        return new LibGdxConsole(terminal, shell, toggleKeycode);
+        return new LibGdxJerminalConsole(terminal, shell, widgetFactory, toggleKeycode, width, height);
+    }
+
+    public LibGdxConsoleBuilder setWidth(float width) {
+        this.width = width;
+        return this;
+    }
+
+    public LibGdxConsoleBuilder setHeight(float height) {
+        this.height = height;
+        return this;
     }
 
     public LibGdxConsoleBuilder setMaxCommandHistory(int maxCommandHistory) {
@@ -54,6 +69,11 @@ public class LibGdxConsoleBuilder {
 
     public LibGdxConsoleBuilder setToggleKeycode(int toggleKeycode) {
         this.toggleKeycode = toggleKeycode;
+        return this;
+    }
+
+    public LibGdxConsoleBuilder disableToggleKeycode() {
+        this.toggleKeycode = DISABLED_KEY_CODE;
         return this;
     }
 

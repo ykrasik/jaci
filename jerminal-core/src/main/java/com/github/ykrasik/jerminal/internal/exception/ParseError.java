@@ -25,7 +25,6 @@ public enum ParseError {
     // Directory related.
     EMPTY_DIRECTORY,
     INVALID_ENTRY,
-    INVALID_ACCESS_TO_ENTRY,
 
     // Param related.
     INVALID_PARAM,

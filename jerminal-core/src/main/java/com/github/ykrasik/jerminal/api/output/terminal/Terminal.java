@@ -23,22 +23,12 @@ package com.github.ykrasik.jerminal.api.output.terminal;
  */
 public interface Terminal {
     /**
-     * Clear the command line.
+     * Print the text.
      */
-    void clearCommandLine();
+    void print(String text);
 
     /**
-     * Set the command line to the given command line.
+     * Print the text as an error.
      */
-    void setCommandLine(String commandLine);
-
-    /**
-     * Print the message.
-     */
-    void print(String message);
-
-    /**
-     * Print the message as an error.
-     */
-    void printError(String message);
+    void printError(String text);
 }

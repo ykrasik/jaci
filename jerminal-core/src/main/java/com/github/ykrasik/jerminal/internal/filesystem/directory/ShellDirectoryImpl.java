@@ -128,7 +128,7 @@ public class ShellDirectoryImpl extends AbstractDescribable implements ShellDire
         if (childEntry.isDirectory() == isDirectory) {
             return childEntry;
         } else {
-            throw invalidAccessToEntry(childEntry.getName(), isDirectory);
+            throw entryIsOfInvalidType(childEntry.getName(), isDirectory);
         }
     }
 
@@ -177,11 +177,11 @@ public class ShellDirectoryImpl extends AbstractDescribable implements ShellDire
         );
     }
 
-    private ParseException invalidAccessToEntry(String entry, boolean directory) {
+    private ParseException entryIsOfInvalidType(String entry, boolean directory) {
         final String desiredEntryType = directory ? "directory" : "command";
         final String actualEntryType = directory ? "command" : "directory";
         return new ParseException(
-            ParseError.INVALID_ACCESS_TO_ENTRY,
+            ParseError.INVALID_ENTRY,
             "'%s' is a %s, not a %s!", entry, actualEntryType, desiredEntryType
         );
     }

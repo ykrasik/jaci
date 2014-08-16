@@ -21,7 +21,7 @@ package com.rawcod.jerminal.libgdx;
  *
  * @author Yevgeny Krasik
  */
-public interface ConsoleActivationListener {
+public interface ConsoleListener {
     /**
      * Called when the console is activated.
      */

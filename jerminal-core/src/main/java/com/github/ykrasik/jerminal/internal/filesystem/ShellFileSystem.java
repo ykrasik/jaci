@@ -23,7 +23,6 @@ import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
 
 /**
  * An <b>immutable</b> hierarchy of {@link ShellDirectory directories} and {@link ShellCommand commands}.<br>
- * In an MVC architecture, this this the model.
  *
  * @author Yevgeny Krasik
  */

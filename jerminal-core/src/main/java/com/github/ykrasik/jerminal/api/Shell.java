@@ -16,36 +16,51 @@
 
 package com.github.ykrasik.jerminal.api;
 
+import com.google.common.base.Optional;
+
 /**
- * Processes command lines and sends results to an {@link com.github.ykrasik.jerminal.api.output.OutputProcessor OutputProcessor}.<br>
- * In an MVC architecture, this is the controller.<br>
+ * Processes command lines and displays results through an {@link com.github.ykrasik.jerminal.api.output.OutputProcessor OutputProcessor}.<br>
+ * <br>
+ * The Shell keeps a command history. Only successfully executed command lines are saved to the history.
+ * The Shell keeps track of where in the command history it is. So the state is kept inside the Shell for consecutive
+ * calls to {@link #getPrevCommandLineFromHistory()} and {@link #getNextCommandLineFromHistory()}. Executing a new command line
+ * will reset the command line history pointer and add the new command line to the end of the history.<br>
+ * <br>
+ * The Shell does not alter the command line in any way. It is assumed that an external system (let's call it a ShellDriver)
+ * has ownership of the command line and is the one in charge of manipulating it. The Shell, in turn, simply returns
+ * what the new command line should be on each of it's calls.<br>
+ * <br>
  * Can be built through a {@link ShellBuilder}.
  *
  * @author Yevgeny Krasik
  */
 public interface Shell {
     /**
-     * Clear the command line.
+     * Get the previous command line from history.<br>
+     * Only successfully executed command lines are saved.<br>
+     * The caller of this method is expected to alter the command line accordingly.
      */
-    void clearCommandLine();
+    Optional<String> getPrevCommandLineFromHistory();
 
     /**
-     * Set the command line to the previous one from the command line history.
+     * Get the next command line from history.<br>
+     * Only successfully executed command lines are saved.<br>
+     * The caller of this method is expected to alter the command line accordingly.
      */
-    void showPrevCommandLine();
+    Optional<String> getNextCommandLineFromHistory();
 
     /**
-     * Set the command line to the next one from the command line history.
+     * Provide assistance according to the command line.<br>
+     * Returns the new command line.<br>
+     * The caller of this method is expected to alter the command line accordingly.
      */
-    void showNextCommandLine();
+    String autoComplete(String commandLine);
 
     /**
-     * Provide assistance according to the command line.
+     * Execute the command line.<br>
+     * Returns the new command line. If the command line was executed successfully, returns an empty command line.
+     * Otherwise, returns the received command line. <br>
+     * The caller of this method is expected to alter the command line accordingly.
      */
-    void autoComplete(String commandLine);
-
-    /**
-     * Execute the command line.
-     */
-    void execute(String commandLine);
+    String execute(String commandLine);
 }

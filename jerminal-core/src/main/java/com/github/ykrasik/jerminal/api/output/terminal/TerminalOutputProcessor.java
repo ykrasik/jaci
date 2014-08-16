@@ -16,12 +16,12 @@
 
 package com.github.ykrasik.jerminal.api.output.terminal;
 
-import com.google.common.base.Joiner;
 import com.github.ykrasik.jerminal.api.command.parameter.view.ShellCommandParamView;
 import com.github.ykrasik.jerminal.api.command.view.ShellCommandView;
 import com.github.ykrasik.jerminal.api.filesystem.ShellEntryView;
 import com.github.ykrasik.jerminal.api.output.OutputProcessor;
 import com.github.ykrasik.jerminal.internal.exception.ParseError;
+import com.google.common.base.Joiner;
 
 import java.util.List;
 
@@ -34,7 +34,10 @@ import java.util.List;
 public class TerminalOutputProcessor implements OutputProcessor {
     private static final Joiner JOINER = Joiner.on(',').skipNulls();
 
-    private final Terminal terminal;
+    /**
+     * Accessible to sub-classes, to support overrides of the default implementations.
+     */
+    protected final Terminal terminal;
 
     public TerminalOutputProcessor(Terminal terminal) {
         this.terminal = terminal;
@@ -46,40 +49,18 @@ public class TerminalOutputProcessor implements OutputProcessor {
     }
 
     @Override
-    public void clearCommandLine() {
-        terminal.clearCommandLine();
-    }
-
-    @Override
-    public void setCommandLine(String commandLine) {
-        terminal.setCommandLine(commandLine);
-    }
-
-    @Override
-    public void handleBlankCommandLine() {
+    public void displayEmptyLine() {
         print("");
     }
 
     @Override
-    public void parseError(ParseError error, String errorMessage) {
-        printError(errorMessage);
-    }
-
-    @Override
-    public void autoCompleteNotPossible(String errorMessage) {
-        printError(errorMessage);
-    }
-
-    @Override
-    public void executeError(String errorMessage) {
-        printError(errorMessage);
-    }
-
-    @Override
-    public void executeUnhandledException(Exception e) {
-        for (StackTraceElement stackTraceElement : e.getStackTrace()) {
-            printError("|    " + stackTraceElement.toString());
+    public void displayCommandOutput(List<String> output) {
+        final StringBuilder sb = new StringBuilder();
+        for (String str : output) {
+            sb.append(str);
+            sb.append('\n');
         }
+        print(sb.toString());
     }
 
     @Override
@@ -107,16 +88,6 @@ public class TerminalOutputProcessor implements OutputProcessor {
     }
 
     @Override
-    public void displayCommandOutput(List<String> output) {
-        final StringBuilder sb = new StringBuilder();
-        for (String str : output) {
-            sb.append(str);
-            sb.append('\n');
-        }
-        print(sb.toString());
-    }
-
-    @Override
     public void displayShellEntryView(ShellEntryView shellEntryView) {
         print(serializeShellEntryView(shellEntryView));
     }
@@ -124,6 +95,67 @@ public class TerminalOutputProcessor implements OutputProcessor {
     @Override
     public void displayShellCommandView(ShellCommandView shellCommandView) {
         print(serializeShellCommandView(shellCommandView));
+    }
+
+    @Override
+    public void parseError(ParseError error, String errorMessage) {
+        printError(errorMessage);
+    }
+
+    @Override
+    public void autoCompleteNotPossible(String errorMessage) {
+        printError(errorMessage);
+    }
+
+    @Override
+    public void executeError(String errorMessage) {
+        printError(errorMessage);
+    }
+
+    @Override
+    public void executeUnhandledException(Exception e) {
+        for (StackTraceElement stackTraceElement : e.getStackTrace()) {
+            printError("|    " + stackTraceElement.toString());
+        }
+    }
+
+    private void print(String message) {
+        terminal.print(message);
+    }
+
+    private void printError(String message) {
+        terminal.printError(message);
+    }
+
+    protected String serializeShellCommandView(ShellCommandView command) {
+        final StringBuilder sb = new StringBuilder();
+        serializeShellCommandView(sb, command);
+        return sb.toString();
+    }
+
+    private void serializeShellCommandView(StringBuilder sb, ShellCommandView command) {
+        sb.append(command.getName());
+        sb.append(" : ");
+        sb.append(command.getDescription());
+        sb.append('\n');
+
+        for (ShellCommandParamView paramView : command.getParams()) {
+            appendDepthSpaces(sb, 1);
+            serializedShellCommandParamView(sb, paramView);
+            sb.append('\n');
+        }
+    }
+
+    private void appendDepthSpaces(StringBuilder sb, int depth) {
+        for (int i = 0; i < depth; i++) {
+            sb.append("    ");
+        }
+    }
+
+    private void serializedShellCommandParamView(StringBuilder sb, ShellCommandParamView param) {
+        sb.append(param.getExternalForm());
+        sb.append(" - ");
+        sb.append(param.getDescription());
     }
 
     protected String serializeShellEntryView(ShellEntryView entry) {
@@ -158,48 +190,5 @@ public class TerminalOutputProcessor implements OutputProcessor {
                 serializeShellEntryView(sb, child, depth + 1);
             }
         }
-    }
-
-    protected String serializeShellCommandView(ShellCommandView command) {
-        final StringBuilder sb = new StringBuilder();
-        serializeShellCommandView(sb, command);
-        return sb.toString();
-    }
-
-    private void serializeShellCommandView(StringBuilder sb, ShellCommandView command) {
-        sb.append(command.getName());
-        sb.append(" : ");
-        sb.append(command.getDescription());
-        sb.append('\n');
-
-        for (ShellCommandParamView paramView : command.getParams()) {
-            appendDepthSpaces(sb, 1);
-            serializedShellCommandParamView(sb, paramView);
-            sb.append('\n');
-        }
-    }
-
-    private void serializedShellCommandParamView(StringBuilder sb, ShellCommandParamView param) {
-        sb.append(param.getExternalForm());
-        sb.append(" - ");
-        sb.append(param.getDescription());
-    }
-
-    private void appendDepthSpaces(StringBuilder sb, int depth) {
-        for (int i = 0; i < depth; i++) {
-            sb.append("    ");
-        }
-    }
-
-    private void print(String message) {
-        terminal.print(message);
-    }
-
-    private void printError(String message) {
-        terminal.printError(message);
-    }
-
-    protected Terminal getTerminal() {
-        return terminal;
     }
 }

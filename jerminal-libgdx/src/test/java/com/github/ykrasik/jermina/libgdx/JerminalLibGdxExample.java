@@ -15,7 +15,7 @@ import com.github.ykrasik.jerminal.api.command.parameter.numeric.IntegerParamBui
 import com.github.ykrasik.jerminal.api.command.parameter.string.StringParamBuilder;
 import com.github.ykrasik.jerminal.api.exception.ExecuteException;
 import com.github.ykrasik.jerminal.api.command.ShellCommandBuilder;
-import com.rawcod.jerminal.libgdx.LibGdxConsole;
+import com.rawcod.jerminal.libgdx.LibGdxJerminalConsole;
 import com.rawcod.jerminal.libgdx.LibGdxConsoleBuilder;
 import com.rawcod.jerminal.libgdx.LibGdxConsoleWidgetFactory;
 
@@ -24,7 +24,7 @@ import com.rawcod.jerminal.libgdx.LibGdxConsoleWidgetFactory;
  * Date: 08/01/14
  */
 public class JerminalLibGdxExample extends ApplicationAdapter {
-    private LibGdxConsole console;
+    private LibGdxJerminalConsole console;
 
     public static void main(String[] args) {
         final LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
@@ -42,12 +42,10 @@ public class JerminalLibGdxExample extends ApplicationAdapter {
 
     @Override
     public void create() {
-        final int width = Gdx.graphics.getWidth();
-        final int height = Gdx.graphics.getHeight();
         final int maxBufferEntries = 30;
         final LibGdxConsoleWidgetFactory widgetFactory = new JerminalLibGdxTestConsoleWidgetFactory();
 
-        final LibGdxConsoleBuilder builder = new LibGdxConsoleBuilder(width, height, maxBufferEntries, widgetFactory);
+        final LibGdxConsoleBuilder builder = new LibGdxConsoleBuilder(widgetFactory, maxBufferEntries);
         builder.setMaxCommandHistory(20)
             .setToggleKeycode(Keys.GRAVE);
 
@@ -116,7 +114,7 @@ public class JerminalLibGdxExample extends ApplicationAdapter {
 
     @Override
     public void resize(int width, int height) {
-        console.resize(width, height);
+        console.setViewport(width, height);
     }
 
     @Override
