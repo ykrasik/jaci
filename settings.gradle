@@ -2,4 +2,3 @@ rootProject.name = 'jerminal'
 
 include "jerminal-core"
 include "jerminal-libgdx"
-include "jerminal-tests"

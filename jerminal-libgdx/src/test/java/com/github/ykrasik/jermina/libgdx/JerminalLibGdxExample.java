@@ -1,4 +1,4 @@
-package com.rawcod.jerminal.libgdx;
+package com.github.ykrasik.jermina.libgdx;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -15,6 +15,9 @@ import com.github.ykrasik.jerminal.api.command.parameter.numeric.IntegerParamBui
 import com.github.ykrasik.jerminal.api.command.parameter.string.StringParamBuilder;
 import com.github.ykrasik.jerminal.api.exception.ExecuteException;
 import com.github.ykrasik.jerminal.api.command.ShellCommandBuilder;
+import com.rawcod.jerminal.libgdx.LibGdxConsole;
+import com.rawcod.jerminal.libgdx.LibGdxConsoleBuilder;
+import com.rawcod.jerminal.libgdx.LibGdxConsoleWidgetFactory;
 
 /**
  * User: ykrasik

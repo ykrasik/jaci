@@ -1,4 +1,4 @@
-package com.rawcod.jerminal.directory;
+package com.github.ykrasik.jerminal.internal.filesystem.directory;
 
 /**
  * User: ykrasik

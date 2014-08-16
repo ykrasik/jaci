@@ -36,18 +36,11 @@ project("jerminal-libgdx") {
 
     dependencies {
         compile project(":jerminal-core")
+
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"
-    }
-}
-
-project("jerminal-tests") {
-    dependencies {
-        compile project(":jerminal-core")
-        compile project(":jerminal-libgdx")
-
         compile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
 
-        compile "junit:junit:$junitVersion"
+        testCompile "junit:junit:$junitVersion"
     }
 }

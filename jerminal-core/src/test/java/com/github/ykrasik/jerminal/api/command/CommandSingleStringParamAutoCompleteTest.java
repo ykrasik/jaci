@@ -1,4 +1,4 @@
-package com.rawcod.jerminal.command;
+package com.github.ykrasik.jerminal.api.command;
 
 /**
  * User: ykrasik
