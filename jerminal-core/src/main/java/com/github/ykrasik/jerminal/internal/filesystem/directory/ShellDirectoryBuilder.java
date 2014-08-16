@@ -16,7 +16,7 @@
 
 package com.github.ykrasik.jerminal.internal.filesystem.directory;
 
-import com.rawcod.jerminal.exception.ShellException;
+import com.github.ykrasik.jerminal.internal.exception.ShellException;
 import com.github.ykrasik.jerminal.internal.filesystem.ShellFileSystemImpl;
 import com.github.ykrasik.jerminal.api.command.ShellCommand;
 

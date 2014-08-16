@@ -16,11 +16,11 @@
 
 package com.github.ykrasik.jerminal.internal.filesystem;
 
-import com.rawcod.jerminal.exception.ParseException;
-import com.rawcod.jerminal.exception.ShellException;
+import com.github.ykrasik.jerminal.internal.exception.ParseException;
+import com.github.ykrasik.jerminal.internal.exception.ShellException;
 import com.github.ykrasik.jerminal.api.command.ShellCommand;
 import com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectory;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
+import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

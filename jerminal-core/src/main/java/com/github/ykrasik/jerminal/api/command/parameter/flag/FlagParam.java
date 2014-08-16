@@ -18,9 +18,9 @@ package com.github.ykrasik.jerminal.api.command.parameter.flag;
 import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
 import com.github.ykrasik.jerminal.internal.AbstractDescribable;
 import com.github.ykrasik.jerminal.internal.command.parameter.ParamType;
-import com.rawcod.jerminal.exception.ParseException;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
-import com.rawcod.jerminal.returnvalue.parse.ParseErrors;
+import com.github.ykrasik.jerminal.internal.exception.ParseException;
+import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
+import com.github.ykrasik.jerminal.internal.exception.ParseError;
 
 /**
  * A special boolean {@link com.github.ykrasik.jerminal.api.command.parameter.CommandParam CommandParam} that does not parse values.<br>
@@ -47,7 +47,7 @@ public class FlagParam extends AbstractDescribable implements CommandParam {
 
     @Override
     public Boolean parse(String rawValue) throws ParseException {
-        throw ParseErrors.invalidFlagValue(getName());
+        throw invalidFlagValue();
     }
 
     @Override
@@ -57,11 +57,18 @@ public class FlagParam extends AbstractDescribable implements CommandParam {
 
     @Override
     public AutoCompleteReturnValue autoComplete(String prefix) throws ParseException {
-        throw ParseErrors.invalidFlagValue(getName());
+        throw invalidFlagValue();
     }
 
     @Override
     public String toString() {
         return getExternalForm();
+    }
+
+    private ParseException invalidFlagValue() {
+        return new ParseException(
+            ParseError.INVALID_PARAM_VALUE,
+            "Flag parameters take no value: '%s'", getName()
+        );
     }
 }

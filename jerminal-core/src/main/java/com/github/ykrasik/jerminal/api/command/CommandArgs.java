@@ -17,7 +17,7 @@
 package com.github.ykrasik.jerminal.api.command;
 
 import com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectory;
-import com.rawcod.jerminal.exception.ShellException;
+import com.github.ykrasik.jerminal.internal.exception.ShellException;
 
 import java.util.Map;
 

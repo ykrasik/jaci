@@ -24,7 +24,7 @@ import com.github.ykrasik.jerminal.collections.trie.node.TrieNodeBuilder;
 import com.github.ykrasik.jerminal.collections.trie.node.TrieNodeImpl;
 import com.github.ykrasik.jerminal.collections.trie.visitor.MapTrieVisitor;
 import com.github.ykrasik.jerminal.collections.trie.visitor.TrieVisitor;
-import com.rawcod.jerminal.exception.ShellException;
+import com.github.ykrasik.jerminal.internal.exception.ShellException;
 
 import java.util.*;
 

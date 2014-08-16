@@ -13,7 +13,7 @@ import com.github.ykrasik.jerminal.api.command.OutputBuffer;
 import com.github.ykrasik.jerminal.api.command.parameter.bool.BooleanParamBuilder;
 import com.github.ykrasik.jerminal.api.command.parameter.numeric.IntegerParamBuilder;
 import com.github.ykrasik.jerminal.api.command.parameter.string.StringParamBuilder;
-import com.rawcod.jerminal.exception.ExecuteException;
+import com.github.ykrasik.jerminal.api.exception.ExecuteException;
 import com.github.ykrasik.jerminal.api.command.ShellCommandBuilder;
 
 /**

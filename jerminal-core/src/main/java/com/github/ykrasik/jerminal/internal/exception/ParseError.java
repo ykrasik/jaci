@@ -14,20 +14,23 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.api.command;
-
-import com.github.ykrasik.jerminal.api.exception.ExecuteException;
+package com.github.ykrasik.jerminal.internal.exception;
 
 /**
- * Executes code according to given arguments.
+ * Possible parse errors.
  *
  * @author Yevgeny Krasik
  */
-public interface CommandExecutor {
-    /**
-     * Executes code according to given arguments.
-     * Output can be written to the supplied {@link OutputBuffer}.
-     * @throws ExecuteException If an error occurs during execution.
-     */
-    void execute(CommandArgs args, OutputBuffer output) throws ExecuteException;
+public enum ParseError {
+    // Directory related.
+    EMPTY_DIRECTORY,
+    INVALID_ENTRY,
+    INVALID_ACCESS_TO_ENTRY,
+
+    // Param related.
+    INVALID_PARAM,
+    INVALID_PARAM_VALUE,
+    PARAM_NOT_BOUND,
+    PARAM_ALREADY_BOUND,
+    NO_MORE_PARAMS
 }

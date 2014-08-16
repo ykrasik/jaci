@@ -21,7 +21,7 @@ import com.github.ykrasik.jerminal.api.command.parameter.view.ShellCommandParamV
 import com.github.ykrasik.jerminal.api.command.view.ShellCommandView;
 import com.github.ykrasik.jerminal.api.filesystem.ShellEntryView;
 import com.github.ykrasik.jerminal.api.output.OutputProcessor;
-import com.rawcod.jerminal.returnvalue.parse.ParseError;
+import com.github.ykrasik.jerminal.internal.exception.ParseError;
 
 import java.util.List;
 

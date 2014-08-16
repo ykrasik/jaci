@@ -2,7 +2,7 @@ package com.github.ykrasik.jerminal.internal.filesystem;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
-import com.rawcod.jerminal.exception.ParseException;
+import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.api.command.ShellCommand;
 import com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectory;
 import org.junit.Before;

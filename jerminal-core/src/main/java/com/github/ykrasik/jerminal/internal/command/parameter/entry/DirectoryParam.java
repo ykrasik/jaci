@@ -17,10 +17,10 @@
 package com.github.ykrasik.jerminal.internal.command.parameter.entry;
 
 import com.github.ykrasik.jerminal.internal.command.parameter.AbstractMandatoryCommandParam;
-import com.rawcod.jerminal.exception.ParseException;
+import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.internal.filesystem.ShellFileSystem;
 import com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectory;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
+import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

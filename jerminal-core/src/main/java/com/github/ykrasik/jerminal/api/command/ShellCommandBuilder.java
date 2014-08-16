@@ -18,7 +18,7 @@ package com.github.ykrasik.jerminal.api.command;
 
 import com.github.ykrasik.jerminal.internal.filesystem.command.ShellCommandImpl;
 import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
-import com.rawcod.jerminal.exception.ExecuteException;
+import com.github.ykrasik.jerminal.api.exception.ExecuteException;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -16,17 +16,16 @@
 
 package com.github.ykrasik.jerminal.internal.filesystem;
 
+import com.github.ykrasik.jerminal.api.command.ShellCommand;
+import com.github.ykrasik.jerminal.collections.trie.Trie;
+import com.github.ykrasik.jerminal.internal.exception.ParseError;
+import com.github.ykrasik.jerminal.internal.exception.ParseException;
+import com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectory;
+import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
+import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteType;
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
-import com.github.ykrasik.jerminal.collections.trie.Trie;
-import com.rawcod.jerminal.exception.ParseException;
-import com.github.ykrasik.jerminal.api.command.ShellCommand;
-import com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectory;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteMappers;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteType;
-import com.rawcod.jerminal.returnvalue.parse.ParseErrors;
-import com.rawcod.jerminal.util.StringUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -40,11 +39,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class ShellFileSystemImpl implements ShellFileSystem {
     private static final char DELIMITER = '/';
-    private static final String DELIMITER_STR = String.valueOf(DELIMITER);
     private static final String THIS = ".";
     private static final String PARENT = "..";
     private static final Splitter SPLITTER = Splitter.on(DELIMITER);
-    private static final List<String> ILLEGAL_NAMES = Arrays.asList(DELIMITER_STR, THIS, PARENT);
+    private static final List<String> ILLEGAL_NAMES = Arrays.asList(String.valueOf(DELIMITER), THIS, PARENT);
+    private static final Function<ShellCommand, AutoCompleteType> AUTO_COMPLETE_TYPE_MAPPER = new Function<ShellCommand, AutoCompleteType>() {
+        @Override
+        public AutoCompleteType apply(ShellCommand input) {
+            return AutoCompleteType.COMMAND;
+        }
+    };
 
     private final ShellDirectory root;
     private final Trie<ShellCommand> globalCommands;
@@ -100,8 +104,8 @@ public class ShellFileSystemImpl implements ShellFileSystem {
     @Override
     public ShellDirectory parsePathToDirectory(String rawPath) throws ParseException {
         // Remove leading and trailing '/'.
-        final boolean startsFromRoot = rawPath.startsWith(DELIMITER_STR);
-        final String pathToSplit = StringUtils.removeLeadingAndTrailing(rawPath, DELIMITER_STR);
+        final boolean startsFromRoot = !rawPath.isEmpty() && rawPath.charAt(0) == DELIMITER;
+        final String pathToSplit = removeLeadingAndTrailingDelimiter(rawPath);
 
         // Split the given path according to delimiter.
         final List<String> splitPath = SPLITTER.splitToList(pathToSplit);
@@ -117,7 +121,7 @@ public class ShellFileSystemImpl implements ShellFileSystem {
                 if (parent.isPresent()) {
                     dir = parent.get();
                 } else {
-                    throw ParseErrors.directoryDoesNotHaveParent(dir.getName());
+                    throw directoryDoesNotHaveParent(dir.getName());
                 }
             }
 
@@ -155,7 +159,7 @@ public class ShellFileSystemImpl implements ShellFileSystem {
             // rawPath did not contain a delimiter.
             // It could be an entry from the current directory or a global command.
             final Trie<AutoCompleteType> entryPossibilities = currentDirectory.autoCompleteEntry(rawPath);
-            final Trie<AutoCompleteType> globalCommandPossibilities = this.globalCommands.subTrie(rawPath).map(AutoCompleteMappers.commandMapper());
+            final Trie<AutoCompleteType> globalCommandPossibilities = this.globalCommands.subTrie(rawPath).map(AUTO_COMPLETE_TYPE_MAPPER);
             final Trie<AutoCompleteType> possibilities = entryPossibilities.union(globalCommandPossibilities);
             return new AutoCompleteReturnValue(rawPath, possibilities);
         }
@@ -175,6 +179,26 @@ public class ShellFileSystemImpl implements ShellFileSystem {
 
         final Trie<AutoCompleteType> possibilities = lastDirectory.autoCompleteEntry(rawEntry);
         return new AutoCompleteReturnValue(rawEntry, possibilities);
+    }
+
+    private String removeLeadingAndTrailingDelimiter(String str) {
+        final int length = str.length();
+        final boolean leadingDelimiter = length > 0 && str.charAt(0) == DELIMITER;
+        final boolean trailingDelimiter = length >= 1 && str.charAt(length - 1) == DELIMITER;
+        if (!leadingDelimiter && !trailingDelimiter) {
+            return str;
+        } else {
+            final int startingDelimiterIndex = leadingDelimiter ? 1 : 0;
+            final int endingDelimiterIndex = trailingDelimiter ? Math.max(length - 1, startingDelimiterIndex) : length;
+            return str.substring(startingDelimiterIndex, endingDelimiterIndex);
+        }
+    }
+
+    private ParseException directoryDoesNotHaveParent(String directoryName) {
+        return new ParseException(
+            ParseError.INVALID_ENTRY,
+            "Directory '%s' doesn't have a parent.", directoryName
+        );
     }
 
     public static boolean isLegalName(String name) {

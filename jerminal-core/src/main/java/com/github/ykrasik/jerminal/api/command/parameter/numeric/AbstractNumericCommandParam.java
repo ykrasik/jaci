@@ -17,9 +17,9 @@
 package com.github.ykrasik.jerminal.api.command.parameter.numeric;
 
 import com.github.ykrasik.jerminal.internal.command.parameter.AbstractMandatoryCommandParam;
-import com.rawcod.jerminal.exception.ParseException;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
-import com.rawcod.jerminal.returnvalue.parse.ParseErrors;
+import com.github.ykrasik.jerminal.internal.exception.ParseException;
+import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
+import com.github.ykrasik.jerminal.internal.exception.ParseError;
 
 /**
  * An abstract implementation of a numeric {@link com.github.ykrasik.jerminal.api.command.parameter.CommandParam CommandParam}.
@@ -36,15 +36,29 @@ public abstract class AbstractNumericCommandParam<T> extends AbstractMandatoryCo
         try {
             return parseNumber(rawValue);
         } catch (NumberFormatException ignored) {
-            throw ParseErrors.invalidParamValue(getExternalForm(), rawValue);
+            throw invalidParamValue(rawValue);
         }
     }
 
     @Override
     public AutoCompleteReturnValue autoComplete(String prefix) throws ParseException {
         // Numbers cannot be auto-completed.
-        throw ParseErrors.invalidParamValue(getExternalForm(), prefix);
+        throw autoCompleteImpossible();
     }
 
     protected abstract T parseNumber(String rawValue);
+
+    private ParseException invalidParamValue(String value) {
+        return new ParseException(
+            ParseError.INVALID_PARAM_VALUE,
+            "Invalid value for %s parameter '%s': '%s'", getExternalFormType(), getName(), value
+        );
+    }
+
+    private ParseException autoCompleteImpossible() {
+        return new ParseException(
+            ParseError.INVALID_PARAM_VALUE,
+            "Cannot autoComplete %s parameters '%s'!'", getExternalFormType(), getName()
+        );
+    }
 }

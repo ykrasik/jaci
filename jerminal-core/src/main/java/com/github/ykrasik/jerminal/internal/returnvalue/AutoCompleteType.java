@@ -14,20 +14,17 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.api.command;
-
-import com.github.ykrasik.jerminal.api.exception.ExecuteException;
+package com.github.ykrasik.jerminal.internal.returnvalue;
 
 /**
- * Executes code according to given arguments.
+ * For an auto complete operation, this is the type of the value being auto completed.
  *
  * @author Yevgeny Krasik
  */
-public interface CommandExecutor {
-    /**
-     * Executes code according to given arguments.
-     * Output can be written to the supplied {@link OutputBuffer}.
-     * @throws ExecuteException If an error occurs during execution.
-     */
-    void execute(CommandArgs args, OutputBuffer output) throws ExecuteException;
+public enum AutoCompleteType {
+    DIRECTORY,
+    COMMAND,
+    COMMAND_PARAM_NAME,
+    COMMAND_PARAM_VALUE,
+    COMMAND_PARAM_FLAG
 }

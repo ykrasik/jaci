@@ -1,8 +1,8 @@
 package com.github.ykrasik.jerminal.internal.filesystem;
 
 import com.google.common.collect.ObjectArrays;
-import com.rawcod.jerminal.exception.ParseException;
-import com.rawcod.jerminal.exception.ShellException;
+import com.github.ykrasik.jerminal.internal.exception.ParseException;
+import com.github.ykrasik.jerminal.internal.exception.ShellException;
 import com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectory;
 import org.junit.Test;
 

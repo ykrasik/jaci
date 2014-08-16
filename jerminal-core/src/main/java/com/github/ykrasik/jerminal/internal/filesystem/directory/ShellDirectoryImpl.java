@@ -20,14 +20,14 @@ import com.github.ykrasik.jerminal.api.command.ShellCommand;
 import com.github.ykrasik.jerminal.collections.trie.Trie;
 import com.github.ykrasik.jerminal.collections.trie.TrieBuilder;
 import com.github.ykrasik.jerminal.internal.AbstractDescribable;
+import com.github.ykrasik.jerminal.internal.exception.ParseError;
+import com.github.ykrasik.jerminal.internal.exception.ParseException;
+import com.github.ykrasik.jerminal.internal.exception.ShellException;
 import com.github.ykrasik.jerminal.internal.filesystem.ShellEntry;
+import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteType;
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import com.rawcod.jerminal.exception.ParseException;
-import com.rawcod.jerminal.exception.ShellException;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteMappers;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteType;
-import com.rawcod.jerminal.returnvalue.parse.ParseErrors;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -43,6 +43,17 @@ public class ShellDirectoryImpl extends AbstractDescribable implements ShellDire
         @Override
         public boolean apply(ShellEntry input) {
             return input.isDirectory();
+        }
+    };
+
+    private static final Function<ShellEntry, AutoCompleteType> AUTO_COMPLETE_TYPE_MAPPER = new Function<ShellEntry, AutoCompleteType>() {
+        @Override
+        public AutoCompleteType apply(ShellEntry input) {
+            if (input.isDirectory()) {
+                return AutoCompleteType.DIRECTORY;
+            } else {
+                return AutoCompleteType.COMMAND;
+            }
         }
     };
 
@@ -106,9 +117,9 @@ public class ShellDirectoryImpl extends AbstractDescribable implements ShellDire
         if (!childEntryOptional.isPresent()) {
             // Give a meaningful error message.
             if (isEmpty()) {
-                throw ParseErrors.emptyDirectory(getName());
+                throw emptyDirectory();
             } else {
-                throw ParseErrors.directoryDoesNotContainEntry(getName(), rawEntry, isDirectory);
+                throw directoryDoesNotContainEntry(rawEntry, isDirectory);
             }
         }
 
@@ -117,7 +128,7 @@ public class ShellDirectoryImpl extends AbstractDescribable implements ShellDire
         if (childEntry.isDirectory() == isDirectory) {
             return childEntry;
         } else {
-            throw ParseErrors.invalidAccessToEntry(childEntry.getName(), isDirectory);
+            throw invalidAccessToEntry(childEntry.getName(), isDirectory);
         }
     }
 
@@ -143,15 +154,35 @@ public class ShellDirectoryImpl extends AbstractDescribable implements ShellDire
         }
 
         // Get all children possible with this prefix.
-        final Trie<AutoCompleteType> possibleChildren = childrenTrie.subTrie(prefix).map(AutoCompleteMappers.entryMapper());
+        final Trie<AutoCompleteType> possibleChildren = childrenTrie.subTrie(prefix).map(AUTO_COMPLETE_TYPE_MAPPER);
         if (possibleChildren.isEmpty()) {
             // Give a meaningful error message.
             if (isEmpty()) {
-                throw ParseErrors.emptyDirectory(getName());
+                throw emptyDirectory();
             }
         }
 
         return possibleChildren;
     }
 
+    private ParseException emptyDirectory() {
+        return new ParseException(ParseError.EMPTY_DIRECTORY, "Directory '%s' is empty.", getName());
+    }
+
+    private ParseException directoryDoesNotContainEntry(String entry, boolean directory) {
+        final String entryType = directory ? "directory" : "command";
+        return new ParseException(
+            ParseError.INVALID_ENTRY,
+            "Directory '%s' doesn't contain %s '%s'", getName(), entryType, entry
+        );
+    }
+
+    private ParseException invalidAccessToEntry(String entry, boolean directory) {
+        final String desiredEntryType = directory ? "directory" : "command";
+        final String actualEntryType = directory ? "command" : "directory";
+        return new ParseException(
+            ParseError.INVALID_ACCESS_TO_ENTRY,
+            "'%s' is a %s, not a %s!", entry, actualEntryType, desiredEntryType
+        );
+    }
 }

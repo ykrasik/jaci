@@ -16,10 +16,10 @@
 
 package com.github.ykrasik.jerminal.internal.filesystem;
 
-import com.rawcod.jerminal.exception.ParseException;
+import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.api.command.ShellCommand;
 import com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectory;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
+import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
 
 /**
  * An <b>immutable</b> hierarchy of {@link ShellDirectory directories} and {@link ShellCommand commands}.<br>

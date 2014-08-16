@@ -18,10 +18,13 @@ package com.github.ykrasik.jerminal.api.command.parameter;
 
 import com.github.ykrasik.jerminal.internal.Describable;
 import com.github.ykrasik.jerminal.internal.command.parameter.ParamType;
-import com.rawcod.jerminal.exception.ParseException;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
+import com.github.ykrasik.jerminal.internal.exception.ParseException;
+import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
 
+// TODO: Rename this to just Parameter.
 /**
+ * A command parameter.<br>
+ * Parameters need to be able to parse values they are given and autoComplete them from prefixes.
  *
  * @author Yevgeny Krasik
  */

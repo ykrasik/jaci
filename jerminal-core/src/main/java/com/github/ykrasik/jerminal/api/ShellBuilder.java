@@ -18,7 +18,7 @@ package com.github.ykrasik.jerminal.api;
 
 import com.github.ykrasik.jerminal.internal.CommandLineHistory;
 import com.github.ykrasik.jerminal.internal.ShellImpl;
-import com.rawcod.jerminal.command.factory.ControlCommandFactory;
+import com.github.ykrasik.jerminal.internal.command.ControlCommandFactory;
 import com.github.ykrasik.jerminal.internal.filesystem.ShellFileSystem;
 import com.github.ykrasik.jerminal.internal.filesystem.ShellFileSystemBuilder;
 import com.github.ykrasik.jerminal.internal.filesystem.ShellFileSystemPromise;
@@ -31,7 +31,15 @@ import java.util.Collection;
 import java.util.Set;
 
 /**
- * A builder for a {@link Shell}.
+ * A builder for a {@link Shell}.<br>
+ * This builder expects to receive a path to a command and a set of commands.
+ * The path is separated by the delimiter '/', for example: "path/to/element". Any directories along that path that don't exist
+ * will be automatically created.<br>
+ * Directories may also provide an optional description. The description delimiter is ':'. A description may
+ * only be assigned to a directory when it is first created. Any subsequent calls may omit the description.<br>
+ * <p>For example: "this/is/a/path : This is a path element/to/some/directory : Everything up till now is a directory".<br>
+ * This will create the following directory structure: this/is/a/path/to/some/directory and also assign the given descriptions
+ * to "path" and "directory".</p>
  *
  * @author Yevgeny Krasik
  */

@@ -1,6 +1,6 @@
 package com.github.ykrasik.jerminal.internal.filesystem;
 
-import com.rawcod.jerminal.exception.ParseException;
+import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import org.junit.Before;
 import org.junit.Test;
 

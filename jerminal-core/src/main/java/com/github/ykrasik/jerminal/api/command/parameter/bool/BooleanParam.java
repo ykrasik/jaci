@@ -19,11 +19,11 @@ package com.github.ykrasik.jerminal.api.command.parameter.bool;
 import com.github.ykrasik.jerminal.collections.trie.Trie;
 import com.github.ykrasik.jerminal.collections.trie.TrieBuilder;
 import com.github.ykrasik.jerminal.internal.command.parameter.AbstractMandatoryCommandParam;
-import com.rawcod.jerminal.exception.ParseException;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteMappers;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteType;
-import com.rawcod.jerminal.returnvalue.parse.ParseErrors;
+import com.github.ykrasik.jerminal.internal.exception.ParseError;
+import com.github.ykrasik.jerminal.internal.exception.ParseException;
+import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
+import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteType;
+import com.google.common.base.Function;
 
 /**
  * A {@link com.github.ykrasik.jerminal.api.command.parameter.CommandParam CommandParam} that parses boolean values.<br>
@@ -33,6 +33,13 @@ import com.rawcod.jerminal.returnvalue.parse.ParseErrors;
  */
 public class BooleanParam extends AbstractMandatoryCommandParam<Boolean> {
     private static final Trie<String> VALUES = new TrieBuilder<String>().add("true", "").add("false", "").build();
+
+    private static final Function<String, AutoCompleteType> AUTO_COMPLETE_TYPE_MAPPER = new Function<String, AutoCompleteType>() {
+        @Override
+        public AutoCompleteType apply(String input) {
+            return AutoCompleteType.COMMAND_PARAM_VALUE;
+        }
+    };
 
     public BooleanParam(String name, String description) {
         super(name, description);
@@ -49,12 +56,19 @@ public class BooleanParam extends AbstractMandatoryCommandParam<Boolean> {
             return Boolean.parseBoolean(rawValue);
         }
 
-        throw ParseErrors.invalidParamValue(getName(), rawValue);
+        throw invalidParamValue(rawValue);
     }
 
     @Override
     public AutoCompleteReturnValue autoComplete(String prefix) throws ParseException {
-        final Trie<AutoCompleteType> possibilities = VALUES.subTrie(prefix).map(AutoCompleteMappers.commandParamValueStringMapper());
+        final Trie<AutoCompleteType> possibilities = VALUES.subTrie(prefix).map(AUTO_COMPLETE_TYPE_MAPPER);
         return new AutoCompleteReturnValue(prefix, possibilities);
+    }
+
+    private ParseException invalidParamValue(String value) {
+        return new ParseException(
+            ParseError.INVALID_PARAM_VALUE,
+            "Invalid value for boolean parameter '%s': '%s'", getName(), value
+        );
     }
 }

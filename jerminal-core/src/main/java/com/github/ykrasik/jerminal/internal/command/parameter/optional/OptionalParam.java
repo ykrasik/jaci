@@ -19,8 +19,8 @@ package com.github.ykrasik.jerminal.internal.command.parameter.optional;
 import com.google.common.base.Supplier;
 import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
 import com.github.ykrasik.jerminal.internal.command.parameter.ParamType;
-import com.rawcod.jerminal.exception.ParseException;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
+import com.github.ykrasik.jerminal.internal.exception.ParseException;
+import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
 
 /**
  * A {@link CommandParam} that is optional.<br>

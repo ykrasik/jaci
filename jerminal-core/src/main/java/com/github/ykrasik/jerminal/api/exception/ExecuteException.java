@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.api.command;
-
-import com.github.ykrasik.jerminal.api.exception.ExecuteException;
+package com.github.ykrasik.jerminal.api.exception;
 
 /**
- * Executes code according to given arguments.
+ * An exception that can be thrown during execution to signify an invalid state.
  *
  * @author Yevgeny Krasik
  */
-public interface CommandExecutor {
-    /**
-     * Executes code according to given arguments.
-     * Output can be written to the supplied {@link OutputBuffer}.
-     * @throws ExecuteException If an error occurs during execution.
-     */
-    void execute(CommandArgs args, OutputBuffer output) throws ExecuteException;
+public class ExecuteException extends Exception {
+    public ExecuteException(String message) {
+        super(message);
+    }
+
+    public ExecuteException(String format, Object... args) {
+        this(String.format(format, args));
+    }
 }

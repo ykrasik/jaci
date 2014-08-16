@@ -1,4 +1,20 @@
-package com.rawcod.jerminal.command.factory;
+/*
+ * Copyright (C) 2014 Yevgeny Krasik
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.github.ykrasik.jerminal.internal.command;
 
 import com.google.common.base.Supplier;
 import com.github.ykrasik.jerminal.api.command.CommandArgs;
@@ -12,7 +28,7 @@ import com.github.ykrasik.jerminal.api.command.parameter.view.ShellCommandParamV
 import com.github.ykrasik.jerminal.internal.command.parameter.view.ShellCommandParamViewImpl;
 import com.github.ykrasik.jerminal.api.command.view.ShellCommandView;
 import com.github.ykrasik.jerminal.internal.command.view.ShellCommandViewImpl;
-import com.rawcod.jerminal.exception.ExecuteException;
+import com.github.ykrasik.jerminal.api.exception.ExecuteException;
 import com.github.ykrasik.jerminal.internal.filesystem.ShellFileSystem;
 import com.github.ykrasik.jerminal.internal.filesystem.ShellEntry;
 import com.github.ykrasik.jerminal.api.command.ShellCommand;
@@ -25,9 +41,9 @@ import com.github.ykrasik.jerminal.api.output.OutputProcessor;
 import java.util.*;
 
 /**
- * User: ykrasik
- * Date: 27/07/2014
- * Time: 23:55
+ * Creates all the default Control {@link ShellCommand}s.
+ *
+ * @author Yevgeny Krasik
  */
 public class ControlCommandFactory {
     private static final String CHANGE_DIRECTORY_COMMAND_NAME = "cd";
@@ -44,12 +60,14 @@ public class ControlCommandFactory {
         this.outputProcessor = outputProcessor;
     }
 
+    // TODO: Add the following commands: list all commands, pwd
+
     public Set<ShellCommand> createControlCommands() {
-        final Set<ShellCommand> globalCommands = new HashSet<>();
-        globalCommands.add(createChangeDirectoryCommand());
-        globalCommands.add(createListDirectoryCommand());
-        globalCommands.add(createDescribeCommandCommand());
-        return globalCommands;
+        final Set<ShellCommand> controlCommands = new HashSet<>();
+        controlCommands.add(createChangeDirectoryCommand());
+        controlCommands.add(createListDirectoryCommand());
+        controlCommands.add(createDescribeCommandCommand());
+        return controlCommands;
     }
 
     public ShellCommand createChangeDirectoryCommand() {

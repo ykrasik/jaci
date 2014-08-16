@@ -16,14 +16,14 @@
 
 package com.github.ykrasik.jerminal.api.command.parameter.string;
 
-import com.google.common.base.Supplier;
 import com.github.ykrasik.jerminal.collections.trie.Trie;
 import com.github.ykrasik.jerminal.internal.command.parameter.AbstractMandatoryCommandParam;
-import com.rawcod.jerminal.exception.ParseException;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteMappers;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteType;
-import com.rawcod.jerminal.returnvalue.parse.ParseErrors;
+import com.github.ykrasik.jerminal.internal.exception.ParseError;
+import com.github.ykrasik.jerminal.internal.exception.ParseException;
+import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
+import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteType;
+import com.google.common.base.Function;
+import com.google.common.base.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -36,6 +36,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 // FIXME: This is incorrect. A situation where a dynamicSupplier returns an empty values list, any string will be accepted.
 public class StringParam extends AbstractMandatoryCommandParam<String> {
+    private static final Function<String, AutoCompleteType> AUTO_COMPLETE_TYPE_MAPPER = new Function<String, AutoCompleteType>() {
+        @Override
+        public AutoCompleteType apply(String input) {
+            return AutoCompleteType.COMMAND_PARAM_VALUE;
+        }
+    };
+
     private final Supplier<Trie<String>> valuesSupplier;
 
     public StringParam(String name, String description, Supplier<Trie<String>> valuesSupplier) {
@@ -60,18 +67,25 @@ public class StringParam extends AbstractMandatoryCommandParam<String> {
 
         // This string param is constrained by the values it can receive,
         // and rawValue isn't contained in the possible values trie.
-        throw ParseErrors.invalidParamValue(getName(), rawValue);
+        throw invalidParamValue(rawValue);
     }
 
     @Override
     public AutoCompleteReturnValue autoComplete(String prefix) throws ParseException {
         final Trie<String> values = getValues();
         final Trie<String> prefixTrie = values.subTrie(prefix);
-        final Trie<AutoCompleteType> possibilities = prefixTrie.map(AutoCompleteMappers.commandParamValueStringMapper());
+        final Trie<AutoCompleteType> possibilities = prefixTrie.map(AUTO_COMPLETE_TYPE_MAPPER);
         return new AutoCompleteReturnValue(prefix, possibilities);
     }
 
     private Trie<String> getValues() {
         return valuesSupplier.get();
+    }
+
+    private ParseException invalidParamValue(String value) {
+        return new ParseException(
+            ParseError.INVALID_PARAM_VALUE,
+            "Invalid value for string parameter '%s': '%s'", getName(), value
+        );
     }
 }

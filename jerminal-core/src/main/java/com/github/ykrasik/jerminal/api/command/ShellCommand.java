@@ -17,10 +17,10 @@
 package com.github.ykrasik.jerminal.api.command;
 
 import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
-import com.rawcod.jerminal.exception.ExecuteException;
-import com.rawcod.jerminal.exception.ParseException;
+import com.github.ykrasik.jerminal.api.exception.ExecuteException;
+import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.internal.filesystem.ShellEntry;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
+import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
 
 import java.util.List;
 
@@ -35,6 +35,7 @@ import java.util.List;
  * @author Yevgeny Krasik
  */
 // TODO: Consider hiding this class a bit better, it's in an API package after all.
+// TODO: Create a ShellFile class which will contain this one, and rename this to Command.
 public interface ShellCommand extends ShellEntry {
     /**
      * Returns the command's declared parameters.

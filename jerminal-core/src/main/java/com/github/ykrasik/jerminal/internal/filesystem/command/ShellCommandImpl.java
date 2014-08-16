@@ -20,21 +20,21 @@ import com.github.ykrasik.jerminal.api.command.CommandArgs;
 import com.github.ykrasik.jerminal.api.command.CommandExecutor;
 import com.github.ykrasik.jerminal.api.command.OutputBuffer;
 import com.github.ykrasik.jerminal.api.command.ShellCommand;
+import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
+import com.github.ykrasik.jerminal.api.exception.ExecuteException;
 import com.github.ykrasik.jerminal.collections.trie.Trie;
 import com.github.ykrasik.jerminal.collections.trie.TrieBuilder;
 import com.github.ykrasik.jerminal.collections.trie.TrieImpl;
 import com.github.ykrasik.jerminal.internal.AbstractDescribable;
+import com.github.ykrasik.jerminal.internal.command.parameter.ParamType;
+import com.github.ykrasik.jerminal.internal.exception.ParseError;
+import com.github.ykrasik.jerminal.internal.exception.ParseException;
+import com.github.ykrasik.jerminal.internal.exception.ShellException;
+import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
+import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteType;
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
-import com.github.ykrasik.jerminal.internal.command.parameter.ParamType;
-import com.rawcod.jerminal.exception.ExecuteException;
-import com.rawcod.jerminal.exception.ParseException;
-import com.rawcod.jerminal.exception.ShellException;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteMappers;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteType;
-import com.rawcod.jerminal.returnvalue.parse.ParseErrors;
 
 import java.util.*;
 
@@ -47,6 +47,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class ShellCommandImpl extends AbstractDescribable implements ShellCommand {
     private static final char ARG_VALUE_DELIMITER = '=';
+
+    private static final Function<CommandParam, AutoCompleteType> AUTO_COMPLETE_TYPE_MAPPER = new Function<CommandParam, AutoCompleteType>() {
+        @Override
+        public AutoCompleteType apply(CommandParam input) {
+            return input.getType() == ParamType.FLAG ? AutoCompleteType.COMMAND_PARAM_FLAG : AutoCompleteType.COMMAND_PARAM_NAME;
+        }
+    };
 
     private final CommandExecutor executor;
     private final List<CommandParam> positionalParams;
@@ -129,7 +136,7 @@ public class ShellCommandImpl extends AbstractDescribable implements ShellComman
                                    List<CommandParam> unboundParams,
                                    Map<String, Object> boundParams) throws ParseException {
         if (unboundParams.isEmpty()) {
-            throw ParseErrors.noMoreParams();
+            throw noMoreParams();
         }
 
         // rawArg is expected to be either:
@@ -168,10 +175,10 @@ public class ShellCommandImpl extends AbstractDescribable implements ShellComman
     private CommandParam parseUnboundParam(String paramName, Map<String, Object> boundParams) throws ParseException {
         final Optional<CommandParam> paramOptional = params.get(paramName);
         if (!paramOptional.isPresent()) {
-            throw ParseErrors.invalidParam(paramName);
+            throw invalidParam(paramName);
         }
         if (boundParams.containsKey(paramName)) {
-            throw ParseErrors.paramAlreadyBound(paramName, boundParams.get(paramName));
+            throw paramAlreadyBound(paramName, boundParams.get(paramName));
         }
         return paramOptional.get();
     }
@@ -193,7 +200,7 @@ public class ShellCommandImpl extends AbstractDescribable implements ShellComman
                                                     List<CommandParam> unboundParams,
                                                     Map<String, Object> boundParams) throws ParseException {
         if (unboundParams.isEmpty()) {
-            throw ParseErrors.noMoreParams();
+            throw noMoreParams();
         }
 
         // rawArg is expected to be either:
@@ -255,7 +262,28 @@ public class ShellCommandImpl extends AbstractDescribable implements ShellComman
 
         final Trie<CommandParam> prefixParams = params.subTrie(prefix);
         final Trie<CommandParam> filteredParams = prefixParams.filter(new BoundParamsFilter(boundParams));
-        return filteredParams.map(AutoCompleteMappers.commandParamNameMapper());
+        return filteredParams.map(AUTO_COMPLETE_TYPE_MAPPER);
+    }
+
+    private ParseException invalidParam(String paramName) {
+        return new ParseException(
+            ParseError.INVALID_PARAM,
+            "Invalid parameter: '%s'", paramName
+        );
+    }
+
+    private ParseException paramAlreadyBound(String paramName, Object value) {
+        return new ParseException(
+            ParseError.PARAM_ALREADY_BOUND,
+            "Parameter '%s' is already bound to a value: '%s'", paramName, value
+        );
+    }
+
+    private ParseException noMoreParams() {
+        return new ParseException(
+            ParseError.NO_MORE_PARAMS,
+            "Command does not accept any more parameters."
+        );
     }
 
     public static boolean isLegalName(String name) {

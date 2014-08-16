@@ -17,24 +17,25 @@
 package com.github.ykrasik.jerminal.internal;
 
 import com.github.ykrasik.jerminal.api.Shell;
-import com.google.common.base.Optional;
-import com.github.ykrasik.jerminal.collections.trie.Trie;
 import com.github.ykrasik.jerminal.api.command.CommandArgs;
-import com.github.ykrasik.jerminal.internal.command.OutputBufferImpl;
-import com.rawcod.jerminal.exception.ExecuteException;
-import com.rawcod.jerminal.exception.ParseException;
-import com.rawcod.jerminal.exception.ShellException;
-import com.github.ykrasik.jerminal.internal.filesystem.ShellFileSystem;
 import com.github.ykrasik.jerminal.api.command.ShellCommand;
+import com.github.ykrasik.jerminal.api.exception.ExecuteException;
 import com.github.ykrasik.jerminal.api.output.OutputProcessor;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteReturnValue;
-import com.rawcod.jerminal.returnvalue.autocomplete.AutoCompleteType;
-import com.rawcod.jerminal.returnvalue.suggestion.Suggestions;
-import com.rawcod.jerminal.util.CommandLineUtils;
+import com.github.ykrasik.jerminal.collections.trie.Trie;
+import com.github.ykrasik.jerminal.internal.command.OutputBufferImpl;
+import com.github.ykrasik.jerminal.internal.exception.ParseException;
+import com.github.ykrasik.jerminal.internal.exception.ShellException;
+import com.github.ykrasik.jerminal.internal.filesystem.ShellFileSystem;
+import com.google.common.base.Optional;
+import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
+import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteType;
+import com.github.ykrasik.jerminal.internal.returnvalue.Suggestions;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 
 /**
  * An implementation for a {@link Shell}.
@@ -42,6 +43,9 @@ import java.util.Map.Entry;
  * @author Yevgeny Krasik
  */
 public class ShellImpl implements Shell {
+    // A pattern that regards sequential spaces as a single space
+    private static final Pattern ARGS_PATTERN = Pattern.compile("[ ]+");
+
     private final OutputProcessor outputProcessor;
     private final ShellFileSystem fileSystem;
     private final CommandLineHistory commandLineHistory;
@@ -83,18 +87,19 @@ public class ShellImpl implements Shell {
         }
     }
 
+    // TODO: AutoCompleting should give more assistance: Command info etc.
+    // TODO: Rename this to assist.
     @Override
     public void autoComplete(String rawCommandLine) {
         // Split the commandLine for autoComplete.
-        final List<String> commandLine = CommandLineUtils.splitCommandLineForAutoComplete(rawCommandLine);
+        final List<String> commandLine = splitCommandLineForAutoComplete(rawCommandLine);
 
         // Do the actual autoCompletion.
         try {
             final AutoCompleteReturnValue returnValue = doAutoComplete(commandLine);
             handleAutoComplete(returnValue, rawCommandLine);
         } catch (ParseException e) {
-            outputProcessor.parseError(e.getError(), e.getMessage());
-            displaySuggestionsIfApplicable(e.getSuggestions());
+            handleParseException(e);
         }
     }
 
@@ -181,7 +186,7 @@ public class ShellImpl implements Shell {
     @Override
     public void execute(String rawCommandLine) {
         // Split the commandLine.
-        final List<String> commandLine = CommandLineUtils.splitCommandLineForExecute(rawCommandLine);
+        final List<String> commandLine = splitCommandLineForExecute(rawCommandLine);
         if (commandLine.size() == 1 && commandLine.get(0).isEmpty()) {
             // Received a commandLine that is either empty or full of spaces.
             clearCommandLine();
@@ -202,8 +207,7 @@ public class ShellImpl implements Shell {
             final List<String> rawArgs = commandLine.subList(1, commandLine.size());
             args = command.parseCommandArgs(rawArgs);
         } catch (ParseException e) {
-            outputProcessor.parseError(e.getError(), e.getMessage());
-            displaySuggestionsIfApplicable(e.getSuggestions());
+            handleParseException(e);
             return;
         }
 
@@ -232,6 +236,12 @@ public class ShellImpl implements Shell {
         // TODO: Display command output in a finally block?
     }
 
+    private void handleParseException(ParseException e) {
+        final String errorMessage = String.format("Parse Error: %s", e.getMessage());
+        outputProcessor.parseError(e.getError(), errorMessage);
+        displaySuggestionsIfApplicable(e.getSuggestions());
+    }
+
     private void displaySuggestionsIfApplicable(Optional<Suggestions> suggestions) {
         if (suggestions.isPresent()) {
             displaySuggestions(suggestions.get());
@@ -257,5 +267,18 @@ public class ShellImpl implements Shell {
             final List<String> output = outputBuffer.getOutputBuffer();
             outputProcessor.displayCommandOutput(output);
         }
+    }
+
+    private List<String> splitCommandLineForAutoComplete(String commandLine) {
+        // Only remove leading spaces, trailing spaces have a significant meaning.
+        final String trimmedCommandLine = commandLine.startsWith(" ") ?
+            ARGS_PATTERN.matcher(commandLine).replaceFirst("") :
+            commandLine;
+        return Arrays.asList(ARGS_PATTERN.split(trimmedCommandLine, -1));
+    }
+
+    private List<String> splitCommandLineForExecute(String commandLine) {
+        final String trimmedCommandLine = commandLine.trim();
+        return Arrays.asList(ARGS_PATTERN.split(trimmedCommandLine, -1));
     }
 }

@@ -16,7 +16,7 @@
 
 package com.github.ykrasik.jerminal.collections.trie.node;
 
-import com.rawcod.jerminal.exception.ShellException;
+import com.github.ykrasik.jerminal.internal.exception.ShellException;
 
 import java.util.HashMap;
 import java.util.Map;

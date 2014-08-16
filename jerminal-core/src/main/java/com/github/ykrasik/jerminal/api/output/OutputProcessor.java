@@ -18,7 +18,7 @@ package com.github.ykrasik.jerminal.api.output;
 
 import com.github.ykrasik.jerminal.api.command.view.ShellCommandView;
 import com.github.ykrasik.jerminal.api.filesystem.ShellEntryView;
-import com.rawcod.jerminal.returnvalue.parse.ParseError;
+import com.github.ykrasik.jerminal.internal.exception.ParseError;
 
 import java.util.List;
 
@@ -62,7 +62,7 @@ public interface OutputProcessor {
 
     /**
      * An execution error occurred while executing the command line.<br>
-     * This can only happen when the user explicitly throws an {@link com.rawcod.jerminal.exception.ExecuteException ExecuteException}.
+     * This can only happen when the user explicitly throws an {@link com.github.ykrasik.jerminal.api.exception.ExecuteException ExecuteException}.
      */
     void executeError(String errorMessage);
 

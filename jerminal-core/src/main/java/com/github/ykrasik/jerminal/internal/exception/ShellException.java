@@ -14,20 +14,26 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.api.command;
-
-import com.github.ykrasik.jerminal.api.exception.ExecuteException;
+package com.github.ykrasik.jerminal.internal.exception;
 
 /**
- * Executes code according to given arguments.
+ * A general purpose exception that signifies an invalid configuration for the shell.
  *
  * @author Yevgeny Krasik
  */
-public interface CommandExecutor {
-    /**
-     * Executes code according to given arguments.
-     * Output can be written to the supplied {@link OutputBuffer}.
-     * @throws ExecuteException If an error occurs during execution.
-     */
-    void execute(CommandArgs args, OutputBuffer output) throws ExecuteException;
+public class ShellException extends RuntimeException {
+    public ShellException() {
+    }
+
+    public ShellException(String format, Object... args) {
+        super(String.format(format, args));
+    }
+
+    public ShellException(Throwable cause, String format, Object... args) {
+        super(String.format(format, args), cause);
+    }
+
+    public ShellException(Throwable cause) {
+        super(cause);
+    }
 }

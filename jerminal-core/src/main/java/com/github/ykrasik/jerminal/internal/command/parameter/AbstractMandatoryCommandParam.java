@@ -18,8 +18,8 @@ package com.github.ykrasik.jerminal.internal.command.parameter;
 
 import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
 import com.github.ykrasik.jerminal.internal.AbstractDescribable;
-import com.rawcod.jerminal.exception.ParseException;
-import com.rawcod.jerminal.returnvalue.parse.ParseErrors;
+import com.github.ykrasik.jerminal.internal.exception.ParseException;
+import com.github.ykrasik.jerminal.internal.exception.ParseError;
 
 /**
  * An abstract implementation for a mandatory {@link CommandParam}.
@@ -38,7 +38,7 @@ public abstract class AbstractMandatoryCommandParam<T> extends AbstractDescribab
 
     @Override
     public T unbound() throws ParseException {
-        throw ParseErrors.paramNotBound(getName());
+        throw paramNotBound();
     }
 
     @Override
@@ -48,6 +48,13 @@ public abstract class AbstractMandatoryCommandParam<T> extends AbstractDescribab
     }
 
     protected abstract String getExternalFormType();
+
+    private ParseException paramNotBound() {
+        return new ParseException(
+            ParseError.PARAM_NOT_BOUND,
+            "Mandatory parameter was not bound: '%s'", getName()
+        );
+    }
 
     @Override
     public String toString() {
