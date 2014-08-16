@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2014 Yevgeny Krasik
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.rawcod.jerminal.libgdx;
 
 import com.badlogic.gdx.graphics.Color;
@@ -8,8 +24,11 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.github.ykrasik.jerminal.api.output.terminal.Terminal;
 
 /**
- * User: yevgenyk
- * Date: 07/01/14
+ * A libGdx implementation for a {@link Terminal}.<br>
+ * This implementation uses {@link LibGdxConsoleWidgetFactory} to create display components and
+ * a {@link Table} for layout. Scrollable.
+ *
+ * @author Yevgeny Krasik
  */
 public class LibGdxTerminal extends Stage implements Terminal {
     private final Table terminalScreen;
@@ -35,7 +54,7 @@ public class LibGdxTerminal extends Stage implements Terminal {
         // Wrap the buffer in a scrollPane to get a nice scrollbar.
         bufferScrollPane = createBufferScrollPane(buffer);
 
-        // A "current-path" thing
+        // A "current-path" thing.
         currentPath = widgetFactory.createCurrentPathLabel("$");
         final Table currentPathTable = new Table();
         currentPathTable.add(currentPath).fill().padLeft(3).padRight(5);
@@ -45,7 +64,7 @@ public class LibGdxTerminal extends Stage implements Terminal {
         // TextField to input commands.
         textField = createInputTextField(widgetFactory);
 
-        // A close console button
+        // A close console button.
         final Button closeButton = widgetFactory.createCloseButton();
         closeButton.addListener(new ClickListener() {
             @Override
@@ -54,7 +73,7 @@ public class LibGdxTerminal extends Stage implements Terminal {
             }
         });
 
-        // The table that will contain the bottom row - current path, text input, close button
+        // The table that will contain the bottom row - current path, text input, close button.
         final Table bottomRow = new Table();
         bottomRow.setBackground(widgetFactory.createConsoleBottomRowBackground());
         bottomRow.add(currentPathTable).fill();
@@ -175,7 +194,7 @@ public class LibGdxTerminal extends Stage implements Terminal {
         // the terminal doesn't get typed into the textField.
         needsFocus = true;
 
-        // Notify listener
+        // Notify listener.
         if (listener != null) {
             listener.activated();
         }
@@ -188,10 +207,10 @@ public class LibGdxTerminal extends Stage implements Terminal {
 
         terminalScreen.setVisible(false);
 
-        // Clear stage keyboard focus
+        // Clear stage keyboard focus.
         this.setKeyboardFocus(null);
 
-        // Notify listener
+        // Notify listener.
         if (listener != null) {
             listener.deactivated();
         }
