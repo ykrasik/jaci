@@ -23,6 +23,18 @@ package com.github.ykrasik.jerminal.api.output.terminal;
  */
 public interface Terminal {
     /**
+     * Called before any text is printed, to allow the {@link Terminal} to prepare itself.<br>
+     * Will not be called again before {@link #end()} is called.
+     */
+    void begin();
+
+    /**
+     * Called when all text has been printed.<br>
+     * {@link #begin()} will be called before any more text is printed.
+     */
+    void end();
+
+    /**
      * Print the text.
      */
     void print(String text);

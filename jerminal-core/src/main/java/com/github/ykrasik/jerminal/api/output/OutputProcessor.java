@@ -28,8 +28,18 @@ import java.util.List;
  *
  * @author Yevgeny Krasik
  */
-// TODO: Add begin() and end() calls.
 public interface OutputProcessor {
+    /**
+     * Called before any other events are called, to allow the {@link OutputProcessor} to prepare itself.<br>
+     * Will not be called again before {@link #end()} is called.
+     */
+    void begin();
+
+    /**
+     * Called when a single event flow has finished.<br>
+     * {@link #begin()} will be called before any more events arrive.
+     */
+    void end();
     /**
      * Display the welcome message.
      */

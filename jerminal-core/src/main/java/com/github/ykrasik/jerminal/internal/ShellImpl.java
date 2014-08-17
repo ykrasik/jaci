@@ -62,7 +62,9 @@ public class ShellImpl implements Shell {
         this.outputPrinter = new OutputPrinterImpl(outputProcessor);
 
         // Init.
+        outputProcessor.begin();
         outputProcessor.displayWelcomeMessage(welcomeMessage);
+        outputProcessor.end();
     }
 
     @Override
@@ -83,6 +85,7 @@ public class ShellImpl implements Shell {
         final List<String> commandLine = splitCommandLineForAutoComplete(rawCommandLine);
 
         // Do the actual autoCompletion.
+        outputProcessor.begin();
         try {
             final AutoCompleteReturnValue returnValue = doAutoComplete(commandLine);
             return getNewCommandLine(returnValue, rawCommandLine);
@@ -91,6 +94,8 @@ public class ShellImpl implements Shell {
 
             // There was an error parsing the command line, return the old one.
             return rawCommandLine;
+        } finally {
+            outputProcessor.end();
         }
     }
 
@@ -120,7 +125,7 @@ public class ShellImpl implements Shell {
         final Map<String, AutoCompleteType> possibilitiesMap = possibilities.toMap();
         final int numPossibilities = possibilitiesMap.size();
         if (numPossibilities == 0) {
-            final String message = String.format("AutoComplete Error: Not possible for prefix '%s'", prefix);
+            final String message = String.format("AutoComplete not possible for prefix '%s'", prefix);
             outputProcessor.autoCompleteNotPossible(message);
 
             // AutoComplete didn't give any results, return the old command line.
@@ -180,7 +185,9 @@ public class ShellImpl implements Shell {
         final List<String> commandLine = splitCommandLineForExecute(rawCommandLine);
         if (commandLine.size() == 1 && commandLine.get(0).isEmpty()) {
             // Received a commandLine that is either empty or full of spaces.
+            outputProcessor.begin();
             outputProcessor.displayEmptyLine();
+            outputProcessor.end();
             return "";
         }
 
@@ -197,7 +204,9 @@ public class ShellImpl implements Shell {
             final List<String> rawArgs = commandLine.subList(1, commandLine.size());
             args = command.parseCommandArgs(rawArgs);
         } catch (ParseException e) {
+            outputProcessor.begin();
             handleParseException(e);
+            outputProcessor.end();
 
             // There was an error parsing the command line, return the old one.
             return rawCommandLine;
@@ -208,6 +217,7 @@ public class ShellImpl implements Shell {
         commandLineHistory.pushCommandLine(rawCommandLine);
 
         // Execute the command.
+        outputProcessor.begin();
         try {
             command.execute(args, outputPrinter);
             // Print a generic success message
@@ -217,6 +227,8 @@ public class ShellImpl implements Shell {
         } catch (Exception e) {
             outputPrinter.println("Command '%s' terminated with an unhandled exception!", command.getName());
             outputProcessor.executeUnhandledException(e);
+        } finally {
+            outputProcessor.end();
         }
 
         // Command line was successfully parsed, the new command line should be blank.

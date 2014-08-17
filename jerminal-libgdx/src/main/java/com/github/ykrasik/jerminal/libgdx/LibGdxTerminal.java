@@ -65,6 +65,16 @@ public class LibGdxTerminal extends Table implements Terminal {
     }
 
     @Override
+    public void begin() {
+        // Nothing to do here.
+    }
+
+    @Override
+    public void end() {
+        // Nothing to do here.
+    }
+
+    @Override
     public void print(String text) {
         print(text, Color.WHITE);
     }

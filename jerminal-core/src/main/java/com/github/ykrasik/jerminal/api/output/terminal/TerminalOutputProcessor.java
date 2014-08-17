@@ -34,13 +34,24 @@ import java.util.List;
 public class TerminalOutputProcessor implements OutputProcessor {
     private static final Joiner JOINER = Joiner.on(',').skipNulls();
 
-    /**
-     * Accessible to sub-classes, to support overrides of the default implementations.
-     */
-    protected final Terminal terminal;
+    private final Terminal terminal;
 
     public TerminalOutputProcessor(Terminal terminal) {
         this.terminal = terminal;
+    }
+
+    public Terminal getTerminal() {
+        return terminal;
+    }
+
+    @Override
+    public void begin() {
+        terminal.begin();
+    }
+
+    @Override
+    public void end() {
+        terminal.end();
     }
 
     @Override
