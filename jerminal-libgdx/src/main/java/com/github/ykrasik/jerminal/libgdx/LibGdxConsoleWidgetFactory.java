@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.rawcod.jerminal.libgdx;
+package com.github.ykrasik.jerminal.libgdx;
 
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;

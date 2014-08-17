@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.rawcod.jerminal.libgdx;
+package com.github.ykrasik.jerminal.libgdx;
 
 /**
  * A callback for console activation/deactivation.

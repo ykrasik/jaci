@@ -15,9 +15,9 @@ import com.github.ykrasik.jerminal.api.command.parameter.numeric.IntegerParamBui
 import com.github.ykrasik.jerminal.api.command.parameter.string.StringParamBuilder;
 import com.github.ykrasik.jerminal.api.exception.ExecuteException;
 import com.github.ykrasik.jerminal.api.command.ShellCommandBuilder;
-import com.rawcod.jerminal.libgdx.LibGdxJerminalConsole;
-import com.rawcod.jerminal.libgdx.LibGdxConsoleBuilder;
-import com.rawcod.jerminal.libgdx.LibGdxConsoleWidgetFactory;
+import com.github.ykrasik.jerminal.libgdx.LibGdxJerminalConsole;
+import com.github.ykrasik.jerminal.libgdx.LibGdxConsoleBuilder;
+import com.github.ykrasik.jerminal.libgdx.LibGdxConsoleWidgetFactory;
 
 /**
  * User: ykrasik
@@ -120,7 +120,7 @@ public class JerminalLibGdxExample extends ApplicationAdapter {
     @Override
     public void render() {
         console.draw();
-        console.act(Gdx.graphics.getDeltaTime());
+        console.act();
     }
 
     private static class JerminalLibGdxTestConsoleWidgetFactory implements LibGdxConsoleWidgetFactory {

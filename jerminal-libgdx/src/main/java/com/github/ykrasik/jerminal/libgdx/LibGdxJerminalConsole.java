@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.rawcod.jerminal.libgdx;
+package com.github.ykrasik.jerminal.libgdx;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
@@ -32,7 +32,7 @@ import com.google.common.base.Optional;
  * A Jerminal console implementation based on libGdx (http://libgdx.badlogicgames.com/).<br>
  * The console is implemented as a {@link Stage} that uses a {@link LibGdxTerminal} as a display.<br>
  * <br>
- * <p>The console is activated/deactivated by a configurable toggle button. A {@link ConsoleListener} can
+ * <p>The console is activated/deactivated by a configurable toggle key. A {@link ConsoleListener} can
  * be set to be called every time the console is activated/deactivated.</p><br>
  * <br>
  * <p>In order to work, the console must be hooked into an application's main loop and receive
@@ -74,7 +74,7 @@ public class LibGdxJerminalConsole extends Stage {
         currentPathTable.debug();
 
         // TextField to input commands.
-        textField = createInputTextField(widgetFactory);
+        textField = widgetFactory.createInputTextField("");
 
         // A close console button.
         final Button closeButton = widgetFactory.createCloseButton();
@@ -108,10 +108,6 @@ public class LibGdxJerminalConsole extends Stage {
         terminalScreen.debug();
 
         this.addActor(terminalScreen);
-    }
-
-    private TextField createInputTextField(LibGdxConsoleWidgetFactory widgetFactory) {
-        return widgetFactory.createInputTextField("");
     }
 
     public void setListener(ConsoleListener listener) {
@@ -264,12 +260,12 @@ public class LibGdxJerminalConsole extends Stage {
 
     @Override
     public void draw() {
-        if (needsKeyboardFocus) {
-            this.setKeyboardFocus(textField);
-            needsKeyboardFocus = false;
-        }
-
         if (active) {
+            if (needsKeyboardFocus) {
+                this.setKeyboardFocus(textField);
+                needsKeyboardFocus = false;
+            }
+
             super.draw();
         }
     }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.rawcod.jerminal.libgdx;
+package com.github.ykrasik.jerminal.libgdx;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -26,7 +26,7 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 
 /**
- * The display part of the {@link LibGdxTerminal}. This is where all text is printed.<br>
+ * The display part of the {@link LibGdxJerminalConsole}. This is where all text is printed.<br>
  * Keeps a configurable maximum number of lines.
  *
  * @author Yevgeny Krasik
