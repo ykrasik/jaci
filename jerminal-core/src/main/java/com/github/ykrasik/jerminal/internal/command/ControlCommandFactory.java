@@ -16,10 +16,9 @@
 
 package com.github.ykrasik.jerminal.internal.command;
 
+import com.github.ykrasik.jerminal.api.command.*;
 import com.google.common.base.Supplier;
-import com.github.ykrasik.jerminal.api.command.CommandArgs;
-import com.github.ykrasik.jerminal.api.command.CommandExecutor;
-import com.github.ykrasik.jerminal.api.command.OutputBuffer;
+import com.github.ykrasik.jerminal.api.command.OutputPrinter;
 import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
 import com.github.ykrasik.jerminal.internal.command.parameter.entry.DirectoryParamBuilder;
 import com.github.ykrasik.jerminal.internal.command.parameter.entry.FileParamBuilder;
@@ -31,8 +30,6 @@ import com.github.ykrasik.jerminal.internal.command.view.ShellCommandViewImpl;
 import com.github.ykrasik.jerminal.api.exception.ExecuteException;
 import com.github.ykrasik.jerminal.internal.filesystem.ShellFileSystem;
 import com.github.ykrasik.jerminal.internal.filesystem.ShellEntry;
-import com.github.ykrasik.jerminal.api.command.ShellCommand;
-import com.github.ykrasik.jerminal.api.command.ShellCommandBuilder;
 import com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectory;
 import com.github.ykrasik.jerminal.api.filesystem.ShellEntryView;
 import com.github.ykrasik.jerminal.internal.filesystem.view.ShellEntryViewImpl;
@@ -81,7 +78,7 @@ public class ControlCommandFactory {
             )
             .setExecutor(new CommandExecutor() {
                 @Override
-                public void execute(CommandArgs args, OutputBuffer output) throws ExecuteException {
+                public void execute(CommandArgs args, OutputPrinter outputPrinter) throws ExecuteException {
                     final ShellDirectory directory = args.getDirectory(dirArgName);
                     fileSystem.setCurrentDirectory(directory);
                 }
@@ -112,7 +109,7 @@ public class ControlCommandFactory {
             )
             .setExecutor(new CommandExecutor() {
                 @Override
-                public void execute(CommandArgs args, OutputBuffer output) throws ExecuteException {
+                public void execute(CommandArgs args, OutputPrinter outputPrinter) throws ExecuteException {
                     final ShellDirectory directory = args.getDirectory(dirArgName);
                     final boolean recursive = args.getBool(recursiveArgName);
                     final ShellEntryView shellEntryView = listDirectory(directory, recursive);
@@ -149,7 +146,7 @@ public class ControlCommandFactory {
             )
             .setExecutor(new CommandExecutor() {
                 @Override
-                public void execute(CommandArgs args, OutputBuffer output) throws ExecuteException {
+                public void execute(CommandArgs args, OutputPrinter outputPrinter) throws ExecuteException {
                     final ShellCommand command = args.getFile(commandArgName);
                     final ShellCommandView shellCommandView = describeCommand(command);
                     outputProcessor.displayShellCommandView(shellCommandView);

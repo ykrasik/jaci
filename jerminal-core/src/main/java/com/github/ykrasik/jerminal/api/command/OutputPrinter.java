@@ -17,19 +17,19 @@
 package com.github.ykrasik.jerminal.api.command;
 
 /**
- * A buffer for the output of a {@link CommandExecutor}.
+ * A printer for the output of a {@link CommandExecutor}.
  *
  * @author Yevgeny Krasik
  */
-public interface OutputBuffer {
+public interface OutputPrinter {
     /**
-     * Add message to the buffer.
+     * Print text.
      */
-    void println(String message);
+    void println(String text);
 
     /**
-     * Add formatted message to the buffer.<br>
-     * Message will be formatted with {@link String#format(String, Object...)}.
+     * Add formatted text to the buffer.<br>
+     * Text will be formatted with {@link String#format(String, Object...)}.
      */
     void println(String format, Object... args);
 }

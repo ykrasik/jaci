@@ -56,8 +56,8 @@ public interface ShellCommand extends ShellEntry {
 
     /**
      * Execute with the given arguments.<br>
-     * Output can be written to the supplied {@link OutputBuffer}.
+     * Output can be written to the supplied {@link OutputPrinter}.
      * @throws ExecuteException If an error occurs during execution.
      */
-    void execute(CommandArgs args, OutputBuffer output) throws ExecuteException;
+    void execute(CommandArgs args, OutputPrinter outputPrinter) throws ExecuteException;
 }

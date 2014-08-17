@@ -18,7 +18,7 @@ package com.github.ykrasik.jerminal.internal.filesystem.command;
 
 import com.github.ykrasik.jerminal.api.command.CommandArgs;
 import com.github.ykrasik.jerminal.api.command.CommandExecutor;
-import com.github.ykrasik.jerminal.api.command.OutputBuffer;
+import com.github.ykrasik.jerminal.api.command.OutputPrinter;
 import com.github.ykrasik.jerminal.api.command.ShellCommand;
 import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
 import com.github.ykrasik.jerminal.api.exception.ExecuteException;
@@ -94,8 +94,8 @@ public class ShellCommandImpl extends AbstractDescribable implements ShellComman
     }
 
     @Override
-    public void execute(CommandArgs args, OutputBuffer output) throws ExecuteException {
-        executor.execute(args, output);
+    public void execute(CommandArgs args, OutputPrinter outputPrinter) throws ExecuteException {
+        executor.execute(args, outputPrinter);
     }
 
     @Override

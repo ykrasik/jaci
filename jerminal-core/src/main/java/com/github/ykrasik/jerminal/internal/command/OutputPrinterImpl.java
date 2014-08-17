@@ -16,35 +16,24 @@
 
 package com.github.ykrasik.jerminal.internal.command;
 
-import com.github.ykrasik.jerminal.api.command.OutputBuffer;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import com.github.ykrasik.jerminal.api.command.OutputPrinter;
+import com.github.ykrasik.jerminal.api.output.OutputProcessor;
 
 /**
- * An implementation for a {@link OutputBuffer}.
+ * An implementation for a {@link com.github.ykrasik.jerminal.api.command.OutputPrinter}.
  *
  * @author Yevgeny Krasik
  */
-public class OutputBufferImpl implements OutputBuffer {
-    private final List<String> outputBuffer;
+public class OutputPrinterImpl implements OutputPrinter {
+    private final OutputProcessor outputProcessor;
 
-    public OutputBufferImpl() {
-        this.outputBuffer = new ArrayList<>();
-    }
-
-    public boolean isEmpty() {
-        return outputBuffer.isEmpty();
-    }
-
-    public List<String> getOutputBuffer() {
-        return Collections.unmodifiableList(outputBuffer);
+    public OutputPrinterImpl(OutputProcessor outputProcessor) {
+        this.outputProcessor = outputProcessor;
     }
 
     @Override
-    public void println(String message) {
-        outputBuffer.add(message);
+    public void println(String text) {
+        outputProcessor.displayText(text);
     }
 
     @Override

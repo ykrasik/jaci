@@ -57,10 +57,10 @@ public class ToggleCommandBuilder {
             )
             .setExecutor(new CommandExecutor() {
                 @Override
-                public void execute(CommandArgs args, OutputBuffer output) throws ExecuteException {
+                public void execute(CommandArgs args, OutputPrinter outputPrinter) throws ExecuteException {
                     final boolean toggle = args.getBool(PARAM_NAME);
                     accessor.set(toggle);
-                    output.println("%s: %s", name, toggle);
+                    outputPrinter.println("%s: %s", name, toggle);
                 }
             })
             .build();

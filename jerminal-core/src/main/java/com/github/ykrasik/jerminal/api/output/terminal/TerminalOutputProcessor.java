@@ -54,13 +54,8 @@ public class TerminalOutputProcessor implements OutputProcessor {
     }
 
     @Override
-    public void displayCommandOutput(List<String> output) {
-        final StringBuilder sb = new StringBuilder();
-        for (String str : output) {
-            sb.append(str);
-            sb.append('\n');
-        }
-        print(sb.toString());
+    public void displayText(String text) {
+        print(text);
     }
 
     @Override
@@ -114,6 +109,7 @@ public class TerminalOutputProcessor implements OutputProcessor {
 
     @Override
     public void executeUnhandledException(Exception e) {
+        printError(e.toString());
         for (StackTraceElement stackTraceElement : e.getStackTrace()) {
             printError("|    " + stackTraceElement.toString());
         }

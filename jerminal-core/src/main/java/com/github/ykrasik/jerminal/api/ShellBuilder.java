@@ -52,7 +52,7 @@ public class ShellBuilder {
     private final ShellFileSystemPromise fileSystemPromise;
 
     private String welcomeMessage = DEFAULT_WELCOME_MESSAGE;
-    private int maxCommandLineHistory = 20;
+    private int maxCommandLineHistory = 30;
 
     public ShellBuilder(Terminal terminal) {
         this(new TerminalOutputProcessor(terminal));

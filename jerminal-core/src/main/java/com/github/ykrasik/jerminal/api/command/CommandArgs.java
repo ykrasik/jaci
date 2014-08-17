@@ -16,8 +16,8 @@
 
 package com.github.ykrasik.jerminal.api.command;
 
+import com.github.ykrasik.jerminal.api.exception.MissingParameterException;
 import com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectory;
-import com.github.ykrasik.jerminal.internal.exception.ShellException;
 
 import java.util.Map;
 
@@ -27,6 +27,7 @@ import java.util.Map;
  *
  * @author Yevgeny Krasik
  */
+// TODO: Annotation based config.
 public class CommandArgs {
     private final Map<String, Object> args;
 
@@ -34,34 +35,34 @@ public class CommandArgs {
         this.args = args;
     }
 
-    public String getString(String name) {
+    public String getString(String name) throws MissingParameterException {
         return getParam(name, String.class);
     }
 
-    public int getInt(String name) {
+    public int getInt(String name) throws MissingParameterException {
         return getParam(name, Integer.class);
     }
 
-    public double getDouble(String name) {
+    public double getDouble(String name) throws MissingParameterException {
         return getParam(name, Double.class);
     }
 
-    public boolean getBool(String name) {
+    public boolean getBool(String name) throws MissingParameterException {
         return getParam(name, Boolean.class);
     }
 
-    public ShellDirectory getDirectory(String name) {
+    public ShellDirectory getDirectory(String name) throws MissingParameterException {
         return getParam(name, ShellDirectory.class);
     }
 
-    public ShellCommand getFile(String name) {
+    public ShellCommand getFile(String name) throws MissingParameterException {
         return getParam(name, ShellCommand.class);
     }
 
-    private <T> T getParam(String name, Class<T> clazz) {
+    private <T> T getParam(String name, Class<T> clazz) throws MissingParameterException {
         final Object value = args.get(name);
         if (value == null) {
-            throw new ShellException("No value defined for param '%s'!", name);
+            throw new MissingParameterException("No value defined for param '%s'!", name);
         }
 
         return clazz.cast(value);

@@ -9,7 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.github.ykrasik.jerminal.api.command.CommandArgs;
 import com.github.ykrasik.jerminal.api.command.CommandExecutor;
-import com.github.ykrasik.jerminal.api.command.OutputBuffer;
+import com.github.ykrasik.jerminal.api.command.OutputPrinter;
 import com.github.ykrasik.jerminal.api.command.parameter.bool.BooleanParamBuilder;
 import com.github.ykrasik.jerminal.api.command.parameter.numeric.IntegerParamBuilder;
 import com.github.ykrasik.jerminal.api.command.parameter.string.StringParamBuilder;
@@ -82,10 +82,10 @@ public class JerminalLibGdxExample extends ApplicationAdapter {
                 )
                 .setExecutor(new CommandExecutor() {
                     @Override
-                    public void execute(CommandArgs args, OutputBuffer output) throws ExecuteException {
+                    public void execute(CommandArgs args, OutputPrinter outputPrinter) throws ExecuteException {
                         final int integer = args.getInt("mandatoryInt");
                         final boolean bool = args.getBool("optionalBool");
-                        output.println("yay: int = %d, bool = %s", integer, bool);
+                        outputPrinter.println("yay: int = %d, bool = %s", integer, bool);
                     }
                 })
                 .build(),
@@ -102,10 +102,10 @@ public class JerminalLibGdxExample extends ApplicationAdapter {
               )
               .setExecutor(new CommandExecutor() {
                   @Override
-                  public void execute(CommandArgs args, OutputBuffer output) throws ExecuteException {
-                      final String str = args.getString("stringy");
+                  public void execute(CommandArgs args, OutputPrinter outputPrinter) throws ExecuteException {
+                      final String str = args.getString("nested");
                       final boolean bool = args.getBool("booleany");
-                      output.println("yay: string = %s, bool = %s", str, bool);
+                      outputPrinter.println("yay: string = %s, bool = %s", str, bool);
                   }
               })
               .build()

@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.api.command;
-
-import com.github.ykrasik.jerminal.api.exception.ExecuteException;
+package com.github.ykrasik.jerminal.api.exception;
 
 /**
- * Executes code according to given arguments.
+ * Thrown when a parameter is accessed that does not exist during execution.
  *
  * @author Yevgeny Krasik
  */
-public interface CommandExecutor {
-    /**
-     * Executes code according to given arguments.
-     * Output can be written to the supplied {@link OutputPrinter}.
-     * @throws ExecuteException If an error occurs during execution.
-     */
-    void execute(CommandArgs args, OutputPrinter outputPrinter) throws ExecuteException;
+public class MissingParameterException extends ExecuteException {
+    public MissingParameterException(String message) {
+        super(message);
+    }
+
+    public MissingParameterException(String format, Object... args) {
+        super(format, args);
+    }
 }

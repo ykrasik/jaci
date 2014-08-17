@@ -18,11 +18,12 @@ package com.github.ykrasik.jerminal.internal;
 
 import com.github.ykrasik.jerminal.api.Shell;
 import com.github.ykrasik.jerminal.api.command.CommandArgs;
+import com.github.ykrasik.jerminal.api.command.OutputPrinter;
 import com.github.ykrasik.jerminal.api.command.ShellCommand;
 import com.github.ykrasik.jerminal.api.exception.ExecuteException;
 import com.github.ykrasik.jerminal.api.output.OutputProcessor;
 import com.github.ykrasik.jerminal.collections.trie.Trie;
-import com.github.ykrasik.jerminal.internal.command.OutputBufferImpl;
+import com.github.ykrasik.jerminal.internal.command.OutputPrinterImpl;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.internal.exception.ShellException;
 import com.github.ykrasik.jerminal.internal.filesystem.ShellFileSystem;
@@ -49,6 +50,7 @@ public class ShellImpl implements Shell {
     private final OutputProcessor outputProcessor;
     private final ShellFileSystem fileSystem;
     private final CommandLineHistory commandLineHistory;
+    private final OutputPrinter outputPrinter;
 
     public ShellImpl(OutputProcessor outputProcessor,
                      ShellFileSystem fileSystem,
@@ -57,6 +59,7 @@ public class ShellImpl implements Shell {
         this.outputProcessor = outputProcessor;
         this.fileSystem = fileSystem;
         this.commandLineHistory = commandLineHistory;
+        this.outputPrinter = new OutputPrinterImpl(outputProcessor);
 
         // Init.
         outputProcessor.displayWelcomeMessage(welcomeMessage);
@@ -205,23 +208,17 @@ public class ShellImpl implements Shell {
         commandLineHistory.pushCommandLine(rawCommandLine);
 
         // Execute the command.
-        final OutputBufferImpl output = new OutputBufferImpl();
         try {
-            command.execute(args, output);
-            if (output.isEmpty()) {
-                // Add a default message if the command didn't print anything.
-                output.println("Command '%s' executed successfully.", command.getName());
-            }
-            displayCommandOutput(output);
+            command.execute(args, outputPrinter);
+            // Print a generic success message
+            outputPrinter.println("Command '%s' executed successfully.", command.getName());
         } catch (ExecuteException e) {
-            displayCommandOutput(output);
             outputProcessor.executeError(e.getMessage());
         } catch (Exception e) {
-            output.println("Command '%s' terminated with an unhandled exception!", command.getName());
-            displayCommandOutput(output);
+            outputPrinter.println("Command '%s' terminated with an unhandled exception!", command.getName());
             outputProcessor.executeUnhandledException(e);
         }
-        // TODO: Display command output in a finally block?
+
         // Command line was successfully parsed, the new command line should be blank.
         return "";
     }
@@ -250,13 +247,6 @@ public class ShellImpl implements Shell {
             paramNameSuggestions,
             paramValueSuggestions
         );
-    }
-
-    private void displayCommandOutput(OutputBufferImpl outputBuffer) {
-        if (!outputBuffer.isEmpty()) {
-            final List<String> output = outputBuffer.getOutputBuffer();
-            outputProcessor.displayCommandOutput(output);
-        }
     }
 
     private List<String> splitCommandLineForAutoComplete(String commandLine) {

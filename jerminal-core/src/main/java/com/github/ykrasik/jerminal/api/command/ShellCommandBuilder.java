@@ -32,7 +32,7 @@ import java.util.List;
 public class ShellCommandBuilder {
     private static final CommandExecutor NOT_IMPLEMENTED_EXECUTOR = new CommandExecutor() {
         @Override
-        public void execute(CommandArgs args, OutputBuffer output) throws ExecuteException {
+        public void execute(CommandArgs args, OutputPrinter outputPrinter) throws ExecuteException {
             throw new ExecuteException("Not implemented!");
         }
     };
