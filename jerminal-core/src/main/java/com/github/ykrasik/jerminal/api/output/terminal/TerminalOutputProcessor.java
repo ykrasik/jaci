@@ -16,41 +16,56 @@
 
 package com.github.ykrasik.jerminal.api.output.terminal;
 
-import com.github.ykrasik.jerminal.api.command.parameter.view.ShellCommandParamView;
+import com.github.ykrasik.jerminal.api.assist.AssistInfo;
+import com.github.ykrasik.jerminal.api.assist.Suggestions;
 import com.github.ykrasik.jerminal.api.command.view.ShellCommandView;
+import com.github.ykrasik.jerminal.api.exception.ExecuteException;
+import com.github.ykrasik.jerminal.api.exception.ParseError;
 import com.github.ykrasik.jerminal.api.filesystem.ShellEntryView;
 import com.github.ykrasik.jerminal.api.output.OutputProcessor;
-import com.github.ykrasik.jerminal.internal.exception.ParseError;
-import com.google.common.base.Joiner;
-
-import java.util.List;
+import com.google.common.base.Optional;
 
 /**
- * An {@link OutputProcessor} that translates all given events into text and send them to a
- * {@link Terminal} to be printed.
+ * An {@link OutputProcessor} that translates all given events into text through a {@link TerminalSerializer}
+ * and send them to a {@link Terminal} to be printed.
  *
  * @author Yevgeny Krasik
  */
 public class TerminalOutputProcessor implements OutputProcessor {
-    private static final Joiner JOINER = Joiner.on(',').skipNulls();
-
     private final Terminal terminal;
+    private final TerminalSerializer serializer;
+
+    private int numInteractions;
 
     public TerminalOutputProcessor(Terminal terminal) {
+        this(terminal, new DefaultTerminalSerializer());
+    }
+
+    public TerminalOutputProcessor(Terminal terminal, TerminalSerializer serializer) {
         this.terminal = terminal;
+        this.serializer = serializer;
     }
 
     public Terminal getTerminal() {
         return terminal;
     }
 
+    public TerminalSerializer getSerializer() {
+        return serializer;
+    }
+
     @Override
     public void begin() {
         terminal.begin();
+        numInteractions = 0;
     }
 
     @Override
     public void end() {
+        if (numInteractions != 0) {
+            // If anything was printed, add an empty line afterwards.
+            displayEmptyLine();
+        }
         terminal.end();
     }
 
@@ -61,7 +76,7 @@ public class TerminalOutputProcessor implements OutputProcessor {
 
     @Override
     public void displayEmptyLine() {
-        print("");
+        print(serializer.getEmptyLine());
     }
 
     @Override
@@ -70,132 +85,69 @@ public class TerminalOutputProcessor implements OutputProcessor {
     }
 
     @Override
-    public void displaySuggestions(List<String> directorySuggestions,
-                                   List<String> commandSuggestions,
-                                   List<String> paramNameSuggestions,
-                                   List<String> paramValueSuggestions) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("Suggestions: \n");
-        appendSuggestions(sb, directorySuggestions, "Directories");
-        appendSuggestions(sb, commandSuggestions, "Commands");
-        appendSuggestions(sb, paramNameSuggestions, "Parameter names");
-        appendSuggestions(sb, paramValueSuggestions, "Parameter values");
-        print(sb.toString());
-    }
+    public void displayAssistance(Optional<AssistInfo> assistInfo, Optional<Suggestions> suggestions) {
+        if (assistInfo.isPresent()) {
+            final String assistInfoStr = serializer.serializeAssistInfo(assistInfo.get());
+            print(assistInfoStr);
+        }
 
-    private void appendSuggestions(StringBuilder sb, List<String> suggestions, String suggestionTitle) {
-        if (!suggestions.isEmpty()) {
-            sb.append("|   ");
-            sb.append(suggestionTitle);
-            sb.append(": [");
-            sb.append(JOINER.join(suggestions));
-            sb.append("]\n");
+        if (suggestions.isPresent()) {
+            final String suggestionsStr = serializer.serializeSuggestions(suggestions.get());
+            print(suggestionsStr);
+        } else {
+            // TODO: Find a way to print this when no suggestions are available, but not to print when only a single one was possible.
+//            printError("No auto complete suggestions available.");
         }
     }
 
     @Override
     public void displayShellEntryView(ShellEntryView shellEntryView) {
-        print(serializeShellEntryView(shellEntryView));
+        final String shellEntryViewStr = serializer.serializeShelEntryView(shellEntryView);
+        print(shellEntryViewStr);
     }
 
     @Override
     public void displayShellCommandView(ShellCommandView shellCommandView) {
-        print(serializeShellCommandView(shellCommandView));
+        final String shellCommandViewStr = serializer.serializeShellCommandView(shellCommandView);
+        print(shellCommandViewStr);
     }
 
     @Override
-    public void parseError(ParseError error, String errorMessage) {
+    public void parseError(ParseError error, String errorMessage, Optional<Suggestions> suggestions) {
         printError(errorMessage);
+        if (suggestions.isPresent()) {
+            final String suggestionsStr = serializer.serializeSuggestions(suggestions.get());
+            print(suggestionsStr);
+        }
     }
 
     @Override
-    public void autoCompleteNotPossible(String errorMessage) {
-        printError(errorMessage);
-    }
-
-    @Override
-    public void executeError(String errorMessage) {
-        printError(errorMessage);
+    public void executeError(ExecuteException e) {
+        printException(e);
     }
 
     @Override
     public void executeUnhandledException(Exception e) {
-        printError(e.toString());
-        for (StackTraceElement stackTraceElement : e.getStackTrace()) {
-            printError("|    " + stackTraceElement.toString());
-        }
+        printException(e);
+    }
+
+    @Override
+    public void internalError(Exception e) {
+        printException(e);
+    }
+
+    private void printException(Exception e) {
+        final String exceptionStr = serializer.serializeException(e);
+        printError(exceptionStr);
     }
 
     private void print(String message) {
+        numInteractions++;
         terminal.print(message);
     }
 
     private void printError(String message) {
+        numInteractions++;
         terminal.printError(message);
-    }
-
-    protected String serializeShellCommandView(ShellCommandView command) {
-        final StringBuilder sb = new StringBuilder();
-        serializeShellCommandView(sb, command);
-        return sb.toString();
-    }
-
-    private void serializeShellCommandView(StringBuilder sb, ShellCommandView command) {
-        sb.append(command.getName());
-        sb.append(" : ");
-        sb.append(command.getDescription());
-        sb.append('\n');
-
-        for (ShellCommandParamView paramView : command.getParams()) {
-            appendDepthSpaces(sb, 1);
-            serializedShellCommandParamView(sb, paramView);
-            sb.append('\n');
-        }
-    }
-
-    private void appendDepthSpaces(StringBuilder sb, int depth) {
-        for (int i = 0; i < depth; i++) {
-            sb.append("    ");
-        }
-    }
-
-    private void serializedShellCommandParamView(StringBuilder sb, ShellCommandParamView param) {
-        sb.append(param.getExternalForm());
-        sb.append(" - ");
-        sb.append(param.getDescription());
-    }
-
-    protected String serializeShellEntryView(ShellEntryView entry) {
-        final StringBuilder sb = new StringBuilder();
-        serializeShellEntryView(sb, entry, 0);
-        return sb.toString();
-    }
-
-    private void serializeShellEntryView(StringBuilder sb, ShellEntryView entry, int depth) {
-        final boolean directory = entry.isDirectory();
-
-        // Print root
-        if (directory) {
-            sb.append('[');
-        }
-        sb.append(entry.getName());
-        if (directory) {
-            sb.append(']');
-        }
-
-        if (!directory) {
-            sb.append(" : ");
-            sb.append(entry.getDescription());
-        }
-        sb.append('\n');
-
-        // Print children
-        if (directory) {
-            for (ShellEntryView child : entry.getChildren()) {
-                sb.append('|');
-                appendDepthSpaces(sb, depth + 1);
-                serializeShellEntryView(sb, child, depth + 1);
-            }
-        }
     }
 }

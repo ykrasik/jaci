@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.internal.returnvalue;
+package com.github.ykrasik.jerminal.api.assist;
 
 import com.google.common.base.Objects;
-import com.github.ykrasik.jerminal.internal.exception.ShellException;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -33,11 +31,14 @@ public class Suggestions {
     private final List<String> paramNameSuggestions;
     private final List<String> paramValueSuggestions;
 
-    public Suggestions() {
-        this.directorySuggestions = new ArrayList<>();
-        this.commandSuggestions = new ArrayList<>();
-        this.paramNameSuggestions = new ArrayList<>();
-        this.paramValueSuggestions = new ArrayList<>();
+    public Suggestions(List<String> directorySuggestions,
+                       List<String> commandSuggestions,
+                       List<String> paramNameSuggestions,
+                       List<String> paramValueSuggestions) {
+        this.directorySuggestions = directorySuggestions;
+        this.commandSuggestions = commandSuggestions;
+        this.paramNameSuggestions = paramNameSuggestions;
+        this.paramValueSuggestions = paramValueSuggestions;
     }
 
     public List<String> getDirectorySuggestions() {
@@ -54,19 +55,6 @@ public class Suggestions {
 
     public List<String> getParamValueSuggestions() {
         return paramValueSuggestions;
-    }
-
-    public void addSuggestion(AutoCompleteType type, String suggestion) {
-        final List<String> suggestions;
-        switch (type) {
-            case DIRECTORY: suggestions = directorySuggestions; break;
-            case COMMAND: suggestions = commandSuggestions; break;
-            case COMMAND_PARAM_NAME: // Fallthrough
-            case COMMAND_PARAM_FLAG: suggestions = paramNameSuggestions; break;
-            case COMMAND_PARAM_VALUE: suggestions = paramValueSuggestions; break;
-            default: throw new ShellException("Invalid AutoCompleteType: %s", type);
-        }
-        suggestions.add(suggestion);
     }
 
     @Override

@@ -22,14 +22,15 @@ import com.github.ykrasik.jerminal.api.command.OutputPrinter;
 import com.github.ykrasik.jerminal.api.command.ShellCommand;
 import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
 import com.github.ykrasik.jerminal.api.exception.ExecuteException;
+import com.github.ykrasik.jerminal.api.exception.ParseError;
 import com.github.ykrasik.jerminal.collections.trie.Trie;
 import com.github.ykrasik.jerminal.collections.trie.TrieBuilder;
 import com.github.ykrasik.jerminal.collections.trie.TrieImpl;
 import com.github.ykrasik.jerminal.internal.AbstractDescribable;
 import com.github.ykrasik.jerminal.internal.command.parameter.ParamType;
-import com.github.ykrasik.jerminal.internal.exception.ParseError;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.internal.exception.ShellException;
+import com.github.ykrasik.jerminal.internal.returnvalue.AssistParamsReturnsValue;
 import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
 import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteType;
 import com.google.common.base.Function;
@@ -184,7 +185,7 @@ public class ShellCommandImpl extends AbstractDescribable implements ShellComman
     }
 
     @Override
-    public AutoCompleteReturnValue autoCompleteArgs(List<String> args) throws ParseException {
+    public AssistParamsReturnsValue assistArgs(List<String> args) throws ParseException {
         // Only the last arg is up for autoCompletion, the rest are expected to be valid args.
         final List<String> argsToBeParsed = args.subList(0, args.size() - 1);
         final String rawArg = args.get(args.size() - 1);
@@ -193,30 +194,42 @@ public class ShellCommandImpl extends AbstractDescribable implements ShellComman
         final BoundParams returnValue = parseBoundParams(argsToBeParsed);
 
         // AutoComplete rawArg.
-        return autoCompleteArg(rawArg, returnValue.unboundParams, returnValue.boundParams);
+        return assistArg(rawArg, returnValue.unboundParams, returnValue.boundParams);
     }
 
-    private AutoCompleteReturnValue autoCompleteArg(String rawArg,
-                                                    List<CommandParam> unboundParams,
-                                                    Map<String, Object> boundParams) throws ParseException {
-        if (unboundParams.isEmpty()) {
-            throw noMoreParams();
-        }
+    private AssistParamsReturnsValue assistArg(String rawArg,
+                                               List<CommandParam> unboundParams,
+                                               Map<String, Object> boundParams) throws ParseException {
+        // TODO: I do want this check somehow...
+//        if (unboundParams.isEmpty()) {
+//            throw noMoreParams();
+//        }
 
         // rawArg is expected to be either:
         // 1. A value that is accepted by the next positional param.
         // 2. A tuple of the form "{name}={value}", which can assign a value to any other param.
-        final int delimiterIndex = rawArg.indexOf(ARG_VALUE_DELIMITER);
-        if (delimiterIndex == -1) {
-            return autoCompleteParamNameOrValue(rawArg, unboundParams, boundParams);
+        final AutoCompleteReturnValue autoCompleteReturnValue;
+        final Optional<CommandParam> currentParam;
+        if (unboundParams.isEmpty()) {
+            autoCompleteReturnValue = new AutoCompleteReturnValue("", TrieImpl.<AutoCompleteType>emptyTrie());
+            currentParam = Optional.absent();
+        } else {
+            final int delimiterIndex = rawArg.indexOf(ARG_VALUE_DELIMITER);
+            if (delimiterIndex == -1) {
+                autoCompleteReturnValue = autoCompleteParamNameOrValue(rawArg, unboundParams, boundParams);
+                currentParam = Optional.of(unboundParams.get(0));
+            } else {
+                // rawArg contains a delimiter, the part before the '=' is expected to be a valid, unbound param.
+                final String paramName = rawArg.substring(0, delimiterIndex);
+                final CommandParam param = parseUnboundParam(paramName, boundParams);
+
+                final String rawValue = rawArg.substring(delimiterIndex + 1);
+                autoCompleteReturnValue = param.autoComplete(rawValue);
+                currentParam = Optional.of(param);
+            }
         }
 
-        // rawArg contains a delimiter, the part before the '=' is expected to be a valid, unbound param.
-        final String paramName = rawArg.substring(0, delimiterIndex);
-        final CommandParam param = parseUnboundParam(paramName, boundParams);
-
-        final String rawValue = rawArg.substring(delimiterIndex + 1);
-        return param.autoComplete(rawValue);
+        return new AssistParamsReturnsValue(currentParam, boundParams, autoCompleteReturnValue);
     }
 
     private AutoCompleteReturnValue autoCompleteParamNameOrValue(String prefix,
@@ -229,6 +242,7 @@ public class ShellCommandImpl extends AbstractDescribable implements ShellComman
         // 2. Mask autoComplete errors in the absence of other autoComplete possibilities.
 
         // Try to autoComplete prefix as the name of any unbound param.
+        // TODO: Do offer to autoComplete the name of the last unbound parameter, but only if no other choice.
         final Trie<AutoCompleteType> paramNamePossibilities = autoCompleteParamName(prefix, unboundParams, boundParams);
 
         // AutoCompleting the param value could throw an exception, which we don't want to mask
@@ -255,7 +269,7 @@ public class ShellCommandImpl extends AbstractDescribable implements ShellComman
     private Trie<AutoCompleteType> autoCompleteParamName(String prefix,
                                                          List<CommandParam> unboundParams,
                                                          Map<String, Object> boundParams) {
-        if (unboundParams.size() == 1 ) {
+        if (unboundParams.size() == 1) {
             // Don't suggest param names if there is only 1 option available.
             return TrieImpl.emptyTrie();
         }

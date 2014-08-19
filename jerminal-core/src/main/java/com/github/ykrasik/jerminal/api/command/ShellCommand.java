@@ -20,7 +20,7 @@ import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
 import com.github.ykrasik.jerminal.api.exception.ExecuteException;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.internal.filesystem.ShellEntry;
-import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
+import com.github.ykrasik.jerminal.internal.returnvalue.AssistParamsReturnsValue;
 
 import java.util.List;
 
@@ -30,12 +30,13 @@ import java.util.List;
  * <p>Parameter values can be passed in 2 ways: positional and named.<br>
  * <i>Positional:</i> The value is parsed by the next {@link CommandParam parameter} that is still unparsed.<br>
  * <i>Named:</i> The value is expected to be of the form "{name}={value}" and will be parsed
- *               by the {@link CommandParam parameter} who's name is "{name}".</p>
+ * by the {@link CommandParam parameter} who's name is "{name}".</p>
  *
  * @author Yevgeny Krasik
  */
 // TODO: Consider hiding this class a bit better, it's in an API package after all.
 // TODO: Create a ShellFile class which will contain this one, and rename this to Command.
+// TODO: Rename this to Command?
 public interface ShellCommand extends ShellEntry {
     /**
      * Returns the command's declared parameters.
@@ -44,19 +45,22 @@ public interface ShellCommand extends ShellEntry {
 
     /**
      * Parse the args according to the command's expected parameters.
+     *
      * @throws ParseException If the one of the args is invalid or a mandatory parameter is missing.
      */
     CommandArgs parseCommandArgs(List<String> args) throws ParseException;
 
     /**
-     * Offer auto complete suggestions for the next available {@link CommandParam parameter}.
+     * Offer assistance for the next available {@link CommandParam parameter}.
+     *
      * @throws ParseException If the one of the args is invalid or a mandatory parameter is missing.
      */
-    AutoCompleteReturnValue autoCompleteArgs(List<String> args) throws ParseException;
+    AssistParamsReturnsValue assistArgs(List<String> args) throws ParseException;
 
     /**
      * Execute with the given arguments.<br>
      * Output can be written to the supplied {@link OutputPrinter}.
+     *
      * @throws ExecuteException If an error occurs during execution.
      */
     void execute(CommandArgs args, OutputPrinter outputPrinter) throws ExecuteException;

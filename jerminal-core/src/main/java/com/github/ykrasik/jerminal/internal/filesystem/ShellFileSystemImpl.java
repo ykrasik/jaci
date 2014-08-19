@@ -17,8 +17,8 @@
 package com.github.ykrasik.jerminal.internal.filesystem;
 
 import com.github.ykrasik.jerminal.api.command.ShellCommand;
+import com.github.ykrasik.jerminal.api.exception.ParseError;
 import com.github.ykrasik.jerminal.collections.trie.Trie;
-import com.github.ykrasik.jerminal.internal.exception.ParseError;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectory;
 import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
@@ -78,40 +78,18 @@ public class ShellFileSystemImpl implements ShellFileSystem {
     }
 
     @Override
-    public ShellCommand parsePathToCommand(String rawPath) throws ParseException {
-        // If rawPath does not contain a single delimiter, we can try use it as the command name.
-        final int delimiterIndex = rawPath.lastIndexOf(DELIMITER);
-        if (delimiterIndex == -1) {
-            // rawPath does not contain a delimiter.
-            // It could either be a global command, or a command from the currentDirectory.
-            final Optional<ShellCommand> globalCommand = globalCommands.get(rawPath);
-            if (globalCommand.isPresent()) {
-                return globalCommand.get();
-            } else {
-                return currentDirectory.parseCommand(rawPath);
-            }
-        }
-
-        // rawPath contains a delimiter.
-        // However, if rawPath ends with the delimiter, it cannot possibly point to a command.
-        if (endsWithDelimiter(rawPath)) {
-            throw pathDoesntPointToCommand(rawPath);
-        }
-
-        // Parse the path until the pre-last entry as directories, and let the last directory parse the last entry as a command.
-        // So in "path/to/command", parse "path/to" as path to directory "to", and let "to" parse "command".
-        final String pathToLastDirectory = rawPath.substring(0, delimiterIndex);
-        final ShellDirectory lastDirectory = parsePathToDirectory(pathToLastDirectory);
-
-        final String rawCommand = rawPath.substring(delimiterIndex + 1);
-        return lastDirectory.parseCommand(rawCommand);
-    }
-
-    @Override
     public ShellDirectory parsePathToDirectory(String rawPath) throws ParseException {
+        if (rawPath.isEmpty()) {
+            throw emptyDirectoryNameAlongPath(currentDirectory);
+        }
+
+        final boolean startsFromRoot = rawPath.charAt(0) == DELIMITER;
+        if (startsFromRoot && rawPath.length() == 1) {
+            return root;
+        }
+
         // Remove leading and trailing '/'.
-        final boolean startsFromRoot = !rawPath.isEmpty() && rawPath.charAt(0) == DELIMITER;
-        final String pathToSplit = removeLeadingAndTrailingDelimiter(rawPath);
+        final String pathToSplit = removeLeadingAndTrailingDelimiter(rawPath, startsFromRoot);
 
         // Split the given path according to delimiter.
         final List<String> splitPath = SPLITTER.splitToList(pathToSplit);
@@ -119,6 +97,9 @@ public class ShellFileSystemImpl implements ShellFileSystem {
         // Parse all pathElements as directories.
         ShellDirectory dir = startsFromRoot ? root : currentDirectory;
         for (String pathElement : splitPath) {
+            if (pathElement.isEmpty()) {
+                throw emptyDirectoryNameAlongPath(dir);
+            }
             if (THIS.equals(pathElement)) {
                 continue;
             }
@@ -137,6 +118,48 @@ public class ShellFileSystemImpl implements ShellFileSystem {
         return dir;
     }
 
+    // TODO: Make sure this doesn't mask '//' or '///' as an error.
+    private String removeLeadingAndTrailingDelimiter(String path, boolean leadingDelimiter) {
+        final int length = path.length();
+        final boolean trailingDelimiter = length > 1 && path.charAt(length - 1) == DELIMITER;
+        if (!leadingDelimiter && !trailingDelimiter) {
+            return path;
+        } else {
+            final int startingDelimiterIndex = leadingDelimiter ? 1 : 0;
+            final int endingDelimiterIndex = trailingDelimiter ? Math.max(length - 1, startingDelimiterIndex) : length;
+            return path.substring(startingDelimiterIndex, endingDelimiterIndex);
+        }
+    }
+
+    @Override
+    public ShellCommand parsePathToCommand(String rawPath) throws ParseException {
+        // If rawPath does not contain a single delimiter, we can try use it as the command name.
+        final int delimiterIndex = rawPath.lastIndexOf(DELIMITER);
+        if (delimiterIndex == -1) {
+            // rawPath does not contain a delimiter.
+            // It could either be a global command, or a command from the currentDirectory.
+            final Optional<ShellCommand> globalCommand = globalCommands.get(rawPath);
+            if (globalCommand.isPresent()) {
+                return globalCommand.get();
+            } else {
+                return currentDirectory.parseCommand(rawPath);
+            }
+        }
+
+        // rawPath contains a delimiter.
+        // Parse the path until the pre-last entry as directories, and let the last directory parse the last entry as a command.
+        // So in "path/to/command", parse "path/to" as path to directory "to", and let "to" parse "command".
+        final String pathToLastDirectory = rawPath.substring(0, delimiterIndex + 1);
+        final ShellDirectory lastDirectory = parsePathToDirectory(pathToLastDirectory);
+
+        // If rawPath ends with the delimiter, it cannot possibly point to a command.
+        final String rawCommand = rawPath.substring(delimiterIndex + 1);
+        if (rawCommand.isEmpty()) {
+            throw pathDoesntPointToCommand(rawPath);
+        }
+        return lastDirectory.parseCommand(rawCommand);
+    }
+
     @Override
     public AutoCompleteReturnValue autoCompletePathToDirectory(String rawPath) throws ParseException {
         // Parse the path until the last delimiter, after which we autoComplete the remaining arg.
@@ -150,9 +173,10 @@ public class ShellFileSystemImpl implements ShellFileSystem {
         // rawPath contains a delimiter.
         // Parse the path until the pre-last entry as directories, and let the last directory autoComplete the last entry as a directory.
         // So in "path/to/directory", parse "path/to" as path to directory "to", and let "to" autoComplete "directory".
-        final String pathToLastDirectory = rawPath.substring(0, delimiterIndex);
-        final String rawEntry = rawPath.substring(delimiterIndex + 1);
+        final String pathToLastDirectory = rawPath.substring(0, delimiterIndex + 1);
         final ShellDirectory lastDirectory = parsePathToDirectory(pathToLastDirectory);
+
+        final String rawEntry = rawPath.substring(delimiterIndex + 1);
         final Trie<AutoCompleteType> possibilities = lastDirectory.autoCompleteDirectory(rawEntry);
         return new AutoCompleteReturnValue(rawEntry, possibilities);
     }
@@ -173,39 +197,12 @@ public class ShellFileSystemImpl implements ShellFileSystem {
         // rawPath contains a delimiter.
         // Parse the path until the pre-last entry as directories, and let the last directory autoComplete the last entry.
         // So in "path/to/entry", parse "path/to" as path to directory "to", and let "to" autoComplete "entry".
-        final String pathToLastDirectory = rawPath.substring(0, delimiterIndex);
-        final String rawEntry = rawPath.substring(delimiterIndex + 1);
-        final ShellDirectory lastDirectory;
-        if (pathToLastDirectory.isEmpty()) {
-            // This can only happen if the commandLine started with '/'.
-            lastDirectory = root;
-        } else {
-            lastDirectory = parsePathToDirectory(pathToLastDirectory);
-        }
+        final String pathToLastDirectory = rawPath.substring(0, delimiterIndex + 1);
+        final ShellDirectory lastDirectory = parsePathToDirectory(pathToLastDirectory);
 
+        final String rawEntry = rawPath.substring(delimiterIndex + 1);
         final Trie<AutoCompleteType> possibilities = lastDirectory.autoCompleteEntry(rawEntry);
         return new AutoCompleteReturnValue(rawEntry, possibilities);
-    }
-
-    private String removeLeadingAndTrailingDelimiter(String str) {
-        final boolean leadingDelimiter = startsWithDelimiter(str);
-        final boolean trailingDelimiter = endsWithDelimiter(str);
-        if (!leadingDelimiter && !trailingDelimiter) {
-            return str;
-        } else {
-            final int startingDelimiterIndex = leadingDelimiter ? 1 : 0;
-            final int endingDelimiterIndex = trailingDelimiter ? Math.max(str.length() - 1, startingDelimiterIndex) : str.length();
-            return str.substring(startingDelimiterIndex, endingDelimiterIndex);
-        }
-    }
-
-    private boolean startsWithDelimiter(String path) {
-        return !path.isEmpty() && path.charAt(0) == DELIMITER;
-    }
-
-    private boolean endsWithDelimiter(String path) {
-        final int length = path.length();
-        return length >= 1 && path.charAt(length - 1) == DELIMITER;
     }
 
     private ParseException directoryDoesNotHaveParent(String directoryName) {
@@ -222,6 +219,12 @@ public class ShellFileSystemImpl implements ShellFileSystem {
         );
     }
 
+    private ParseException emptyDirectoryNameAlongPath(ShellDirectory parentDirectory) {
+        return new ParseException(
+            ParseError.INVALID_ENTRY,
+            "Empty directory name detected along path! Under: '%s'", parentDirectory.getName()
+        );
+    }
 
     public static boolean isLegalName(String name) {
         return !ILLEGAL_NAMES.contains(name);

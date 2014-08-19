@@ -16,9 +16,10 @@
 
 package com.github.ykrasik.jerminal.internal.exception;
 
+import com.github.ykrasik.jerminal.api.assist.Suggestions;
+import com.github.ykrasik.jerminal.api.exception.ParseError;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
-import com.github.ykrasik.jerminal.internal.returnvalue.Suggestions;
 
 /**
  * An exception that signifies an error while parsing the command line.

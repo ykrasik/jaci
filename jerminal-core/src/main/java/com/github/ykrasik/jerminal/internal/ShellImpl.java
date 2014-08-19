@@ -17,9 +17,13 @@
 package com.github.ykrasik.jerminal.internal;
 
 import com.github.ykrasik.jerminal.api.Shell;
+import com.github.ykrasik.jerminal.api.assist.AssistInfo;
+import com.github.ykrasik.jerminal.api.assist.BoundParam;
+import com.github.ykrasik.jerminal.api.assist.Suggestions;
 import com.github.ykrasik.jerminal.api.command.CommandArgs;
 import com.github.ykrasik.jerminal.api.command.OutputPrinter;
 import com.github.ykrasik.jerminal.api.command.ShellCommand;
+import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
 import com.github.ykrasik.jerminal.api.exception.ExecuteException;
 import com.github.ykrasik.jerminal.api.output.OutputProcessor;
 import com.github.ykrasik.jerminal.collections.trie.Trie;
@@ -27,14 +31,10 @@ import com.github.ykrasik.jerminal.internal.command.OutputPrinterImpl;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.internal.exception.ShellException;
 import com.github.ykrasik.jerminal.internal.filesystem.ShellFileSystem;
+import com.github.ykrasik.jerminal.internal.returnvalue.*;
 import com.google.common.base.Optional;
-import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
-import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteType;
-import com.github.ykrasik.jerminal.internal.returnvalue.Suggestions;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
@@ -77,29 +77,35 @@ public class ShellImpl implements Shell {
         return commandLineHistory.getNextCommandLine();
     }
 
-    // TODO: AutoCompleting should give more assistance: Command info etc.
-    // TODO: Rename this to assist.
     @Override
-    public String autoComplete(String rawCommandLine) {
-        // Split the commandLine for autoComplete.
-        final List<String> commandLine = splitCommandLineForAutoComplete(rawCommandLine);
-
-        // Do the actual autoCompletion.
+    public String assist(String rawCommandLine) {
         outputProcessor.begin();
         try {
-            final AutoCompleteReturnValue returnValue = doAutoComplete(commandLine);
-            return getNewCommandLine(returnValue, rawCommandLine);
+            // Split the commandLine for autoComplete.
+            // Only remove leading spaces, trailing spaces have a significant meaning.
+            final String trimmedCommandLine = rawCommandLine.startsWith(" ") ?
+                ARGS_PATTERN.matcher(rawCommandLine).replaceFirst("") :
+                rawCommandLine;
+            final List<String> commandLine = Arrays.asList(ARGS_PATTERN.split(trimmedCommandLine, -1));
+
+            // Do the actual autoCompletion.
+            final AssistReturnValue returnValue = doAssist(commandLine);
+            return handleAssist(returnValue, rawCommandLine);
         } catch (ParseException e) {
             handleParseException(e);
-
-            // There was an error parsing the command line, return the old one.
-            return rawCommandLine;
+        } catch (Exception e) {
+            outputProcessor.internalError(e);
         } finally {
             outputProcessor.end();
         }
+
+        // There was an error parsing the command line, return the old one.
+        return rawCommandLine;
     }
 
-    private AutoCompleteReturnValue doAutoComplete(List<String> commandLine) throws ParseException {
+    // FIXME: Assist info should be printed no matter what.
+    // FIXME: I do still want the old errors - no more params, etc.
+    private AssistReturnValue doAssist(List<String> commandLine) throws ParseException {
         // The first arg of the commandLine must be a path to a command.
         final String rawPath = commandLine.get(0);
 
@@ -107,52 +113,109 @@ public class ShellImpl implements Shell {
         // Otherwise, the first arg is expected to be a valid command and we are autoCompleting its' args.
         if (commandLine.size() == 1) {
             // The first arg is the only arg on the commandLine, autoComplete path.
-            return fileSystem.autoCompletePath(rawPath);
+            final AutoCompleteReturnValue autoCompleteReturnValue = fileSystem.autoCompletePath(rawPath);
+            return new AssistReturnValue(
+                Optional.<ShellCommand>absent(),
+                Optional.<CommandParam>absent(),
+                Collections.<String, Object>emptyMap(),
+                autoCompleteReturnValue
+            );
         }
 
         // The first arg is not the only arg on the commandLine, it is expected to be a valid path to a command.
         final ShellCommand command = fileSystem.parsePathToCommand(rawPath);
 
-        // AutoComplete the command args.
-        // The args start from the 2nd commandLine element (the first was the command).
+        // Provide assistance with the command parameters.
+        // The command args start from the 2nd commandLine element (the first was the command).
         final List<String> args = commandLine.subList(1, commandLine.size());
-        return command.autoCompleteArgs(args);
+        final AssistParamsReturnsValue assistParamsReturnsValue = command.assistArgs(args);
+        return new AssistReturnValue(Optional.of(command), assistParamsReturnsValue.getCurrentParam(), assistParamsReturnsValue.getBoundParams(), assistParamsReturnsValue.getAutoCompleteReturnValue());
     }
 
-    private String getNewCommandLine(AutoCompleteReturnValue returnValue, String rawCommandLine) {
-        final String prefix = returnValue.getPrefix();
-        final Trie<AutoCompleteType> possibilities = returnValue.getPossibilities();
+    private String handleAssist(AssistReturnValue returnValue, String rawCommandLine) {
+        // This method does 3 things:
+        // 1. Display assistance about the command line, if there is any.
+        // 2. Determine the suggestions for auto complete.
+        // 3. Determine what the new command line should be.
+        final AutoCompleteReturnValue autoCompleteReturnValue = returnValue.getAutoCompleteReturnValue();
+        final String prefix = autoCompleteReturnValue.getPrefix();
+        final Trie<AutoCompleteType> possibilities = autoCompleteReturnValue.getPossibilities();
         final Map<String, AutoCompleteType> possibilitiesMap = possibilities.toMap();
+
+        final Optional<AssistInfo> assistInfo = createAssistInfo(returnValue);
+        final Optional<Suggestions> suggestions;
+        final String newCommandLine;
         final int numPossibilities = possibilitiesMap.size();
         if (numPossibilities == 0) {
-            final String message = String.format("AutoComplete not possible for prefix '%s'", prefix);
-            outputProcessor.autoCompleteNotPossible(message);
-
             // AutoComplete didn't give any results, return the old command line.
-            return rawCommandLine;
-        }
-
-        final String autoCompleteAddition;
-        if (numPossibilities == 1) {
-            // Only a single word is possible.
-            // Let's be helpful - depending on the autoCompleteType, add a suffix.
-            final String singlePossibility = possibilitiesMap.keySet().iterator().next();
-            final AutoCompleteType type = possibilitiesMap.get(singlePossibility);
-            final char suffix = getSinglePossibilitySuffix(type);
-            autoCompleteAddition = getAutoCompleteAddition(prefix, singlePossibility) + suffix;
+            suggestions = Optional.absent();
+            newCommandLine = rawCommandLine;
         } else {
-            // Multiple words are possible.
-            // AutoComplete as much as is possible - until the longest common prefix.
-            final String longestPrefix = possibilities.getLongestPrefix();
-            autoCompleteAddition = getAutoCompleteAddition(prefix, longestPrefix);
+            final String autoCompleteAddition;
+            if (numPossibilities == 1) {
+                // TODO: Only 1 possibility, assistInfo should be updated to show it...
+                // Only a single auto complete result is possible.
+                // Just take the auto complete, the change will be reflected in the new command line. No suggestions.
+                // Let's be helpful - depending on the autoCompleteType, add a suffix.
+                final String singlePossibility = possibilitiesMap.keySet().iterator().next();
+                final AutoCompleteType type = possibilitiesMap.get(singlePossibility);
+                final char suffix = getSinglePossibilitySuffix(type);
+                autoCompleteAddition = getAutoCompleteAddition(prefix, singlePossibility) + suffix;
+                suggestions = Optional.absent();
+            } else {
+                // Multiple auto complete results are possible.
+                // AutoComplete as much as is possible - until the longest common prefix.
+                final String longestPrefix = possibilities.getLongestPrefix();
+                autoCompleteAddition = getAutoCompleteAddition(prefix, longestPrefix);
 
-            // Catalogue the suggestions according to their type and display them.
-            final Suggestions suggestions = createAutoCompleteSuggestions(possibilitiesMap);
-            displaySuggestions(suggestions);
+                // Catalogue the suggestions according to their type and display them.
+                suggestions = Optional.of(createAutoCompleteSuggestions(possibilitiesMap));
+            }
+
+            newCommandLine = rawCommandLine + autoCompleteAddition;
         }
 
-        // The new command line is the old command line + autoCompleteAddition.
-        return rawCommandLine + autoCompleteAddition;
+        outputProcessor.displayAssistance(assistInfo, suggestions);
+        return newCommandLine;
+    }
+
+    private Optional<AssistInfo> createAssistInfo(AssistReturnValue returnValue) {
+        final Optional<ShellCommand> commandOptional = returnValue.getCommand();
+        if (!commandOptional.isPresent()) {
+            return Optional.absent();
+        }
+
+        final ShellCommand command = commandOptional.get();
+        final List<BoundParam> boundParams = createBoundParams(command, returnValue.getBoundParams());
+        final int currentParamIndex = getCurrentParamIndex(command, returnValue.getCurrentParam());
+        return Optional.of(new AssistInfo(command.getName(), boundParams, currentParamIndex));
+    }
+
+    private List<BoundParam> createBoundParams(ShellCommand command, Map<String, Object> boundParamMap) {
+        final List<CommandParam> params = command.getParams();
+        final List<BoundParam> boundParams = new ArrayList<>(params.size());
+        for (CommandParam param : params) {
+            final Optional<Object> value = Optional.fromNullable(boundParamMap.get(param.getName()));
+            boundParams.add(new BoundParam(param, value));
+        }
+        return boundParams;
+    }
+
+    private int getCurrentParamIndex(ShellCommand command, Optional<CommandParam> currentParamOptional) {
+        if (!currentParamOptional.isPresent()) {
+            return -1;
+        }
+
+        List<CommandParam> params = command.getParams();
+        final CommandParam currentParam = currentParamOptional.get();
+        for (int i = 0; i < params.size(); i++) {
+            final CommandParam param = params.get(i);
+            if (currentParam == param) {
+                return i;
+            }
+        }
+
+        throw new ShellException("CurrentParam is not a parameter of the command?! currentParam=%s, command=%s", currentParam, command);
     }
 
     private char getSinglePossibilitySuffix(AutoCompleteType type) {
@@ -168,11 +231,11 @@ public class ShellImpl implements Shell {
     }
 
     private Suggestions createAutoCompleteSuggestions(Map<String, AutoCompleteType> possibilitiesMap) {
-        final Suggestions autoCompleteSuggestions = new Suggestions();
+        final SuggestionsBuilder builder = new SuggestionsBuilder();
         for (Entry<String, AutoCompleteType> entry : possibilitiesMap.entrySet()) {
-            autoCompleteSuggestions.addSuggestion(entry.getValue(), entry.getKey());
+            builder.addSuggestion(entry.getValue(), entry.getKey());
         }
-        return autoCompleteSuggestions;
+        return builder.build();
     }
 
     private String getAutoCompleteAddition(String prefix, String autoCompletedPrefix) {
@@ -181,13 +244,25 @@ public class ShellImpl implements Shell {
 
     @Override
     public String execute(String rawCommandLine) {
+        outputProcessor.begin();
+        try {
+            return doExecute(rawCommandLine);
+        } catch (Exception e) {
+            outputProcessor.internalError(e);
+        } finally {
+            outputProcessor.end();
+        }
+
+        // There was an internal error, return the old command line.
+        return rawCommandLine;
+    }
+
+    private String doExecute(String rawCommandLine) {
         // Split the commandLine.
-        final List<String> commandLine = splitCommandLineForExecute(rawCommandLine);
+        final List<String> commandLine = Arrays.asList(ARGS_PATTERN.split(rawCommandLine.trim(), -1));
         if (commandLine.size() == 1 && commandLine.get(0).isEmpty()) {
             // Received a commandLine that is either empty or full of spaces.
-            outputProcessor.begin();
             outputProcessor.displayEmptyLine();
-            outputProcessor.end();
             return "";
         }
 
@@ -204,9 +279,7 @@ public class ShellImpl implements Shell {
             final List<String> rawArgs = commandLine.subList(1, commandLine.size());
             args = command.parseCommandArgs(rawArgs);
         } catch (ParseException e) {
-            outputProcessor.begin();
             handleParseException(e);
-            outputProcessor.end();
 
             // There was an error parsing the command line, return the old one.
             return rawCommandLine;
@@ -217,60 +290,27 @@ public class ShellImpl implements Shell {
         commandLineHistory.pushCommandLine(rawCommandLine);
 
         // Execute the command.
-        outputProcessor.begin();
-        try {
-            command.execute(args, outputPrinter);
-            // Print a generic success message
-            outputPrinter.println("Command '%s' executed successfully.", command.getName());
-        } catch (ExecuteException e) {
-            outputProcessor.executeError(e.getMessage());
-        } catch (Exception e) {
-            outputPrinter.println("Command '%s' terminated with an unhandled exception!", command.getName());
-            outputProcessor.executeUnhandledException(e);
-        } finally {
-            outputProcessor.end();
-        }
+        executeParsedCommand(command, args);
 
         // Command line was successfully parsed, the new command line should be blank.
         return "";
     }
 
-    private void handleParseException(ParseException e) {
-        final String errorMessage = String.format("Parse Error: %s", e.getMessage());
-        outputProcessor.parseError(e.getError(), errorMessage);
-        displaySuggestionsIfApplicable(e.getSuggestions());
-    }
-
-    private void displaySuggestionsIfApplicable(Optional<Suggestions> suggestions) {
-        if (suggestions.isPresent()) {
-            displaySuggestions(suggestions.get());
+    private void executeParsedCommand(ShellCommand command, CommandArgs args) {
+        try {
+            command.execute(args, outputPrinter);
+            // Print a generic success message
+            outputPrinter.println("Command '%s' executed successfully.", command.getName());
+        } catch (ExecuteException e) {
+            outputProcessor.executeError(e);
+        } catch (Exception e) {
+            outputPrinter.println("Command '%s' was terminated due to an unhandled exception!", command.getName());
+            outputProcessor.executeUnhandledException(e);
         }
     }
 
-    private void displaySuggestions(Suggestions suggestions) {
-        final List<String> directorySuggestions = suggestions.getDirectorySuggestions();
-        final List<String> commandSuggestions = suggestions.getCommandSuggestions();
-        final List<String> paramNameSuggestions = suggestions.getParamNameSuggestions();
-        final List<String> paramValueSuggestions = suggestions.getParamValueSuggestions();
-
-        outputProcessor.displaySuggestions(
-            directorySuggestions,
-            commandSuggestions,
-            paramNameSuggestions,
-            paramValueSuggestions
-        );
-    }
-
-    private List<String> splitCommandLineForAutoComplete(String commandLine) {
-        // Only remove leading spaces, trailing spaces have a significant meaning.
-        final String trimmedCommandLine = commandLine.startsWith(" ") ?
-            ARGS_PATTERN.matcher(commandLine).replaceFirst("") :
-            commandLine;
-        return Arrays.asList(ARGS_PATTERN.split(trimmedCommandLine, -1));
-    }
-
-    private List<String> splitCommandLineForExecute(String commandLine) {
-        final String trimmedCommandLine = commandLine.trim();
-        return Arrays.asList(ARGS_PATTERN.split(trimmedCommandLine, -1));
+    private void handleParseException(ParseException e) {
+        final String errorMessage = String.format("Parse Error: %s", e.getMessage());
+        outputProcessor.parseError(e.getError(), errorMessage, e.getSuggestions());
     }
 }

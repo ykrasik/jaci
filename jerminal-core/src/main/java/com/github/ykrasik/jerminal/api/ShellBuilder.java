@@ -44,8 +44,8 @@ import java.util.Set;
  * @author Yevgeny Krasik
  */
 public class ShellBuilder {
-    private static final String VERSION = "0.1";
-    private static final String DEFAULT_WELCOME_MESSAGE = "Welcome to Jerminal v" + VERSION + "!\n\n";
+    private static final String VERSION = "0.1a";
+    private static final String DEFAULT_WELCOME_MESSAGE = "Welcome to Jerminal v" + VERSION + "!\n";
 
     private final OutputProcessor outputProcessor;
     private final ShellFileSystemBuilder fileSystemBuilder;

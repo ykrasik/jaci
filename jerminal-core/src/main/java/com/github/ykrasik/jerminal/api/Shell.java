@@ -54,7 +54,7 @@ public interface Shell {
      * Returns the new command line.<br>
      * The caller of this method is expected to alter the command line accordingly.
      */
-    String autoComplete(String commandLine);
+    String assist(String commandLine);
 
     /**
      * Execute the command line.<br>

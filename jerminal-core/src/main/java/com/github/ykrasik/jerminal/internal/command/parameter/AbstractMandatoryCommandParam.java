@@ -17,9 +17,9 @@
 package com.github.ykrasik.jerminal.internal.command.parameter;
 
 import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
+import com.github.ykrasik.jerminal.api.exception.ParseError;
 import com.github.ykrasik.jerminal.internal.AbstractDescribable;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
-import com.github.ykrasik.jerminal.internal.exception.ParseError;
 
 /**
  * An abstract implementation for a mandatory {@link CommandParam}.

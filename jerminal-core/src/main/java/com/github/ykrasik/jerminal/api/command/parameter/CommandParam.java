@@ -28,6 +28,7 @@ import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
  *
  * @author Yevgeny Krasik
  */
+// TODO: Create a ParameterDef class and use double dispatch to decipher parameters.
 public interface CommandParam extends Describable {
     /**
      * Returns the type of the parameter.

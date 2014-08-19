@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.internal.exception;
+package com.github.ykrasik.jerminal.api.exception;
 
 /**
  * Possible parse errors.

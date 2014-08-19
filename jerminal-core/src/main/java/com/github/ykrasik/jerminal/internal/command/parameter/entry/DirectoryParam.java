@@ -16,6 +16,7 @@
 
 package com.github.ykrasik.jerminal.internal.command.parameter.entry;
 
+import com.github.ykrasik.jerminal.api.exception.ParseError;
 import com.github.ykrasik.jerminal.internal.command.parameter.AbstractMandatoryCommandParam;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.internal.filesystem.ShellFileSystem;
@@ -45,11 +46,21 @@ public class DirectoryParam extends AbstractMandatoryCommandParam<ShellDirectory
 
     @Override
     public Object parse(String rawValue) throws ParseException {
+        if (rawValue.isEmpty()) {
+            throw emptyValue();
+        }
         return fileSystem.parsePathToDirectory(rawValue);
     }
 
     @Override
     public AutoCompleteReturnValue autoComplete(String prefix) throws ParseException {
         return fileSystem.autoCompletePathToDirectory(prefix);
+    }
+
+    private ParseException emptyValue() {
+        return new ParseException(
+            ParseError.INVALID_PARAM_VALUE,
+            "No directory was supplied!"
+        );
     }
 }

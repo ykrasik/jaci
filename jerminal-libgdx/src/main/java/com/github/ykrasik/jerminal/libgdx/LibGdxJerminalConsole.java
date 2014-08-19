@@ -206,7 +206,7 @@ public class LibGdxJerminalConsole extends Stage {
 
     private void assistCommandLine() {
         final String commandLine = readCommandLineUntilCursor();
-        final String newCommandLine = shell.autoComplete(commandLine);
+        final String newCommandLine = shell.assist(commandLine);
         setCommandLine(newCommandLine);
     }
 

@@ -17,10 +17,10 @@
 package com.github.ykrasik.jerminal.internal.filesystem.directory;
 
 import com.github.ykrasik.jerminal.api.command.ShellCommand;
+import com.github.ykrasik.jerminal.api.exception.ParseError;
 import com.github.ykrasik.jerminal.collections.trie.Trie;
 import com.github.ykrasik.jerminal.collections.trie.TrieBuilder;
 import com.github.ykrasik.jerminal.internal.AbstractDescribable;
-import com.github.ykrasik.jerminal.internal.exception.ParseError;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.internal.exception.ShellException;
 import com.github.ykrasik.jerminal.internal.filesystem.ShellEntry;

@@ -57,13 +57,13 @@ public class ShellFileSystemPromise implements ShellFileSystem {
     }
 
     @Override
-    public ShellCommand parsePathToCommand(String rawPath) throws ParseException {
-        return delegate.parsePathToCommand(rawPath);
+    public ShellDirectory parsePathToDirectory(String rawPath) throws ParseException {
+        return delegate.parsePathToDirectory(rawPath);
     }
 
     @Override
-    public ShellDirectory parsePathToDirectory(String rawPath) throws ParseException {
-        return delegate.parsePathToDirectory(rawPath);
+    public ShellCommand parsePathToCommand(String rawPath) throws ParseException {
+        return delegate.parsePathToCommand(rawPath);
     }
 
     @Override

@@ -16,9 +16,9 @@
 
 package com.github.ykrasik.jerminal.api.command.parameter.string;
 
+import com.github.ykrasik.jerminal.api.exception.ParseError;
 import com.github.ykrasik.jerminal.collections.trie.Trie;
 import com.github.ykrasik.jerminal.internal.command.parameter.AbstractMandatoryCommandParam;
-import com.github.ykrasik.jerminal.internal.exception.ParseError;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
 import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteType;

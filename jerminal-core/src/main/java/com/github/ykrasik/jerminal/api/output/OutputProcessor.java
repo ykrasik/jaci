@@ -16,11 +16,13 @@
 
 package com.github.ykrasik.jerminal.api.output;
 
+import com.github.ykrasik.jerminal.api.assist.AssistInfo;
+import com.github.ykrasik.jerminal.api.assist.Suggestions;
 import com.github.ykrasik.jerminal.api.command.view.ShellCommandView;
+import com.github.ykrasik.jerminal.api.exception.ExecuteException;
+import com.github.ykrasik.jerminal.api.exception.ParseError;
 import com.github.ykrasik.jerminal.api.filesystem.ShellEntryView;
-import com.github.ykrasik.jerminal.internal.exception.ParseError;
-
-import java.util.List;
+import com.google.common.base.Optional;
 
 /**
  * In charge of displaying information to the user.<br>
@@ -40,6 +42,7 @@ public interface OutputProcessor {
      * {@link #begin()} will be called before any more events arrive.
      */
     void end();
+
     /**
      * Display the welcome message.
      */
@@ -56,12 +59,9 @@ public interface OutputProcessor {
     void displayText(String text);
 
     /**
-     * Either the user requested assistance, or an error occurred. Display possible suggestions.
+     * The user requested assistance with the command line, display the results.
      */
-    void displaySuggestions(List<String> directorySuggestions,
-                            List<String> commandSuggestions,
-                            List<String> paramNameSuggestions,
-                            List<String> paramValueSuggestions);
+    void displayAssistance(Optional<AssistInfo> assistInfo, Optional<Suggestions> suggestions);
 
     /**
      * The user requested to display the directory structure of a directory.
@@ -76,18 +76,13 @@ public interface OutputProcessor {
     /**
      * A parse error occurred while parsing the command line.
      */
-    void parseError(ParseError error, String errorMessage);
-
-    /**
-     * The user requested assistance with the command line, but no assistance can be given.
-     */
-    void autoCompleteNotPossible(String errorMessage);
+    // TODO: Put all these params in a single ParseErrorContext?
+    void parseError(ParseError error, String errorMessage, Optional<Suggestions> suggestions);
 
     /**
      * An execution error occurred while executing the command line.<br>
-     * This can only happen when the user explicitly throws an {@link com.github.ykrasik.jerminal.api.exception.ExecuteException ExecuteException}.
      */
-    void executeError(String errorMessage);
+    void executeError(ExecuteException e);
 
     /**
      * An unhandled exception was thrown while executing the command line.<br>
@@ -95,6 +90,11 @@ public interface OutputProcessor {
      * this exception was thrown from within the code associated with the command being run.
      */
     void executeUnhandledException(Exception e);
+
+    /**
+     * An internal error has occurred. Shouldn't happen :)
+     */
+    void internalError(Exception e);
 
     // TODO: Add a 'setPath' call, for 'cd'.
 }

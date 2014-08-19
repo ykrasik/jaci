@@ -16,8 +16,8 @@
 
 package com.github.ykrasik.jerminal.internal.filesystem;
 
-import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.api.command.ShellCommand;
+import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectory;
 import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
 
@@ -43,27 +43,31 @@ public interface ShellFileSystem {
     void setCurrentDirectory(ShellDirectory directory);
 
     /**
-     * Parse the given path as a path to a {@link ShellCommand}.<br>
+     * Parse the given path as a path to a {@link ShellDirectory}.<br>
      * Parsing a path always starts from the current directory, unless the path explicitly starts from root.
-     * @throws ParseException If the path is invalid or doesn't point to a {@link ShellCommand}.
-     */
-    ShellCommand parsePathToCommand(String rawPath) throws ParseException;
-
-    /**
-     * Parse the given path as a path to a {@link ShellDirectory}.
-     * Parsing a path always starts from the current directory, unless the path explicitly starts from root.
+     *
      * @throws ParseException If the path is invalid or doesn't point to a {@link ShellDirectory}.
      */
     ShellDirectory parsePathToDirectory(String rawPath) throws ParseException;
 
     /**
+     * Parse the given path as a path to a {@link ShellCommand}.<br>
+     * Parsing a path always starts from the current directory, unless the path explicitly starts from root.
+     *
+     * @throws ParseException If the path is invalid or doesn't point to a {@link ShellCommand}.
+     */
+    ShellCommand parsePathToCommand(String rawPath) throws ParseException;
+
+    /**
      * Offer auto complete suggestions for the next {@link ShellDirectory} in this path.
+     *
      * @throws ParseException If the path is invalid.
      */
     AutoCompleteReturnValue autoCompletePathToDirectory(String rawPath) throws ParseException;
 
     /**
      * Offer auto complete suggestions for the next {@link ShellDirectory} or {@link ShellCommand} in this path.
+     *
      * @throws ParseException If the path is invalid.
      */
     AutoCompleteReturnValue autoCompletePath(String rawPath) throws ParseException;
