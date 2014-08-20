@@ -21,18 +21,18 @@ import com.google.common.base.Objects;
 import java.util.List;
 
 /**
- * Assistance information about the command line.
+ * Information about the command on the command line.
  *
  * @author Yevgeny Krasik
  */
-public class AssistInfo {
+public class CommandInfo {
     private final String commandName;
-    private final List<BoundParam> boundParams;
+    private final List<ParamAndValue> paramAndValues;
     private final int currentParamIndex;
 
-    public AssistInfo(String commandName, List<BoundParam> boundParams, int currentParamIndex) {
+    public CommandInfo(String commandName, List<ParamAndValue> paramAndValues, int currentParamIndex) {
         this.commandName = commandName;
-        this.boundParams = boundParams;
+        this.paramAndValues = paramAndValues;
         this.currentParamIndex = currentParamIndex;
     }
 
@@ -48,13 +48,13 @@ public class AssistInfo {
      * in the order they appear in the command.<br>
      * The size of this list is equal exactly to the amount of parameters the command defines.
      */
-    public List<BoundParam> getBoundParams() {
-        return boundParams;
+    public List<ParamAndValue> getParamAndValues() {
+        return paramAndValues;
     }
 
     /**
      * Returns the index of the current parameter being parsed.<br>
-     * This is an index into the list returned by {@link #getBoundParams()}.<br>
+     * This is an index into the list returned by {@link #getParamAndValues()}.<br>
      * May be -1 if
      */
     public int getCurrentParamIndex() {
@@ -64,8 +64,9 @@ public class AssistInfo {
     @Override
     public String toString() {
         return Objects.toStringHelper(this)
-            .add("command", commandName)
-            .add("boundParams", boundParams)
+            .add("commandName", commandName)
+            .add("paramAndValues", paramAndValues)
+            .add("currentParamIndex", currentParamIndex)
             .toString();
     }
 }

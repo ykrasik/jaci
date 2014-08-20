@@ -28,6 +28,7 @@ import java.util.Map;
  * @author Yevgeny Krasik
  */
 // TODO: Annotation based config.
+// TODO: Add stack-based arg access.
 public class CommandArgs {
     private final Map<String, Object> args;
 

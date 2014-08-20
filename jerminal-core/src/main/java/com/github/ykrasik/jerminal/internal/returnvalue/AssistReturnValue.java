@@ -16,45 +16,29 @@
 
 package com.github.ykrasik.jerminal.internal.returnvalue;
 
-import com.github.ykrasik.jerminal.api.command.ShellCommand;
-import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
+import com.github.ykrasik.jerminal.api.assist.CommandInfo;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 
-import java.util.Map;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * The return value of an assist operation.<br>
- * Contains auto complete suggestions, as well as info about the command that is being assisted.
+ * Contains info about the command as well as auto complete suggestions.
  *
  * @author Yevgeny Krasik
  */
 public class AssistReturnValue {
-    private final Optional<ShellCommand> command;
-    private final Optional<CommandParam> currentParam;
-    private final Map<String, Object> boundParams;
+    private final Optional<CommandInfo> commandInfo;
     private final AutoCompleteReturnValue autoCompleteReturnValue;
 
-    public AssistReturnValue(Optional<ShellCommand> command,
-                             Optional<CommandParam> currentParam,
-                             Map<String, Object> boundParams,
-                             AutoCompleteReturnValue autoCompleteReturnValue) {
-        this.command = command;
-        this.currentParam = currentParam;
-        this.boundParams = boundParams;
-        this.autoCompleteReturnValue = autoCompleteReturnValue;
+    public AssistReturnValue(Optional<CommandInfo> commandInfo, AutoCompleteReturnValue autoCompleteReturnValue) {
+        this.commandInfo = checkNotNull(commandInfo, "commandInfo");
+        this.autoCompleteReturnValue = checkNotNull(autoCompleteReturnValue, "autoCompleteReturnValue");
     }
 
-    public Optional<ShellCommand> getCommand() {
-        return command;
-    }
-
-    public Optional<CommandParam> getCurrentParam() {
-        return currentParam;
-    }
-
-    public Map<String, Object> getBoundParams() {
-        return boundParams;
+    public Optional<CommandInfo> getCommandInfo() {
+        return commandInfo;
     }
 
     public AutoCompleteReturnValue getAutoCompleteReturnValue() {
@@ -64,9 +48,8 @@ public class AssistReturnValue {
     @Override
     public String toString() {
         return Objects.toStringHelper(this)
-            .add("command", command)
-            .add("currentParam", currentParam)
-            .add("boundParams", boundParams)
+            .add("commandInfo", commandInfo)
+            .add("autoCompleteReturnValue", autoCompleteReturnValue)
             .toString();
     }
 }

@@ -16,8 +16,8 @@
 
 package com.github.ykrasik.jerminal.api.output.terminal;
 
-import com.github.ykrasik.jerminal.api.assist.AssistInfo;
-import com.github.ykrasik.jerminal.api.assist.BoundParam;
+import com.github.ykrasik.jerminal.api.assist.CommandInfo;
+import com.github.ykrasik.jerminal.api.assist.ParamAndValue;
 import com.github.ykrasik.jerminal.api.assist.Suggestions;
 import com.github.ykrasik.jerminal.api.command.parameter.view.ShellCommandParamView;
 import com.github.ykrasik.jerminal.api.command.view.ShellCommandView;
@@ -41,26 +41,26 @@ public class DefaultTerminalSerializer implements TerminalSerializer {
     }
 
     @Override
-    public String serializeAssistInfo(AssistInfo info) {
-        final String commandName = info.getCommandName();
-        final List<BoundParam> boundParams = info.getBoundParams();
-        final int currentParamIndex = info.getCurrentParamIndex();
+    public String serializeCommandInfo(CommandInfo commandInfo) {
+        final String commandName = commandInfo.getCommandName();
+        final List<ParamAndValue> paramAndValues = commandInfo.getParamAndValues();
+        final int currentParamIndex = commandInfo.getCurrentParamIndex();
 
         final StringBuilder sb = new StringBuilder();
         sb.append(commandName);
         sb.append(' ');
-        appendParams(sb, boundParams, currentParamIndex);
+        appendParams(sb, paramAndValues, currentParamIndex);
         return sb.toString();
     }
 
-    private void appendParams(StringBuilder sb, List<BoundParam> boundParams, int currentParamIndex) {
+    private void appendParams(StringBuilder sb, List<ParamAndValue> paramAndValues, int currentParamIndex) {
         // Surround the current param being parsed with >>> <<<
-        for (int i = 0; i < boundParams.size(); i++) {
+        for (int i = 0; i < paramAndValues.size(); i++) {
             if (currentParamIndex == i) {
                 sb.append(">>> ");
             }
 
-            final BoundParam param = boundParams.get(i);
+            final ParamAndValue param = paramAndValues.get(i);
             sb.append(param.getParam().getExternalForm());
 
             final Optional<Object> value = param.getValue();
@@ -99,7 +99,7 @@ public class DefaultTerminalSerializer implements TerminalSerializer {
     }
 
     @Override
-    public String serializeShelEntryView(ShellEntryView shellEntryView) {
+    public String serializeShellEntryView(ShellEntryView shellEntryView) {
         final StringBuilder sb = new StringBuilder();
         doSerializeShellEntryView(sb, shellEntryView, 0);
         return sb.toString();

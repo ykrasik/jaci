@@ -20,19 +20,22 @@ import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * A parameter with it's optionally parsed value. If the value is absent, this parameter hasn't been
  * bound to a value from the command line yet.
  *
  * @author Yevgeny Krasik
  */
-public class BoundParam {
+public class ParamAndValue {
     private final CommandParam param;
+    // FIXME: This should be Optional<String> and contain the value that was passed from the command line.
     private final Optional<Object> value;
 
-    public BoundParam(CommandParam param, Optional<Object> value) {
-        this.param = param;
-        this.value = value;
+    public ParamAndValue(CommandParam param, Optional<Object> value) {
+        this.param = checkNotNull(param, "param");
+        this.value = checkNotNull(value, "value");
     }
 
     public CommandParam getParam() {

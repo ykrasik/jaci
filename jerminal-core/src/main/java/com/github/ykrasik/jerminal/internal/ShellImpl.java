@@ -17,13 +17,11 @@
 package com.github.ykrasik.jerminal.internal;
 
 import com.github.ykrasik.jerminal.api.Shell;
-import com.github.ykrasik.jerminal.api.assist.AssistInfo;
-import com.github.ykrasik.jerminal.api.assist.BoundParam;
+import com.github.ykrasik.jerminal.api.assist.CommandInfo;
 import com.github.ykrasik.jerminal.api.assist.Suggestions;
 import com.github.ykrasik.jerminal.api.command.CommandArgs;
 import com.github.ykrasik.jerminal.api.command.OutputPrinter;
 import com.github.ykrasik.jerminal.api.command.ShellCommand;
-import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
 import com.github.ykrasik.jerminal.api.exception.ExecuteException;
 import com.github.ykrasik.jerminal.api.output.OutputProcessor;
 import com.github.ykrasik.jerminal.collections.trie.Trie;
@@ -34,7 +32,9 @@ import com.github.ykrasik.jerminal.internal.filesystem.ShellFileSystem;
 import com.github.ykrasik.jerminal.internal.returnvalue.*;
 import com.google.common.base.Optional;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
@@ -114,12 +114,7 @@ public class ShellImpl implements Shell {
         if (commandLine.size() == 1) {
             // The first arg is the only arg on the commandLine, autoComplete path.
             final AutoCompleteReturnValue autoCompleteReturnValue = fileSystem.autoCompletePath(rawPath);
-            return new AssistReturnValue(
-                Optional.<ShellCommand>absent(),
-                Optional.<CommandParam>absent(),
-                Collections.<String, Object>emptyMap(),
-                autoCompleteReturnValue
-            );
+            return new AssistReturnValue(Optional.<CommandInfo>absent(), autoCompleteReturnValue);
         }
 
         // The first arg is not the only arg on the commandLine, it is expected to be a valid path to a command.
@@ -128,21 +123,20 @@ public class ShellImpl implements Shell {
         // Provide assistance with the command parameters.
         // The command args start from the 2nd commandLine element (the first was the command).
         final List<String> args = commandLine.subList(1, commandLine.size());
-        final AssistParamsReturnsValue assistParamsReturnsValue = command.assistArgs(args);
-        return new AssistReturnValue(Optional.of(command), assistParamsReturnsValue.getCurrentParam(), assistParamsReturnsValue.getBoundParams(), assistParamsReturnsValue.getAutoCompleteReturnValue());
+        return command.assistArgs(args);
     }
 
     private String handleAssist(AssistReturnValue returnValue, String rawCommandLine) {
         // This method does 3 things:
-        // 1. Display assistance about the command line, if there is any.
+        // 1. Display command information, if there is any.
         // 2. Determine the suggestions for auto complete.
         // 3. Determine what the new command line should be.
+        final Optional<CommandInfo> commandInfo = returnValue.getCommandInfo();
+
         final AutoCompleteReturnValue autoCompleteReturnValue = returnValue.getAutoCompleteReturnValue();
-        final String prefix = autoCompleteReturnValue.getPrefix();
         final Trie<AutoCompleteType> possibilities = autoCompleteReturnValue.getPossibilities();
         final Map<String, AutoCompleteType> possibilitiesMap = possibilities.toMap();
 
-        final Optional<AssistInfo> assistInfo = createAssistInfo(returnValue);
         final Optional<Suggestions> suggestions;
         final String newCommandLine;
         final int numPossibilities = possibilitiesMap.size();
@@ -151,6 +145,7 @@ public class ShellImpl implements Shell {
             suggestions = Optional.absent();
             newCommandLine = rawCommandLine;
         } else {
+            final String prefix = autoCompleteReturnValue.getPrefix();
             final String autoCompleteAddition;
             if (numPossibilities == 1) {
                 // TODO: Only 1 possibility, assistInfo should be updated to show it...
@@ -175,47 +170,8 @@ public class ShellImpl implements Shell {
             newCommandLine = rawCommandLine + autoCompleteAddition;
         }
 
-        outputProcessor.displayAssistance(assistInfo, suggestions);
+        outputProcessor.displayAssistance(commandInfo, suggestions);
         return newCommandLine;
-    }
-
-    private Optional<AssistInfo> createAssistInfo(AssistReturnValue returnValue) {
-        final Optional<ShellCommand> commandOptional = returnValue.getCommand();
-        if (!commandOptional.isPresent()) {
-            return Optional.absent();
-        }
-
-        final ShellCommand command = commandOptional.get();
-        final List<BoundParam> boundParams = createBoundParams(command, returnValue.getBoundParams());
-        final int currentParamIndex = getCurrentParamIndex(command, returnValue.getCurrentParam());
-        return Optional.of(new AssistInfo(command.getName(), boundParams, currentParamIndex));
-    }
-
-    private List<BoundParam> createBoundParams(ShellCommand command, Map<String, Object> boundParamMap) {
-        final List<CommandParam> params = command.getParams();
-        final List<BoundParam> boundParams = new ArrayList<>(params.size());
-        for (CommandParam param : params) {
-            final Optional<Object> value = Optional.fromNullable(boundParamMap.get(param.getName()));
-            boundParams.add(new BoundParam(param, value));
-        }
-        return boundParams;
-    }
-
-    private int getCurrentParamIndex(ShellCommand command, Optional<CommandParam> currentParamOptional) {
-        if (!currentParamOptional.isPresent()) {
-            return -1;
-        }
-
-        List<CommandParam> params = command.getParams();
-        final CommandParam currentParam = currentParamOptional.get();
-        for (int i = 0; i < params.size(); i++) {
-            final CommandParam param = params.get(i);
-            if (currentParam == param) {
-                return i;
-            }
-        }
-
-        throw new ShellException("CurrentParam is not a parameter of the command?! currentParam=%s, command=%s", currentParam, command);
     }
 
     private char getSinglePossibilitySuffix(AutoCompleteType type) {
@@ -311,6 +267,6 @@ public class ShellImpl implements Shell {
 
     private void handleParseException(ParseException e) {
         final String errorMessage = String.format("Parse Error: %s", e.getMessage());
-        outputProcessor.parseError(e.getError(), errorMessage, e.getSuggestions());
+        outputProcessor.parseError(e.getError(), errorMessage, e.getCommandInfo());
     }
 }

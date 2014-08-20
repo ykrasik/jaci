@@ -21,7 +21,7 @@ import com.google.common.base.Objects;
 import java.util.List;
 
 /**
- * Holds possible suggestions, grouped by their type.
+ * Possible suggestions, grouped by their type.
  *
  * @author Yevgeny Krasik
  */

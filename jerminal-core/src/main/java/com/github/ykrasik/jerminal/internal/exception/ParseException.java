@@ -16,7 +16,7 @@
 
 package com.github.ykrasik.jerminal.internal.exception;
 
-import com.github.ykrasik.jerminal.api.assist.Suggestions;
+import com.github.ykrasik.jerminal.api.assist.CommandInfo;
 import com.github.ykrasik.jerminal.api.exception.ParseError;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
@@ -28,32 +28,32 @@ import com.google.common.base.Optional;
  */
 public class ParseException extends Exception {
     private final ParseError error;
-    private final Optional<Suggestions> suggestions;
+    private final Optional<CommandInfo> commandInfo;
 
-    public ParseException(ParseError error, String message, Optional<Suggestions> suggestions) {
+    private ParseException(String message, ParseError error, Optional<CommandInfo> commandInfo) {
         super(message);
         this.error = error;
-        this.suggestions = suggestions;
-    }
-
-    public ParseException(ParseError error, Optional<Suggestions> suggestions, String format, Object... args) {
-        this(error, String.format(format, args), suggestions);
+        this.commandInfo = commandInfo;
     }
 
     public ParseException(ParseError error, String message) {
-        this(error, message, Optional.<Suggestions>absent());
+        this(message, error, Optional.<CommandInfo>absent());
     }
 
     public ParseException(ParseError error, String format, Object... args) {
-        this(error, Optional.<Suggestions>absent(), format, args);
+        this(String.format(format, args), error, Optional.<CommandInfo>absent());
+    }
+
+    public ParseException withCommandInfo(CommandInfo commandInfo) {
+        return new ParseException(getMessage(), error, Optional.of(commandInfo));
     }
 
     public ParseError getError() {
         return error;
     }
 
-    public Optional<Suggestions> getSuggestions() {
-        return suggestions;
+    public Optional<CommandInfo> getCommandInfo() {
+        return commandInfo;
     }
 
     @Override
@@ -61,7 +61,7 @@ public class ParseException extends Exception {
         return Objects.toStringHelper(this)
             .add("error", error)
             .add("message", getMessage())
-            .add("suggestions", suggestions)
+            .add("commandInfo", commandInfo)
             .toString();
     }
 }

@@ -20,7 +20,7 @@ import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
 import com.github.ykrasik.jerminal.api.exception.ExecuteException;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.internal.filesystem.ShellEntry;
-import com.github.ykrasik.jerminal.internal.returnvalue.AssistParamsReturnsValue;
+import com.github.ykrasik.jerminal.internal.returnvalue.AssistReturnValue;
 
 import java.util.List;
 
@@ -55,7 +55,7 @@ public interface ShellCommand extends ShellEntry {
      *
      * @throws ParseException If the one of the args is invalid or a mandatory parameter is missing.
      */
-    AssistParamsReturnsValue assistArgs(List<String> args) throws ParseException;
+    AssistReturnValue assistArgs(List<String> args) throws ParseException;
 
     /**
      * Execute with the given arguments.<br>

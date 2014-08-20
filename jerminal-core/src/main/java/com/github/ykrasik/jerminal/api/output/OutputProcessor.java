@@ -16,7 +16,7 @@
 
 package com.github.ykrasik.jerminal.api.output;
 
-import com.github.ykrasik.jerminal.api.assist.AssistInfo;
+import com.github.ykrasik.jerminal.api.assist.CommandInfo;
 import com.github.ykrasik.jerminal.api.assist.Suggestions;
 import com.github.ykrasik.jerminal.api.command.view.ShellCommandView;
 import com.github.ykrasik.jerminal.api.exception.ExecuteException;
@@ -61,7 +61,7 @@ public interface OutputProcessor {
     /**
      * The user requested assistance with the command line, display the results.
      */
-    void displayAssistance(Optional<AssistInfo> assistInfo, Optional<Suggestions> suggestions);
+    void displayAssistance(Optional<CommandInfo> assistInfo, Optional<Suggestions> suggestions);
 
     /**
      * The user requested to display the directory structure of a directory.
@@ -77,7 +77,7 @@ public interface OutputProcessor {
      * A parse error occurred while parsing the command line.
      */
     // TODO: Put all these params in a single ParseErrorContext?
-    void parseError(ParseError error, String errorMessage, Optional<Suggestions> suggestions);
+    void parseError(ParseError error, String errorMessage, Optional<CommandInfo> commandInfo);
 
     /**
      * An execution error occurred while executing the command line.<br>

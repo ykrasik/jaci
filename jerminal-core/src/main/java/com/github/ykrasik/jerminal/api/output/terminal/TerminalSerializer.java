@@ -16,7 +16,7 @@
 
 package com.github.ykrasik.jerminal.api.output.terminal;
 
-import com.github.ykrasik.jerminal.api.assist.AssistInfo;
+import com.github.ykrasik.jerminal.api.assist.CommandInfo;
 import com.github.ykrasik.jerminal.api.assist.Suggestions;
 import com.github.ykrasik.jerminal.api.command.view.ShellCommandView;
 import com.github.ykrasik.jerminal.api.filesystem.ShellEntryView;
@@ -33,9 +33,9 @@ public interface TerminalSerializer {
     String getEmptyLine();
 
     /**
-     * Serializes an {@link AssistInfo} into a {@link String}.
+     * Serializes an {@link CommandInfo} into a {@link String}.
      */
-    String serializeAssistInfo(AssistInfo info);
+    String serializeCommandInfo(CommandInfo commandInfo);
 
     /**
      * Serializes a {@link Suggestions} into a {@link String}.
@@ -45,7 +45,7 @@ public interface TerminalSerializer {
     /**
      * Serializes a {@link ShellEntryView} into a {@link String}.
      */
-    String serializeShelEntryView(ShellEntryView shellEntryView);
+    String serializeShellEntryView(ShellEntryView shellEntryView);
 
     /**
      * Serializes a {@link ShellCommandView} into a {@link String}.

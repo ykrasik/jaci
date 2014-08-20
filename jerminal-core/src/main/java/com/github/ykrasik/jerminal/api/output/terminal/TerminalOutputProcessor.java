@@ -16,7 +16,7 @@
 
 package com.github.ykrasik.jerminal.api.output.terminal;
 
-import com.github.ykrasik.jerminal.api.assist.AssistInfo;
+import com.github.ykrasik.jerminal.api.assist.CommandInfo;
 import com.github.ykrasik.jerminal.api.assist.Suggestions;
 import com.github.ykrasik.jerminal.api.command.view.ShellCommandView;
 import com.github.ykrasik.jerminal.api.exception.ExecuteException;
@@ -85,9 +85,9 @@ public class TerminalOutputProcessor implements OutputProcessor {
     }
 
     @Override
-    public void displayAssistance(Optional<AssistInfo> assistInfo, Optional<Suggestions> suggestions) {
+    public void displayAssistance(Optional<CommandInfo> assistInfo, Optional<Suggestions> suggestions) {
         if (assistInfo.isPresent()) {
-            final String assistInfoStr = serializer.serializeAssistInfo(assistInfo.get());
+            final String assistInfoStr = serializer.serializeCommandInfo(assistInfo.get());
             print(assistInfoStr);
         }
 
@@ -102,7 +102,7 @@ public class TerminalOutputProcessor implements OutputProcessor {
 
     @Override
     public void displayShellEntryView(ShellEntryView shellEntryView) {
-        final String shellEntryViewStr = serializer.serializeShelEntryView(shellEntryView);
+        final String shellEntryViewStr = serializer.serializeShellEntryView(shellEntryView);
         print(shellEntryViewStr);
     }
 
@@ -113,11 +113,11 @@ public class TerminalOutputProcessor implements OutputProcessor {
     }
 
     @Override
-    public void parseError(ParseError error, String errorMessage, Optional<Suggestions> suggestions) {
+    public void parseError(ParseError error, String errorMessage, Optional<CommandInfo> commandInfo) {
         printError(errorMessage);
-        if (suggestions.isPresent()) {
-            final String suggestionsStr = serializer.serializeSuggestions(suggestions.get());
-            print(suggestionsStr);
+        if (commandInfo.isPresent()) {
+            final String commandInfoStr = serializer.serializeCommandInfo(commandInfo.get());
+            print(commandInfoStr);
         }
     }
 
