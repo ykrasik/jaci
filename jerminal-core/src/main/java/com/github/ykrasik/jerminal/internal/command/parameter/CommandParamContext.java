@@ -60,6 +60,7 @@ public class CommandParamContext {
 
     private final List<CommandParam> unboundParams;
     private final Map<String, Object> boundParamValues;
+    private final Map<String, String> boundParamRawValues;
 
     private Optional<CommandParam> currentParam;
 
@@ -69,6 +70,7 @@ public class CommandParamContext {
         final List<CommandParam> commandParams = command.getParams();
         this.unboundParams = new ArrayList<>(commandParams);
         this.boundParamValues = new HashMap<>(commandParams.size());
+        this.boundParamRawValues = new HashMap<>(commandParams.size());
         this.currentParam = !commandParams.isEmpty() ? Optional.of(commandParams.get(0)) : Optional.<CommandParam>absent();
     }
 
@@ -93,7 +95,9 @@ public class CommandParamContext {
             final ParsedParam parsedParam = parseParam(rawArg);
 
             // Mark the param as bound.
-            boundParamValues.put(parsedParam.param.getName(), parsedParam.value);
+            final String paramName = parsedParam.param.getName();
+            boundParamValues.put(paramName, parsedParam.value);
+            boundParamRawValues.put(paramName, parsedParam.rawValue);
             unboundParams.remove(parsedParam.param);
         }
     }
@@ -117,14 +121,14 @@ public class CommandParamContext {
                 // If it is unbound, use it.
                 // If it is bound, it could still be a valid value for the next positional param.
                 if (!boundParamValues.containsKey(rawArg)) {
-                    return new ParsedParam(flagOptional.get(), true);
+                    return new ParsedParam(flagOptional.get(), true, "true");
                 }
             }
 
             // Try to parse rawArg as the value of the next positional param.
             final CommandParam nextPositionalParam = unboundParams.get(0);
             final Object value = nextPositionalParam.parse(rawArg);
-            return new ParsedParam(nextPositionalParam, value);
+            return new ParsedParam(nextPositionalParam, value, rawArg);
         }
 
         // rawArg contains a '=', the part before the '=' is expected to be a valid, unbound param.
@@ -134,7 +138,7 @@ public class CommandParamContext {
         final String rawValue = rawArg.substring(delimiterIndex + 1);
         final Object value = param.parse(rawValue);
 
-        return new ParsedParam(param, value);
+        return new ParsedParam(param, value, rawValue);
     }
 
     private CommandParam parseUnboundParam(String paramName) throws ParseException {
@@ -161,6 +165,7 @@ public class CommandParamContext {
     }
 
     private AssistReturnValue assistArg(String rawArg) throws ParseException {
+        // FIXME: AutoCompleting a Flag doesn't work.
         if (unboundParams.isEmpty()) {
             throw noMoreParams();
         }
@@ -247,7 +252,7 @@ public class CommandParamContext {
         final List<CommandParam> params = command.getParams();
         final List<ParamAndValue> paramAndValues = new ArrayList<>(params.size());
         for (CommandParam param : params) {
-            final Optional<Object> value = Optional.fromNullable(boundParamValues.get(param.getName()));
+            final Optional<String> value = Optional.fromNullable(boundParamRawValues.get(param.getName()));
             paramAndValues.add(new ParamAndValue(param, value));
         }
         return paramAndValues;
@@ -295,10 +300,12 @@ public class CommandParamContext {
     private static class ParsedParam {
         public final CommandParam param;
         public final Object value;
+        public final String rawValue;
 
-        private ParsedParam(CommandParam param, Object value) {
+        private ParsedParam(CommandParam param, Object value, String rawValue) {
             this.param = checkNotNull(param, "param");
             this.value = checkNotNull(value, "value");
+            this.rawValue = checkNotNull(rawValue, "rawValue");
         }
     }
 }

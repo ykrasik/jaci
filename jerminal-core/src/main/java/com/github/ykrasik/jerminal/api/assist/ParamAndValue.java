@@ -30,10 +30,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class ParamAndValue {
     private final CommandParam param;
-    // FIXME: This should be Optional<String> and contain the value that was passed from the command line.
-    private final Optional<Object> value;
+    private final Optional<String> value;
 
-    public ParamAndValue(CommandParam param, Optional<Object> value) {
+    public ParamAndValue(CommandParam param, Optional<String> value) {
         this.param = checkNotNull(param, "param");
         this.value = checkNotNull(value, "value");
     }
@@ -42,7 +41,7 @@ public class ParamAndValue {
         return param;
     }
 
-    public Optional<Object> getValue() {
+    public Optional<String> getValue() {
         return value;
     }
 

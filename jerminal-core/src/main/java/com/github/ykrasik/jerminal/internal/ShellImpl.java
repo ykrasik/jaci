@@ -79,6 +79,7 @@ public class ShellImpl implements Shell {
 
     @Override
     public String assist(String rawCommandLine) {
+        // TODO: Return Optional.absent on error?
         outputProcessor.begin();
         try {
             // Split the commandLine for autoComplete.
@@ -200,6 +201,7 @@ public class ShellImpl implements Shell {
 
     @Override
     public String execute(String rawCommandLine) {
+        // TODO: Return Optional.absent on error?
         outputProcessor.begin();
         try {
             return doExecute(rawCommandLine);

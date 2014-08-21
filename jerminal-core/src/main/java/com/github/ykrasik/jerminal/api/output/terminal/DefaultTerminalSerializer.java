@@ -63,10 +63,10 @@ public class DefaultTerminalSerializer implements TerminalSerializer {
             final ParamAndValue param = paramAndValues.get(i);
             sb.append(param.getParam().getExternalForm());
 
-            final Optional<Object> value = param.getValue();
+            final Optional<String> value = param.getValue();
             if (value.isPresent()) {
                 sb.append('=');
-                sb.append(value.get().toString());
+                sb.append(value.get());
             } else {
                 if (currentParamIndex == i) {
                     sb.append(" <<<");
