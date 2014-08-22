@@ -22,9 +22,20 @@ package com.github.ykrasik.jerminal.internal.returnvalue;
  * @author Yevgeny Krasik
  */
 public enum AutoCompleteType {
-    DIRECTORY,
-    COMMAND,
-    COMMAND_PARAM_NAME,
-    COMMAND_PARAM_VALUE,
-    COMMAND_PARAM_FLAG
+    // TODO: Get these constants out of somewhere more specific.
+    DIRECTORY('/'),
+    COMMAND(' '),
+    COMMAND_PARAM_NAME('='),
+    COMMAND_PARAM_VALUE(' '),
+    COMMAND_PARAM_FLAG(' ');
+
+    private final char suffix;
+
+    AutoCompleteType(char suffix) {
+        this.suffix = suffix;
+    }
+
+    public char getSuffix() {
+        return suffix;
+    }
 }

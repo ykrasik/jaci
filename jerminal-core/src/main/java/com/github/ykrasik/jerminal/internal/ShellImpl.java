@@ -20,16 +20,17 @@ import com.github.ykrasik.jerminal.api.Shell;
 import com.github.ykrasik.jerminal.api.assist.CommandInfo;
 import com.github.ykrasik.jerminal.api.assist.Suggestions;
 import com.github.ykrasik.jerminal.api.command.CommandArgs;
-import com.github.ykrasik.jerminal.api.command.OutputPrinter;
 import com.github.ykrasik.jerminal.api.command.ShellCommand;
 import com.github.ykrasik.jerminal.api.exception.ExecuteException;
 import com.github.ykrasik.jerminal.api.output.OutputProcessor;
 import com.github.ykrasik.jerminal.collections.trie.Trie;
 import com.github.ykrasik.jerminal.internal.command.OutputPrinterImpl;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
-import com.github.ykrasik.jerminal.internal.exception.ShellException;
 import com.github.ykrasik.jerminal.internal.filesystem.ShellFileSystem;
-import com.github.ykrasik.jerminal.internal.returnvalue.*;
+import com.github.ykrasik.jerminal.internal.returnvalue.AssistReturnValue;
+import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
+import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteType;
+import com.github.ykrasik.jerminal.internal.returnvalue.SuggestionsBuilder;
 import com.google.common.base.Optional;
 
 import java.util.Arrays;
@@ -50,7 +51,6 @@ public class ShellImpl implements Shell {
     private final OutputProcessor outputProcessor;
     private final ShellFileSystem fileSystem;
     private final CommandLineHistory commandLineHistory;
-    private final OutputPrinter outputPrinter;
 
     public ShellImpl(OutputProcessor outputProcessor,
                      ShellFileSystem fileSystem,
@@ -59,7 +59,6 @@ public class ShellImpl implements Shell {
         this.outputProcessor = outputProcessor;
         this.fileSystem = fileSystem;
         this.commandLineHistory = commandLineHistory;
-        this.outputPrinter = new OutputPrinterImpl(outputProcessor);
 
         // Init.
         outputProcessor.begin();
@@ -104,7 +103,6 @@ public class ShellImpl implements Shell {
         return rawCommandLine;
     }
 
-    // FIXME: Assist info should be printed no matter what.
     // FIXME: I do still want the old errors - no more params, etc.
     private AssistReturnValue doAssist(List<String> commandLine) throws ParseException {
         // The first arg of the commandLine must be a path to a command.
@@ -155,7 +153,7 @@ public class ShellImpl implements Shell {
                 // Let's be helpful - depending on the autoCompleteType, add a suffix.
                 final String singlePossibility = possibilitiesMap.keySet().iterator().next();
                 final AutoCompleteType type = possibilitiesMap.get(singlePossibility);
-                final char suffix = getSinglePossibilitySuffix(type);
+                final char suffix = type.getSuffix();
                 autoCompleteAddition = getAutoCompleteAddition(prefix, singlePossibility) + suffix;
                 suggestions = Optional.absent();
             } else {
@@ -173,18 +171,6 @@ public class ShellImpl implements Shell {
 
         outputProcessor.displayAssistance(commandInfo, suggestions);
         return newCommandLine;
-    }
-
-    private char getSinglePossibilitySuffix(AutoCompleteType type) {
-        // FIXME: Where to place these constants?
-        switch (type) {
-            case DIRECTORY: return '/';
-            case COMMAND: return ' ';
-            case COMMAND_PARAM_NAME: return '=';
-            case COMMAND_PARAM_FLAG: // Fallthrough
-            case COMMAND_PARAM_VALUE: return ' ';
-            default: throw new ShellException("Invalid AutoCompleteType: %s", type);
-        }
     }
 
     private Suggestions createAutoCompleteSuggestions(Map<String, AutoCompleteType> possibilitiesMap) {
@@ -255,10 +241,13 @@ public class ShellImpl implements Shell {
     }
 
     private void executeParsedCommand(ShellCommand command, CommandArgs args) {
+        final OutputPrinterImpl outputPrinter = new OutputPrinterImpl(outputProcessor);
         try {
             command.execute(args, outputPrinter);
-            // Print a generic success message
-            outputPrinter.println("Command '%s' executed successfully.", command.getName());
+            // Print a generic success message if the command didn't print anything on it's own.
+            if (!outputPrinter.hasInteractions()) {
+                outputPrinter.println("Command '%s' executed successfully.", command.getName());
+            }
         } catch (ExecuteException e) {
             outputProcessor.executeError(e);
         } catch (Exception e) {
