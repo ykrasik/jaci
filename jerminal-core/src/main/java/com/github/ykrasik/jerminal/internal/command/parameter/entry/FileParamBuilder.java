@@ -16,17 +16,17 @@
 
 package com.github.ykrasik.jerminal.internal.command.parameter.entry;
 
-import com.google.common.base.Supplier;
 import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
 import com.github.ykrasik.jerminal.internal.command.parameter.ParamUtils;
 import com.github.ykrasik.jerminal.internal.command.parameter.optional.OptionalParam;
 import com.github.ykrasik.jerminal.internal.filesystem.ShellFileSystem;
-import com.github.ykrasik.jerminal.api.command.ShellCommand;
+import com.github.ykrasik.jerminal.internal.filesystem.file.ShellFile;
+import com.google.common.base.Supplier;
 
 /**
  * A builder for a {@link FileParam}.<br>
  * By default creates mandatory parameters, but can be set to create optional parameters via
- * {@link #setOptional(ShellCommand)} and {@link #setOptional(Supplier)}.<br>
+ * {@link #setOptional(ShellFile)} and {@link #setOptional(Supplier)}.<br>
  * Intended for internal use with control commands.
  *
  * @author Yevgeny Krasik
@@ -36,7 +36,7 @@ public class FileParamBuilder {
     private final ShellFileSystem fileSystem;
 
     private String description = "file";
-    private Supplier<ShellCommand> defaultValueSupplier;
+    private Supplier<ShellFile> defaultValueSupplier;
 
     public FileParamBuilder(String name, ShellFileSystem fileSystem) {
         this.name = name;
@@ -56,11 +56,11 @@ public class FileParamBuilder {
         return this;
     }
 
-    public FileParamBuilder setOptional(ShellCommand defaultValue) {
+    public FileParamBuilder setOptional(ShellFile defaultValue) {
         return setOptional(ParamUtils.constValueSupplier(defaultValue));
     }
 
-    public FileParamBuilder setOptional(Supplier<ShellCommand> defaultValueSupplier) {
+    public FileParamBuilder setOptional(Supplier<ShellFile> defaultValueSupplier) {
         this.defaultValueSupplier = defaultValueSupplier;
         return this;
     }

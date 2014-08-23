@@ -16,11 +16,13 @@
 
 package com.github.ykrasik.jerminal.internal.filesystem;
 
+import com.github.ykrasik.jerminal.api.command.Command;
 import com.github.ykrasik.jerminal.collections.trie.Trie;
 import com.github.ykrasik.jerminal.collections.trie.TrieBuilder;
-import com.github.ykrasik.jerminal.api.command.ShellCommand;
 import com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectory;
 import com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectoryBuilder;
+import com.github.ykrasik.jerminal.internal.filesystem.file.ShellFile;
+import com.github.ykrasik.jerminal.internal.filesystem.file.ShellFileImpl;
 import com.google.common.base.Splitter;
 import com.github.ykrasik.jerminal.internal.exception.ShellException;
 
@@ -50,41 +52,42 @@ public class ShellFileSystemBuilder {
     private static final Splitter DESCRIPTION_SPLITTER = Splitter.on(DESCRIPTION_DELIMITER).trimResults();
 
     private final ShellDirectoryBuilder rootBuilder;
-    private final TrieBuilder<ShellCommand> globalCommandsBuilder;
+    private final TrieBuilder<ShellFile> globalFileBuilder;
 
     public ShellFileSystemBuilder() {
         this.rootBuilder = new ShellDirectoryBuilder("root", "root");
-        this.globalCommandsBuilder = new TrieBuilder<>();
+        this.globalFileBuilder = new TrieBuilder<>();
     }
 
     public ShellFileSystem build() {
         final ShellDirectory root = rootBuilder.build();
-        final Trie<ShellCommand> globalCommands = globalCommandsBuilder.build();
-        return new ShellFileSystemImpl(root, globalCommands);
+        final Trie<ShellFile> globalFiles = globalFileBuilder.build();
+        return new ShellFileSystemImpl(root, globalFiles);
     }
 
-    public ShellFileSystemBuilder add(ShellCommand... commands) {
+    public ShellFileSystemBuilder add(Command... commands) {
         return add("", commands);
     }
 
-    public ShellFileSystemBuilder add(String path, ShellCommand... commands) {
+    public ShellFileSystemBuilder add(String path, Command... commands) {
         return add(path, Arrays.asList(commands));
     }
 
-    public ShellFileSystemBuilder add(String path, Collection<ShellCommand> commands) {
+    public ShellFileSystemBuilder add(String path, Collection<Command> commands) {
         final ShellDirectoryBuilder directory = getOrCreatePath(path);
         directory.addCommands(commands);
         return this;
     }
 
-    public ShellFileSystemBuilder addGlobalCommands(ShellCommand... globalCommands) {
+    public ShellFileSystemBuilder addGlobalCommands(Command... globalCommands) {
         return addGlobalCommands(Arrays.asList(globalCommands));
     }
 
-    public ShellFileSystemBuilder addGlobalCommands(Collection<ShellCommand> globalCommands) {
-        for (ShellCommand globalCommand : globalCommands) {
+    public ShellFileSystemBuilder addGlobalCommands(Collection<Command> globalCommands) {
+        for (Command globalCommand : globalCommands) {
             final String name = globalCommand.getName();
-            this.globalCommandsBuilder.add(name, globalCommand);
+            final ShellFile globalFile = new ShellFileImpl(globalCommand);
+            globalFileBuilder.add(name, globalFile);
         }
         return this;
     }

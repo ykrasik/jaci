@@ -16,13 +16,13 @@
 
 package com.github.ykrasik.jerminal.internal.filesystem;
 
-import com.github.ykrasik.jerminal.api.command.ShellCommand;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectory;
+import com.github.ykrasik.jerminal.internal.filesystem.file.ShellFile;
 import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
 
 /**
- * An <b>immutable</b> hierarchy of {@link ShellDirectory directories} and {@link ShellCommand commands}.<br>
+ * An <b>immutable</b> hierarchy of {@link ShellDirectory directories} and {@link ShellFile files}.<br>
  *
  * @author Yevgeny Krasik
  */
@@ -51,12 +51,12 @@ public interface ShellFileSystem {
     ShellDirectory parsePathToDirectory(String rawPath) throws ParseException;
 
     /**
-     * Parse the given path as a path to a {@link ShellCommand}.<br>
+     * Parse the given path as a path to a {@link ShellFile}.<br>
      * Parsing a path always starts from the current directory, unless the path explicitly starts from root.
      *
-     * @throws ParseException If the path is invalid or doesn't point to a {@link ShellCommand}.
+     * @throws ParseException If the path is invalid or doesn't point to a {@link ShellFile}.
      */
-    ShellCommand parsePathToCommand(String rawPath) throws ParseException;
+    ShellFile parsePathToFile(String rawPath) throws ParseException;
 
     /**
      * Offer auto complete suggestions for the next {@link ShellDirectory} in this path.
@@ -66,7 +66,7 @@ public interface ShellFileSystem {
     AutoCompleteReturnValue autoCompletePathToDirectory(String rawPath) throws ParseException;
 
     /**
-     * Offer auto complete suggestions for the next {@link ShellDirectory} or {@link ShellCommand} in this path.
+     * Offer auto complete suggestions for the next {@link ShellDirectory} or {@link ShellFile} in this path.
      *
      * @throws ParseException If the path is invalid.
      */

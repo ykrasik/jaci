@@ -16,7 +16,7 @@
 
 package com.github.ykrasik.jerminal.api.command;
 
-import com.github.ykrasik.jerminal.internal.filesystem.command.ShellCommandImpl;
+import com.github.ykrasik.jerminal.internal.command.CommandImpl;
 import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
 import com.github.ykrasik.jerminal.api.exception.ExecuteException;
 
@@ -25,7 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * A builder for a {@link ShellCommand}.
+ * A builder for a {@link Command}.
  *
  * @author Yevgeny Krasik
  */
@@ -46,8 +46,8 @@ public class ShellCommandBuilder {
         this.name = name;
     }
 
-    public ShellCommand build() {
-        return new ShellCommandImpl(name, description, params, executor);
+    public Command build() {
+        return new CommandImpl(name, description, params, executor);
     }
 
     public ShellCommandBuilder setDescription(String description) {

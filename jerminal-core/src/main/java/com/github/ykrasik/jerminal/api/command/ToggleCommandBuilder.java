@@ -21,7 +21,7 @@ import com.github.ykrasik.jerminal.api.command.parameter.bool.BooleanParamBuilde
 import com.github.ykrasik.jerminal.api.exception.ExecuteException;
 
 /**
- * Creates toggle {@link ShellCommand}s.<br>
+ * Creates toggle {@link Command}s.<br>
  * A toggle command is a commmand that takes a single optional boolean parameter and toggles
  * the boolean state of some component on or off. The state of the component is accessed via a
  * {@link StateAccessor}.<br>
@@ -48,7 +48,7 @@ public class ToggleCommandBuilder {
         this.builder.setDescription("toggle");
     }
 
-    public ShellCommand build() {
+    public Command build() {
         return builder
             .addParam(new BooleanParamBuilder(PARAM_NAME)
                     .setDescription(paramDescription)

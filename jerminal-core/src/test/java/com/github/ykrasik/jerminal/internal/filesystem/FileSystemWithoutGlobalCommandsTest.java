@@ -73,7 +73,7 @@ public class FileSystemWithoutGlobalCommandsTest extends AbstractFileSystemTest 
         for (String command : commands) {
             final String path = basePathToUse + command;
             try {
-                fileSystem.parsePathToCommand(path);
+                fileSystem.parsePathToFile(path);
             } catch (ParseException e) {
                 throw new RuntimeException(e);
             }

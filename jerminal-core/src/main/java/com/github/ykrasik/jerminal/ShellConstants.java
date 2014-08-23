@@ -14,21 +14,15 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.api.command.view;
-
-import com.github.ykrasik.jerminal.api.command.parameter.view.ShellCommandParamView;
-import com.github.ykrasik.jerminal.internal.Describable;
-
-import java.util.List;
+package com.github.ykrasik.jerminal;
 
 /**
- * A view of a {@link com.github.ykrasik.jerminal.api.command.Command ShellCommand} and it's parameters.
- *
  * @author Yevgeny Krasik
  */
-public interface ShellCommandView extends Describable {
-    /**
-     * Returns a view of the command's parameters.
-     */
-    List<ShellCommandParamView> getParams();
+public class ShellConstants {
+    public static final char FILE_SYSTEM_DELIMITER = '/';
+    public static final String FILE_SYSTEM_THIS = ".";
+    public static final String FILE_SYSTEM_PARENT = "..";
+
+    public static final char ARG_VALUE_DELIMITER = '=';
 }

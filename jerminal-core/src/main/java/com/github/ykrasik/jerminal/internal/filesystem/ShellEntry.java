@@ -21,7 +21,7 @@ import com.github.ykrasik.jerminal.internal.Describable;
 /**
  * Represents an entry in a {@link ShellFileSystem}.<br>
  * Can be either a {@link com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectory directory}
- * or a {@link com.github.ykrasik.jerminal.api.command.ShellCommand command}.
+ * or a {@link com.github.ykrasik.jerminal.api.command.Command command}.
  *
  * @author Yevgeny Krasik
  */

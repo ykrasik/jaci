@@ -14,57 +14,46 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.internal.filesystem.command;
+package com.github.ykrasik.jerminal.internal.filesystem.file;
 
+import com.github.ykrasik.jerminal.ShellConstants;
 import com.github.ykrasik.jerminal.api.assist.CommandInfo;
+import com.github.ykrasik.jerminal.api.command.Command;
 import com.github.ykrasik.jerminal.api.command.CommandArgs;
-import com.github.ykrasik.jerminal.api.command.CommandExecutor;
-import com.github.ykrasik.jerminal.api.command.OutputPrinter;
-import com.github.ykrasik.jerminal.api.command.ShellCommand;
 import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
-import com.github.ykrasik.jerminal.api.exception.ExecuteException;
 import com.github.ykrasik.jerminal.collections.trie.Trie;
 import com.github.ykrasik.jerminal.collections.trie.TrieBuilder;
-import com.github.ykrasik.jerminal.internal.AbstractDescribable;
 import com.github.ykrasik.jerminal.internal.command.parameter.CommandParamContext;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.internal.exception.ShellException;
 import com.github.ykrasik.jerminal.internal.returnvalue.AssistReturnValue;
 
-import java.util.Collections;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * An implementation for a {@link ShellCommand}.
+ * An <b>immutable</b> implementation for a {@link ShellFile}.
  *
  * @author Yevgeny Krasik
  */
-public class ShellCommandImpl extends AbstractDescribable implements ShellCommand {
-    public static final char ARG_VALUE_DELIMITER = '=';
-
-    private final CommandExecutor executor;
-    private final List<CommandParam> positionalParams;
+public class ShellFileImpl implements ShellFile {
+    private final Command command;
     private final Trie<CommandParam> params;
 
-    public ShellCommandImpl(String name,
-                            String description,
-                            List<CommandParam> params,
-                            CommandExecutor executor) {
-        super(name, description);
-
-        this.executor = checkNotNull(executor, "executor");
-        this.positionalParams = Collections.unmodifiableList(checkNotNull(params, "params"));
-        this.params = createParamTrie(params);
+    public ShellFileImpl(Command command) {
+        this.command = checkNotNull(command, "command");
+        this.params = createParamTrie(command.getParams());
     }
 
     private Trie<CommandParam> createParamTrie(List<CommandParam> params) {
         final TrieBuilder<CommandParam> builder = new TrieBuilder<>();
         for (CommandParam param : params) {
             final String paramName = param.getName();
-            if (!isLegalName(paramName)) {
-                throw new ShellException("Illegal param name: '%s'. Param names cannot contain '%c'!", paramName, ARG_VALUE_DELIMITER);
+            if (paramName.indexOf(ShellConstants.ARG_VALUE_DELIMITER) != -1) {
+                throw new ShellException("Illegal param name: '%s'. Param names cannot contain '%c'!",
+                    paramName, ShellConstants.ARG_VALUE_DELIMITER
+                );
             }
 
             builder.add(paramName, param);
@@ -73,23 +62,28 @@ public class ShellCommandImpl extends AbstractDescribable implements ShellComman
     }
 
     @Override
+    public String getName() {
+        return command.getName();
+    }
+
+    @Override
+    public String getDescription() {
+        return command.getDescription();
+    }
+
+    @Override
     public boolean isDirectory() {
         return false;
     }
 
     @Override
-    public List<CommandParam> getParams() {
-        return positionalParams;
-    }
-
-    @Override
-    public void execute(CommandArgs args, OutputPrinter outputPrinter) throws ExecuteException {
-        executor.execute(args, outputPrinter);
+    public Command getCommand() {
+        return command;
     }
 
     @Override
     public CommandArgs parseCommandArgs(List<String> args) throws ParseException {
-        final CommandParamContext context = new CommandParamContext(this, params);
+        final CommandParamContext context = new CommandParamContext(command, params);
         try {
             return context.parseCommandArgs(args);
         } catch (ParseException e) {
@@ -101,7 +95,7 @@ public class ShellCommandImpl extends AbstractDescribable implements ShellComman
 
     @Override
     public AssistReturnValue assistArgs(List<String> args) throws ParseException {
-        final CommandParamContext context = new CommandParamContext(this, params);
+        final CommandParamContext context = new CommandParamContext(command, params);
         try {
             return context.assistArgs(args);
         } catch (ParseException e) {
@@ -109,9 +103,5 @@ public class ShellCommandImpl extends AbstractDescribable implements ShellComman
             final CommandInfo commandInfo = context.createCommandInfo();
             throw e.withCommandInfo(commandInfo);
         }
-    }
-
-    private boolean isLegalName(String name) {
-        return name.indexOf(ARG_VALUE_DELIMITER) == -1;
     }
 }

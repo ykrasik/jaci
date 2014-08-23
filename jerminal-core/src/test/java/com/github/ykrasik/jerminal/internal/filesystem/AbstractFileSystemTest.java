@@ -16,10 +16,10 @@
 
 package com.github.ykrasik.jerminal.internal.filesystem;
 
+import com.github.ykrasik.jerminal.api.command.Command;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
-import com.github.ykrasik.jerminal.api.command.ShellCommand;
 import com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectory;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -58,19 +58,18 @@ public class AbstractFileSystemTest {
     }
 
     protected void add(String path, List<String> commands) {
-        final List<ShellCommand> shellCommands = Lists.transform(commands, new Function<String, ShellCommand>() {
+        final List<Command> commandDefs = Lists.transform(commands, new Function<String, Command>() {
             @Override
-            public ShellCommand apply(String input) {
+            public Command apply(String input) {
                 return cmd(input);
             }
         });
-        builder.add(path, shellCommands);
+        builder.add(path, commandDefs);
     }
 
-    protected ShellCommand cmd(String name) {
-        final ShellCommand command = mock(ShellCommand.class);
+    protected Command cmd(String name) {
+        final Command command = mock(Command.class);
         when(command.getName()).thenReturn(name);
-        when(command.isDirectory()).thenReturn(false);
         return command;
     }
 

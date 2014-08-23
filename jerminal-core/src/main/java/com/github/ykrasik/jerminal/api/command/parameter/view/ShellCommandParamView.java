@@ -20,7 +20,7 @@ import com.github.ykrasik.jerminal.internal.Describable;
 import com.github.ykrasik.jerminal.internal.command.parameter.ParamType;
 
 /**
- * A view of a {@link com.github.ykrasik.jerminal.api.command.ShellCommand command}'s
+ * A view of a {@link com.github.ykrasik.jerminal.api.command.Command command}'s
  * {@link com.github.ykrasik.jerminal.api.command.parameter.CommandParam parameter}.
  *
  * @author Yevgeny Krasik

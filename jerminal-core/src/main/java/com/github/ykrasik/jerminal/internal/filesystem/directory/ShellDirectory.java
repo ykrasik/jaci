@@ -16,17 +16,17 @@
 
 package com.github.ykrasik.jerminal.internal.filesystem.directory;
 
-import com.github.ykrasik.jerminal.api.command.ShellCommand;
 import com.github.ykrasik.jerminal.collections.trie.Trie;
-import com.github.ykrasik.jerminal.internal.filesystem.ShellEntry;
-import com.google.common.base.Optional;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
+import com.github.ykrasik.jerminal.internal.filesystem.ShellEntry;
+import com.github.ykrasik.jerminal.internal.filesystem.file.ShellFile;
 import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteType;
+import com.google.common.base.Optional;
 
 import java.util.Collection;
 
 /**
- * A <b>immutable</b> container for {@link ShellDirectory directories} and {@link ShellCommand commands}.
+ * A <b>immutable</b> container for {@link ShellDirectory directories} and {@link ShellFile files}.
  *
  * @author Yevgeny Krasik
  */
@@ -47,27 +47,31 @@ public interface ShellDirectory extends ShellEntry {
     Optional<ShellDirectory> getParent();
 
     /**
-     * Parse the input as a child {@link ShellCommand}.
-     * @throws ParseException If no such child {@link ShellCommand} exists.
+     * Parse the input as a child {@link ShellFile}.
+     *
+     * @throws ParseException If no such child {@link ShellFile} exists.
      */
-    ShellCommand parseCommand(String rawCommand) throws ParseException;
+    ShellFile parseFile(String rawCommand) throws ParseException;
 
     /**
      * Parse the input as a child {@link ShellDirectory}.
+     *
      * @throws ParseException If no such child {@link ShellDirectory} exists.
      */
     ShellDirectory parseDirectory(String rawDirectory) throws ParseException;
 
     /**
      * Offer auto complete suggestions for the a child {@link ShellDirectory} that starts with the given prefix.
+     *
      * @throws ParseException If this {@link ShellDirectory} is empty.
      */
     // TODO: Do I really want to throw this exception? Directories aren't supposed to be empty anyway.
     Trie<AutoCompleteType> autoCompleteDirectory(String prefix) throws ParseException;
 
     /**
-     * Offer auto complete suggestions for the a child {@link ShellDirectory} or {@link ShellCommand}
+     * Offer auto complete suggestions for the a child {@link ShellDirectory} or {@link com.github.ykrasik.jerminal.api.command.Command}
      * that starts with the given prefix.
+     *
      * @throws ParseException If this {@link ShellDirectory} is empty.
      */
     // TODO: Do I really want to throw this exception? Directories aren't supposed to be empty anyway.

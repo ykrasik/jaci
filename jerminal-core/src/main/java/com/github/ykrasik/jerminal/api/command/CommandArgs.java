@@ -56,8 +56,8 @@ public class CommandArgs {
         return getParam(name, ShellDirectory.class);
     }
 
-    public ShellCommand getFile(String name) throws MissingParameterException {
-        return getParam(name, ShellCommand.class);
+    public Command getFile(String name) throws MissingParameterException {
+        return getParam(name, Command.class);
     }
 
     private <T> T getParam(String name, Class<T> clazz) throws MissingParameterException {

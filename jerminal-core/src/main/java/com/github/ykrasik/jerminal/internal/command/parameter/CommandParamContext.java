@@ -16,17 +16,17 @@
 
 package com.github.ykrasik.jerminal.internal.command.parameter;
 
+import com.github.ykrasik.jerminal.ShellConstants;
 import com.github.ykrasik.jerminal.api.assist.CommandInfo;
 import com.github.ykrasik.jerminal.api.assist.ParamAndValue;
+import com.github.ykrasik.jerminal.api.command.Command;
 import com.github.ykrasik.jerminal.api.command.CommandArgs;
-import com.github.ykrasik.jerminal.api.command.ShellCommand;
 import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
 import com.github.ykrasik.jerminal.api.exception.ParseError;
 import com.github.ykrasik.jerminal.collections.trie.Trie;
 import com.github.ykrasik.jerminal.collections.trie.TrieImpl;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.internal.exception.ShellException;
-import com.github.ykrasik.jerminal.internal.filesystem.command.ShellCommandImpl;
 import com.github.ykrasik.jerminal.internal.returnvalue.AssistReturnValue;
 import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
 import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteType;
@@ -55,7 +55,7 @@ public class CommandParamContext {
         }
     };
 
-    private final ShellCommand command;
+    private final Command command;
     private final Trie<CommandParam> params;
 
     private final List<CommandParam> unboundParams;
@@ -64,7 +64,7 @@ public class CommandParamContext {
 
     private Optional<CommandParam> currentParam;
 
-    public CommandParamContext(ShellCommand command, Trie<CommandParam> params) {
+    public CommandParamContext(Command command, Trie<CommandParam> params) {
         this.command = command;
         this.params = params;
         final List<CommandParam> commandParams = command.getParams();
@@ -110,7 +110,7 @@ public class CommandParamContext {
         // rawArg is expected to be either:
         // 1. A value that is accepted by the next param in unboundParams.
         // 2. A tuple of the form "{name}={value}", which can assign a value to any other param.
-        final int delimiterIndex = rawArg.indexOf(ShellCommandImpl.ARG_VALUE_DELIMITER);
+        final int delimiterIndex = rawArg.indexOf(ShellConstants.ARG_VALUE_DELIMITER);
         if (delimiterIndex == -1) {
             // rawArg does not contain a delimiter.
             // It can either be the value of the next positional param or the name of a flag.
@@ -174,7 +174,7 @@ public class CommandParamContext {
         // 1. A value that is accepted by the next positional param.
         // 2. A tuple of the form "{name}={value}", which can assign a value to any other param.
         final AutoCompleteReturnValue autoCompleteReturnValue;
-        final int delimiterIndex = rawArg.indexOf(ShellCommandImpl.ARG_VALUE_DELIMITER);
+        final int delimiterIndex = rawArg.indexOf(ShellConstants.ARG_VALUE_DELIMITER);
         if (delimiterIndex == -1) {
             autoCompleteReturnValue = autoCompleteParamNameOrValue(rawArg);
             // FIXME: If only 1 possibility to autoComplete param name, this is the current param.

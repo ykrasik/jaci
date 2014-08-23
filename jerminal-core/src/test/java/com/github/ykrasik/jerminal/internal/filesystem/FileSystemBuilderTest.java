@@ -241,7 +241,7 @@ public class FileSystemBuilderTest extends AbstractFileSystemTest {
         final ShellDirectory directory = getDirectory(pathToDirectory);
         if (commandName != null) {
             try {
-                directory.parseCommand(commandName);
+                directory.parseFile(commandName);
             } catch (ParseException e) {
                 throw new RuntimeException(e);
             }

@@ -37,7 +37,7 @@ import com.google.common.base.Supplier;
 import java.util.*;
 
 /**
- * Creates all the default Control {@link ShellCommand}s.
+ * Creates all the default Control {@link Command}s.
  *
  * @author Yevgeny Krasik
  */
@@ -59,8 +59,8 @@ public class ControlCommandFactory {
 
     // TODO: Add the following commands: list all commands
 
-    public Set<ShellCommand> createControlCommands() {
-        final Set<ShellCommand> controlCommands = new HashSet<>();
+    public Set<Command> createControlCommands() {
+        final Set<Command> controlCommands = new HashSet<>();
         controlCommands.add(createChangeDirectoryCommand());
         controlCommands.add(createListDirectoryCommand());
         controlCommands.add(createDescribeCommandCommand());
@@ -68,7 +68,7 @@ public class ControlCommandFactory {
         return controlCommands;
     }
 
-    public ShellCommand createChangeDirectoryCommand() {
+    public Command createChangeDirectoryCommand() {
         final String dirArgName = "dir";
         return new ShellCommandBuilder(CHANGE_DIRECTORY_COMMAND_NAME)
             .setDescription("Change current directory")
@@ -87,7 +87,7 @@ public class ControlCommandFactory {
             .build();
     }
 
-    public ShellCommand createListDirectoryCommand() {
+    public Command createListDirectoryCommand() {
         final String dirArgName = "dir";
         final String recursiveArgName = "-r";
         return new ShellCommandBuilder(LIST_DIRECTORY_COMMAND_NAME)
@@ -136,7 +136,7 @@ public class ControlCommandFactory {
         return new ShellEntryViewImpl(directory.getName(), directory.getDescription(), true, viewChildren);
     }
 
-    public ShellCommand createDescribeCommandCommand() {
+    public Command createDescribeCommandCommand() {
         final String commandArgName = "cmd";
         return new ShellCommandBuilder(DESCRIBE_COMMAND_COMMAND_NAME)
             .setDescription("Describe command")
@@ -148,7 +148,7 @@ public class ControlCommandFactory {
             .setExecutor(new CommandExecutor() {
                 @Override
                 public void execute(CommandArgs args, OutputPrinter outputPrinter) throws ExecuteException {
-                    final ShellCommand command = args.getFile(commandArgName);
+                    final Command command = args.getFile(commandArgName);
                     final ShellCommandView shellCommandView = createShellCommandView(command);
                     outputProcessor.displayShellCommandView(shellCommandView);
                 }
@@ -156,7 +156,7 @@ public class ControlCommandFactory {
             .build();
     }
 
-    private ShellCommandView createShellCommandView(ShellCommand command) {
+    private ShellCommandView createShellCommandView(Command command) {
         final List<ShellCommandParamView> params = describeCommandParams(command.getParams());
         return new ShellCommandViewImpl(command.getName(), command.getDescription(), params);
     }
@@ -170,7 +170,7 @@ public class ControlCommandFactory {
         return paramViews;
     }
 
-    public ShellCommand createPrintWorkingDirectoryCommand() {
+    public Command createPrintWorkingDirectoryCommand() {
         return new ShellCommandBuilder(PRINT_WORKING_DIRECTORY_COMMAND_NAME)
             .setDescription("Print working directory")
             .setExecutor(new CommandExecutor() {

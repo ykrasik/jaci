@@ -16,18 +16,18 @@
 
 package com.github.ykrasik.jerminal.internal.filesystem;
 
-import com.github.ykrasik.jerminal.api.command.ShellCommand;
+import com.github.ykrasik.jerminal.ShellConstants;
 import com.github.ykrasik.jerminal.api.exception.ParseError;
 import com.github.ykrasik.jerminal.collections.trie.Trie;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectory;
+import com.github.ykrasik.jerminal.internal.filesystem.file.ShellFile;
 import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
 import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteType;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -38,27 +38,23 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Yevgeny Krasik
  */
 public class ShellFileSystemImpl implements ShellFileSystem {
-    private static final char DELIMITER = '/';
-    private static final String THIS = ".";
-    private static final String PARENT = "..";
-    private static final Splitter SPLITTER = Splitter.on(DELIMITER);
-    private static final List<String> ILLEGAL_NAMES = Arrays.asList(String.valueOf(DELIMITER), THIS, PARENT);
-    private static final Function<ShellCommand, AutoCompleteType> AUTO_COMPLETE_TYPE_MAPPER = new Function<ShellCommand, AutoCompleteType>() {
+    private static final Splitter SPLITTER = Splitter.on(ShellConstants.FILE_SYSTEM_DELIMITER);
+    private static final Function<ShellFile, AutoCompleteType> AUTO_COMPLETE_TYPE_MAPPER = new Function<ShellFile, AutoCompleteType>() {
         @Override
-        public AutoCompleteType apply(ShellCommand input) {
+        public AutoCompleteType apply(ShellFile input) {
             return AutoCompleteType.COMMAND;
         }
     };
 
     private final ShellDirectory root;
-    private final Trie<ShellCommand> globalCommands;
+    private final Trie<ShellFile> globalFiles;
 
     private ShellDirectory currentDirectory;
 
     ShellFileSystemImpl(ShellDirectory root,
-                        Trie<ShellCommand> globalCommands) {
+                        Trie<ShellFile> globalFiles) {
         this.root = root;
-        this.globalCommands = globalCommands;
+        this.globalFiles = globalFiles;
         this.currentDirectory = root;
     }
 
@@ -83,7 +79,7 @@ public class ShellFileSystemImpl implements ShellFileSystem {
             throw emptyDirectoryNameAlongPath(currentDirectory);
         }
 
-        final boolean startsFromRoot = rawPath.charAt(0) == DELIMITER;
+        final boolean startsFromRoot = rawPath.charAt(0) == ShellConstants.FILE_SYSTEM_DELIMITER;
         if (startsFromRoot && rawPath.length() == 1) {
             return root;
         }
@@ -100,10 +96,10 @@ public class ShellFileSystemImpl implements ShellFileSystem {
             if (pathElement.isEmpty()) {
                 throw emptyDirectoryNameAlongPath(dir);
             }
-            if (THIS.equals(pathElement)) {
+            if (ShellConstants.FILE_SYSTEM_THIS.equals(pathElement)) {
                 continue;
             }
-            if (PARENT.equals(pathElement)) {
+            if (ShellConstants.FILE_SYSTEM_PARENT.equals(pathElement)) {
                 final Optional<ShellDirectory> parent = dir.getParent();
                 if (parent.isPresent()) {
                     dir = parent.get();
@@ -121,7 +117,7 @@ public class ShellFileSystemImpl implements ShellFileSystem {
     // TODO: Make sure this doesn't mask '//' or '///' as an error.
     private String removeLeadingAndTrailingDelimiter(String path, boolean leadingDelimiter) {
         final int length = path.length();
-        final boolean trailingDelimiter = length > 1 && path.charAt(length - 1) == DELIMITER;
+        final boolean trailingDelimiter = length > 1 && path.charAt(length - 1) == ShellConstants.FILE_SYSTEM_DELIMITER;
         if (!leadingDelimiter && !trailingDelimiter) {
             return path;
         } else {
@@ -132,17 +128,17 @@ public class ShellFileSystemImpl implements ShellFileSystem {
     }
 
     @Override
-    public ShellCommand parsePathToCommand(String rawPath) throws ParseException {
+    public ShellFile parsePathToFile(String rawPath) throws ParseException {
         // If rawPath does not contain a single delimiter, we can try use it as the command name.
-        final int delimiterIndex = rawPath.lastIndexOf(DELIMITER);
+        final int delimiterIndex = rawPath.lastIndexOf(ShellConstants.FILE_SYSTEM_DELIMITER);
         if (delimiterIndex == -1) {
             // rawPath does not contain a delimiter.
-            // It could either be a global command, or a command from the currentDirectory.
-            final Optional<ShellCommand> globalCommand = globalCommands.get(rawPath);
-            if (globalCommand.isPresent()) {
-                return globalCommand.get();
+            // It could either be a global file(command), or a file(command) from the currentDirectory.
+            final Optional<ShellFile> globalFile = globalFiles.get(rawPath);
+            if (globalFile.isPresent()) {
+                return globalFile.get();
             } else {
-                return currentDirectory.parseCommand(rawPath);
+                return currentDirectory.parseFile(rawPath);
             }
         }
 
@@ -157,13 +153,13 @@ public class ShellFileSystemImpl implements ShellFileSystem {
         if (rawCommand.isEmpty()) {
             throw pathDoesntPointToCommand(rawPath);
         }
-        return lastDirectory.parseCommand(rawCommand);
+        return lastDirectory.parseFile(rawCommand);
     }
 
     @Override
     public AutoCompleteReturnValue autoCompletePathToDirectory(String rawPath) throws ParseException {
         // Parse the path until the last delimiter, after which we autoComplete the remaining arg.
-        final int delimiterIndex = rawPath.lastIndexOf(DELIMITER);
+        final int delimiterIndex = rawPath.lastIndexOf(ShellConstants.FILE_SYSTEM_DELIMITER);
         if (delimiterIndex == -1) {
             // rawPath did not contain a delimiter, just autoComplete it from the current directory.
             final Trie<AutoCompleteType> possibilities = currentDirectory.autoCompleteDirectory(rawPath);
@@ -184,13 +180,13 @@ public class ShellFileSystemImpl implements ShellFileSystem {
     @Override
     public AutoCompleteReturnValue autoCompletePath(String rawPath) throws ParseException {
         // Parse the path until the last delimiter, after which we autoComplete the remaining arg.
-        final int delimiterIndex = rawPath.lastIndexOf(DELIMITER);
+        final int delimiterIndex = rawPath.lastIndexOf(ShellConstants.FILE_SYSTEM_DELIMITER);
         if (delimiterIndex == -1) {
             // rawPath did not contain a delimiter.
             // It could be an entry from the current directory or a global command.
             final Trie<AutoCompleteType> entryPossibilities = currentDirectory.autoCompleteEntry(rawPath);
-            final Trie<AutoCompleteType> globalCommandPossibilities = this.globalCommands.subTrie(rawPath).map(AUTO_COMPLETE_TYPE_MAPPER);
-            final Trie<AutoCompleteType> possibilities = entryPossibilities.union(globalCommandPossibilities);
+            final Trie<AutoCompleteType> globalFilePossibilities = globalFiles.subTrie(rawPath).map(AUTO_COMPLETE_TYPE_MAPPER);
+            final Trie<AutoCompleteType> possibilities = entryPossibilities.union(globalFilePossibilities);
             return new AutoCompleteReturnValue(rawPath, possibilities);
         }
 
@@ -224,9 +220,5 @@ public class ShellFileSystemImpl implements ShellFileSystem {
             ParseError.INVALID_ENTRY,
             "Empty directory name detected along path! Under: '%s'", parentDirectory.getName()
         );
-    }
-
-    public static boolean isLegalName(String name) {
-        return !ILLEGAL_NAMES.contains(name);
     }
 }

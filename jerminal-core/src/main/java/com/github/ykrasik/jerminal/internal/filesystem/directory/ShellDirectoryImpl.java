@@ -16,7 +16,6 @@
 
 package com.github.ykrasik.jerminal.internal.filesystem.directory;
 
-import com.github.ykrasik.jerminal.api.command.ShellCommand;
 import com.github.ykrasik.jerminal.api.exception.ParseError;
 import com.github.ykrasik.jerminal.collections.trie.Trie;
 import com.github.ykrasik.jerminal.collections.trie.TrieBuilder;
@@ -24,6 +23,7 @@ import com.github.ykrasik.jerminal.internal.AbstractDescribable;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.internal.exception.ShellException;
 import com.github.ykrasik.jerminal.internal.filesystem.ShellEntry;
+import com.github.ykrasik.jerminal.internal.filesystem.file.ShellFile;
 import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteType;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -64,12 +64,12 @@ public class ShellDirectoryImpl extends AbstractDescribable implements ShellDire
     public ShellDirectoryImpl(String name,
                               String description,
                               Map<String, ShellDirectory> directories,
-                              Map<String, ShellCommand> commands) {
+                              Map<String, ShellFile> files) {
         super(name, description);
 
         final TrieBuilder<ShellEntry> trieBuilder = new TrieBuilder<>();
         trieBuilder.addAll(directories);
-        trieBuilder.addAll(commands);
+        trieBuilder.addAll(files);
         this.entries = trieBuilder.build();
 
         this.parent = Optional.absent();
@@ -103,8 +103,8 @@ public class ShellDirectoryImpl extends AbstractDescribable implements ShellDire
     }
 
     @Override
-    public ShellCommand parseCommand(String rawCommand) throws ParseException {
-        return (ShellCommand) doParseEntry(rawCommand, false);
+    public ShellFile parseFile(String rawCommand) throws ParseException {
+        return (ShellFile) doParseEntry(rawCommand, false);
     }
 
     @Override

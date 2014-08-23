@@ -16,22 +16,23 @@
 
 package com.github.ykrasik.jerminal.internal.command.parameter.entry;
 
+import com.github.ykrasik.jerminal.api.command.Command;
 import com.github.ykrasik.jerminal.api.exception.ParseError;
 import com.github.ykrasik.jerminal.internal.command.parameter.AbstractMandatoryCommandParam;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.internal.filesystem.ShellFileSystem;
-import com.github.ykrasik.jerminal.api.command.ShellCommand;
 import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A {@link com.github.ykrasik.jerminal.api.command.parameter.CommandParam CommandParam} that parses {@link ShellCommand} values.<br>
+ * A {@link com.github.ykrasik.jerminal.api.command.parameter.CommandParam CommandParam} that parses
+ * {@link com.github.ykrasik.jerminal.internal.filesystem.file.ShellFile ShellFile} values.<br>
  * Intended for internal use with control commands.
  *
  * @author Yevgeny Krasik
  */
-public class FileParam extends AbstractMandatoryCommandParam<ShellCommand> {
+public class FileParam extends AbstractMandatoryCommandParam<Command> {
     private final ShellFileSystem fileSystem;
 
     public FileParam(String name, String description, ShellFileSystem fileSystem) {
@@ -49,7 +50,7 @@ public class FileParam extends AbstractMandatoryCommandParam<ShellCommand> {
         if (rawValue.isEmpty()) {
             throw emptyValue();
         }
-        return fileSystem.parsePathToCommand(rawValue);
+        return fileSystem.parsePathToFile(rawValue);
     }
 
     @Override

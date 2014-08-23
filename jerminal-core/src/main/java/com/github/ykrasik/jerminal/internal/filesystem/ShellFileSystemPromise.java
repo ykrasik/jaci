@@ -18,8 +18,8 @@ package com.github.ykrasik.jerminal.internal.filesystem;
 
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.internal.exception.ShellException;
-import com.github.ykrasik.jerminal.api.command.ShellCommand;
 import com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectory;
+import com.github.ykrasik.jerminal.internal.filesystem.file.ShellFile;
 import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -62,8 +62,8 @@ public class ShellFileSystemPromise implements ShellFileSystem {
     }
 
     @Override
-    public ShellCommand parsePathToCommand(String rawPath) throws ParseException {
-        return delegate.parsePathToCommand(rawPath);
+    public ShellFile parsePathToFile(String rawPath) throws ParseException {
+        return delegate.parsePathToFile(rawPath);
     }
 
     @Override

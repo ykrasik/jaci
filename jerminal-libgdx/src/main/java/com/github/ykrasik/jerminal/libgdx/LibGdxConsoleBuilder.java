@@ -20,7 +20,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.github.ykrasik.jerminal.api.Shell;
 import com.github.ykrasik.jerminal.api.ShellBuilder;
-import com.github.ykrasik.jerminal.api.command.ShellCommand;
+import com.github.ykrasik.jerminal.api.command.Command;
 
 import java.util.Collection;
 
@@ -77,22 +77,22 @@ public class LibGdxConsoleBuilder {
         return this;
     }
 
-    public LibGdxConsoleBuilder add(ShellCommand... commands) {
+    public LibGdxConsoleBuilder add(Command... commands) {
         builder.add(commands);
         return this;
     }
 
-    public LibGdxConsoleBuilder add(String path, ShellCommand... commands) {
+    public LibGdxConsoleBuilder add(String path, Command... commands) {
         builder.add(path, commands);
         return this;
     }
 
-    public LibGdxConsoleBuilder addGlobalCommands(ShellCommand... globalCommands) {
+    public LibGdxConsoleBuilder addGlobalCommands(Command... globalCommands) {
         builder.addGlobalCommands(globalCommands);
         return this;
     }
 
-    public LibGdxConsoleBuilder addGlobalCommands(Collection<ShellCommand> globalCommands) {
+    public LibGdxConsoleBuilder addGlobalCommands(Collection<Command> globalCommands) {
         builder.addGlobalCommands(globalCommands);
         return this;
     }

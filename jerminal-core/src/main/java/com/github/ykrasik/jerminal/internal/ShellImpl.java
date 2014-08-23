@@ -19,14 +19,15 @@ package com.github.ykrasik.jerminal.internal;
 import com.github.ykrasik.jerminal.api.Shell;
 import com.github.ykrasik.jerminal.api.assist.CommandInfo;
 import com.github.ykrasik.jerminal.api.assist.Suggestions;
+import com.github.ykrasik.jerminal.api.command.Command;
 import com.github.ykrasik.jerminal.api.command.CommandArgs;
-import com.github.ykrasik.jerminal.api.command.ShellCommand;
 import com.github.ykrasik.jerminal.api.exception.ExecuteException;
 import com.github.ykrasik.jerminal.api.output.OutputProcessor;
 import com.github.ykrasik.jerminal.collections.trie.Trie;
 import com.github.ykrasik.jerminal.internal.command.OutputPrinterImpl;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.internal.filesystem.ShellFileSystem;
+import com.github.ykrasik.jerminal.internal.filesystem.file.ShellFile;
 import com.github.ykrasik.jerminal.internal.returnvalue.AssistReturnValue;
 import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
 import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteType;
@@ -105,7 +106,7 @@ public class ShellImpl implements Shell {
 
     // FIXME: I do still want the old errors - no more params, etc.
     private AssistReturnValue doAssist(List<String> commandLine) throws ParseException {
-        // The first arg of the commandLine must be a path to a command.
+        // The first arg of the commandLine must be a path to a command(file).
         final String rawPath = commandLine.get(0);
 
         // If we only have 1 arg, we are trying to autoComplete a path to a command.
@@ -116,13 +117,13 @@ public class ShellImpl implements Shell {
             return new AssistReturnValue(Optional.<CommandInfo>absent(), autoCompleteReturnValue);
         }
 
-        // The first arg is not the only arg on the commandLine, it is expected to be a valid path to a command.
-        final ShellCommand command = fileSystem.parsePathToCommand(rawPath);
+        // The first arg is not the only arg on the commandLine, it is expected to be a valid path to a file(command).
+        final ShellFile file = fileSystem.parsePathToFile(rawPath);
 
         // Provide assistance with the command parameters.
         // The command args start from the 2nd commandLine element (the first was the command).
         final List<String> args = commandLine.subList(1, commandLine.size());
-        return command.assistArgs(args);
+        return file.assistArgs(args);
     }
 
     private String handleAssist(AssistReturnValue returnValue, String rawCommandLine) {
@@ -211,17 +212,17 @@ public class ShellImpl implements Shell {
         }
 
         // Parse commandLine.
-        final ShellCommand command;
+        final ShellFile file;
         final CommandArgs args;
         try {
-            // The first arg of the commandLine must be a path to a command.
+            // The first arg of the commandLine must be a path to a file(command).
             final String pathToCommand = commandLine.get(0);
-            command = fileSystem.parsePathToCommand(pathToCommand);
+            file = fileSystem.parsePathToFile(pathToCommand);
 
             // Parse the command args.
             // The command args start from the 2nd commandLine element (the first was the command).
             final List<String> rawArgs = commandLine.subList(1, commandLine.size());
-            args = command.parseCommandArgs(rawArgs);
+            args = file.parseCommandArgs(rawArgs);
         } catch (ParseException e) {
             handleParseException(e);
 
@@ -234,13 +235,14 @@ public class ShellImpl implements Shell {
         commandLineHistory.pushCommandLine(rawCommandLine);
 
         // Execute the command.
-        executeParsedCommand(command, args);
+        executeFile(file, args);
 
         // Command line was successfully parsed, the new command line should be blank.
         return "";
     }
 
-    private void executeParsedCommand(ShellCommand command, CommandArgs args) {
+    private void executeFile(ShellFile file, CommandArgs args) {
+        final Command command = file.getCommand();
         final OutputPrinterImpl outputPrinter = new OutputPrinterImpl(outputProcessor);
         try {
             command.execute(args, outputPrinter);

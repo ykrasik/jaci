@@ -16,13 +16,13 @@
 
 package com.github.ykrasik.jerminal.api;
 
+import com.github.ykrasik.jerminal.api.command.Command;
 import com.github.ykrasik.jerminal.internal.CommandLineHistory;
 import com.github.ykrasik.jerminal.internal.ShellImpl;
 import com.github.ykrasik.jerminal.internal.command.ControlCommandFactory;
 import com.github.ykrasik.jerminal.internal.filesystem.ShellFileSystem;
 import com.github.ykrasik.jerminal.internal.filesystem.ShellFileSystemBuilder;
 import com.github.ykrasik.jerminal.internal.filesystem.ShellFileSystemPromise;
-import com.github.ykrasik.jerminal.api.command.ShellCommand;
 import com.github.ykrasik.jerminal.api.output.OutputProcessor;
 import com.github.ykrasik.jerminal.api.output.terminal.Terminal;
 import com.github.ykrasik.jerminal.api.output.terminal.TerminalOutputProcessor;
@@ -63,7 +63,7 @@ public class ShellBuilder {
         this.fileSystemBuilder = new ShellFileSystemBuilder();
         this.fileSystemPromise = new ShellFileSystemPromise();
 
-        final Set<ShellCommand> controlCommands = new ControlCommandFactory(fileSystemPromise, outputProcessor).createControlCommands();
+        final Set<Command> controlCommands = new ControlCommandFactory(fileSystemPromise, outputProcessor).createControlCommands();
         fileSystemBuilder.addGlobalCommands(controlCommands);
     }
 
@@ -84,22 +84,22 @@ public class ShellBuilder {
         return this;
     }
 
-    public ShellBuilder add(ShellCommand... commands) {
+    public ShellBuilder add(Command... commands) {
         fileSystemBuilder.add(commands);
         return this;
     }
 
-    public ShellBuilder add(String path, ShellCommand... commands) {
+    public ShellBuilder add(String path, Command... commands) {
         fileSystemBuilder.add(path, commands);
         return this;
     }
 
-    public ShellBuilder addGlobalCommands(ShellCommand... globalCommands) {
+    public ShellBuilder addGlobalCommands(Command... globalCommands) {
         fileSystemBuilder.addGlobalCommands(globalCommands);
         return this;
     }
 
-    public ShellBuilder addGlobalCommands(Collection<ShellCommand> globalCommands) {
+    public ShellBuilder addGlobalCommands(Collection<Command> globalCommands) {
         fileSystemBuilder.addGlobalCommands(globalCommands);
         return this;
     }
