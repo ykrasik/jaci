@@ -20,13 +20,12 @@ import com.github.ykrasik.jerminal.api.command.OutputPrinter;
 import com.github.ykrasik.jerminal.api.output.OutputProcessor;
 
 /**
- * An implementation for a {@link com.github.ykrasik.jerminal.api.command.OutputPrinter}.
+ * An implementation for an {@link OutputPrinter}.
  *
  * @author Yevgeny Krasik
  */
 public class OutputPrinterImpl implements OutputPrinter {
     private final OutputProcessor outputProcessor;
-    private int numInteractions;
 
     public OutputPrinterImpl(OutputProcessor outputProcessor) {
         this.outputProcessor = outputProcessor;
@@ -35,15 +34,10 @@ public class OutputPrinterImpl implements OutputPrinter {
     @Override
     public void println(String text) {
         outputProcessor.displayText(text);
-        numInteractions++;
     }
 
     @Override
     public void println(String format, Object... args) {
         println(String.format(format, args));
-    }
-
-    public boolean hasInteractions() {
-        return numInteractions > 0;
     }
 }

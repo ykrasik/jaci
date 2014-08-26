@@ -18,8 +18,10 @@ package com.github.ykrasik.jerminal.api.command;
 
 import com.github.ykrasik.jerminal.api.exception.MissingParameterException;
 import com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectory;
+import com.github.ykrasik.jerminal.internal.filesystem.file.ShellFile;
 
 import java.util.Map;
+import java.util.Queue;
 
 /**
  * Holds the args that were passed to the command.<br>
@@ -28,44 +30,78 @@ import java.util.Map;
  * @author Yevgeny Krasik
  */
 // TODO: Annotation based config.
-// TODO: Add stack-based arg access.
 public class CommandArgs {
     private final Map<String, Object> args;
+    private final Queue<Object> positionalArgValues;
 
-    public CommandArgs(Map<String, Object> args) {
+    public CommandArgs(Map<String, Object> args, Queue<Object> positionalArgValues) {
         this.args = args;
+        this.positionalArgValues = positionalArgValues;
     }
 
     public String getString(String name) throws MissingParameterException {
-        return getParam(name, String.class);
+        return getArg(name, String.class);
+    }
+
+    public String popString() throws MissingParameterException {
+        return popArg(String.class);
     }
 
     public int getInt(String name) throws MissingParameterException {
-        return getParam(name, Integer.class);
+        return getArg(name, Integer.class);
+    }
+
+    public int popInt() throws MissingParameterException {
+        return popArg(Integer.class);
     }
 
     public double getDouble(String name) throws MissingParameterException {
-        return getParam(name, Double.class);
+        return getArg(name, Double.class);
+    }
+
+    public double popDouble() throws MissingParameterException {
+        return popArg(Double.class);
     }
 
     public boolean getBool(String name) throws MissingParameterException {
-        return getParam(name, Boolean.class);
+        return getArg(name, Boolean.class);
+    }
+
+    public boolean popBool() throws MissingParameterException {
+        return popArg(Boolean.class);
     }
 
     public ShellDirectory getDirectory(String name) throws MissingParameterException {
-        return getParam(name, ShellDirectory.class);
+        return getArg(name, ShellDirectory.class);
     }
 
-    public Command getFile(String name) throws MissingParameterException {
-        return getParam(name, Command.class);
+    public ShellDirectory popDirectory() throws MissingParameterException {
+        return popArg(ShellDirectory.class);
     }
 
-    private <T> T getParam(String name, Class<T> clazz) throws MissingParameterException {
+    public ShellFile getFile(String name) throws MissingParameterException {
+        return getArg(name, ShellFile.class);
+    }
+
+    public ShellFile popFile() throws MissingParameterException {
+        return popArg(ShellFile.class);
+    }
+
+    private <T> T getArg(String name, Class<T> clazz) throws MissingParameterException {
         final Object value = args.get(name);
         if (value == null) {
             throw new MissingParameterException("No value defined for param '%s'!", name);
         }
 
+        return clazz.cast(value);
+    }
+
+    private <T> T popArg(Class<T> clazz) throws MissingParameterException {
+        if (positionalArgValues.isEmpty()) {
+            throw new MissingParameterException("No more arguments!");
+        }
+
+        final Object value = positionalArgValues.poll();
         return clazz.cast(value);
     }
 }

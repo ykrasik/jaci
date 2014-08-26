@@ -31,6 +31,7 @@ import com.github.ykrasik.jerminal.internal.command.view.ShellCommandViewImpl;
 import com.github.ykrasik.jerminal.internal.filesystem.ShellEntry;
 import com.github.ykrasik.jerminal.internal.filesystem.ShellFileSystem;
 import com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectory;
+import com.github.ykrasik.jerminal.internal.filesystem.file.ShellFile;
 import com.github.ykrasik.jerminal.internal.filesystem.view.ShellEntryViewImpl;
 import com.google.common.base.Supplier;
 
@@ -69,18 +70,17 @@ public class ControlCommandFactory {
     }
 
     public Command createChangeDirectoryCommand() {
-        final String dirArgName = "dir";
         return new ShellCommandBuilder(CHANGE_DIRECTORY_COMMAND_NAME)
             .setDescription("Change current directory")
             .addParam(
-                new DirectoryParamBuilder(dirArgName, fileSystem)
+                new DirectoryParamBuilder("dir", fileSystem)
                     .setDescription("Directory to change to")
                     .build()
             )
             .setExecutor(new CommandExecutor() {
                 @Override
                 public void execute(CommandArgs args, OutputPrinter outputPrinter) throws ExecuteException {
-                    final ShellDirectory directory = args.getDirectory(dirArgName);
+                    final ShellDirectory directory = args.popDirectory();
                     fileSystem.setCurrentDirectory(directory);
                 }
             })
@@ -88,12 +88,10 @@ public class ControlCommandFactory {
     }
 
     public Command createListDirectoryCommand() {
-        final String dirArgName = "dir";
-        final String recursiveArgName = "-r";
         return new ShellCommandBuilder(LIST_DIRECTORY_COMMAND_NAME)
             .setDescription("List directory content")
             .addParam(
-                new DirectoryParamBuilder(dirArgName, fileSystem)
+                new DirectoryParamBuilder("dir", fileSystem)
                     .setDescription("Directory to list")
                     .setOptional(new Supplier<ShellDirectory>() {
                         @Override
@@ -104,15 +102,15 @@ public class ControlCommandFactory {
                     .build()
             )
             .addParam(
-                new FlagParamBuilder(recursiveArgName)
+                new FlagParamBuilder("-r")
                     .setDescription("Whether to recurse into sub-directories")
                     .build()
             )
             .setExecutor(new CommandExecutor() {
                 @Override
                 public void execute(CommandArgs args, OutputPrinter outputPrinter) throws ExecuteException {
-                    final ShellDirectory directory = args.getDirectory(dirArgName);
-                    final boolean recursive = args.getBool(recursiveArgName);
+                    final ShellDirectory directory = args.popDirectory();
+                    final boolean recursive = args.popBool();
                     final ShellEntryView shellEntryView = createShellEntryView(directory, recursive);
                     outputProcessor.displayShellEntryView(shellEntryView);
                 }
@@ -137,18 +135,18 @@ public class ControlCommandFactory {
     }
 
     public Command createDescribeCommandCommand() {
-        final String commandArgName = "cmd";
         return new ShellCommandBuilder(DESCRIBE_COMMAND_COMMAND_NAME)
             .setDescription("Describe command")
             .addParam(
-                new FileParamBuilder(commandArgName, fileSystem)
+                new FileParamBuilder("cmd", fileSystem)
                     .setDescription("Command to describe")
                     .build()
             )
             .setExecutor(new CommandExecutor() {
                 @Override
                 public void execute(CommandArgs args, OutputPrinter outputPrinter) throws ExecuteException {
-                    final Command command = args.getFile(commandArgName);
+                    final ShellFile file = args.popFile();
+                    final Command command = file.getCommand();
                     final ShellCommandView shellCommandView = createShellCommandView(command);
                     outputProcessor.displayShellCommandView(shellCommandView);
                 }

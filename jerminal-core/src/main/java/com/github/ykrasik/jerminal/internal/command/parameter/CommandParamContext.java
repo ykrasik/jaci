@@ -34,10 +34,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -81,11 +78,13 @@ public class CommandParamContext {
         // Bind the remaining unbound params.
         // It is up to the param to decide whether they can be parsed this way.
         for (CommandParam unboundParam : unboundParams) {
+            // TODO: Double dispatch somehow?
             final Object value = unboundParam.unbound();
             boundParamValues.put(unboundParam.getName(), value);
         }
 
-        return new CommandArgs(boundParamValues);
+        final Queue<Object> positionalArgValues = createPositionalArgValues();
+        return new CommandArgs(boundParamValues, positionalArgValues);
     }
 
     private void parse(List<String> args) throws ParseException {
@@ -239,6 +238,19 @@ public class CommandParamContext {
             }
         });
         return filteredParams.map(AUTO_COMPLETE_TYPE_MAPPER);
+    }
+
+    private Queue<Object> createPositionalArgValues() {
+        final List<CommandParam> params = command.getParams();
+        final Queue<Object> values = new ArrayDeque<>(params.size());
+        for (CommandParam param : params) {
+            final Object value = boundParamValues.get(param.getName());
+            if (value == null) {
+                throw new ShellException("Arg was bound but is missing a value: %s", param.getName());
+            }
+            values.add(value);
+        }
+        return values;
     }
 
     public CommandInfo createCommandInfo() {

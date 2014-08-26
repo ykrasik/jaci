@@ -246,10 +246,8 @@ public class ShellImpl implements Shell {
         final OutputPrinterImpl outputPrinter = new OutputPrinterImpl(outputProcessor);
         try {
             command.execute(args, outputPrinter);
-            // Print a generic success message if the command didn't print anything on it's own.
-            if (!outputPrinter.hasInteractions()) {
-                outputPrinter.println("Command '%s' executed successfully.", command.getName());
-            }
+            // Print a generic success message.
+            outputPrinter.println("Command '%s' executed successfully.", command.getName());
         } catch (ExecuteException e) {
             outputProcessor.executeError(e);
         } catch (Exception e) {

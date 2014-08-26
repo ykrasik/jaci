@@ -45,7 +45,7 @@ public class DirectoryParam extends AbstractMandatoryCommandParam<ShellDirectory
     }
 
     @Override
-    public Object parse(String rawValue) throws ParseException {
+    public ShellDirectory parse(String rawValue) throws ParseException {
         if (rawValue.isEmpty()) {
             throw emptyValue();
         }

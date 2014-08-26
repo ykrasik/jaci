@@ -23,6 +23,7 @@ package com.github.ykrasik.jerminal.internal.returnvalue;
  */
 public enum AutoCompleteType {
     // TODO: Get these constants out of somewhere more specific.
+    // FIXME: Doesn't belong here.
     DIRECTORY('/'),
     COMMAND(' '),
     COMMAND_PARAM_NAME('='),

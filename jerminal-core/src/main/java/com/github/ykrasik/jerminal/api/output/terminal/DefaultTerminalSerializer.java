@@ -153,9 +153,11 @@ public class DefaultTerminalSerializer implements TerminalSerializer {
     public String serializeException(Exception e) {
         final StringBuilder sb = new StringBuilder();
         sb.append(e.toString());
+        sb.append('\n');
         for (StackTraceElement stackTraceElement : e.getStackTrace()) {
             sb.append("|    ");
             sb.append(stackTraceElement.toString());
+            sb.append('\n');
         }
         return sb.toString();
     }

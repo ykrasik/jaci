@@ -16,11 +16,11 @@
 
 package com.github.ykrasik.jerminal.internal.command.parameter.entry;
 
-import com.github.ykrasik.jerminal.api.command.Command;
 import com.github.ykrasik.jerminal.api.exception.ParseError;
 import com.github.ykrasik.jerminal.internal.command.parameter.AbstractMandatoryCommandParam;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.internal.filesystem.ShellFileSystem;
+import com.github.ykrasik.jerminal.internal.filesystem.file.ShellFile;
 import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -32,7 +32,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Yevgeny Krasik
  */
-public class FileParam extends AbstractMandatoryCommandParam<Command> {
+public class FileParam extends AbstractMandatoryCommandParam<ShellFile> {
     private final ShellFileSystem fileSystem;
 
     public FileParam(String name, String description, ShellFileSystem fileSystem) {
@@ -46,7 +46,7 @@ public class FileParam extends AbstractMandatoryCommandParam<Command> {
     }
 
     @Override
-    public Object parse(String rawValue) throws ParseException {
+    public ShellFile parse(String rawValue) throws ParseException {
         if (rawValue.isEmpty()) {
             throw emptyValue();
         }
