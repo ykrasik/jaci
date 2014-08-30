@@ -18,8 +18,8 @@ package com.github.ykrasik.jerminal.internal;
 
 import com.google.common.base.Optional;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Manages a history of command lines.
@@ -27,57 +27,64 @@ import java.util.Deque;
  * @author Yevgeny Krasik
  */
 public class CommandLineHistory {
-    // FIXME: This class needs testing.
-    // FIXME: Wouldn't it be easier to just keep an int index?
-    private final Deque<String> prevCommandLines;
-    private final Deque<String> nextCommandLines;
+    private final int maxHistory;
+    private final List<String> history;
 
-    private final int maxCommandLineHistory;
+    private int currentIndex;
 
-    public CommandLineHistory(int maxCommandLineHistory) {
-        this.maxCommandLineHistory = maxCommandLineHistory;
-        this.prevCommandLines = new ArrayDeque<>(maxCommandLineHistory);
-        this.nextCommandLines = new ArrayDeque<>(maxCommandLineHistory);
+    public CommandLineHistory(int maxHistory) {
+        this.maxHistory = maxHistory;
+        this.history = new LinkedList<>();
+
+        resetCurrentIndex();
     }
 
     public Optional<String> getPrevCommandLine() {
-        if (prevCommandLines.isEmpty()) {
+        if (history.isEmpty()) {
             return Optional.absent();
         }
-        if (prevCommandLines.size() == 1) {
-            return Optional.of(prevCommandLines.peek());
+
+        // Don't let currentIndex go below 0.
+        if (currentIndex > 0) {
+            currentIndex--;
         }
 
-        final String prevCommand = prevCommandLines.pollLast();
-        nextCommandLines.addFirst(prevCommand);
-        return Optional.of(prevCommand);
+        return getElementAtCurrentIndex();
     }
 
     public Optional<String> getNextCommandLine() {
-        if (nextCommandLines.isEmpty()) {
+        if (history.isEmpty()) {
             return Optional.absent();
         }
-        if (nextCommandLines.size() == 1){
-            return Optional.of(nextCommandLines.peek());
-        }
 
-        final String nextCommand = nextCommandLines.pollFirst();
-        prevCommandLines.addLast(nextCommand);
-        return Optional.of(nextCommand);
+        // Don't let currentIndex go above the length of 'history'.
+        final int size = history.size();
+        currentIndex = currentIndex < size - 1 ? currentIndex + 1 : size - 1;
+
+        return getElementAtCurrentIndex();
+    }
+
+    private Optional<String> getElementAtCurrentIndex() {
+        final String element = history.get(currentIndex);
+        return Optional.of(element);
     }
 
     public void pushCommandLine(String commandLine) {
-        resetCommandLines();
-        if (prevCommandLines.size() >= maxCommandLineHistory) {
-            prevCommandLines.removeFirst();
+        // Add new history entry to the end.
+        history.add(commandLine);
+
+        // Maintain max history size.
+        if (history.size() > maxHistory) {
+            history.remove(0);
         }
-        prevCommandLines.addLast(commandLine);
+
+        // Reset the iteration index.
+        resetCurrentIndex();
     }
 
-    private void resetCommandLines() {
-        // Move all commandsLines currently in nextCommandLines to prevCommandLines.
-        // This is done before a commandLine is pushed.
-        prevCommandLines.addAll(nextCommandLines);
-        nextCommandLines.clear();
+    private void resetCurrentIndex() {
+        // Set 'currentIndex' to point after the end of the 'history',
+        // so the next access to the next or prev commandLine returns the last element of 'history'.
+        currentIndex = history.size();
     }
 }
