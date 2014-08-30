@@ -35,7 +35,7 @@ import static org.mockito.Mockito.when;
  * @author Yevgeny Krasik
  */
 @RunWith(MockitoJUnitRunner.class)
-public class AbstractFileSystemTest {
+public abstract class AbstractFileSystemTest {
     protected ShellFileSystemBuilder builder;
     protected ShellFileSystem fileSystem;
 
@@ -53,18 +53,19 @@ public class AbstractFileSystemTest {
         add(path, "cmd");
     }
 
-    protected void add(String path, String... commands) {
-        add(path, Arrays.asList(commands));
+    protected void add(String path, String... commandNames) {
+        add(path, Arrays.asList(commandNames));
     }
 
-    protected void add(String path, List<String> commands) {
-        final List<Command> commandDefs = Lists.transform(commands, new Function<String, Command>() {
+    protected void add(String path, List<String> commandNames) {
+        final List<Command> commands = Lists.transform(commandNames, new Function<String, Command>() {
             @Override
             public Command apply(String input) {
                 return cmd(input);
             }
         });
-        builder.add(path, commandDefs);
+        builder.add(path, commands);
+        build();
     }
 
     protected Command cmd(String name) {

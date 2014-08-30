@@ -39,8 +39,6 @@ public class FileSystemWithoutGlobalCommandsTest extends AbstractFileSystemTest 
         add("dir1/dir3dir");
         add("dir1/dib");
         add("dir1/folder");
-
-        build();
     }
 
     @Test
