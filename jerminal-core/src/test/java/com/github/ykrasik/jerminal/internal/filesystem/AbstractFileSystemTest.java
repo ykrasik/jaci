@@ -17,17 +17,15 @@
 package com.github.ykrasik.jerminal.internal.filesystem;
 
 import com.github.ykrasik.jerminal.api.command.Command;
-import com.google.common.base.Function;
-import com.google.common.collect.Lists;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectory;
+import com.github.ykrasik.jerminal.internal.filesystem.file.ShellFile;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.util.Arrays;
-import java.util.List;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -49,23 +47,16 @@ public abstract class AbstractFileSystemTest {
         this.fileSystem = builder.build();
     }
 
-    protected void add(String path) {
-        add(path, "cmd");
-    }
-
     protected void add(String path, String... commandNames) {
-        add(path, Arrays.asList(commandNames));
+        for (String commandName : commandNames) {
+            builder.add(path, cmd(commandName));
+        }
     }
 
-    protected void add(String path, List<String> commandNames) {
-        final List<Command> commands = Lists.transform(commandNames, new Function<String, Command>() {
-            @Override
-            public Command apply(String input) {
-                return cmd(input);
-            }
-        });
-        builder.add(path, commands);
-        build();
+    protected void addGlobalCommands(String... commandNames) {
+        for (String commandName : commandNames) {
+            builder.addGlobalCommands(cmd(commandName));
+        }
     }
 
     protected Command cmd(String name) {
@@ -74,24 +65,37 @@ public abstract class AbstractFileSystemTest {
         return command;
     }
 
-    protected ShellDirectory getDirectory(List<String> path) {
-        ShellDirectory currentDirectory = fileSystem.getRoot();
-        for (String pathElement : path) {
-            currentDirectory = getChild(currentDirectory, pathElement);
-        }
-        return currentDirectory;
-    }
-
-    protected ShellDirectory getChild(ShellDirectory directory, String name) {
+    protected void assertPathToCommand(String path, String commandName) {
         try {
-            return directory.parseDirectory(name);
+            final ShellFile file = fileSystem.parsePathToFile(path);
+            assertEquals(commandName, file.getName());
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
     }
 
-    protected void setCurrentDirectory(String... path) {
-        final ShellDirectory directory = getDirectory(Arrays.asList(path));
-        fileSystem.setCurrentDirectory(directory);
+    protected void assertPathToDirectory(String path, String directoryName) {
+        try {
+            final ShellDirectory directory = fileSystem.parsePathToDirectory(path);
+            assertEquals(directoryName, directory.getName());
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected void assertGlobalCommand(String commandName) {
+        try {
+            final ShellFile file = fileSystem.parsePathToFile(commandName);
+            assertEquals(commandName, file.getName());
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected void assertDoesntExist(String path) {
+        try {
+            fileSystem.parsePathToFile(path);
+            fail();
+        } catch (ParseException ignored) { }
     }
 }

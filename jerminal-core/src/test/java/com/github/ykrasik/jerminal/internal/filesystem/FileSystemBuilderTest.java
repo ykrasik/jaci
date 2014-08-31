@@ -16,16 +16,17 @@
 
 package com.github.ykrasik.jerminal.internal.filesystem;
 
-import com.google.common.collect.ObjectArrays;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.internal.exception.ShellException;
 import com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectory;
+import com.google.common.collect.ObjectArrays;
 import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * @author Yevgeny Krasik
@@ -34,103 +35,109 @@ public class FileSystemBuilderTest extends AbstractFileSystemTest {
     @Test
     public void testBasicPath() {
         add("dir1/dir2/dir3");
+        build();
         assertPath("dir1", "dir2", "dir3");
     }
 
     @Test
     public void testPartiallyExistingPath() {
         add("dir1");
+        build();
         assertPath("dir1");
 
+        // 'dir1' already exists.
         add("dir1/dir2");
+        build();
         assertPath("dir1", "dir2");
 
+        // 'dir1/dir2' already exists.
         add("dir1/dir2/dir3");
+        build();
         assertPath("dir1", "dir2", "dir3");
     }
 
     @Test
     public void testDifferentPaths() {
+        // 2 different paths without anything common.
         add("dir1/dir2/dir3");
-        assertPath("dir1", "dir2", "dir3");
-
         add("another1/another2/another3");
+        build();
+
+        assertPath("dir1", "dir2", "dir3");
         assertPath("another1", "another2", "another3");
     }
 
     @Test
     public void testPathWithSameNames() {
+        // Nesting the same directory name should be possible.
         add("dir/dir/dir");
+        build();
         assertPath("dir", "dir", "dir");
-    }
-
-    @Test
-    public void testSamePathTwice() {
-        builder.add("dir1/dir2");
-        build();
-        assertPathToCommand("dir1", "dir2", null);
-
-        builder.add("dir1/dir2");
-        build();
-        assertPathToCommand("dir1", "dir2", null);
     }
 
     @Test
     public void testPathWithLeadingDelimiter() {
         add("/dir1");
-        assertPath("dir1");
-
         add("/dir2");
+        build();
+
+        assertPath("dir1");
         assertPath("dir2");
     }
 
     @Test
     public void testPathWithTrailingDelimiter() {
         add("dir1/");
-        assertPath("dir1");
-
         add("dir2/");
+        build();
+
+        assertPath("dir1");
         assertPath("dir2");
     }
 
     @Test
     public void testPathWithLeadingAndTrailingDelimiter() {
         add("/dir1/dir2/dir3/");
+        build();
         assertPath("dir1", "dir2", "dir3");
     }
 
     @Test
     public void testEmptyPath() {
+        // All these forms represent an empty path.
         add("", "cmd1");
-        assertPathToCommand("cmd1");
-
         add("/", "cmd2");
-        assertPathToCommand("cmd2");
-
         add("   /", "cmd3");
-        assertPathToCommand("cmd3");
-
         add("/   ", "cmd4");
-        assertPathToCommand("cmd4");
-
         add("   /   ", "cmd5");
+        build();
+
+        assertPathToCommand("cmd1");
+        assertPathToCommand("cmd2");
+        assertPathToCommand("cmd3");
+        assertPathToCommand("cmd4");
         assertPathToCommand("cmd5");
     }
 
     @Test
     public void testPathWithSpaces() {
+        // Spaces surrounding a directory name should be ignored.
         add("    dir1/   dir2   /  dir3    ");
+        build();
         assertPath("dir1", "dir2", "dir3");
     }
 
     @Test
     public void testDirNameWithSpaces() {
+        // Spaces that are part of the directory name should be legal.
         add("dir   ecto  ry/   d i r 2   / d  ir  3  ");
+        build();
         assertPath("dir   ecto  ry", "d i r 2", "d  ir  3");
     }
 
     @Test
-    public void testIllegalPath() {
+    public void testIInvalid() {
+        // These are all invalid paths.
         assertIllegal("//");
         assertIllegal("    //");
         assertIllegal("//   ");
@@ -141,44 +148,34 @@ public class FileSystemBuilderTest extends AbstractFileSystemTest {
         assertIllegal("   dir1   //   dir2   //   dir3   ");
     }
 
-//    @Test
-//    public void testSpecialCharacters() {
-//        add("./dir1", "cmd1");
-//        assertPathToCommand("dir1", "cmd1");
-//
-//        add("/./dir1", "cmd2");
-//        assertPathToCommand("dir1", "cmd2");
-//
-//        add("dir1/.", "cmd3");
-//        assertPathToCommand("dir1", "cmd3");
-//
-//        add("dir1/./", "cmd4");
-//        assertPathToCommand("dir1", "cmd4");
-//
-//        add("dir1/./dir2", "cmd5");
-//        assertPathToCommand("dir1", "dir2", "cmd5");
-//
-//        add("dir1/../dir2", "cmd6");
-//        assertPathToCommand("dir2", "cmd6");
-//
-//        add("dir1/dir2/..", "cmd7");
-//        assertPathToCommand("dir1", "cmd7");
-//
-//        add("dir1/dir2/../", "cmd8");
-//        assertPathToCommand("dir1", "cmd8");
-//    }
-
     @Test
-    public void testIllegalRootParent() {
+    public void testIllegal() {
+        // These are all illegal due to special characters being used.
+        assertIllegal(".");
+        assertIllegal("/.");
+        assertIllegal("./");
+        assertIllegal("/./");
+
         assertIllegal("..");
         assertIllegal("/..");
         assertIllegal("../");
         assertIllegal("/../");
+
+        assertIllegal("./dir1");
+        assertIllegal("/./dir1");
+        assertIllegal("dir1/.");
+        assertIllegal("dir1/./");
+        assertIllegal("dir1/./dir2");
+        assertIllegal("dir1/../dir2");
+        assertIllegal("dir1/dir2/..");
+        assertIllegal("dir1/dir2/../");
     }
 
     @Test
     public void testPathWithDescription() {
+        // It is possible to add descriptions to a directory.
         add("dir1 : Directory1/  dir2   :   Directory2  /   dir3 : Description with spaces  /  dir4:  ");
+        build();
         assertPath("dir1", "dir2", "dir3", "dir4");
 
         ShellDirectory dir = getChild(fileSystem.getRoot(), "dir1");
@@ -212,27 +209,39 @@ public class FileSystemBuilderTest extends AbstractFileSystemTest {
 
     @Test
     public void testAddToRoot() {
-        // These methods are identical.
+        // These methods are identical and add the commands to the root.
         add("/", "cmd1");
-        assertPathToCommand("cmd1");
-
         add("", "cmd2");
-        assertPathToCommand("cmd2");
-
         add("       ", "cmd3");
-        assertPathToCommand("cmd3");
-
         builder.add(cmd("cmd4"));
         build();
+
+        assertPathToCommand("cmd1");
+        assertPathToCommand("cmd2");
+        assertPathToCommand("cmd3");
         assertPathToCommand("cmd4");
     }
 
     @Test(expected = ShellException.class)
     public void testAddCommandTwice() {
         add("dir", "cmd");
+        build();
         assertPathToCommand("dir", "cmd");
 
         add("dir", "cmd");
+    }
+
+    @Test
+    public void testGlobalCommands() {
+        addGlobalCommands("global1", "global2");
+        build();
+
+        assertGlobalCommand("global1");
+        assertGlobalCommand("global2");
+    }
+
+    private void add(String path) {
+        add(path, "cmd");
     }
 
     private void assertPath(String... path) {
@@ -244,12 +253,26 @@ public class FileSystemBuilderTest extends AbstractFileSystemTest {
         final List<String> pathToDirectory = pathElements.subList(0, pathElements.size() - 1);
         final String commandName = pathElements.get(pathElements.size() - 1);
         final ShellDirectory directory = getDirectory(pathToDirectory);
-        if (commandName != null) {
-            try {
-                directory.parseFile(commandName);
-            } catch (ParseException e) {
-                throw new RuntimeException(e);
-            }
+        try {
+            directory.parseFile(commandName);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private ShellDirectory getDirectory(List<String> path) {
+        ShellDirectory currentDirectory = fileSystem.getRoot();
+        for (String pathElement : path) {
+            currentDirectory = getChild(currentDirectory, pathElement);
+        }
+        return currentDirectory;
+    }
+
+    private ShellDirectory getChild(ShellDirectory directory, String name) {
+        try {
+            return directory.parseDirectory(name);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
         }
     }
 

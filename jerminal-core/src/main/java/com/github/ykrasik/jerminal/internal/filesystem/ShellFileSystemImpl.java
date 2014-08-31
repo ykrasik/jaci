@@ -103,6 +103,7 @@ public class ShellFileSystemImpl implements ShellFileSystem {
                 final Optional<ShellDirectory> parent = dir.getParent();
                 if (parent.isPresent()) {
                     dir = parent.get();
+                    continue;
                 } else {
                     throw directoryDoesNotHaveParent(dir.getName());
                 }
