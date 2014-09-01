@@ -28,9 +28,6 @@ import static org.junit.Assert.assertTrue;
  * @author Yevgeny Krasik
  */
 public class FileSystemParseTest extends AbstractFileSystemTest {
-//    private static final String[] COMMANDS = { "c", "cm", "cmd1", "cmd2", "cmd2cmd", "cmf", "file" };
-//    private static final String[] GLOBAL_COMMANDS = { "g", "gl", "global", "globalCommand", "globalCommand2" };
-
     @Override
     @Before
     public void setUp() {
@@ -124,6 +121,9 @@ public class FileSystemParseTest extends AbstractFileSystemTest {
             throw new RuntimeException(e);
         }
     }
+
+    // FIXME: Add a currentDirectory test
+    // FIXME: Add invalid path test
 
     private void assertPathToCommandVariations(String basePath, String commandName) {
         assertPathToCommand(basePath + '/' + commandName, commandName);
