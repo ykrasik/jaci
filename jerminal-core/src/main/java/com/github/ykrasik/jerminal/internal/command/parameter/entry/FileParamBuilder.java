@@ -23,6 +23,8 @@ import com.github.ykrasik.jerminal.internal.filesystem.ShellFileSystem;
 import com.github.ykrasik.jerminal.internal.filesystem.file.ShellFile;
 import com.google.common.base.Supplier;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * A builder for a {@link FileParam}.<br>
  * By default creates mandatory parameters, but can be set to create optional parameters via
@@ -39,8 +41,8 @@ public class FileParamBuilder {
     private Supplier<ShellFile> defaultValueSupplier;
 
     public FileParamBuilder(String name, ShellFileSystem fileSystem) {
-        this.name = name;
-        this.fileSystem = fileSystem;
+        this.name = checkNotNull(name, "name");
+        this.fileSystem = checkNotNull(fileSystem, "fileSystem");
     }
 
     public CommandParam build() {

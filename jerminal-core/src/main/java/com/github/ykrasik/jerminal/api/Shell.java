@@ -34,6 +34,7 @@ import com.google.common.base.Optional;
  *
  * @author Yevgeny Krasik
  */
+// FIXME: Remove Guava dependency?
 public interface Shell {
     /**
      * Get the previous command line from history.<br>

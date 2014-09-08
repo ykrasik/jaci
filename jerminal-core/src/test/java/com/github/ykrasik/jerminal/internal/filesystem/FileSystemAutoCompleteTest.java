@@ -26,6 +26,7 @@ import org.junit.Test;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * @author Yevgeny Krasik
@@ -61,12 +62,7 @@ public class FileSystemAutoCompleteTest extends AbstractFileSystemTest {
         this.expectedDirectories = Collections.emptyList();
     }
 
-    // FIXME: Test that global commands are impossible with a delimiter
-    // FIXME: Test that global commands are impossible when inside a directory.
-    // FIXME: Test invalid path
-    // FIXME: Test with "dir1" prefix
-    // FIXME: Test with "dir1/dir2" prefix
-    // FIXME: Test special characters
+    // FIXME: Add current directory test
 
     @Test
     public void testAutoCompletePathEmptyPrefix() {
@@ -181,6 +177,13 @@ public class FileSystemAutoCompleteTest extends AbstractFileSystemTest {
     }
 
     @Test
+    public void testInvalidPath() {
+        assertInvalidPath("dir/");
+        assertInvalidPath("dir1/dir/");
+        assertInvalidPath("dir1/dir2/d/");
+    }
+
+    @Test
     public void testAutoCompleteDirectory() {
         // FIXME: Implement.
     }
@@ -194,9 +197,19 @@ public class FileSystemAutoCompleteTest extends AbstractFileSystemTest {
     }
 
     private void assertAutoCompletePathVariations(String prefix) {
-        assertAutoCompletePath(prefix, prefix);
+        assertAutoCompletePathWithAndWithoutDelimiter(prefix, prefix);
+        assertAutoCompletePathWithAndWithoutDelimiter("./" + prefix, prefix);
+        assertAutoCompletePathWithAndWithoutDelimiter("dir1/../" + prefix, prefix);
+
         assertAutoCompletePathWithAndWithoutDelimiter("dir1/" + prefix, prefix);
+        assertAutoCompletePathWithAndWithoutDelimiter("./dir1/" + prefix, prefix);
+        assertAutoCompletePathWithAndWithoutDelimiter("dir1/./" + prefix, prefix);
+        assertAutoCompletePathWithAndWithoutDelimiter("dir1/dir2/../" + prefix, prefix);
+
         assertAutoCompletePathWithAndWithoutDelimiter("dir1/dir2/" + prefix, prefix);
+        assertAutoCompletePathWithAndWithoutDelimiter("./dir1/dir2/" + prefix, prefix);
+        assertAutoCompletePathWithAndWithoutDelimiter("dir1/./dir2/" + prefix, prefix);
+        assertAutoCompletePathWithAndWithoutDelimiter("dir1/dir2/./" + prefix, prefix);
     }
 
     private void assertAutoCompletePathWithAndWithoutDelimiter(String path, String prefix) {
@@ -238,5 +251,12 @@ public class FileSystemAutoCompleteTest extends AbstractFileSystemTest {
         for (String expectedEntry : expectedEntries) {
             assertEquals(expectedType, possibilities.get(expectedEntry));
         }
+    }
+
+    private void assertInvalidPath(String path) {
+        try {
+            fileSystem.autoCompletePath(path);
+            fail();
+        } catch (ParseException ignored) { }
     }
 }

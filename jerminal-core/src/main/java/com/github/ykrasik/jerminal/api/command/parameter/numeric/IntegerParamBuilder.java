@@ -21,6 +21,8 @@ import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
 import com.github.ykrasik.jerminal.internal.command.parameter.ParamUtils;
 import com.github.ykrasik.jerminal.internal.command.parameter.optional.OptionalParam;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * A builder for an {@link IntegerParam}.<br>
  * By default creates mandatory parameters, but can be set to create optional parameters via
@@ -34,7 +36,7 @@ public class IntegerParamBuilder {
     private Supplier<Integer> defaultValueSupplier;
 
     public IntegerParamBuilder(String name) {
-        this.name = name;
+        this.name = checkNotNull(name, "name");
     }
 
     public CommandParam build() {

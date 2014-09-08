@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * A builder for a {@link Command}.
  *
@@ -43,7 +45,7 @@ public class ShellCommandBuilder {
     private CommandExecutor executor = NOT_IMPLEMENTED_EXECUTOR;
 
     public ShellCommandBuilder(String name) {
-        this.name = name;
+        this.name = checkNotNull(name, "name");
     }
 
     public Command build() {

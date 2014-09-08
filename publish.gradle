@@ -1,7 +1,7 @@
 apply plugin: 'maven'
 apply plugin: 'signing'
 
-group = 'com.github.ykrasik.jerminal'
+group = 'com.github.ykrasik'
 version = '0.1'
 ext.packaging = 'jar'
 

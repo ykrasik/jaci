@@ -20,6 +20,8 @@ import com.google.common.base.Supplier;
 import com.github.ykrasik.jerminal.api.command.parameter.bool.BooleanParamBuilder;
 import com.github.ykrasik.jerminal.api.exception.ExecuteException;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Creates toggle {@link Command}s.<br>
  * A toggle command is a commmand that takes a single optional boolean parameter and toggles
@@ -42,12 +44,13 @@ public class ToggleCommandBuilder {
     private String paramDescription = "toggle";
 
     public ToggleCommandBuilder(String name, StateAccessor accessor) {
-        this.name = name;
-        this.accessor = accessor;
+        this.name = checkNotNull(name, "name");
+        this.accessor = checkNotNull(accessor, "accessor");
         this.builder = new ShellCommandBuilder(name);
         this.builder.setDescription("toggle");
     }
 
+    // TODO: Multiple calls to this will produce weird results.
     public Command build() {
         return builder
             .addParam(new BooleanParamBuilder(PARAM_NAME)
@@ -58,7 +61,7 @@ public class ToggleCommandBuilder {
             .setExecutor(new CommandExecutor() {
                 @Override
                 public void execute(CommandArgs args, OutputPrinter outputPrinter) throws ExecuteException {
-                    final boolean toggle = args.getBool(PARAM_NAME);
+                    final boolean toggle = args.popBool();
                     accessor.set(toggle);
                     outputPrinter.println("%s: %s", name, toggle);
                 }

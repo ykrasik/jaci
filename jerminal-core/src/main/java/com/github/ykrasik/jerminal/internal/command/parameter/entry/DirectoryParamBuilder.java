@@ -23,6 +23,8 @@ import com.github.ykrasik.jerminal.internal.command.parameter.optional.OptionalP
 import com.github.ykrasik.jerminal.internal.filesystem.ShellFileSystem;
 import com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectory;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * A builder for a {@link DirectoryParam}.<br>
  * By default creates mandatory parameters, but can be set to create optional parameters via
@@ -39,8 +41,8 @@ public class DirectoryParamBuilder {
     private Supplier<ShellDirectory> defaultValueSupplier;
 
     public DirectoryParamBuilder(String name, ShellFileSystem fileSystem) {
-        this.name = name;
-        this.fileSystem = fileSystem;
+        this.name = checkNotNull(name, "name");
+        this.fileSystem = checkNotNull(fileSystem, "fileSystem");
     }
 
     public CommandParam build() {

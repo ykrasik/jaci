@@ -41,6 +41,7 @@ import com.google.common.base.Optional;
  * @author Yevgeny Krasik
  */
 // TODO: Implement coloring suggestions in yellow.
+    // FIXME: This should be a table.
 public class LibGdxJerminalConsole extends Stage {
     private final Shell shell;
     private final int toggleKeycode;

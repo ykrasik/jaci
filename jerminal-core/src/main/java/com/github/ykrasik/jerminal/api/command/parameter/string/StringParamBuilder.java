@@ -26,6 +26,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * A builder for a {@link StringParam}.<br>
  * By default creates mandatory parameters, but can be set to create optional parameters via
@@ -45,7 +47,7 @@ public class StringParamBuilder {
     private Supplier<String> defaultValueSupplier;
 
     public StringParamBuilder(String name) {
-        this.name = name;
+        this.name = checkNotNull(name, "name");
     }
 
     public CommandParam build() {
