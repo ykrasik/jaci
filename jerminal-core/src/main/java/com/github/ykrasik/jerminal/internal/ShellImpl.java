@@ -34,10 +34,11 @@ import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteType;
 import com.github.ykrasik.jerminal.internal.returnvalue.SuggestionsBuilder;
 import com.google.common.base.Optional;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -46,8 +47,9 @@ import java.util.regex.Pattern;
  * @author Yevgeny Krasik
  */
 public class ShellImpl implements Shell {
-    // A pattern that regards sequential spaces as a single space
-    private static final Pattern ARGS_PATTERN = Pattern.compile("[ ]+");
+    // A pattern that matches spaces that aren't surrounded by single or double quotes.
+    private static final Pattern ARGS_PATTERN = Pattern.compile("[^\\s\"']+|\"([^\"]*)\"|'([^']*)'");
+    // FIXME: Add JavaFX frontend gui
 
     private final OutputProcessor outputProcessor;
     private final ShellFileSystem fileSystem;
@@ -84,10 +86,14 @@ public class ShellImpl implements Shell {
         try {
             // Split the commandLine for autoComplete.
             // Only remove leading spaces, trailing spaces have a significant meaning.
-            final String trimmedCommandLine = rawCommandLine.startsWith(" ") ?
-                ARGS_PATTERN.matcher(rawCommandLine).replaceFirst("") :
-                rawCommandLine;
-            final List<String> commandLine = Arrays.asList(ARGS_PATTERN.split(trimmedCommandLine, -1));
+            final boolean endsWithSpace = rawCommandLine.isEmpty() || rawCommandLine.endsWith(" ");
+
+            // If the commandLine ends with a space (or is empty), we manually insert an empty arg.
+            // This signifies that the user wanted assistance about the NEXT argument and not the last one he typed.
+            final List<String> commandLine = splitCommandLine(rawCommandLine.trim());
+            if (endsWithSpace) {
+                commandLine.add("");
+            }
 
             // Do the actual autoCompletion.
             final AssistReturnValue returnValue = doAssist(commandLine);
@@ -204,8 +210,8 @@ public class ShellImpl implements Shell {
 
     private String doExecute(String rawCommandLine) {
         // Split the commandLine.
-        final List<String> commandLine = Arrays.asList(ARGS_PATTERN.split(rawCommandLine.trim(), -1));
-        if (commandLine.size() == 1 && commandLine.get(0).isEmpty()) {
+        final List<String> commandLine = splitCommandLine(rawCommandLine.trim());
+        if (commandLine.isEmpty()) {
             // Received a commandLine that is either empty or full of spaces.
             outputProcessor.displayEmptyLine();
             return "";
@@ -259,5 +265,23 @@ public class ShellImpl implements Shell {
     private void handleParseException(ParseException e) {
         final String errorMessage = String.format("Parse Error: %s", e.getMessage());
         outputProcessor.parseError(e.getError(), errorMessage, e.getCommandInfo());
+    }
+
+    private List<String> splitCommandLine(String commandLine) {
+        final List<String> matchList = new ArrayList<>();
+        final Matcher matcher = ARGS_PATTERN.matcher(commandLine);
+        while (matcher.find()) {
+            if (matcher.group(1) != null) {
+                // Add double-quoted string without the quotes
+                matchList.add(matcher.group(1));
+            } else if (matcher.group(2) != null) {
+                // Add single-quoted string without the quotes
+                matchList.add(matcher.group(2));
+            } else {
+                // Add unquoted word
+                matchList.add(matcher.group());
+            }
+        }
+        return matchList;
     }
 }
