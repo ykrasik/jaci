@@ -39,14 +39,14 @@ public class ToggleCommandBuilder {
 
     private final String name;
     private final StateAccessor accessor;
-    private final ShellCommandBuilder builder;
+    private final CommandBuilder builder;
 
     private String paramDescription = "toggle";
 
     public ToggleCommandBuilder(String name, StateAccessor accessor) {
         this.name = checkNotNull(name, "name");
         this.accessor = checkNotNull(accessor, "accessor");
-        this.builder = new ShellCommandBuilder(name);
+        this.builder = new CommandBuilder(name);
         this.builder.setDescription("toggle");
     }
 

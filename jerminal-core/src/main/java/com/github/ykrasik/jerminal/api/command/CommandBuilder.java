@@ -31,7 +31,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Yevgeny Krasik
  */
-public class ShellCommandBuilder {
+public class CommandBuilder {
     private static final CommandExecutor NOT_IMPLEMENTED_EXECUTOR = new CommandExecutor() {
         @Override
         public void execute(CommandArgs args, OutputPrinter outputPrinter) throws ExecuteException {
@@ -44,7 +44,7 @@ public class ShellCommandBuilder {
     private final List<CommandParam> params = new ArrayList<>(4);
     private CommandExecutor executor = NOT_IMPLEMENTED_EXECUTOR;
 
-    public ShellCommandBuilder(String name) {
+    public CommandBuilder(String name) {
         this.name = checkNotNull(name, "name");
     }
 
@@ -52,26 +52,26 @@ public class ShellCommandBuilder {
         return new CommandImpl(name, description, params, executor);
     }
 
-    public ShellCommandBuilder setDescription(String description) {
+    public CommandBuilder setDescription(String description) {
         this.description = description;
         return this;
     }
 
-    public ShellCommandBuilder addParam(CommandParam param) {
+    public CommandBuilder addParam(CommandParam param) {
         this.params.add(param);
         return this;
     }
 
-    public ShellCommandBuilder addParams(CommandParam... params) {
+    public CommandBuilder addParams(CommandParam... params) {
         return addParams(Arrays.asList(params));
     }
 
-    public ShellCommandBuilder addParams(List<CommandParam> params) {
+    public CommandBuilder addParams(List<CommandParam> params) {
         this.params.addAll(params);
         return this;
     }
 
-    public ShellCommandBuilder setExecutor(CommandExecutor executor) {
+    public CommandBuilder setExecutor(CommandExecutor executor) {
         this.executor = executor;
         return this;
     }

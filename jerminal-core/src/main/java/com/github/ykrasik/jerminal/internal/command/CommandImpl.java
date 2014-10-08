@@ -21,7 +21,6 @@ import com.github.ykrasik.jerminal.api.command.CommandArgs;
 import com.github.ykrasik.jerminal.api.command.CommandExecutor;
 import com.github.ykrasik.jerminal.api.command.OutputPrinter;
 import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
-import com.github.ykrasik.jerminal.api.exception.ExecuteException;
 import com.github.ykrasik.jerminal.internal.AbstractDescribable;
 
 import java.util.Collections;
@@ -54,7 +53,7 @@ public class CommandImpl extends AbstractDescribable implements Command {
     }
 
     @Override
-    public void execute(CommandArgs args, OutputPrinter outputPrinter) throws ExecuteException {
+    public void execute(CommandArgs args, OutputPrinter outputPrinter) throws Exception {
         executor.execute(args, outputPrinter);
     }
 }

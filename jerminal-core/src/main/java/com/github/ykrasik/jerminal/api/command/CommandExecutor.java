@@ -25,9 +25,13 @@ import com.github.ykrasik.jerminal.api.exception.ExecuteException;
  */
 public interface CommandExecutor {
     /**
-     * Executes code according to given arguments.
-     * Output can be written to the supplied {@link OutputPrinter}.
-     * @throws ExecuteException If an error occurs during execution.
+     * Executes code according to given arguments.<br>
+     * Output can be written to the supplied {@link OutputPrinter}.<br>
+     * May throw an {@link com.github.ykrasik.jerminal.api.exception.ExecuteException ExecuteException}
+     * in case of an invalid internal state. This will be considered an execution error. Any other exception
+     * thrown will be considered as an unhandled exception.
+     *
+     * @throws Exception If an error occurs during execution.
      */
-    void execute(CommandArgs args, OutputPrinter outputPrinter) throws ExecuteException;
+    void execute(CommandArgs args, OutputPrinter outputPrinter) throws ExecuteException, Exception;
 }

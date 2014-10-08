@@ -17,7 +17,6 @@
 package com.github.ykrasik.jerminal.api.command;
 
 import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
-import com.github.ykrasik.jerminal.api.exception.ExecuteException;
 import com.github.ykrasik.jerminal.internal.Describable;
 
 import java.util.List;
@@ -42,8 +41,11 @@ public interface Command extends Describable {
     /**
      * Execute with the given arguments.<br>
      * Output can be written to the supplied {@link OutputPrinter}.
+     * May throw an {@link com.github.ykrasik.jerminal.api.exception.ExecuteException ExecuteException}
+     * in case of an invalid internal state. This will be considered an execution error. Any other exception
+     * thrown will be considered as an unhandled exception.
      *
-     * @throws ExecuteException If an error occurs during execution.
+     * @throws Exception If an error occurs during execution.
      */
-    void execute(CommandArgs args, OutputPrinter outputPrinter) throws ExecuteException;
+    void execute(CommandArgs args, OutputPrinter outputPrinter) throws Exception;
 }

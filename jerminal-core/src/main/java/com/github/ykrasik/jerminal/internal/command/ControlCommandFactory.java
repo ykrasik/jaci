@@ -70,7 +70,7 @@ public class ControlCommandFactory {
     }
 
     public Command createChangeDirectoryCommand() {
-        return new ShellCommandBuilder(CHANGE_DIRECTORY_COMMAND_NAME)
+        return new CommandBuilder(CHANGE_DIRECTORY_COMMAND_NAME)
             .setDescription("Change current directory")
             .addParam(
                 new DirectoryParamBuilder("dir", fileSystem)
@@ -88,7 +88,7 @@ public class ControlCommandFactory {
     }
 
     public Command createListDirectoryCommand() {
-        return new ShellCommandBuilder(LIST_DIRECTORY_COMMAND_NAME)
+        return new CommandBuilder(LIST_DIRECTORY_COMMAND_NAME)
             .setDescription("List directory content")
             .addParam(
                 new DirectoryParamBuilder("dir", fileSystem)
@@ -135,7 +135,7 @@ public class ControlCommandFactory {
     }
 
     public Command createDescribeCommandCommand() {
-        return new ShellCommandBuilder(DESCRIBE_COMMAND_COMMAND_NAME)
+        return new CommandBuilder(DESCRIBE_COMMAND_COMMAND_NAME)
             .setDescription("Describe command")
             .addParam(
                 new FileParamBuilder("cmd", fileSystem)
@@ -169,7 +169,7 @@ public class ControlCommandFactory {
     }
 
     public Command createPrintWorkingDirectoryCommand() {
-        return new ShellCommandBuilder(PRINT_WORKING_DIRECTORY_COMMAND_NAME)
+        return new CommandBuilder(PRINT_WORKING_DIRECTORY_COMMAND_NAME)
             .setDescription("Print working directory")
             .setExecutor(new CommandExecutor() {
                 @Override
