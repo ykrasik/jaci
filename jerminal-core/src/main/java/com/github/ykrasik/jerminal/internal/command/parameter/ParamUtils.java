@@ -16,10 +16,10 @@
 
 package com.github.ykrasik.jerminal.internal.command.parameter;
 
+import com.github.ykrasik.jerminal.collections.trie.Trie;
+import com.github.ykrasik.jerminal.collections.trie.Tries;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
-import com.github.ykrasik.jerminal.collections.trie.Trie;
-import com.github.ykrasik.jerminal.collections.trie.TrieBuilder;
 
 import java.util.List;
 
@@ -39,7 +39,7 @@ public final class ParamUtils {
     }
 
     public static Supplier<Trie<String>> constStringValuesSupplier(List<String> possibleValues) {
-        final Trie<String> trie = toTrie(checkNotNull(possibleValues, "possibleValues"));
+        final Trie<String> trie = Tries.toStringTrie(checkNotNull(possibleValues, "possibleValues"));
         return Suppliers.ofInstance(trie);
     }
 
@@ -57,15 +57,7 @@ public final class ParamUtils {
         @Override
         public Trie<String> get() {
             final List<String> values = supplier.get();
-            return toTrie(values);
+            return Tries.toStringTrie(values);
         }
-    }
-
-    private static Trie<String> toTrie(List<String> values) {
-        final TrieBuilder<String> trieBuilder = new TrieBuilder<>();
-        for (String value : values) {
-            trieBuilder.add(value, value);
-        }
-        return trieBuilder.build();
     }
 }

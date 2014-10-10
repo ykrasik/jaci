@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.api.output.terminal;
+package com.github.ykrasik.jerminal.api.display.terminal;
 
 import com.github.ykrasik.jerminal.api.assist.CommandInfo;
 import com.github.ykrasik.jerminal.api.assist.Suggestions;

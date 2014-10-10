@@ -24,7 +24,6 @@ import org.junit.Test;
 public class TrieBasicTest extends AbstractTrieTest {
     @Test
     public void emptyTrieTest() {
-        build();
         assertEmpty();
         assertWords();
         assertLongestPrefix("");

@@ -18,7 +18,7 @@ package com.github.ykrasik.jerminal.api.command.parameter.bool;
 
 import com.github.ykrasik.jerminal.api.exception.ParseError;
 import com.github.ykrasik.jerminal.collections.trie.Trie;
-import com.github.ykrasik.jerminal.collections.trie.TrieBuilder;
+import com.github.ykrasik.jerminal.collections.trie.TrieImpl;
 import com.github.ykrasik.jerminal.internal.command.parameter.AbstractMandatoryCommandParam;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
@@ -32,7 +32,7 @@ import com.google.common.base.Function;
  * @author Yevgeny Krasik
  */
 public class BooleanParam extends AbstractMandatoryCommandParam<Boolean> {
-    private static final Trie<String> VALUES = new TrieBuilder<String>().add("true", "").add("false", "").build();
+    private static final Trie<String> VALUES = new TrieImpl<String>().add("true", "").add("false", "");
 
     private static final Function<String, AutoCompleteType> AUTO_COMPLETE_TYPE_MAPPER = new Function<String, AutoCompleteType>() {
         @Override

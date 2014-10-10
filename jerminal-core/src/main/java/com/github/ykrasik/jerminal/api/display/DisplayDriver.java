@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.api.output;
+package com.github.ykrasik.jerminal.api.display;
 
 import com.github.ykrasik.jerminal.api.assist.CommandInfo;
 import com.github.ykrasik.jerminal.api.assist.Suggestions;
@@ -22,17 +22,15 @@ import com.github.ykrasik.jerminal.api.command.view.ShellCommandView;
 import com.github.ykrasik.jerminal.api.exception.ExecuteException;
 import com.github.ykrasik.jerminal.api.exception.ParseError;
 import com.github.ykrasik.jerminal.api.filesystem.ShellEntryView;
-import com.google.common.base.Optional;
 
 /**
  * In charge of displaying information to the user.<br>
- * Receives it's commands from the {@link com.github.ykrasik.jerminal.api.Shell Shell} to which it is attached.<br>
  *
  * @author Yevgeny Krasik
  */
-public interface OutputProcessor {
+public interface DisplayDriver {
     /**
-     * Called before any other events are called, to allow the {@link OutputProcessor} to prepare itself.<br>
+     * Called before any other events are called, to allow the {@link DisplayDriver} to prepare itself.<br>
      * Will not be called again before {@link #end()} is called.
      */
     void begin();
@@ -58,10 +56,10 @@ public interface OutputProcessor {
      */
     void displayText(String text);
 
-    /**
-     * The user requested assistance with the command line, display the results.
-     */
-    void displayAssistance(Optional<CommandInfo> assistInfo, Optional<Suggestions> suggestions);
+    // FIXME: JavaDoc
+    void displayCommandInfo(CommandInfo commandInfo);
+
+    void displaySuggestions(Suggestions suggestions);
 
     /**
      * The user requested to display the directory structure of a directory.
@@ -77,24 +75,24 @@ public interface OutputProcessor {
      * A parse error occurred while parsing the command line.
      */
     // TODO: Put all these params in a single ParseErrorContext?
-    void parseError(ParseError error, String errorMessage, Optional<CommandInfo> commandInfo);
+    void displayParseError(ParseError error, String errorMessage);
 
     /**
      * An execution error occurred while executing the command line.<br>
      */
-    void executeError(ExecuteException e);
+    void displayExecuteError(ExecuteException e);
 
     /**
      * An unhandled exception was thrown while executing the command line.<br>
      * This is not an internal error -
      * this exception was thrown from within the code associated with the command being run.
      */
-    void executeUnhandledException(Exception e);
+    void displayExecuteUnhandledException(Exception e);
 
     /**
      * An internal error has occurred. Shouldn't happen :)
      */
-    void internalError(Exception e);
+    void displayInternalError(Exception e);
 
     // TODO: Add a 'setPath' call, for 'cd'.
 }

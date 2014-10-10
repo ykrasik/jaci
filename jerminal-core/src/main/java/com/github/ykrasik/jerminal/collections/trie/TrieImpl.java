@@ -19,29 +19,29 @@ package com.github.ykrasik.jerminal.collections.trie;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import com.github.ykrasik.jerminal.collections.trie.node.TrieNode;
-import com.github.ykrasik.jerminal.collections.trie.node.TrieNodeBuilder;
-import com.github.ykrasik.jerminal.collections.trie.node.TrieNodeImpl;
-import com.github.ykrasik.jerminal.collections.trie.visitor.MapTrieVisitor;
-import com.github.ykrasik.jerminal.collections.trie.visitor.TrieVisitor;
-import com.github.ykrasik.jerminal.internal.exception.ShellException;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 /**
- * An implementation for a {@link Trie}. <b>Immutable</b>.
+ * An implementation for a {@link Trie}.
  *
  * @author Yevgeny Krasik
  */
 public class TrieImpl<T> implements Trie<T> {
-    private static final Trie<?> EMPTY_TRIE = new TrieImpl<>(new TrieNodeBuilder<>().build());
-
     private final TrieNode<T> root;
 
     // This is the prefix of the current trie. Used by subTries.
     private final String triePrefix;
 
-    public TrieImpl(TrieNode<T> root) {
+    public TrieImpl() {
+        this(new TrieNodeImpl<T>((char) 0));
+    }
+
+    private TrieImpl(TrieNode<T> root) {
         this(root, "");
     }
 
@@ -51,9 +51,90 @@ public class TrieImpl<T> implements Trie<T> {
     }
 
     @Override
+    public int size() {
+        return root.getNumWords();
+    }
+
+    @Override
     public boolean isEmpty() {
         return root.isEmpty();
     }
+
+    @Override
+    public Trie<T> add(String word, T value) {
+        if (word.isEmpty()) {
+            throw new IllegalArgumentException("Empty words aren't allowed!");
+        }
+
+        final TrieNode<T> newRoot = doPut(root, word, 0, value, false);
+        return new TrieImpl<>(newRoot, triePrefix);
+    }
+
+    @Override
+    public Trie<T> set(String word, T value) {
+        if (word.isEmpty()) {
+            throw new IllegalArgumentException("Empty words aren't allowed!");
+        }
+
+        final TrieNode<T> newRoot = doPut(root, word, 0, value, true);
+        return new TrieImpl<>(newRoot, triePrefix);
+    }
+
+    // FIXME: Doesn't work with subTries!
+    // FIXME: Test this thoroughly!
+    // FIXME: This method is pretty ugly...
+    private TrieNode<T> doPut(TrieNode<T> parent, String word, int index, T value, boolean replace) {
+        final char c = word.charAt(index);
+        final Optional<TrieNode<T>> child = parent.getChild(c);
+        final TrieNode<T> currentChild;
+        if (child.isPresent()) {
+            currentChild = child.get();
+        } else {
+            currentChild = new TrieNodeImpl<>(c);
+        }
+
+        final TrieNode<T> newChild;
+        if (index == word.length() - 1) {
+            // Last character of the word, set node.
+            if (!replace && currentChild.getValue().isPresent()) {
+                throw new IllegalArgumentException("Trie already contains a value for: " + word);
+            }
+            newChild = currentChild.setValue(value);
+        } else {
+            newChild = doPut(currentChild, word, index + 1, value, replace);
+        }
+        return parent.setChild(newChild);
+    }
+
+//    private TrieNode<T> doPut(TrieNode<T> parent, String word, int index, T value) {
+//        final char c = word.charAt(index);
+//
+//        if (index == word.length() - 1) {
+//            // Last character of the word, create a value node.
+//            final Optional<TrieNode<T>> child = parent.getChild(c);
+//            final TrieNode<T> newChild;
+//            if (child.isPresent()) {
+//                if (child.get().getValue().isPresent()) {
+//                    throw new IllegalArgumentException("Trie already contains a value for: " + word);
+//                }
+//                newChild = child.get().setValue(value);
+//            } else {
+//                newChild = new TrieNodeImpl<>(c, value);
+//            }
+//            return parent.setChild(newChild);
+//        }
+//
+//        final Optional<TrieNode<T>> child = parent.getChild(c);
+//        final TrieNode<T> currentChild;
+//        if (child.isPresent()) {
+//            currentChild = child.get();
+//        } else {
+//            currentChild = new TrieNodeImpl<>(c);
+//        }
+//
+//        final TrieNode<T> newChild = doPut(currentChild, word, index + 1, value);
+//        return parent.setChild(newChild);
+//    }
 
     @Override
     public TrieNode<T> getRoot() {
@@ -67,9 +148,14 @@ public class TrieImpl<T> implements Trie<T> {
     }
 
     @Override
+    // FIXME: This will not function correctly for subTries!
     public Optional<T> get(String word) {
         final TrieNode<T> node = getNode(word);
-        return node != null ? Optional.fromNullable(node.getValue()) : Optional.<T>absent();
+        if (node != null) {
+            return node.getValue();
+        } else {
+            return Optional.absent();
+        }
     }
 
     @Override
@@ -101,24 +187,22 @@ public class TrieImpl<T> implements Trie<T> {
         }
 
         final StringBuilder prefixBuilder = new StringBuilder(triePrefix);
-        visitWordsFromNodeByFilter(prefixBuilder, root, visitor);
+        visitWordsFromNode(root, visitor, prefixBuilder);
     }
 
-    private void visitWordsFromNodeByFilter(StringBuilder prefixBuilder,
-                                            TrieNode<T> node,
-                                            TrieVisitor<T> visitor) {
+    private void visitWordsFromNode(TrieNode<T> node, TrieVisitor<T> visitor, StringBuilder prefixBuilder) {
         // Started processing node, push it's character to the prefix.
         if (node != root) {
             // The root node has no char.
             prefixBuilder.append(node.getCharacter());
         }
 
-        // Visit the node, if it is accepted.
-        visitIfNodeAccepted(prefixBuilder, node, visitor);
+        // Visit the node, if it has a value.
+        visitNodeIfHasValue(node, visitor, prefixBuilder);
 
         // Visit all the node's children.
         for (TrieNode<T> child : node.getChildren()) {
-            visitWordsFromNodeByFilter(prefixBuilder, child, visitor);
+            visitWordsFromNode(child, visitor, prefixBuilder);
         }
 
         // Done processing node, pop it's character from the prefix.
@@ -127,13 +211,11 @@ public class TrieImpl<T> implements Trie<T> {
         }
     }
 
-    private void visitIfNodeAccepted(StringBuilder prefixBuilder,
-                                     TrieNode<T> node,
-                                     TrieVisitor<T> visitor) {
-        final T value = node.getValue();
-        if (value != null) {
+    private void visitNodeIfHasValue(TrieNode<T> node, TrieVisitor<T> visitor, StringBuilder prefixBuilder) {
+        final Optional<T> value = node.getValue();
+        if (value.isPresent()) {
             final String word = prefixBuilder.toString();
-            visitor.visit(word, value);
+            visitor.visit(word, value.get());
         }
     }
 
@@ -161,16 +243,18 @@ public class TrieImpl<T> implements Trie<T> {
     }
 
     @Override
+    // FIXME: This requires testing.
     public Trie<T> subTrie(String prefix) {
         if (isEmpty()) {
             return this;
         }
 
         final TrieNode<T> node = getNode(prefix);
-        if (node == null) {
+        if (node != null) {
+            return new TrieImpl<>(node, triePrefix + prefix);
+        } else {
             return emptyTrie();
         }
-        return new TrieImpl<>(node, triePrefix + prefix);
     }
 
     @Override
@@ -179,45 +263,13 @@ public class TrieImpl<T> implements Trie<T> {
             return emptyTrie();
         }
 
-        final TrieNode<A> newRoot = mapNode(root, function);
-        if (newRoot == null) {
+        final Optional<TrieNode<A>> newRoot = root.map(function);
+        if (newRoot.isPresent()) {
+            return new TrieImpl<>(newRoot.get(), triePrefix);
+        } else {
             // Empty root.
             return emptyTrie();
         }
-        return new TrieImpl<>(newRoot, triePrefix);
-    }
-
-    private <A> TrieNode<A> mapNode(TrieNode<T> node, Function<T, A> function) {
-        final T value = node.getValue();
-        final A newValue = value != null ? function.apply(value) : null;
-
-        // Map the node's children.
-        final Map<Character, TrieNode<A>> newChildren = mapChildren(node, function);
-        if (newChildren.isEmpty() && newValue == null) {
-            // None of the node's mapped to actual values,
-            // and the node either had no value or it didn't map to a value as well.
-            // This node should be discarded.
-            return null;
-        }
-
-        // Create a new node.
-        return new TrieNodeImpl<>(node.getCharacter(), newValue, newChildren);
-    }
-
-    private <A> Map<Character, TrieNode<A>> mapChildren(TrieNode<T> node, Function<T, A> function) {
-        final Collection<TrieNode<T>> children = node.getChildren();
-        if (children.isEmpty()) {
-            return Collections.emptyMap();
-        }
-
-        final Map<Character, TrieNode<A>> newChildren = new HashMap<>(children.size());
-        for (TrieNode<T> child : children) {
-            final TrieNode<A> newChild = mapNode(child, function);
-            if (newChild != null) {
-                newChildren.put(child.getCharacter(), newChild);
-            }
-        }
-        return newChildren;
     }
 
     @Override
@@ -239,61 +291,13 @@ public class TrieImpl<T> implements Trie<T> {
             return this;
         }
 
-        final TrieNode<T> unionRoot = createUnionNode(root, other.getRoot());
+        final TrieNode<T> unionRoot = root.union(other.getRoot());
         return new TrieImpl<>(unionRoot, triePrefix);
     }
 
-    private TrieNode<T> createUnionNode(TrieNode<T> mainNode, TrieNode<T> otherNode) {
-        final char character = mainNode.getCharacter();
-        final char otherCharacter = otherNode.getCharacter();
-        if (character != otherCharacter) {
-            throw new ShellException("Trying to create a union between incompatible nodes: '%s' and '%s'!", character, otherCharacter);
-        }
-
-        final T unionValue = createUnionValue(mainNode, otherNode);
-        final Map<Character, TrieNode<T>> unionChildren = createUnionChildren(mainNode, otherNode);
-        return new TrieNodeImpl<>(character, unionValue, unionChildren);
-    }
-
-    private T createUnionValue(TrieNode<T> mainNode, TrieNode<T> otherNode) {
-        T value = mainNode.getValue();
-        if (value == null) {
-            value = otherNode.getValue();
-        }
-        return value;
-    }
-
-    private Map<Character, TrieNode<T>> createUnionChildren(TrieNode<T> mainNode, TrieNode<T> otherNode) {
-        // Check which of node1's children are also present in node2 and vice versa.
-        // Those that are unique will be used as is.
-        // Those that are present in both will be replaced with a UnionNode.
-        final Map<Character, TrieNode<T>> unionChildren = new HashMap<>(mainNode.getChildren().size() + otherNode.getChildren().size());
-        checkNode(mainNode, otherNode, unionChildren);
-        checkNode(otherNode, mainNode, unionChildren);
-        return unionChildren;
-    }
-
-    private void checkNode(TrieNode<T> mainNode,
-                           TrieNode<T> otherNode,
-                           Map<Character, TrieNode<T>> unionChildren) {
-        for (TrieNode<T> mainChild : mainNode.getChildren()) {
-            final char character = mainChild.getCharacter();
-            if (unionChildren.containsKey(character)) {
-                // This node's character was already handled in a previous iteration.
-                continue;
-            }
-
-            final TrieNode<T> otherChild = otherNode.getChild(character);
-            final TrieNode<T> trieNodeToAdd;
-            if (otherChild == null) {
-                // The other node has no child under 'c'.
-                trieNodeToAdd = mainChild;
-            } else {
-                // The other node has a child under 'c', use a union node.
-                trieNodeToAdd = createUnionNode(mainChild, otherChild);
-            }
-            unionChildren.put(character, trieNodeToAdd);
-        }
+    @Override
+    public Set<Entry<String, T>> entrySet() {
+        return toMap().entrySet();
     }
 
     @Override
@@ -312,8 +316,10 @@ public class TrieImpl<T> implements Trie<T> {
         TrieNode<T> currentNode = root;
         for (int i = 0; i < prefix.length(); i++) {
             final char c = prefix.charAt(i);
-            currentNode = currentNode.getChild(c);
-            if (currentNode == null) {
+            final Optional<TrieNode<T>> child = currentNode.getChild(c);
+            if (child.isPresent()) {
+                currentNode = child.get();
+            } else {
                 return null;
             }
         }
@@ -327,9 +333,10 @@ public class TrieImpl<T> implements Trie<T> {
     public static <T> Trie<T> emptyTrie() {
         return (Trie<T>) EMPTY_TRIE;
     }
+    private static final Trie<?> EMPTY_TRIE = new TrieImpl<>();
 
     @Override
     public String toString() {
-        return getWords().toString();
+        return toMap().toString();
     }
 }

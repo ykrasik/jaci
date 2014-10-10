@@ -14,36 +14,37 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.api.output.terminal;
+package com.github.ykrasik.jerminal.api.display.terminal;
 
 import com.github.ykrasik.jerminal.api.assist.CommandInfo;
 import com.github.ykrasik.jerminal.api.assist.Suggestions;
 import com.github.ykrasik.jerminal.api.command.view.ShellCommandView;
+import com.github.ykrasik.jerminal.api.display.DisplayDriver;
 import com.github.ykrasik.jerminal.api.exception.ExecuteException;
 import com.github.ykrasik.jerminal.api.exception.ParseError;
 import com.github.ykrasik.jerminal.api.filesystem.ShellEntryView;
-import com.github.ykrasik.jerminal.api.output.OutputProcessor;
-import com.google.common.base.Optional;
+
+import java.util.Objects;
 
 /**
- * An {@link OutputProcessor} that translates all given events into text through a {@link TerminalSerializer}
+ * A {@link DisplayDriver} that translates all received events into text through a {@link TerminalSerializer}
  * and send them to a {@link Terminal} to be printed.
  *
  * @author Yevgeny Krasik
  */
-public class TerminalOutputProcessor implements OutputProcessor {
+public class TerminalDisplayDriver implements DisplayDriver {
     private final Terminal terminal;
     private final TerminalSerializer serializer;
 
     private int numInteractions;
 
-    public TerminalOutputProcessor(Terminal terminal) {
+    public TerminalDisplayDriver(Terminal terminal) {
         this(terminal, new DefaultTerminalSerializer());
     }
 
-    public TerminalOutputProcessor(Terminal terminal, TerminalSerializer serializer) {
-        this.terminal = terminal;
-        this.serializer = serializer;
+    public TerminalDisplayDriver(Terminal terminal, TerminalSerializer serializer) {
+        this.terminal = Objects.requireNonNull(terminal, "terminal");
+        this.serializer = Objects.requireNonNull(serializer, "serializer");
     }
 
     public Terminal getTerminal() {
@@ -85,19 +86,15 @@ public class TerminalOutputProcessor implements OutputProcessor {
     }
 
     @Override
-    public void displayAssistance(Optional<CommandInfo> assistInfo, Optional<Suggestions> suggestions) {
-        if (assistInfo.isPresent()) {
-            final String assistInfoStr = serializer.serializeCommandInfo(assistInfo.get());
-            print(assistInfoStr);
-        }
+    public void displayCommandInfo(CommandInfo commandInfo) {
+        final String assistInfoStr = serializer.serializeCommandInfo(commandInfo);
+        print(assistInfoStr);
+    }
 
-        if (suggestions.isPresent()) {
-            final String suggestionsStr = serializer.serializeSuggestions(suggestions.get());
-            print(suggestionsStr);
-        } else {
-            // TODO: Find a way to print this when no suggestions are available, but not to print when only a single one was possible.
-//            printError("No auto complete suggestions available.");
-        }
+    @Override
+    public void displaySuggestions(Suggestions suggestions) {
+        final String suggestionsStr = serializer.serializeSuggestions(suggestions);
+        print(suggestionsStr);
     }
 
     @Override
@@ -113,26 +110,22 @@ public class TerminalOutputProcessor implements OutputProcessor {
     }
 
     @Override
-    public void parseError(ParseError error, String errorMessage, Optional<CommandInfo> commandInfo) {
+    public void displayParseError(ParseError error, String errorMessage) {
         printError(errorMessage);
-        if (commandInfo.isPresent()) {
-            final String commandInfoStr = serializer.serializeCommandInfo(commandInfo.get());
-            print(commandInfoStr);
-        }
     }
 
     @Override
-    public void executeError(ExecuteException e) {
+    public void displayExecuteError(ExecuteException e) {
         printException(e);
     }
 
     @Override
-    public void executeUnhandledException(Exception e) {
+    public void displayExecuteUnhandledException(Exception e) {
         printException(e);
     }
 
     @Override
-    public void internalError(Exception e) {
+    public void displayInternalError(Exception e) {
         printException(e);
     }
 

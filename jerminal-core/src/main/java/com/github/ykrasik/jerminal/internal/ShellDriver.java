@@ -16,13 +16,12 @@
 
 package com.github.ykrasik.jerminal.internal;
 
-import com.github.ykrasik.jerminal.api.Shell;
 import com.github.ykrasik.jerminal.api.assist.CommandInfo;
 import com.github.ykrasik.jerminal.api.assist.Suggestions;
 import com.github.ykrasik.jerminal.api.command.Command;
 import com.github.ykrasik.jerminal.api.command.CommandArgs;
+import com.github.ykrasik.jerminal.api.display.DisplayDriver;
 import com.github.ykrasik.jerminal.api.exception.ExecuteException;
-import com.github.ykrasik.jerminal.api.output.OutputProcessor;
 import com.github.ykrasik.jerminal.collections.trie.Trie;
 import com.github.ykrasik.jerminal.internal.command.OutputPrinterImpl;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
@@ -36,60 +35,45 @@ import com.google.common.base.Optional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * An implementation for a {@link Shell}.
- *
  * @author Yevgeny Krasik
  */
-public class ShellImpl implements Shell {
+// FIXME: JavaDoc
+public class ShellDriver {
     // A pattern that matches spaces that aren't surrounded by single or double quotes.
     private static final Pattern ARGS_PATTERN = Pattern.compile("[^\\s\"']+|\"([^\"]*)\"|'([^']*)'");
-    // FIXME: Add JavaFX frontend gui
 
-    private final OutputProcessor outputProcessor;
     private final ShellFileSystem fileSystem;
-    private final CommandLineHistory commandLineHistory;
+    private final DisplayDriver displayDriver;
+    private final CommandLineHistory history;
 
-    public ShellImpl(OutputProcessor outputProcessor,
-                     ShellFileSystem fileSystem,
-                     CommandLineHistory commandLineHistory,
-                     String welcomeMessage) {
-        this.outputProcessor = outputProcessor;
+    public ShellDriver(ShellFileSystem fileSystem, DisplayDriver displayDriver, CommandLineHistory history) {
+        this.displayDriver = displayDriver;
         this.fileSystem = fileSystem;
-        this.commandLineHistory = commandLineHistory;
-
-        // Init.
-        outputProcessor.begin();
-        outputProcessor.displayWelcomeMessage(welcomeMessage);
-        outputProcessor.end();
+        this.history = history;
     }
 
-    @Override
     public Optional<String> getPrevCommandLineFromHistory() {
-        return commandLineHistory.getPrevCommandLine();
+        return history.getPrevCommandLine();
     }
 
-    @Override
     public Optional<String> getNextCommandLineFromHistory() {
-        return commandLineHistory.getNextCommandLine();
+        return history.getNextCommandLine();
     }
 
-    @Override
-    public String assist(String rawCommandLine) {
-        // TODO: Return Optional.absent on error?
-        outputProcessor.begin();
+    // FIXME: Javadoc
+    public Optional<String> assist(String rawCommandLine) {
+        displayDriver.begin();
         try {
             // Split the commandLine for autoComplete.
-            // Only remove leading spaces, trailing spaces have a significant meaning.
             final boolean endsWithSpace = rawCommandLine.isEmpty() || rawCommandLine.endsWith(" ");
 
             // If the commandLine ends with a space (or is empty), we manually insert an empty arg.
-            // This signifies that the user wanted assistance about the NEXT argument and not the last one he typed.
+            // This implies that the user wanted assistance about the NEXT argument and not the last one he typed.
             final List<String> commandLine = splitCommandLine(rawCommandLine.trim());
             if (endsWithSpace) {
                 commandLine.add("");
@@ -101,13 +85,13 @@ public class ShellImpl implements Shell {
         } catch (ParseException e) {
             handleParseException(e);
         } catch (Exception e) {
-            outputProcessor.internalError(e);
+            displayDriver.displayInternalError(e);
         } finally {
-            outputProcessor.end();
+            displayDriver.end();
         }
 
-        // There was an error parsing the command line, return the old one.
-        return rawCommandLine;
+        // There was an error parsing the command line.
+        return Optional.absent();
     }
 
     // FIXME: I do still want the old errors - no more params, etc.
@@ -132,57 +116,51 @@ public class ShellImpl implements Shell {
         return file.assistArgs(args);
     }
 
-    private String handleAssist(AssistReturnValue returnValue, String rawCommandLine) {
+    private Optional<String> handleAssist(AssistReturnValue returnValue, String rawCommandLine) {
         // This method does 3 things:
-        // 1. Display command information, if there is any.
+        // 1. Display command info, if there is any.
         // 2. Determine the suggestions for auto complete.
         // 3. Determine what the new command line should be.
-        final Optional<CommandInfo> commandInfo = returnValue.getCommandInfo();
-
         final AutoCompleteReturnValue autoCompleteReturnValue = returnValue.getAutoCompleteReturnValue();
+
+        displayCommandInfoIfPresent(returnValue.getCommandInfo());
+
         final Trie<AutoCompleteType> possibilities = autoCompleteReturnValue.getPossibilities();
-        final Map<String, AutoCompleteType> possibilitiesMap = possibilities.toMap();
-
-        final Optional<Suggestions> suggestions;
-        final String newCommandLine;
-        final int numPossibilities = possibilitiesMap.size();
-        if (numPossibilities == 0) {
-            // AutoComplete didn't give any results, return the old command line.
-            suggestions = Optional.absent();
-            newCommandLine = rawCommandLine;
-        } else {
-            final String prefix = autoCompleteReturnValue.getPrefix();
-            final String autoCompleteAddition;
-            if (numPossibilities == 1) {
-                // TODO: Only 1 possibility, assistInfo should be updated to show it...
-                // Only a single auto complete result is possible.
-                // Just take the auto complete, the change will be reflected in the new command line. No suggestions.
-                // Let's be helpful - depending on the autoCompleteType, add a suffix.
-                final String singlePossibility = possibilitiesMap.keySet().iterator().next();
-                final AutoCompleteType type = possibilitiesMap.get(singlePossibility);
-                final char suffix = type.getSuffix();
-                autoCompleteAddition = getAutoCompleteAddition(prefix, singlePossibility) + suffix;
-                suggestions = Optional.absent();
-            } else {
-                // Multiple auto complete results are possible.
-                // AutoComplete as much as is possible - until the longest common prefix.
-                final String longestPrefix = possibilities.getLongestPrefix();
-                autoCompleteAddition = getAutoCompleteAddition(prefix, longestPrefix);
-
-                // Catalogue the suggestions according to their type and display them.
-                suggestions = Optional.of(createAutoCompleteSuggestions(possibilitiesMap));
-            }
-
-            newCommandLine = rawCommandLine + autoCompleteAddition;
+        if (possibilities.isEmpty()) {
+            // There are no auto complete possibilities, so no suggestions either.
+            // TODO: Print an error that no suggestions are available?
+            return Optional.absent();
         }
 
-        outputProcessor.displayAssistance(commandInfo, suggestions);
-        return newCommandLine;
+        final String prefix = autoCompleteReturnValue.getPrefix();
+        final String autoCompleteAddition;
+        if (possibilities.size() == 1) {
+            // TODO: Only 1 possibility, assistInfo should be updated to show it...
+            // Only a single auto complete result is possible, append it to the command line.
+            // This is also why there are no suggestions - only 1 is possible.
+            // Let's be helpful - depending on the autoCompleteType, add a suffix.
+            final Entry<String, AutoCompleteType> entry = possibilities.entrySet().iterator().next();
+            final String singlePossibility = entry.getKey();
+            final AutoCompleteType type = entry.getValue();
+            final char suffix = type.getSuffix();
+            autoCompleteAddition = getAutoCompleteAddition(prefix, singlePossibility) + suffix;
+        } else {
+            // Multiple auto complete results are possible.
+            // AutoComplete as much as is possible - until the longest common prefix.
+            final String longestPrefix = possibilities.getLongestPrefix();
+            autoCompleteAddition = getAutoCompleteAddition(prefix, longestPrefix);
+
+            // There are at least 2 possibilities, so suggestions are available.
+            final Suggestions suggestions = getSuggestions(possibilities);
+            displayDriver.displaySuggestions(suggestions);
+        }
+
+        return Optional.of(rawCommandLine + autoCompleteAddition);
     }
 
-    private Suggestions createAutoCompleteSuggestions(Map<String, AutoCompleteType> possibilitiesMap) {
+    private Suggestions getSuggestions(Trie<AutoCompleteType> possibilities) {
         final SuggestionsBuilder builder = new SuggestionsBuilder();
-        for (Entry<String, AutoCompleteType> entry : possibilitiesMap.entrySet()) {
+        for (Entry<String, AutoCompleteType> entry : possibilities.entrySet()) {
             builder.addSuggestion(entry.getValue(), entry.getKey());
         }
         return builder.build();
@@ -192,29 +170,26 @@ public class ShellImpl implements Shell {
         return autoCompletedPrefix.substring(prefix.length());
     }
 
-    @Override
-    public String execute(String rawCommandLine) {
-        // TODO: Return Optional.absent on error?
-        outputProcessor.begin();
+    // FIXME: JavaDoc
+    public boolean execute(String rawCommandLine) {
+        displayDriver.begin();
         try {
-            return doExecute(rawCommandLine);
+            return parseAndExecute(rawCommandLine);
         } catch (Exception e) {
-            outputProcessor.internalError(e);
+            displayDriver.displayInternalError(e);
+            return false;
         } finally {
-            outputProcessor.end();
+            displayDriver.end();
         }
-
-        // There was an internal error, return the old command line.
-        return rawCommandLine;
     }
 
-    private String doExecute(String rawCommandLine) {
+    private boolean parseAndExecute(String rawCommandLine) {
         // Split the commandLine.
         final List<String> commandLine = splitCommandLine(rawCommandLine.trim());
         if (commandLine.isEmpty()) {
             // Received a commandLine that is either empty or full of spaces.
-            outputProcessor.displayEmptyLine();
-            return "";
+            displayDriver.displayEmptyLine();
+            return true;
         }
 
         // Parse commandLine.
@@ -231,40 +206,45 @@ public class ShellImpl implements Shell {
             args = file.parseCommandArgs(rawArgs);
         } catch (ParseException e) {
             handleParseException(e);
-
-            // There was an error parsing the command line, return the old one.
-            return rawCommandLine;
+            return false;
         }
 
         // Successfully parsed commandLine.
         // Save command in history.
-        commandLineHistory.pushCommandLine(rawCommandLine);
+        history.pushCommandLine(rawCommandLine);
 
         // Execute the command.
         executeFile(file, args);
 
-        // Command line was successfully parsed, the new command line should be blank.
-        return "";
+        // Command line was successfully parsed and executed.
+        return true;
     }
 
     private void executeFile(ShellFile file, CommandArgs args) {
         final Command command = file.getCommand();
-        final OutputPrinterImpl outputPrinter = new OutputPrinterImpl(outputProcessor);
+        final OutputPrinterImpl outputPrinter = new OutputPrinterImpl(displayDriver);
         try {
             command.execute(args, outputPrinter);
             // Print a generic success message.
             outputPrinter.println("Command '%s' executed successfully.", command.getName());
         } catch (ExecuteException e) {
-            outputProcessor.executeError(e);
+            displayDriver.displayExecuteError(e);
         } catch (Exception e) {
             outputPrinter.println("Command '%s' was terminated due to an unhandled exception!", command.getName());
-            outputProcessor.executeUnhandledException(e);
+            displayDriver.displayExecuteUnhandledException(e);
         }
     }
 
     private void handleParseException(ParseException e) {
+        displayCommandInfoIfPresent(e.getCommandInfo());
         final String errorMessage = String.format("Parse Error: %s", e.getMessage());
-        outputProcessor.parseError(e.getError(), errorMessage, e.getCommandInfo());
+        displayDriver.displayParseError(e.getError(), errorMessage);
+    }
+
+    private void displayCommandInfoIfPresent(Optional<CommandInfo> commandInfo) {
+        if (commandInfo.isPresent()) {
+            displayDriver.displayCommandInfo(commandInfo.get());
+        }
     }
 
     private List<String> splitCommandLine(String commandLine) {

@@ -16,13 +16,42 @@
 
 package com.github.ykrasik.jerminal;
 
+import com.github.ykrasik.jerminal.internal.exception.ShellException;
+
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * @author Yevgeny Krasik
  */
-public class ShellConstants {
-    public static final char FILE_SYSTEM_DELIMITER = '/';
+public final class ShellConstants {
+    private ShellConstants() {
+    }
+
+    public static final String FILE_SYSTEM_DELIMITER = "/";
     public static final String FILE_SYSTEM_THIS = ".";
     public static final String FILE_SYSTEM_PARENT = "..";
+    public static final String FILE_SYSTEM_DESCRIPTION_DELIMITER = ":";
 
-    public static final char ARG_VALUE_DELIMITER = '=';
+    public static final String ARG_VALUE_DELIMITER = "=";
+
+    private static final List<String> RESERVED_CHARS = Arrays.asList(
+        FILE_SYSTEM_DELIMITER, FILE_SYSTEM_THIS, FILE_SYSTEM_PARENT, FILE_SYSTEM_DESCRIPTION_DELIMITER,
+        ARG_VALUE_DELIMITER
+    );
+
+    public static boolean isLegalName(String name) {
+        for (String reservedChar : RESERVED_CHARS) {
+            if (name.contains(reservedChar)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static void assertLegalName(String name) {
+        if (!isLegalName(name)) {
+            throw new ShellException("Illegal name for entry: '%s'", name);
+        }
+    }
 }

@@ -21,9 +21,9 @@ import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
 import com.github.ykrasik.jerminal.api.command.parameter.flag.FlagParamBuilder;
 import com.github.ykrasik.jerminal.api.command.parameter.view.ShellCommandParamView;
 import com.github.ykrasik.jerminal.api.command.view.ShellCommandView;
+import com.github.ykrasik.jerminal.api.display.DisplayDriver;
 import com.github.ykrasik.jerminal.api.exception.ExecuteException;
 import com.github.ykrasik.jerminal.api.filesystem.ShellEntryView;
-import com.github.ykrasik.jerminal.api.output.OutputProcessor;
 import com.github.ykrasik.jerminal.internal.command.parameter.entry.DirectoryParamBuilder;
 import com.github.ykrasik.jerminal.internal.command.parameter.entry.FileParamBuilder;
 import com.github.ykrasik.jerminal.internal.command.parameter.view.ShellCommandParamViewImpl;
@@ -51,22 +51,23 @@ public class ControlCommandFactory {
     private static final ShellEntryViewComparator COMPARATOR = new ShellEntryViewComparator();
 
     private final ShellFileSystem fileSystem;
-    private final OutputProcessor outputProcessor;
+    private final DisplayDriver displayDriver;
 
-    public ControlCommandFactory(ShellFileSystem fileSystem, OutputProcessor outputProcessor) {
+    public ControlCommandFactory(ShellFileSystem fileSystem, DisplayDriver displayDriver) {
         this.fileSystem = fileSystem;
-        this.outputProcessor = outputProcessor;
+        this.displayDriver = displayDriver;
     }
 
     // TODO: Add the following commands: list all commands
 
-    public Set<Command> createControlCommands() {
-        final Set<Command> controlCommands = new HashSet<>();
-        controlCommands.add(createChangeDirectoryCommand());
-        controlCommands.add(createListDirectoryCommand());
-        controlCommands.add(createDescribeCommandCommand());
-        controlCommands.add(createPrintWorkingDirectoryCommand());
-        return controlCommands;
+    public ShellFileSystem installControlCommands() {
+        // TODO: DOn't install directory navigation commands if no directories in fileSystem?
+        return fileSystem.addGlobalCommands(
+            createChangeDirectoryCommand(),
+            createListDirectoryCommand(),
+            createDescribeCommandCommand(),
+            createPrintWorkingDirectoryCommand()
+        );
     }
 
     public Command createChangeDirectoryCommand() {
@@ -112,7 +113,7 @@ public class ControlCommandFactory {
                     final ShellDirectory directory = args.popDirectory();
                     final boolean recursive = args.popBool();
                     final ShellEntryView shellEntryView = createShellEntryView(directory, recursive);
-                    outputProcessor.displayShellEntryView(shellEntryView);
+                    displayDriver.displayShellEntryView(shellEntryView);
                 }
             })
             .build();
@@ -148,7 +149,7 @@ public class ControlCommandFactory {
                     final ShellFile file = args.popFile();
                     final Command command = file.getCommand();
                     final ShellCommandView shellCommandView = createShellCommandView(command);
-                    outputProcessor.displayShellCommandView(shellCommandView);
+                    displayDriver.displayShellCommandView(shellCommandView);
                 }
             })
             .build();

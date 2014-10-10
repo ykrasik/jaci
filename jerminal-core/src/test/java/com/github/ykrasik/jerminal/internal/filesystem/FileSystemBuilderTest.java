@@ -35,24 +35,20 @@ public class FileSystemBuilderTest extends AbstractFileSystemTest {
     @Test
     public void testBasicPath() {
         add("dir1/dir2/dir3");
-        build();
         assertPath("dir1", "dir2", "dir3");
     }
 
     @Test
     public void testPartiallyExistingPath() {
         add("dir1");
-        build();
         assertPath("dir1");
 
         // 'dir1' already exists.
         add("dir1/dir2");
-        build();
         assertPath("dir1", "dir2");
 
         // 'dir1/dir2' already exists.
         add("dir1/dir2/dir3");
-        build();
         assertPath("dir1", "dir2", "dir3");
     }
 
@@ -61,7 +57,6 @@ public class FileSystemBuilderTest extends AbstractFileSystemTest {
         // 2 different paths without anything common.
         add("dir1/dir2/dir3");
         add("another1/another2/another3");
-        build();
 
         assertPath("dir1", "dir2", "dir3");
         assertPath("another1", "another2", "another3");
@@ -71,7 +66,6 @@ public class FileSystemBuilderTest extends AbstractFileSystemTest {
     public void testPathWithSameNames() {
         // Nesting the same directory name should be possible.
         add("dir/dir/dir");
-        build();
         assertPath("dir", "dir", "dir");
     }
 
@@ -79,7 +73,6 @@ public class FileSystemBuilderTest extends AbstractFileSystemTest {
     public void testPathWithLeadingDelimiter() {
         add("/dir1");
         add("/dir2");
-        build();
 
         assertPath("dir1");
         assertPath("dir2");
@@ -89,7 +82,6 @@ public class FileSystemBuilderTest extends AbstractFileSystemTest {
     public void testPathWithTrailingDelimiter() {
         add("dir1/");
         add("dir2/");
-        build();
 
         assertPath("dir1");
         assertPath("dir2");
@@ -98,7 +90,6 @@ public class FileSystemBuilderTest extends AbstractFileSystemTest {
     @Test
     public void testPathWithLeadingAndTrailingDelimiter() {
         add("/dir1/dir2/dir3/");
-        build();
         assertPath("dir1", "dir2", "dir3");
     }
 
@@ -110,7 +101,6 @@ public class FileSystemBuilderTest extends AbstractFileSystemTest {
         add("   /", "cmd3");
         add("/   ", "cmd4");
         add("   /   ", "cmd5");
-        build();
 
         assertPathToCommand("cmd1");
         assertPathToCommand("cmd2");
@@ -123,7 +113,6 @@ public class FileSystemBuilderTest extends AbstractFileSystemTest {
     public void testPathWithSpaces() {
         // Spaces surrounding a directory name should be ignored.
         add("    dir1/   dir2   /  dir3    ");
-        build();
         assertPath("dir1", "dir2", "dir3");
     }
 
@@ -131,7 +120,6 @@ public class FileSystemBuilderTest extends AbstractFileSystemTest {
     public void testDirNameWithSpaces() {
         // Spaces that are part of the directory name should be legal.
         add("dir   ecto  ry/   d i r 2   / d  ir  3  ");
-        build();
         assertPath("dir   ecto  ry", "d i r 2", "d  ir  3");
     }
 
@@ -175,7 +163,6 @@ public class FileSystemBuilderTest extends AbstractFileSystemTest {
     public void testPathWithDescription() {
         // It is possible to add descriptions to a directory.
         add("dir1 : Directory1/  dir2   :   Directory2  /   dir3 : Description with spaces  /  dir4:  ");
-        build();
         assertPath("dir1", "dir2", "dir3", "dir4");
 
         ShellDirectory dir = getChild(fileSystem.getRoot(), "dir1");
@@ -213,8 +200,7 @@ public class FileSystemBuilderTest extends AbstractFileSystemTest {
         add("/", "cmd1");
         add("", "cmd2");
         add("       ", "cmd3");
-        builder.add(cmd("cmd4"));
-        build();
+        fileSystem = fileSystem.addCommands(cmd("cmd4"));
 
         assertPathToCommand("cmd1");
         assertPathToCommand("cmd2");
@@ -225,7 +211,6 @@ public class FileSystemBuilderTest extends AbstractFileSystemTest {
     @Test(expected = ShellException.class)
     public void testAddCommandTwice() {
         add("dir", "cmd");
-        build();
         assertPathToCommand("dir", "cmd");
 
         add("dir", "cmd");
@@ -234,8 +219,6 @@ public class FileSystemBuilderTest extends AbstractFileSystemTest {
     @Test
     public void testGlobalCommands() {
         addGlobalCommands("global1", "global2");
-        build();
-
         assertGlobalCommand("global1");
         assertGlobalCommand("global2");
     }
@@ -254,7 +237,7 @@ public class FileSystemBuilderTest extends AbstractFileSystemTest {
         final String commandName = pathElements.get(pathElements.size() - 1);
         final ShellDirectory directory = getDirectory(pathToDirectory);
         try {
-            directory.parseFile(commandName);
+            directory.getFile(commandName);
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
@@ -270,7 +253,7 @@ public class FileSystemBuilderTest extends AbstractFileSystemTest {
 
     private ShellDirectory getChild(ShellDirectory directory, String name) {
         try {
-            return directory.parseDirectory(name);
+            return directory.getDirectory(name);
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
@@ -278,7 +261,7 @@ public class FileSystemBuilderTest extends AbstractFileSystemTest {
 
     private void assertIllegal(String path) {
         try {
-            builder.add(path);
+            fileSystem.addCommands(path);
             fail();
         } catch (ShellException ignored) { }
     }

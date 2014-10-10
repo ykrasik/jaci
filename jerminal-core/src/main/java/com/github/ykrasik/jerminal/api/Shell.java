@@ -18,8 +18,9 @@ package com.github.ykrasik.jerminal.api;
 
 import com.google.common.base.Optional;
 
+// FIXME: JavaDoc
 /**
- * Processes command lines and displays results through an {@link com.github.ykrasik.jerminal.api.output.OutputProcessor OutputProcessor}.<br>
+ * Processes command lines and displays results through an {@link com.github.ykrasik.jerminal.api.display.DisplayDriver OutputProcessor}.<br>
  * <br>
  * The Shell keeps a command history. Only successfully executed command lines are saved to the history.
  * The Shell keeps track of where in the command history it is. So the state is kept inside the Shell for consecutive
@@ -37,31 +38,24 @@ import com.google.common.base.Optional;
 // FIXME: Remove Guava dependency?
 public interface Shell {
     /**
-     * Get the previous command line from history.<br>
-     * Only successfully executed command lines are saved.<br>
-     * The caller of this method is expected to alter the command line accordingly.
+     * @return The previous command line from history. Only successfully executed command lines are saved.
      */
     Optional<String> getPrevCommandLineFromHistory();
 
     /**
-     * Get the next command line from history.<br>
-     * Only successfully executed command lines are saved.<br>
-     * The caller of this method is expected to alter the command line accordingly.
+     * @return The next command line from history. Only successfully executed command lines are saved.
      */
     Optional<String> getNextCommandLineFromHistory();
 
     /**
-     * Provide assistance according to the command line.<br>
-     * Returns the new command line.<br>
-     * The caller of this method is expected to alter the command line accordingly.
+     * Provide assistance for the command line.
+     * @return The new command line if assistance was possible.
      */
-    String assist(String commandLine);
+    Optional<String> assist(String commandLine);
 
     /**
-     * Execute the command line.<br>
-     * Returns the new command line. If the command line was executed successfully, returns an empty command line.
-     * Otherwise, returns the received command line. <br>
-     * The caller of this method is expected to alter the command line accordingly.
+     * Execute the command line.
+     * @return true if the command line was executed successfully.
      */
-    String execute(String commandLine);
+    boolean execute(String commandLine);
 }

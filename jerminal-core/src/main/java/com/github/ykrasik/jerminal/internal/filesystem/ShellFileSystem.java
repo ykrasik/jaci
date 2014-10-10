@@ -16,10 +16,13 @@
 
 package com.github.ykrasik.jerminal.internal.filesystem;
 
+import com.github.ykrasik.jerminal.api.command.Command;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectory;
 import com.github.ykrasik.jerminal.internal.filesystem.file.ShellFile;
 import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
+
+import java.util.List;
 
 /**
  * An <b>immutable</b> hierarchy of {@link ShellDirectory directories} and {@link ShellFile files}.<br>
@@ -27,9 +30,23 @@ import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
  * @author Yevgeny Krasik
  */
 public interface ShellFileSystem {
+    // FIXME: JavaDoc
+    ShellFileSystem addGlobalCommands(Command... globalCommands);
+
+    ShellFileSystem addGlobalCommands(List<Command> globalCommands);
+
+    ShellFileSystem addCommands(Command... commands);
+
+    ShellFileSystem addCommands(List<Command> commands);
+
+    ShellFileSystem addCommands(String path, Command... commands);
+
+    ShellFileSystem addCommands(String path, List<Command> commands);
+
     /**
      * Returns the root {@link ShellDirectory}.
      */
+    // FIXME: Remove this.
     ShellDirectory getRoot();
 
     /**

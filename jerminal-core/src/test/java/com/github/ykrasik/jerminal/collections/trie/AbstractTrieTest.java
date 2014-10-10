@@ -31,23 +31,17 @@ import static org.junit.Assert.*;
  */
 public class AbstractTrieTest {
     private Map<String, String> valueMap;
-    private TrieBuilder<String> trieBuilder;
     protected Trie<String> trie;
 
     @Before
     public void setUp() {
         this.valueMap = new HashMap<>();
-        this.trieBuilder = new TrieBuilder<>();
-        this.trie = null;
-    }
-
-    protected void build() {
-        trie = trieBuilder.build();
+        this.trie = new TrieImpl<>();
     }
 
     protected void addWord(String word, String value) {
         valueMap.put(word, value);
-        trieBuilder.add(word, value);
+        trie = trie.set(word, value);
     }
 
     protected void successfulSubTrie(String prefix) {

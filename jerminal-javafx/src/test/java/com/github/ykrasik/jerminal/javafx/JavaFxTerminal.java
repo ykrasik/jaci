@@ -1,6 +1,6 @@
 package com.github.ykrasik.jerminal.javafx;
 
-import com.github.ykrasik.jerminal.api.output.terminal.Terminal;
+import com.github.ykrasik.jerminal.api.display.terminal.Terminal;
 import javafx.scene.control.TextArea;
 
 import java.util.Objects;

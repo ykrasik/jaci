@@ -36,8 +36,6 @@ public class TriePrefixTest extends AbstractTrieTest {
         addWord("prefix", "prefix6");
         addWord("prefiz", "prefix7");
         addWord("other", "other");
-
-        build();
     }
 
     @Test

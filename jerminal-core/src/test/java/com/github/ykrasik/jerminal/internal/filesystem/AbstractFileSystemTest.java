@@ -34,28 +34,22 @@ import static org.mockito.Mockito.when;
  */
 @RunWith(MockitoJUnitRunner.class)
 public abstract class AbstractFileSystemTest {
-    protected ShellFileSystemBuilder builder;
     protected ShellFileSystem fileSystem;
 
     @Before
     public void setUp() {
-        this.builder = new ShellFileSystemBuilder();
-        this.fileSystem = null;
-    }
-
-    protected void build() {
-        this.fileSystem = builder.build();
+        this.fileSystem = new ShellFileSystemImpl();
     }
 
     protected void add(String path, String... commandNames) {
         for (String commandName : commandNames) {
-            builder.add(path, cmd(commandName));
+            fileSystem = fileSystem.addCommands(path, cmd(commandName));
         }
     }
 
     protected void addGlobalCommands(String... commandNames) {
         for (String commandName : commandNames) {
-            builder.addGlobalCommands(cmd(commandName));
+            fileSystem = fileSystem.addGlobalCommands(cmd(commandName));
         }
     }
 

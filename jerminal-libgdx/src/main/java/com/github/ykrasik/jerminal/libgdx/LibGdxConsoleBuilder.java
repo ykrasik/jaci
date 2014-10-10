@@ -19,12 +19,12 @@ package com.github.ykrasik.jerminal.libgdx;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.github.ykrasik.jerminal.api.Shell;
-import com.github.ykrasik.jerminal.api.ShellBuilder;
-import com.github.ykrasik.jerminal.api.command.Command;
+import com.github.ykrasik.jerminal.api.ShellImpl;
+import com.github.ykrasik.jerminal.api.display.DisplayDriver;
+import com.github.ykrasik.jerminal.api.display.terminal.TerminalDisplayDriver;
+import com.github.ykrasik.jerminal.internal.filesystem.ShellFileSystem;
 
-import java.util.Collection;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.Objects;
 
 /**
  * A builder for a {@link LibGdxConsole}.<br>
@@ -33,73 +33,61 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 // FIXME: Explain the toggle functionality.
 public class LibGdxConsoleBuilder {
-    private static final ConsoleToggler DEFAULT_CONSOLE_TOGGLER = new DefaultConsoleToggler();
-    private static final ConsoleToggler DISABLED_CONSOLE_TOGGLER = new DisabledConsoleToggler();
+    private static final ConsoleToggler DEFAULT_CONSOLE_TOGGLER = new ConsoleToggler() {
+        @Override
+        public boolean shouldToggle(int keycode) {
+            return keycode == Keys.GRAVE &&
+                   Gdx.input.isKeyPressed(Keys.CONTROL_LEFT);
+        }
+    };
+    private static final ConsoleToggler DISABLED_CONSOLE_TOGGLER = new ConsoleToggler() {
+        @Override
+        public boolean shouldToggle(int keycode) {
+            return false;
+        }
+    };
 
-    private final LibGdxTerminal terminal;
-    private final ShellBuilder builder;
     private final LibGdxConsoleWidgetFactory widgetFactory;
 
+    private final LibGdxTerminal terminal;
+    private ShellFileSystem fileSystem;
+    private int maxHistory = 30;
+    private String welcomeMessage = "Welcome to Jerminal!\n";
     private ConsoleToggler consoleToggler = DEFAULT_CONSOLE_TOGGLER;
 
     public LibGdxConsoleBuilder(LibGdxConsoleWidgetFactory widgetFactory, int maxBufferEntries) {
         this.widgetFactory = widgetFactory;
         this.terminal = new LibGdxTerminal(widgetFactory, maxBufferEntries);
-        this.builder = new ShellBuilder(terminal);
     }
 
     public LibGdxConsole build() {
-        final Shell shell = builder.build();
+        final DisplayDriver displayDriver = new TerminalDisplayDriver(terminal);
+        final Shell shell = new ShellImpl(fileSystem, displayDriver, maxHistory, welcomeMessage);
         return new LibGdxConsole(terminal, shell, consoleToggler, widgetFactory);
     }
 
-    public LibGdxConsoleBuilder setMaxCommandHistory(int maxCommandHistory) {
-        builder.setMaxCommandLineHistory(maxCommandHistory);
+    public LibGdxConsoleBuilder setFileSystem(ShellFileSystem fileSystem) {
+        this.fileSystem = Objects.requireNonNull(fileSystem);
+        return this;
+    }
+
+    public LibGdxConsoleBuilder setMaxCommandHistory(int maxHistory) {
+        this.maxHistory = maxHistory;
+        return this;
+    }
+
+    public LibGdxConsoleBuilder setWelcomeMessage(String welcomeMessage) {
+        this.welcomeMessage = Objects.requireNonNull(welcomeMessage);
         return this;
     }
 
     public LibGdxConsoleBuilder setConsoleToggler(ConsoleToggler consoleToggler) {
-        this.consoleToggler = checkNotNull(consoleToggler, "consoleToggler");
+        this.consoleToggler = Objects.requireNonNull(consoleToggler);
         return this;
     }
 
     public LibGdxConsoleBuilder disableConsoleToggler() {
         this.consoleToggler = DISABLED_CONSOLE_TOGGLER;
         return this;
-    }
-
-    public LibGdxConsoleBuilder add(Command... commands) {
-        builder.add(commands);
-        return this;
-    }
-
-    public LibGdxConsoleBuilder add(String path, Command... commands) {
-        builder.add(path, commands);
-        return this;
-    }
-
-    public LibGdxConsoleBuilder addGlobalCommands(Command... globalCommands) {
-        builder.addGlobalCommands(globalCommands);
-        return this;
-    }
-
-    public LibGdxConsoleBuilder addGlobalCommands(Collection<Command> globalCommands) {
-        builder.addGlobalCommands(globalCommands);
-        return this;
-    }
-
-    private static final class DefaultConsoleToggler implements ConsoleToggler {
-        @Override
-        public boolean shouldToggle(int keycode) {
-            return keycode == Keys.GRAVE &&
-                   Gdx.input.isKeyPressed(Keys.CONTROL_LEFT);
-        }
-    }
-
-    private static final class DisabledConsoleToggler implements ConsoleToggler {
-        @Override
-        public boolean shouldToggle(int keycode) {
-            return false;
-        }
     }
 }

@@ -30,8 +30,8 @@ import static org.junit.Assert.assertSame;
 public class TrieUnionTest extends AbstractTrieTest {
     @Test
     public void testSimpleUnion() {
-        final Trie<String> trie1 = createTrie("word");
-        final Trie<String> trie2 = createTrie("anotherWord");
+        final Trie<String> trie1 = Tries.toStringTrie("word");
+        final Trie<String> trie2 = Tries.toStringTrie("anotherWord");
 
         this.trie = trie1.union(trie2);
         assertNotEmpty();
@@ -41,8 +41,8 @@ public class TrieUnionTest extends AbstractTrieTest {
 
     @Test
     public void prefixUnionTest() {
-        final Trie<String> trie1 = createTrie("word1");
-        final Trie<String> trie2 = createTrie("word2");
+        final Trie<String> trie1 = Tries.toStringTrie("word1");
+        final Trie<String> trie2 = Tries.toStringTrie("word2");
 
         this.trie = trie1.union(trie2);
         assertNotEmpty();
@@ -52,8 +52,8 @@ public class TrieUnionTest extends AbstractTrieTest {
 
     @Test
     public void emptyUnionTest() {
-        final Trie<String> trie1 = createTrie("single");
-        final Trie<String> trie2 = createTrie();
+        final Trie<String> trie1 = Tries.toStringTrie("single");
+        final Trie<String> trie2 = Tries.toStringTrie();
 
         this.trie = trie1.union(trie2);
         assertNotEmpty();
@@ -70,10 +70,10 @@ public class TrieUnionTest extends AbstractTrieTest {
 
     @Test
     public void compoundUnionTest() {
-        final Trie<String> trie1 = createTrie("word1", "another1", "extra");
-        final Trie<String> trie2 = createTrie("word2");
-        final Trie<String> trie3 = createTrie("another2", "extra2");
-        final Trie<String> trie4 = createTrie("newWord", "many", "other", "words");
+        final Trie<String> trie1 = Tries.toStringTrie("word1", "another1", "extra");
+        final Trie<String> trie2 = Tries.toStringTrie("word2");
+        final Trie<String> trie3 = Tries.toStringTrie("another2", "extra2");
+        final Trie<String> trie4 = Tries.toStringTrie("newWord", "many", "other", "words");
 
         final Trie<String> union1 = trie1.union(trie2);
         final Trie<String> union2 = trie3.union(trie4);
@@ -108,14 +108,6 @@ public class TrieUnionTest extends AbstractTrieTest {
     }
 
     // FIXME: Tests aren't exhaustive, what about a union of 2 tries with the same values?
-
-    private Trie<String> createTrie(String... words) {
-        final TrieBuilder<String> builder = new TrieBuilder<>();
-        for (String word : words) {
-            builder.add(word, word);
-        }
-        return builder.build();
-    }
 
     @Override
     protected void assertWords(String... expectedWords) {

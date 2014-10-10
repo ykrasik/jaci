@@ -53,8 +53,6 @@ public class TrieFilterTest extends AbstractTrieTest {
         addWord("thisValueIsOk2", "value7");
         addWord("thisValueIsNotOj", "");
         addWord("thisValueIsNotOk2", "");
-
-        build();
     }
 
     @Test
@@ -105,16 +103,12 @@ public class TrieFilterTest extends AbstractTrieTest {
     @Test
     public void testFailedFilter() {
         // All values are invalid, no subTrie expected after filtering.
-        build();
         failedFilter("n"); // Only 1 value and it's illegal.
 
-        build();
         failedFilter("notOkValue"); // Only 1 value and it's illegal.
 
-        build();
         failedFilter("in"); // invalid1, invalid2
 
-        build();
         failedFilter("thisValueIsNot"); // thisValueIsNotOk, thisValueIsNotOj, thisValueIsNotOk2
     }
 

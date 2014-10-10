@@ -24,44 +24,71 @@ import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteType;
 import com.google.common.base.Optional;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * A <b>immutable</b> container for {@link ShellDirectory directories} and {@link ShellFile files}.
  *
  * @author Yevgeny Krasik
  */
+// FIXME: Directories don't need a description.
 public interface ShellDirectory extends ShellEntry {
+
+    // FIXME: JavaDoc
+
+    // FIXME: Is this needed?
+    ShellDirectory addFiles(ShellFile... files);
+
+    ShellDirectory addFiles(List<ShellFile> files);
+
     /**
-     * Returns 'true' if this {@link ShellDirectory} has no children.
+     * @return True if this directory has no children.
      */
     boolean isEmpty();
 
     /**
-     * Returns this {@link ShellDirectory}'s children.
+     * @return This directory's children.
      */
     Collection<ShellEntry> getChildren();
 
     /**
-     * Returns this {@link ShellDirectory}'s parent {@link ShellDirectory}.
+     * @return This directory's parent.
      */
     Optional<ShellDirectory> getParent();
 
     /**
-     * Parse the input as a child {@link ShellFile}.
+     * @return A copy of this directory with it's parent set to the given parent.
+     */
+    ShellDirectory setParent(ShellDirectory parent);
+
+    /**
+     * @return A child {@link ShellEntry} with the given name. Does not throw any exceptions.
+     */
+    Optional<ShellEntry> getChildDirectory(String name);
+
+    /**
+     * @return A copy of this directory with the given directory as a child.
+     *         If a previous entry (child or file) existed under the same name, it will be overwritten.
+     */
+    ShellDirectory setChildDirectory(ShellDirectory child);
+
+    /**
+     * @return A child {@link ShellFile} with the given name, if one exists.
      *
      * @throws ParseException If no such child {@link ShellFile} exists.
      */
-    ShellFile parseFile(String rawCommand) throws ParseException;
+    ShellFile getFile(String name) throws ParseException;
 
     /**
-     * Parse the input as a child {@link ShellDirectory}.
+     * @return A child {@link ShellDirectory} with the given name, if one exists.
      *
      * @throws ParseException If no such child {@link ShellDirectory} exists.
      */
-    ShellDirectory parseDirectory(String rawDirectory) throws ParseException;
+    ShellDirectory getDirectory(String name) throws ParseException;
 
     /**
-     * Offer auto complete suggestions for the a child {@link ShellDirectory} that starts with the given prefix.
+     * @return A {@link Trie} containing auto complete suggestions for the a child {@link ShellDirectory}
+     *         that starts with the given prefix.
      *
      * @throws ParseException If this {@link ShellDirectory} is empty.
      */
@@ -69,8 +96,7 @@ public interface ShellDirectory extends ShellEntry {
     Trie<AutoCompleteType> autoCompleteDirectory(String prefix) throws ParseException;
 
     /**
-     * Offer auto complete suggestions for the a child {@link ShellDirectory} or {@link com.github.ykrasik.jerminal.api.command.Command}
-     * that starts with the given prefix.
+     * @return A {@link Trie} containing auto complete suggestions for any child entry that starts with the given prefix.
      *
      * @throws ParseException If this {@link ShellDirectory} is empty.
      */

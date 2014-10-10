@@ -43,8 +43,6 @@ public class FileSystemParseTest extends AbstractFileSystemTest {
         add("folder", "cmd7");
 
         addGlobalCommands("global");
-
-        build();
     }
 
     @Test
@@ -101,11 +99,12 @@ public class FileSystemParseTest extends AbstractFileSystemTest {
     public void testGlobalCommandBeforeLocalCommand() {
         // Global commands take precedence over local commands when parsing.
         final String name = "command";
+
         final Command globalCommand = cmd(name);
-        builder.addGlobalCommands(globalCommand);
+        fileSystem = fileSystem.addGlobalCommands(globalCommand);
+
         final Command localCommand = cmd(name);
-        builder.add(localCommand);
-        build();
+        fileSystem = fileSystem.addCommands(localCommand);
 
         try {
             ShellFile file = fileSystem.parsePathToFile(name);

@@ -14,14 +14,30 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.collections.trie.visitor;
+package com.github.ykrasik.jerminal.api.commandline;
 
 /**
- * Can be given to a {@link com.github.ykrasik.jerminal.collections.trie.Trie}
- * to visit all it's words and their associated values.
- *
  * @author Yevgeny Krasik
  */
-public interface TrieVisitor<T> {
-    void visit(String word, T value);
+// FIXME: JavaDoc
+public interface CommandLineDriver {
+    /**
+     * @return The command line.
+     */
+    String read();
+
+    /**
+     * @return The command line until the cursor.
+     */
+    String readUntilCursor();
+
+    /**
+     * Set the command line to the given command line.
+     */
+    void set(String commandLine);
+
+    /**
+     * Clear the command line.
+     */
+    void clear();
 }

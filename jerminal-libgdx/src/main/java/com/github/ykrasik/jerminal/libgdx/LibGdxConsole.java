@@ -18,22 +18,26 @@ package com.github.ykrasik.jerminal.libgdx;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.scenes.scene2d.*;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.github.ykrasik.jerminal.api.Shell;
-import com.google.common.base.Optional;
+import com.github.ykrasik.jerminal.api.commandline.CommandLineDriver;
+import com.github.ykrasik.jerminal.api.commandline.ShellWithCommandLine;
+import com.github.ykrasik.jerminal.api.commandline.ShellWithCommandLineImpl;
 
 /**
  * @author Yevgeny Krasik
  */
 // FIXME: JavaDoc
 public class LibGdxConsole extends Table {
-    private final LibGdxTerminal terminal;
-    private final Shell shell;
+    private final ShellWithCommandLine shell;
     private final ConsoleToggler consoleToggler;
 
     private final Label currentPath;
@@ -47,9 +51,12 @@ public class LibGdxConsole extends Table {
                          Shell shell,
                          ConsoleToggler consoleToggler,
                          LibGdxConsoleWidgetFactory widgetFactory) {
-        this.terminal = terminal;
-        this.shell = shell;
+        this.shell = new ShellWithCommandLineImpl(shell, new LibGdxCommandLineDriver());
         this.consoleToggler = consoleToggler;
+
+        // TextField to input commands.
+        textField = widgetFactory.createInputTextField("");
+        textField.setName("textField");
 
         terminal.bottom().left();
         terminal.debug();
@@ -62,10 +69,6 @@ public class LibGdxConsole extends Table {
         currentPathTable.add(currentPath).fill().padLeft(3).padRight(5);
         currentPathTable.setBackground(widgetFactory.createCurrentPathLabelBackground());
         currentPathTable.debug();
-
-        // TextField to input commands.
-        textField = widgetFactory.createInputTextField("");
-        textField.setName("textField");
 
         // A close console button.
         final Button closeButton = widgetFactory.createCloseButton();
@@ -181,6 +184,29 @@ public class LibGdxConsole extends Table {
         }
     }
 
+    private class LibGdxCommandLineDriver implements CommandLineDriver {
+        @Override
+        public String read() {
+            return textField.getText();
+        }
+
+        @Override
+        public String readUntilCursor() {
+            return textField.getText().substring(0, textField.getCursorPosition());
+        }
+
+        @Override
+        public void set(String commandLine) {
+            textField.setText(commandLine);
+            textField.setCursorPosition(commandLine.length());
+        }
+
+        @Override
+        public void clear() {
+            set("");
+        }
+    }
+
     private class ConsoleInputListener extends InputListener {
         @Override
         public boolean keyDown(InputEvent event, int keycode) {
@@ -190,58 +216,18 @@ public class LibGdxConsole extends Table {
             }
 
             switch (keycode) {
-                case Keys.DPAD_UP:
-                    showCommandLineIfPresent(shell.getPrevCommandLineFromHistory());
-                    return true;
-                case Keys.DPAD_DOWN:
-                    showCommandLineIfPresent(shell.getNextCommandLineFromHistory());
-                    return true;
-                case Keys.ENTER:
-                    executeCommandLine();
-                    return true;
-                case Keys.TAB:
-                    assistCommandLine();
-                    return true;
+                case Keys.DPAD_UP: shell.setPrevCommandLineFromHistory(); return true;
+                case Keys.DPAD_DOWN: shell.setNextCommandLineFromHistory(); return true;
+                case Keys.ENTER: shell.execute(); return true;
+                case Keys.TAB: shell.assist(); return true;
                 case Keys.Z:
                     if (Gdx.input.isKeyPressed(Keys.CONTROL_LEFT)) {
-                        // Clear command line.
-                        setCommandLine("");
+                        shell.clearCommandLine();
                         return true;
                     }
             }
 
             return false;
-        }
-
-        private void showCommandLineIfPresent(Optional<String> commandLine) {
-            if (commandLine.isPresent()) {
-                setCommandLine(commandLine.get());
-            }
-        }
-
-        private void executeCommandLine() {
-            final String commandLine = readCommandLine();
-            final String newCommandLine = shell.execute(commandLine);
-            setCommandLine(newCommandLine);
-        }
-
-        private void assistCommandLine() {
-            final String commandLine = readCommandLineUntilCursor();
-            final String newCommandLine = shell.assist(commandLine);
-            setCommandLine(newCommandLine);
-        }
-
-        private String readCommandLine() {
-            return textField.getText();
-        }
-
-        private String readCommandLineUntilCursor() {
-            return textField.getText().substring(0, textField.getCursorPosition());
-        }
-
-        private void setCommandLine(String commandLine) {
-            textField.setText(commandLine);
-            textField.setCursorPosition(commandLine.length());
         }
     }
 }

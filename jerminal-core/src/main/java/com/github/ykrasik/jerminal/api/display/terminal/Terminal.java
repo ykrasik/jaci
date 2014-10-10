@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.api.output.terminal;
+package com.github.ykrasik.jerminal.api.display.terminal;
 
 /**
  * A simple display, in which everything is printed into text.

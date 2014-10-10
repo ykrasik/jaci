@@ -45,16 +45,19 @@ public class SuggestionsBuilder {
     }
 
     public SuggestionsBuilder addSuggestion(AutoCompleteType type, String suggestion) {
-        final List<String> suggestions;
-        switch (type) {
-            case DIRECTORY: suggestions = directorySuggestions; break;
-            case COMMAND: suggestions = commandSuggestions; break;
-            case COMMAND_PARAM_NAME: // Fallthrough
-            case COMMAND_PARAM_FLAG: suggestions = paramNameSuggestions; break;
-            case COMMAND_PARAM_VALUE: suggestions = paramValueSuggestions; break;
-            default: throw new ShellException("Invalid AutoCompleteType: %s", type);
-        }
+        final List<String> suggestions = getSuggestionsByType(type);
         suggestions.add(suggestion);
         return this;
+    }
+
+    private List<String> getSuggestionsByType(AutoCompleteType type) {
+        switch (type) {
+            case DIRECTORY: return directorySuggestions;
+            case COMMAND: return commandSuggestions;
+            case COMMAND_PARAM_NAME: // Fallthrough
+            case COMMAND_PARAM_FLAG: return paramNameSuggestions;
+            case COMMAND_PARAM_VALUE: return paramValueSuggestions;
+            default: throw new ShellException("Invalid AutoCompleteType: %s", type);
+        }
     }
 }

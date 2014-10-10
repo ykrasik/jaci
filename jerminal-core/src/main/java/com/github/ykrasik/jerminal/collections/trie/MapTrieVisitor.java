@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.collections.trie.visitor;
+package com.github.ykrasik.jerminal.collections.trie;
 
 import java.util.HashMap;
 import java.util.Map;

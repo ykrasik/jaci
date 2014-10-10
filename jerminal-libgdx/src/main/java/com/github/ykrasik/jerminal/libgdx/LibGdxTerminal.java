@@ -20,7 +20,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.github.ykrasik.jerminal.api.output.terminal.Terminal;
+import com.github.ykrasik.jerminal.api.display.terminal.Terminal;
 
 import java.util.ArrayDeque;
 import java.util.Deque;

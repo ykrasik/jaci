@@ -56,8 +56,6 @@ public class FileSystemAutoCompleteTest extends AbstractFileSystemTest {
 
         addGlobalCommands(GLOBAL_COMMANDS);
 
-        build();
-
         this.expectedFiles = Collections.emptyList();
         this.expectedDirectories = Collections.emptyList();
     }

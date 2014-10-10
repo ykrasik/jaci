@@ -14,27 +14,14 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.collections.trie.node;
-
-import java.util.Map;
+package com.github.ykrasik.jerminal.collections.trie;
 
 /**
- * Utilities for working with {@link TrieNode}s.
+ * Can be given to a {@link com.github.ykrasik.jerminal.collections.trie.Trie}
+ * to visit all it's words and their associated values.
  *
  * @author Yevgeny Krasik
  */
-final class TrieNodeUtils {
-    private TrieNodeUtils() {
-    }
-
-    /**
-     * Returns the child of the map at lowerCase 'c' or upperCase 'c', in that order.
-     */
-    public static <T> T getCaseInsensitive(Map<Character, T> map, char c) {
-        T value = map.get(Character.toLowerCase(c));
-        if (value == null) {
-            value = map.get(Character.toUpperCase(c));
-        }
-        return value;
-    }
+public interface TrieVisitor<T> {
+    void visit(String word, T value);
 }

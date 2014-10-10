@@ -14,30 +14,28 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.internal.command;
+package com.github.ykrasik.jerminal.collections.trie;
 
-import com.github.ykrasik.jerminal.api.command.OutputPrinter;
-import com.github.ykrasik.jerminal.api.display.DisplayDriver;
+import java.util.Arrays;
+import java.util.List;
 
 /**
- * An implementation for an {@link OutputPrinter}.
- *
  * @author Yevgeny Krasik
  */
-public class OutputPrinterImpl implements OutputPrinter {
-    private final DisplayDriver displayDriver;
-
-    public OutputPrinterImpl(DisplayDriver displayDriver) {
-        this.displayDriver = displayDriver;
+public final class Tries {
+    private Tries() {
     }
 
-    @Override
-    public void println(String text) {
-        displayDriver.displayText(text);
+    // FIXME: JavaDoc
+    public static Trie<String> toStringTrie(String... strings) {
+        return toStringTrie(Arrays.asList(strings));
     }
 
-    @Override
-    public void println(String format, Object... args) {
-        println(String.format(format, args));
+    public static Trie<String> toStringTrie(List<String> strings) {
+        Trie<String> trie = new TrieImpl<>();
+        for (String string : strings) {
+            trie = trie.add(string, "");
+        }
+        return trie;
     }
 }

@@ -22,7 +22,7 @@ import com.github.ykrasik.jerminal.api.command.Command;
 import com.github.ykrasik.jerminal.api.command.CommandArgs;
 import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
 import com.github.ykrasik.jerminal.collections.trie.Trie;
-import com.github.ykrasik.jerminal.collections.trie.TrieBuilder;
+import com.github.ykrasik.jerminal.collections.trie.TrieImpl;
 import com.github.ykrasik.jerminal.internal.command.parameter.CommandParamContext;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.internal.exception.ShellException;
@@ -47,18 +47,16 @@ public class ShellFileImpl implements ShellFile {
     }
 
     private Trie<CommandParam> createParamTrie(List<CommandParam> params) {
-        final TrieBuilder<CommandParam> builder = new TrieBuilder<>();
+        Trie<CommandParam> trie = new TrieImpl<>();
         for (CommandParam param : params) {
-            final String paramName = param.getName();
-            if (paramName.indexOf(ShellConstants.ARG_VALUE_DELIMITER) != -1) {
-                throw new ShellException("Illegal param name: '%s'. Param names cannot contain '%c'!",
-                    paramName, ShellConstants.ARG_VALUE_DELIMITER
-                );
+            final String name = param.getName();
+            if (!ShellConstants.isLegalName(name)) {
+                throw new ShellException("Illegal name for parameter: '%s'", name);
             }
 
-            builder.add(paramName, param);
+            trie = trie.add(name, param);
         }
-        return builder.build();
+        return trie;
     }
 
     @Override

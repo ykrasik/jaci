@@ -16,9 +16,10 @@
 
 package com.github.ykrasik.jerminal.internal.filesystem.directory;
 
+import com.github.ykrasik.jerminal.ShellConstants;
 import com.github.ykrasik.jerminal.api.exception.ParseError;
 import com.github.ykrasik.jerminal.collections.trie.Trie;
-import com.github.ykrasik.jerminal.collections.trie.TrieBuilder;
+import com.github.ykrasik.jerminal.collections.trie.TrieImpl;
 import com.github.ykrasik.jerminal.internal.AbstractDescribable;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.internal.exception.ShellException;
@@ -29,9 +30,10 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
+import java.util.List;
 
 /**
  * An implementation for a {@link ShellDirectory}.
@@ -58,33 +60,46 @@ public class ShellDirectoryImpl extends AbstractDescribable implements ShellDire
     };
 
     private final Trie<ShellEntry> entries;
+    private final Optional<ShellDirectory> parent;
 
-    private Optional<ShellDirectory> parent;
-
-    public ShellDirectoryImpl(String name,
-                              String description,
-                              Map<String, ShellDirectory> directories,
-                              Map<String, ShellFile> files) {
-        super(name, description);
-
-        final TrieBuilder<ShellEntry> trieBuilder = new TrieBuilder<>();
-        trieBuilder.addAll(directories);
-        trieBuilder.addAll(files);
-        this.entries = trieBuilder.build();
-
-        this.parent = Optional.absent();
+    public ShellDirectoryImpl(String name, String description) {
+        this(name, description, TrieImpl.<ShellEntry>emptyTrie(), Optional.<ShellDirectory>absent());
     }
 
-    void setParent(ShellDirectory parent) {
-        if (this.parent.isPresent()) {
-            throw new ShellException("Parent was already set for directory: '%s'", getName());
-        }
-        this.parent = Optional.of(parent);
+    private ShellDirectoryImpl(String name,
+                               String description,
+                               Trie<ShellEntry> entries,
+                               Optional<ShellDirectory> parent) {
+        super(name, description);
+        this.entries = entries;
+        this.parent = parent;
     }
 
     @Override
     public boolean isDirectory() {
         return true;
+    }
+
+    @Override
+    public ShellDirectory addFiles(ShellFile... files) {
+        return addFiles(Arrays.asList(files));
+    }
+
+    @Override
+    public ShellDirectory addFiles(List<ShellFile> files) {
+        Trie<ShellEntry> newEntries = entries;
+        for (ShellFile file : files) {
+            final String name = file.getName();
+            if (!ShellConstants.isLegalName(name)) {
+                throw new ShellException("Illegal name for file: '%s'", name);
+            }
+            if (entries.contains(name)) {
+                throw new ShellException("Directory '%s' already contains a child file named: '%s'", getName(), name);
+            }
+
+            newEntries = newEntries.add(name, file);
+        }
+        return new ShellDirectoryImpl(getName(), getDescription(), newEntries, parent);
     }
 
     @Override
@@ -103,23 +118,39 @@ public class ShellDirectoryImpl extends AbstractDescribable implements ShellDire
     }
 
     @Override
-    public ShellFile parseFile(String rawCommand) throws ParseException {
-        return (ShellFile) doParseEntry(rawCommand, false);
+    public ShellDirectory setParent(ShellDirectory parent) {
+        return new ShellDirectoryImpl(getName(), getDescription(), entries, Optional.of(parent));
     }
 
     @Override
-    public ShellDirectory parseDirectory(String rawDirectory) throws ParseException {
-        return (ShellDirectory) doParseEntry(rawDirectory, true);
+    public Optional<ShellEntry> getChildDirectory(String name) {
+        return entries.get(name);
     }
 
-    private ShellEntry doParseEntry(String rawEntry, boolean isDirectory) throws ParseException {
-        final Optional<ShellEntry> childEntryOptional = entries.get(rawEntry);
+    @Override
+    public ShellDirectory setChildDirectory(ShellDirectory child) {
+        final Trie<ShellEntry> newEntries = entries.set(child.getName(), child);
+        return new ShellDirectoryImpl(getName(), getDescription(), newEntries, Optional.<ShellDirectory>of(this));
+    }
+
+    @Override
+    public ShellFile getFile(String name) throws ParseException {
+        return (ShellFile) doGet(name, false);
+    }
+
+    @Override
+    public ShellDirectory getDirectory(String name) throws ParseException {
+        return (ShellDirectory) doGet(name, true);
+    }
+
+    private ShellEntry doGet(String name, boolean isDirectory) throws ParseException {
+        final Optional<ShellEntry> childEntryOptional = entries.get(name);
         if (!childEntryOptional.isPresent()) {
             // Give a meaningful error message.
             if (isEmpty()) {
                 throw emptyDirectory();
             } else {
-                throw directoryDoesNotContainEntry(rawEntry, isDirectory);
+                throw directoryDoesNotContainEntry(name, isDirectory);
             }
         }
 

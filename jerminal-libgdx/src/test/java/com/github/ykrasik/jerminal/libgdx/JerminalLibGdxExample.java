@@ -31,6 +31,8 @@ import com.github.ykrasik.jerminal.api.command.parameter.bool.BooleanParamBuilde
 import com.github.ykrasik.jerminal.api.command.parameter.numeric.IntegerParamBuilder;
 import com.github.ykrasik.jerminal.api.command.parameter.string.StringParamBuilder;
 import com.github.ykrasik.jerminal.api.exception.ExecuteException;
+import com.github.ykrasik.jerminal.internal.filesystem.ShellFileSystem;
+import com.github.ykrasik.jerminal.internal.filesystem.ShellFileSystemImpl;
 
 /**
  * @author Yevgeny Krasik
@@ -54,76 +56,73 @@ public class JerminalLibGdxExample extends ApplicationAdapter {
 
     @Override
     public void create() {
-        final int maxBufferEntries = 30;
         final LibGdxConsoleWidgetFactory widgetFactory = new JerminalLibGdxTestConsoleWidgetFactory();
-
-        final LibGdxConsoleBuilder builder = new LibGdxConsoleBuilder(widgetFactory, maxBufferEntries);
-        builder.setMaxCommandHistory(20);
-
-        createFileSystem(builder);
+        final LibGdxConsoleBuilder builder = new LibGdxConsoleBuilder(widgetFactory, 30);
+        builder.setFileSystem(createFileSystem());
 
         final LibGdxConsole console = builder.build();
         console.setFillParent(true);
         stage = new Stage();
         stage.addActor(console);
-        Table.drawDebug(stage);
+//        Table.drawDebug(stage);
+
         Gdx.input.setInputProcessor(stage);
         console.activate();
     }
 
-    private void createFileSystem(LibGdxConsoleBuilder builder) {
-        builder.add("nested/d/1possible");
-        builder.add("nested/d/2possible");
-        builder.add("nested/dir/singlePossible");
-        builder.add("nested/dir1/singlePossible");
-        builder.add("nested/dir2/singlePossible");
-        builder.add("nested/directory/singlePossible/multiplePossible1/singlePossible");
-        builder.add("nested/directory/singlePossible/multiplePossible2/singlePossible");
-
-        builder.add(
-            new CommandBuilder("cmd")
-                .setDescription("cmd")
-                .addParam(
-                    new IntegerParamBuilder("mandatoryInt")
-                        .setDescription("This int is mandatory!")
+    private ShellFileSystem createFileSystem() {
+        return new ShellFileSystemImpl()
+            .addCommands("nested/d/1possible")
+            .addCommands("nested/d/2possible")
+            .addCommands("nested/dir/singlePossible")
+            .addCommands("nested/dir1/singlePossible")
+            .addCommands("nested/dir2/singlePossible")
+            .addCommands("nested/directory/singlePossible/multiplePossible1/singlePossible")
+            .addCommands("nested/directory/singlePossible/multiplePossible2/singlePossible")
+            .addCommands(
+                new CommandBuilder("cmd")
+                    .setDescription("cmd")
+                    .addParam(
+                        new IntegerParamBuilder("mandatoryInt")
+                            .setDescription("This int is mandatory!")
+                            .build()
+                    )
+                    .addParam(
+                        new BooleanParamBuilder("optionalBool")
+                            .setDescription("This boolean is optional...")
+                            .setOptional(false)
+                            .build()
+                    )
+                    .setExecutor(new CommandExecutor() {
+                        @Override
+                        public void execute(CommandArgs args, OutputPrinter outputPrinter) throws ExecuteException {
+                            final int integer = args.getInt("mandatoryInt");
+                            final boolean bool = args.getBool("optionalBool");
+                            outputPrinter.println("yay: int = %d, bool = %s", integer, bool);
+                        }
+                    })
+                    .build(),
+                new CommandBuilder("nestCommand")
+                  .setDescription("test Command")
+                  .addParam(
+                      new StringParamBuilder("nested")
+                        .setConstantPossibleValues("test1", "value2", "param3", "long string")
                         .build()
-                )
-                .addParam(
-                    new BooleanParamBuilder("optionalBool")
-                        .setDescription("This boolean is optional...")
-                        .setOptional(false)
+                  )
+                  .addParam(
+                      new BooleanParamBuilder("booleany")
                         .build()
-                )
-                .setExecutor(new CommandExecutor() {
-                    @Override
-                    public void execute(CommandArgs args, OutputPrinter outputPrinter) throws ExecuteException {
-                        final int integer = args.getInt("mandatoryInt");
-                        final boolean bool = args.getBool("optionalBool");
-                        outputPrinter.println("yay: int = %d, bool = %s", integer, bool);
-                    }
-                })
-                .build(),
-            new CommandBuilder("nestCommand")
-              .setDescription("test Command")
-              .addParam(
-                  new StringParamBuilder("nested")
-                    .setConstantPossibleValues("test1", "value2", "param3", "long string")
-                    .build()
-              )
-              .addParam(
-                  new BooleanParamBuilder("booleany")
-                    .build()
-              )
-              .setExecutor(new CommandExecutor() {
-                  @Override
-                  public void execute(CommandArgs args, OutputPrinter outputPrinter) throws ExecuteException {
-                      final String str = args.getString("nested");
-                      final boolean bool = args.getBool("booleany");
-                      outputPrinter.println("yay: string = %s, bool = %s", str, bool);
-                  }
-              })
-              .build()
-        );
+                  )
+                  .setExecutor(new CommandExecutor() {
+                      @Override
+                      public void execute(CommandArgs args, OutputPrinter outputPrinter) throws ExecuteException {
+                          final String str = args.getString("nested");
+                          final boolean bool = args.getBool("booleany");
+                          outputPrinter.println("yay: string = %s, bool = %s", str, bool);
+                      }
+                  })
+                  .build()
+            );
     }
 
     @Override
