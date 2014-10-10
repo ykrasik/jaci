@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.collections.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+
+<BorderPane id="BorderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+    <center>
+        <TextArea fx:id="textArea" prefHeight="376.0" prefWidth="210.0" wrapText="true" />
+    </center>
+   <bottom>
+        <ToolBar BorderPane.alignment="CENTER">
+            <items>
+            <Pane prefHeight="25.0" prefWidth="35.0">
+               <children>
+                  <Label fx:id="currentPathLabel" layoutX="15.0" layoutY="4.0" text="\$" />
+               </children>
+            </Pane>
+            <TextField fx:id="textField" prefHeight="25.0" prefWidth="1147.0" />
+                <Button fx:id="enterButton" alignment="CENTER" cancelButton="false" contentDisplay="CENTER" defaultButton="true" disable="false" mnemonicParsing="false" prefHeight="25.0" prefWidth="71.0" text="Enter" textAlignment="CENTER" />
+            </items>
+        </ToolBar>
+   </bottom>
+</BorderPane>

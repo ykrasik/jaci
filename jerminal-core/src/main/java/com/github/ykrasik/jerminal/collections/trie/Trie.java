@@ -27,8 +27,7 @@ import java.util.Map;
 
 /**
  * An <b>immutable</b> prefix tree.<br>
- * Can be converted to a {@link Map} with {@link #toMap()}
- * or from a {@link Map} with a {@link TrieBuilder}
+ * Can be converted to a {@link Map} with {@link #toMap()} or from a {@link Map} with a {@link TrieBuilder}
  *
  * @author Yevgeny Krasik
  */

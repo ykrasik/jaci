@@ -26,7 +26,7 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 
 /**
- * The display part of the {@link LibGdxJerminalConsole}. This is where all text is printed.<br>
+ * The display part of the console. This is where all text is printed.<br>
  * Keeps a configurable maximum number of lines.
  *
  * @author Yevgeny Krasik
@@ -60,8 +60,8 @@ public class LibGdxTerminal extends Table implements Terminal {
         // Buffer history.
         this.bufferEntries = new ArrayDeque<>(maxBufferEntries);
 
-        this.setName("terminal");
-        this.add(scrollPane);
+        setName("terminal");
+        add(scrollPane);
     }
 
     @Override

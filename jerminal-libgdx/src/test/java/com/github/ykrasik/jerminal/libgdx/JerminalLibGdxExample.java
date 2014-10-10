@@ -1,30 +1,42 @@
-package com.github.ykrasik.jermina.libgdx;
+/*
+ * Copyright (C) 2014 Yevgeny Krasik
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.github.ykrasik.jerminal.libgdx;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.github.ykrasik.jerminal.api.command.CommandArgs;
+import com.github.ykrasik.jerminal.api.command.CommandBuilder;
 import com.github.ykrasik.jerminal.api.command.CommandExecutor;
 import com.github.ykrasik.jerminal.api.command.OutputPrinter;
 import com.github.ykrasik.jerminal.api.command.parameter.bool.BooleanParamBuilder;
 import com.github.ykrasik.jerminal.api.command.parameter.numeric.IntegerParamBuilder;
 import com.github.ykrasik.jerminal.api.command.parameter.string.StringParamBuilder;
 import com.github.ykrasik.jerminal.api.exception.ExecuteException;
-import com.github.ykrasik.jerminal.api.command.ShellCommandBuilder;
-import com.github.ykrasik.jerminal.libgdx.LibGdxJerminalConsole;
-import com.github.ykrasik.jerminal.libgdx.LibGdxConsoleBuilder;
-import com.github.ykrasik.jerminal.libgdx.LibGdxConsoleWidgetFactory;
 
 /**
- * User: ykrasik
- * Date: 08/01/14
+ * @author Yevgeny Krasik
  */
 public class JerminalLibGdxExample extends ApplicationAdapter {
-    private LibGdxJerminalConsole console;
+    private Stage stage;
 
     public static void main(String[] args) {
         final LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
@@ -46,14 +58,16 @@ public class JerminalLibGdxExample extends ApplicationAdapter {
         final LibGdxConsoleWidgetFactory widgetFactory = new JerminalLibGdxTestConsoleWidgetFactory();
 
         final LibGdxConsoleBuilder builder = new LibGdxConsoleBuilder(widgetFactory, maxBufferEntries);
-        builder.setMaxCommandHistory(20)
-            .setToggleKeycode(Keys.GRAVE);
+        builder.setMaxCommandHistory(20);
 
         createFileSystem(builder);
 
-        console = builder.build();
-
-        Gdx.input.setInputProcessor(console);
+        final LibGdxConsole console = builder.build();
+        console.setFillParent(true);
+        stage = new Stage();
+        stage.addActor(console);
+        Table.drawDebug(stage);
+        Gdx.input.setInputProcessor(stage);
         console.activate();
     }
 
@@ -67,7 +81,7 @@ public class JerminalLibGdxExample extends ApplicationAdapter {
         builder.add("nested/directory/singlePossible/multiplePossible2/singlePossible");
 
         builder.add(
-            new ShellCommandBuilder("cmd")
+            new CommandBuilder("cmd")
                 .setDescription("cmd")
                 .addParam(
                     new IntegerParamBuilder("mandatoryInt")
@@ -89,11 +103,11 @@ public class JerminalLibGdxExample extends ApplicationAdapter {
                     }
                 })
                 .build(),
-            new ShellCommandBuilder("nestCommand")
+            new CommandBuilder("nestCommand")
               .setDescription("test Command")
               .addParam(
                   new StringParamBuilder("nested")
-                    .setConstantPossibleValues("test1", "value2", "param3")
+                    .setConstantPossibleValues("test1", "value2", "param3", "long string")
                     .build()
               )
               .addParam(
@@ -114,13 +128,13 @@ public class JerminalLibGdxExample extends ApplicationAdapter {
 
     @Override
     public void resize(int width, int height) {
-        console.setViewport(width, height);
+        stage.setViewport(width, height);
     }
 
     @Override
     public void render() {
-        console.draw();
-        console.act();
+        stage.act();
+        stage.draw();
     }
 
     private static class JerminalLibGdxTestConsoleWidgetFactory implements LibGdxConsoleWidgetFactory {

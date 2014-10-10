@@ -1,4 +1,5 @@
 rootProject.name = 'jerminal'
 
 include "jerminal-core"
+include "jerminal-javafx"
 include "jerminal-libgdx"

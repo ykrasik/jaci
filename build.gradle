@@ -31,6 +31,14 @@ project("jerminal-core") {
     }
 }
 
+project("jerminal-javafx") {
+    description "Jerminal JavaFX frontend"
+
+    dependencies {
+        compile project(":jerminal-core")
+    }
+}
+
 project("jerminal-libgdx") {
     description "Jerminal libGdx integration"
 

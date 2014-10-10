@@ -51,8 +51,7 @@ public class ShellFileSystemImpl implements ShellFileSystem {
 
     private ShellDirectory currentDirectory;
 
-    ShellFileSystemImpl(ShellDirectory root,
-                        Trie<ShellFile> globalFiles) {
+    ShellFileSystemImpl(ShellDirectory root, Trie<ShellFile> globalFiles) {
         this.root = root;
         this.globalFiles = globalFiles;
         this.currentDirectory = root;

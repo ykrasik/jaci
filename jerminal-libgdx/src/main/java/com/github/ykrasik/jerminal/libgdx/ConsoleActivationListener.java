@@ -17,11 +17,11 @@
 package com.github.ykrasik.jerminal.libgdx;
 
 /**
- * A callback for console activation/deactivation.
+ * A listener for console activation/deactivation.
  *
  * @author Yevgeny Krasik
  */
-public interface ConsoleListener {
+public interface ConsoleActivationListener {
     /**
      * Called when the console is activated.
      */
