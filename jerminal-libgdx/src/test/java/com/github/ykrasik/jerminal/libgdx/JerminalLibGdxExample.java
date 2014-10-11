@@ -63,7 +63,6 @@ public class JerminalLibGdxExample extends ApplicationAdapter {
         console.setFillParent(true);
         stage = new Stage();
         stage.addActor(console);
-//        Table.drawDebug(stage);
 
         Gdx.input.setInputProcessor(stage);
         console.activate();

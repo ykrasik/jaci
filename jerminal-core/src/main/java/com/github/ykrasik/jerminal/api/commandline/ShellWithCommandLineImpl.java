@@ -52,7 +52,7 @@ public class ShellWithCommandLineImpl implements ShellWithCommandLine {
 
     @Override
     public boolean assist() {
-        final String commandLine = commandLineDriver.readUntilCursor();
+        final String commandLine = commandLineDriver.readUntilCaret();
         final Optional<String> newCommandLine = shell.assist(commandLine);
         return setCommandLineIfPresent(newCommandLine);
     }

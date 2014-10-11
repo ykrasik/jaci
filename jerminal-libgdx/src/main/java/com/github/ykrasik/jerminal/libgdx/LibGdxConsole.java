@@ -191,7 +191,7 @@ public class LibGdxConsole extends Table {
         }
 
         @Override
-        public String readUntilCursor() {
+        public String readUntilCaret() {
             return textField.getText().substring(0, textField.getCursorPosition());
         }
 

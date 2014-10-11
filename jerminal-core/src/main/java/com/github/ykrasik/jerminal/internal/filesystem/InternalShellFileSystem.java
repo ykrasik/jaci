@@ -132,7 +132,7 @@ public class InternalShellFileSystem {
             if (childDirectory.isPresent()) {
                 currentDirectory = childDirectory.get();
             } else {
-                throw invalidEntry(currentDirectory.getName(), directoryName, "directory");
+                throw invalidEntry(currentDirectory.getName(), directoryName, true);
             }
         }
 
@@ -171,7 +171,7 @@ public class InternalShellFileSystem {
         if (file.isPresent()) {
             return file.get();
         } else {
-            throw invalidEntry(lastDirectory.getName(), fileName, "command");
+            throw invalidEntry(lastDirectory.getName(), fileName, false);
         }
     }
 
@@ -187,7 +187,7 @@ public class InternalShellFileSystem {
         if (file.isPresent()) {
             return file.get();
         } else {
-            throw invalidCommandName(workingDirectory.getName(), name);
+            throw invalidCommandName(name);
         }
     }
 
@@ -262,33 +262,30 @@ public class InternalShellFileSystem {
         }
     }
 
-    private ParseException invalidEntry(String parentName, String entryName, String type) {
+    private ParseException invalidEntry(String dirName, String entryName, boolean directory) {
         return new ParseException(
-            ParseError.INVALID_ENTRY,
-            "Directory '%s' doesn't contain %s: '%s'", parentName, type, entryName
+            directory ? ParseError.INVALID_DIRECTORY : ParseError.INVALID_COMMAND,
+            "Directory '%s' doesn't contain %s: '%s'", dirName, directory ? "directory" : "command", entryName
         );
     }
 
-    private ParseException invalidCommandName(String parentName, String fileName) {
-        return new ParseException(
-            ParseError.INVALID_ENTRY,
-            "Command '%s' is neither a global command nor a child of directory '%s'", fileName, parentName
-        );
+    private ParseException invalidCommandName(String name) {
+        return new ParseException(ParseError.INVALID_COMMAND, "'%s' is not a recognized command!", name);
     }
 
     private ParseException emptyPath() {
-        return new ParseException(ParseError.INVALID_ENTRY, "Empty path!");
+        return new ParseException(ParseError.INVALID_DIRECTORY, "Empty path!");
     }
 
     private ParseException directoryDoesNotHaveParent(String directoryName) {
-        return new ParseException(ParseError.INVALID_ENTRY, "Directory '%s' doesn't have a parent.", directoryName);
+        return new ParseException(ParseError.INVALID_DIRECTORY, "Directory '%s' doesn't have a parent.", directoryName);
     }
 
     private ParseException pathDoesNotPointToCommand(String path) {
-        return new ParseException(ParseError.INVALID_ENTRY, "Path doesn't point to a command: %s", path);
+        return new ParseException(ParseError.INVALID_COMMAND, "Path doesn't point to a command: %s", path);
     }
 
     private ParseException emptyDirectoryNameAlongPath(String parentName) {
-        return new ParseException(ParseError.INVALID_ENTRY, "Empty directory name! Under: '%s'", parentName);
+        return new ParseException(ParseError.INVALID_DIRECTORY, "Empty directory name! Under: '%s'", parentName);
     }
 }

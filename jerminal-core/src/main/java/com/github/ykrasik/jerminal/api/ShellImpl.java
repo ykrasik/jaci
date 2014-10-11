@@ -226,6 +226,9 @@ public class ShellImpl implements Shell {
             return;
         }
 
+        // Save command in history.
+        history.pushCommandLine(rawCommandLine);
+
         // Parse commandLine.
         // The first arg of the commandLine must be a path to a command.
         final String pathToCommand = commandLine.get(0);
@@ -235,10 +238,6 @@ public class ShellImpl implements Shell {
         // The command args start from the 2nd commandLine element (the first was the command).
         final List<String> rawArgs = commandLine.subList(1, commandLine.size());
         final CommandArgs args = command.parseCommandArgs(rawArgs);
-
-        // Successfully parsed commandLine.
-        // Save command in history.
-        history.pushCommandLine(rawCommandLine);
 
         // Execute the command.
         final OutputPrinter outputPrinter = new OutputPrinterImpl(displayDriver);

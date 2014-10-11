@@ -22,10 +22,11 @@ package com.github.ykrasik.jerminal.api.exception;
  * @author Yevgeny Krasik
  */
 public enum ParseError {
-    // Directory related.
-    INVALID_ENTRY,
+    // File system related
+    INVALID_COMMAND,
+    INVALID_DIRECTORY,
 
-    // Param related.
+    // Param related
     INVALID_PARAM,
     INVALID_PARAM_VALUE,
     PARAM_NOT_BOUND,

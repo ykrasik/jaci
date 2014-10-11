@@ -80,7 +80,7 @@ public class DefaultTerminalSerializer implements TerminalSerializer {
     @Override
     public String serializeSuggestions(Suggestions suggestions) {
         final StringBuilder sb = new StringBuilder();
-        sb.append("Suggestions: \n");
+        sb.append("|Suggestions: \n");
         appendSuggestions(sb, suggestions.getDirectorySuggestions(), "Directories");
         appendSuggestions(sb, suggestions.getCommandSuggestions(), "Commands");
         appendSuggestions(sb, suggestions.getParamNameSuggestions(), "Parameter names");
@@ -90,7 +90,7 @@ public class DefaultTerminalSerializer implements TerminalSerializer {
 
     private void appendSuggestions(StringBuilder sb, List<String> suggestions, String suggestionTitle) {
         if (!suggestions.isEmpty()) {
-            sb.append("|   ");
+            appendDepthSpaces(sb, 1);
             sb.append(suggestionTitle);
             sb.append(": [");
             sb.append(JOINER.join(suggestions));

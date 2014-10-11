@@ -29,7 +29,7 @@ public interface CommandLineDriver {
     /**
      * @return The command line until the cursor.
      */
-    String readUntilCursor();
+    String readUntilCaret();
 
     /**
      * Set the command line to the given command line.

@@ -139,17 +139,14 @@ public class ControlCommandFactory {
 
     private String serializePath(List<InternalShellDirectory> path) {
         final StringBuilder sb = new StringBuilder();
-        if (path.size() == 1) {
-            // If the path only has 1 element, it's the root.
+        // All paths should start with '/'.
+        sb.append(ShellConstants.FILE_SYSTEM_DELIMITER);
+
+        // The first element is always the root, skip it.
+        for (int i = 1; i < path.size(); i++) {
+            final InternalShellDirectory directory = path.get(i);
+            sb.append(directory.getName());
             sb.append(ShellConstants.FILE_SYSTEM_DELIMITER);
-        } else {
-            // Don't append the root to the path, use a '/' instead.
-            for (int i = 1; i < path.size(); i++) {
-                final InternalShellDirectory directory = path.get(i);
-                sb.append(directory.getName());
-                sb.append(ShellConstants.FILE_SYSTEM_DELIMITER);
-            }
-            sb.deleteCharAt(sb.length() - 1);
         }
         return sb.toString();
     }
