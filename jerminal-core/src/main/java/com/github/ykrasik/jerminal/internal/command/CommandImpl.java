@@ -16,17 +16,17 @@
 
 package com.github.ykrasik.jerminal.internal.command;
 
-import com.github.ykrasik.jerminal.api.filesystem.command.Command;
 import com.github.ykrasik.jerminal.api.command.CommandArgs;
 import com.github.ykrasik.jerminal.api.command.CommandExecutor;
 import com.github.ykrasik.jerminal.api.command.OutputPrinter;
 import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
+import com.github.ykrasik.jerminal.api.filesystem.command.Command;
 import com.github.ykrasik.jerminal.internal.AbstractDescribable;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.Objects;
 
 /**
  * An implementation for a {@link Command}.
@@ -43,8 +43,8 @@ public class CommandImpl extends AbstractDescribable implements Command {
                        CommandExecutor executor) {
         super(name, description);
 
-        this.executor = checkNotNull(executor, "executor");
-        this.params = Collections.unmodifiableList(checkNotNull(params, "params"));
+        this.executor = Objects.requireNonNull(executor, "executor");
+        this.params = Collections.unmodifiableList(new ArrayList<>(Objects.requireNonNull(params)));
     }
 
     @Override

@@ -17,22 +17,26 @@
 package com.github.ykrasik.jerminal.api.commandline;
 
 /**
+ * A similar but different API to a {@link com.github.ykrasik.jerminal.api.Shell Shell}.<br>
+ * This assumes access to the command line - specifically the ability to read from and write to the
+ * command line. Only returns indications of success, because the actual logic is performed as a side effect.
+ *
  * @author Yevgeny Krasik
  */
 public interface ShellWithCommandLine {
     /**
-     * Clears the command line.
+     * Clear the command line.
      */
     void clearCommandLine();
 
     /**
-     * Sets the command line to the previous one from history. Only successfully executed command lines are saved.
+     * Set the command line to the previous one from history.
      * @return true if there was a previous command line in history.
      */
     boolean setPrevCommandLineFromHistory();
 
     /**
-     * Sets the command line to the next one from history. Only successfully executed command lines are saved.
+     * Set the command line to the next one from history.
      * @return true if there was a next command line in history.
      */
     boolean setNextCommandLineFromHistory();

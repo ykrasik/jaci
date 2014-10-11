@@ -25,18 +25,18 @@ import java.util.List;
 
 /**
  * A definition for a command.<br>
- * Defines the command's parameters in the order they appear and can execute code given arguments for those parameters.
+ * Defines the command parameters in the order they appear and can execute code given arguments for those parameters.
  * <br>
  * <p>Parameter values can be passed in 2 ways: positional and named.<br>
  * <i>Positional:</i> The value is parsed by the next {@link CommandParam parameter} that is still unparsed.<br>
  * <i>Named:</i> The value is expected to be of the form "{name}={value}" and will be parsed
- * by the {@link CommandParam parameter} who's name is "{name}".</p>
+ * by the {@link CommandParam} who's name is "{name}".</p>
  *
  * @author Yevgeny Krasik
  */
 public interface Command extends Describable {
     /**
-     * Returns the command's declared parameters.
+     * @return The command's declared parameters.
      */
     List<CommandParam> getParams();
 
@@ -47,6 +47,8 @@ public interface Command extends Describable {
      * in case of an invalid internal state. This will be considered an execution error. Any other exception
      * thrown will be considered as an unhandled exception.
      *
+     * @param args Parsed args. This object can be queried for arg values.
+     * @param outputPrinter Used to print text onto the display.
      * @throws Exception If an error occurs during execution.
      */
     void execute(CommandArgs args, OutputPrinter outputPrinter) throws Exception;

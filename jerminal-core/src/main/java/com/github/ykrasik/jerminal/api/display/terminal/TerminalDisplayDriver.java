@@ -28,7 +28,7 @@ import java.util.Objects;
 
 /**
  * A {@link DisplayDriver} that translates all received events into text through a {@link TerminalSerializer}
- * and send them to a {@link Terminal} to be printed.
+ * and sends them to a {@link Terminal} to be printed.
  *
  * @author Yevgeny Krasik
  */
@@ -43,16 +43,12 @@ public class TerminalDisplayDriver implements DisplayDriver {
     }
 
     public TerminalDisplayDriver(Terminal terminal, TerminalSerializer serializer) {
-        this.terminal = Objects.requireNonNull(terminal, "terminal");
-        this.serializer = Objects.requireNonNull(serializer, "serializer");
+        this.terminal = Objects.requireNonNull(terminal);
+        this.serializer = Objects.requireNonNull(serializer);
     }
 
     public Terminal getTerminal() {
         return terminal;
-    }
-
-    public TerminalSerializer getSerializer() {
-        return serializer;
     }
 
     @Override

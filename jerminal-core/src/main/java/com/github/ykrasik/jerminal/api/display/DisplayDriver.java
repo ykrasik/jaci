@@ -43,6 +43,8 @@ public interface DisplayDriver {
 
     /**
      * Display the welcome message.
+     *
+     * @param welcomeMessage Welcome message to display.
      */
     void displayWelcomeMessage(String welcomeMessage);
 
@@ -53,43 +55,62 @@ public interface DisplayDriver {
 
     /**
      * Display text. Usually generated as output from commands.
+     *
+     * @param text Text to display.
      */
     void displayText(String text);
 
-    // FIXME: JavaDoc
-
     /**
-     * Display command info along with it's parsed args.
+     * Display command info along with it's parsed args.<br>
+     * Called when assistance was requested or if a parsing error occurred.<br>
+     * Differs from {@link #displayCommand(Command)} in that {@link #displayCommand(Command)} is called when
+     * the user requests to display information about a command without executing it.
+     *
+     * @param commandInfo Command info to display.
      */
     void displayCommandInfo(CommandInfo commandInfo);
 
     /**
-     * Display suggestions. Called either because assistance was requested, or due to an error.
+     * Display suggestions. Called either because assistance was requested or due to an error.
+     *
+     * @param suggestions Suggestions to display.
      */
     void displaySuggestions(Suggestions suggestions);
 
     /**
      * Display the directory structure.
+     *
+     * @param directory Directory to display.
      */
     void displayDirectory(ShellDirectory directory);
 
     /**
-     * Display command info.
+     * Display command info.<br>
+     * Called when information about a specific command was requested.<br>
+     *
+     * @param command Command to display.
      */
     void displayCommand(Command command);
 
     /**
      * Display the parse error that occurred while parsing the command line.
+     *
+     * @param error The parse error.
+     * @param errorMessage The error message details.
      */
     void displayParseError(ParseError error, String errorMessage);
 
     /**
      * Display the execution error that was thrown while executing the command line.
+     *
+     * @param e Exception to display.
      */
     void displayExecuteError(ExecuteException e);
 
     /**
      * Display the unhandled exception that was thrown while operating on the command line.
+     *
+     * @param e Exception to display.
      */
     void displayUnhandledException(Exception e);
 

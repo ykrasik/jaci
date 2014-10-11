@@ -16,18 +16,17 @@
 
 package com.github.ykrasik.jerminal.api.command;
 
-import com.github.ykrasik.jerminal.api.filesystem.command.Command;
-import com.google.common.base.Supplier;
 import com.github.ykrasik.jerminal.api.command.parameter.bool.BooleanParamBuilder;
 import com.github.ykrasik.jerminal.api.exception.ExecuteException;
+import com.github.ykrasik.jerminal.api.filesystem.command.Command;
+import com.google.common.base.Supplier;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.Objects;
 
 /**
- * Creates toggle {@link com.github.ykrasik.jerminal.api.filesystem.command.Command}s.<br>
- * A toggle command is a commmand that takes a single optional boolean parameter and toggles
- * the boolean state of some component on or off. The state of the component is accessed via a
- * {@link StateAccessor}.<br>
+ * Creates toggle {@link com.github.ykrasik.jerminal.api.filesystem.command.Command Commands}.<br>
+ * A toggle command is a command that takes a single optional boolean parameter and toggles
+ * the boolean state of some component on or off. The state of the component is accessed via a {@link StateAccessor}.<br>
  * If the optional boolean parameter is passed, the toggle command will set the {@link StateAccessor}'s
  * state to whatever value the parameter had. If boolean parameter is not passed, the toggle command
  * will toggle the state of the {@link StateAccessor} - If it was previously 'false', it will now be 'true'
@@ -45,8 +44,8 @@ public class ToggleCommandBuilder {
     private String paramDescription = "toggle";
 
     public ToggleCommandBuilder(String name, StateAccessor accessor) {
-        this.name = checkNotNull(name, "name");
-        this.accessor = checkNotNull(accessor, "accessor");
+        this.name = Objects.requireNonNull(name);
+        this.accessor = Objects.requireNonNull(accessor);
         this.builder = new CommandBuilder(name);
         this.builder.setDescription("toggle");
     }
@@ -87,12 +86,14 @@ public class ToggleCommandBuilder {
      */
     public interface StateAccessor {
         /**
-         * Sets the state of the component.
+         * Set the state of the component.
+         *
+         * @param value Value to set the component to.
          */
         void set(boolean value);
 
         /**
-         * Returns the current state of the component.
+         * @return Current value of the component.
          */
         boolean get();
     }

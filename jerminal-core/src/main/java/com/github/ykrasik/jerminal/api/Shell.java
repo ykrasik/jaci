@@ -20,30 +20,28 @@ import com.google.common.base.Optional;
 
 // FIXME: JavaDoc
 /**
- * Processes command lines and displays results through an {@link com.github.ykrasik.jerminal.api.display.DisplayDriver OutputProcessor}.<br>
+ * Processes command lines and displays results as a side effect through a {@link com.github.ykrasik.jerminal.api.display.DisplayDriver}.<br>
  * <br>
- * The Shell keeps a command history. Only successfully executed command lines are saved to the history.
- * The Shell keeps track of where in the command history it is. So the state is kept inside the Shell for consecutive
- * calls to {@link #getPrevCommandLineFromHistory()} and {@link #getNextCommandLineFromHistory()}. Executing a new command line
- * will reset the command line history pointer and add the new command line to the end of the history.<br>
+ * The Shell keeps a command history that can be queried. The Shell keeps track of where in the command history it is.
+ * So the state is kept inside the Shell for consecutive calls to {@link #getPrevCommandLineFromHistory()} and {@link #getNextCommandLineFromHistory()}.
+ * Executing a new command line will reset the command line history pointer and add the new command line to the end of the history.<br>
  * <br>
- * The Shell does not alter the command line in any way. It is assumed that an external system (let's call it a ShellDriver)
+ * The Shell does not alter the command line in any way. It is assumed that an external system
  * has ownership of the command line and is the one in charge of manipulating it. The Shell, in turn, simply returns
  * what the new command line should be on each of it's calls.<br>
  * <br>
- * Can be built through a {@link ShellBuilder}.
  *
  * @author Yevgeny Krasik
  */
 // FIXME: Remove Guava dependency?
 public interface Shell {
     /**
-     * @return The previous command line from history. Only successfully executed command lines are saved.
+     * @return The previous command line from history.
      */
     Optional<String> getPrevCommandLineFromHistory();
 
     /**
-     * @return The next command line from history. Only successfully executed command lines are saved.
+     * @return The next command line from history.
      */
     Optional<String> getNextCommandLineFromHistory();
 
@@ -55,7 +53,7 @@ public interface Shell {
 
     /**
      * Execute the command line.
-     * @return true if the command line was executed successfully.
+     * @return True if the command line was executed successfully.
      */
     boolean execute(String commandLine);
 }

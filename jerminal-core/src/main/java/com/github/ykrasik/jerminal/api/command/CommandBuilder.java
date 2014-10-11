@@ -16,19 +16,18 @@
 
 package com.github.ykrasik.jerminal.api.command;
 
-import com.github.ykrasik.jerminal.api.filesystem.command.Command;
-import com.github.ykrasik.jerminal.internal.command.CommandImpl;
 import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
 import com.github.ykrasik.jerminal.api.exception.ExecuteException;
+import com.github.ykrasik.jerminal.api.filesystem.command.Command;
+import com.github.ykrasik.jerminal.internal.command.CommandImpl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.Objects;
 
 /**
- * A builder for a {@link com.github.ykrasik.jerminal.api.filesystem.command.Command}.
+ * A builder for a {@link com.github.ykrasik.jerminal.api.filesystem.command.Command Command}.
  *
  * @author Yevgeny Krasik
  */
@@ -46,7 +45,7 @@ public class CommandBuilder {
     private CommandExecutor executor = NOT_IMPLEMENTED_EXECUTOR;
 
     public CommandBuilder(String name) {
-        this.name = checkNotNull(name, "name");
+        this.name = Objects.requireNonNull(name);
     }
 
     public Command build() {

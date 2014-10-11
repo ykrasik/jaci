@@ -17,7 +17,7 @@
 package com.github.ykrasik.jerminal.api.exception;
 
 /**
- * An exception that can be thrown during execution to signify an invalid state.
+ * An exception that can be thrown during execution of a command to signal an invalid state.
  *
  * @author Yevgeny Krasik
  */
@@ -26,6 +26,12 @@ public class ExecuteException extends Exception {
         super(message);
     }
 
+    /**
+     * Construct the exception with a message that will be formatted using {@link String#format(String, Object...)}.
+     *
+     * @param format Format to use for the message.
+     * @param args Args to use for the message.
+     */
     public ExecuteException(String format, Object... args) {
         this(String.format(format, args));
     }

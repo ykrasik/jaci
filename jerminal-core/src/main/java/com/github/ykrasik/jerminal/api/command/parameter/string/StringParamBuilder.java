@@ -16,21 +16,20 @@
 
 package com.github.ykrasik.jerminal.api.command.parameter.string;
 
-import com.google.common.base.Supplier;
-import com.github.ykrasik.jerminal.collections.trie.Trie;
 import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
+import com.github.ykrasik.jerminal.collections.trie.Trie;
 import com.github.ykrasik.jerminal.internal.command.parameter.ParamUtils;
 import com.github.ykrasik.jerminal.internal.command.parameter.optional.OptionalParam;
+import com.google.common.base.Supplier;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.Objects;
 
 /**
  * A builder for a {@link StringParam}.<br>
- * By default creates mandatory parameters, but can be set to create optional parameters via
+ * By default creates mandatory parameters, but can create optional parameters via
  * {@link #setOptional(String)} and {@link #setOptional(Supplier)}.<br>
  * By default creates parameters that accept any string, but can be set to create parameters that are
  * constrained to a pre-defined set of strings with {@link #setConstantPossibleValues(List)} and {@link #setConstantPossibleValues(List)},
@@ -47,7 +46,7 @@ public class StringParamBuilder {
     private Supplier<String> defaultValueSupplier;
 
     public StringParamBuilder(String name) {
-        this.name = checkNotNull(name, "name");
+        this.name = Objects.requireNonNull(name);
     }
 
     public CommandParam build() {

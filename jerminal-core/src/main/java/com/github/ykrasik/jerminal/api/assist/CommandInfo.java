@@ -16,9 +16,8 @@
 
 package com.github.ykrasik.jerminal.api.assist;
 
-import com.google.common.base.Objects;
-
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Information about a command.
@@ -31,31 +30,29 @@ public class CommandInfo {
     private final int currentParamIndex;
 
     public CommandInfo(String commandName, List<ParamAndValue> paramAndValues, int currentParamIndex) {
-        this.commandName = commandName;
-        this.paramAndValues = paramAndValues;
-        this.currentParamIndex = currentParamIndex;
+        this.commandName = Objects.requireNonNull(commandName);
+        this.paramAndValues = Objects.requireNonNull(paramAndValues);
+        this.currentParamIndex = Objects.requireNonNull(currentParamIndex);
     }
 
     /**
-     * Returns the name of the command specified by the command line.<br>
+     * @return The name of the command.
      */
     public String getCommandName() {
         return commandName;
     }
 
     /**
-     * Returns all the command's parameters and their optionally parsed values,
-     * in the order they appear in the command.<br>
-     * The size of this list is equal exactly to the amount of parameters the command defines.
+     * @return The command's parameters and their optionally parsed values, in the order they appear in the command.<br>
+     *         The size of this list is equal exactly to the amount of parameters the command defines.
      */
     public List<ParamAndValue> getParamAndValues() {
         return paramAndValues;
     }
 
     /**
-     * Returns the index of the current parameter being parsed.<br>
-     * This is an index into the list returned by {@link #getParamAndValues()}.<br>
-     * May be -1 if
+     * @return The index of the current parameter being parsed. This is an index into the list returned by {@link #getParamAndValues()}.<br>
+     *         May be -1 if all parameters have been parsed.
      */
     public int getCurrentParamIndex() {
         return currentParamIndex;
@@ -63,10 +60,11 @@ public class CommandInfo {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
-            .add("commandName", commandName)
-            .add("paramAndValues", paramAndValues)
-            .add("currentParamIndex", currentParamIndex)
-            .toString();
+        final StringBuilder sb = new StringBuilder("CommandInfo{");
+        sb.append("commandName='").append(commandName).append('\'');
+        sb.append(", paramAndValues=").append(paramAndValues);
+        sb.append(", currentParamIndex=").append(currentParamIndex);
+        sb.append('}');
+        return sb.toString();
     }
 }

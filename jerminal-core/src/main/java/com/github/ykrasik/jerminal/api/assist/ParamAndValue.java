@@ -17,10 +17,9 @@
 package com.github.ykrasik.jerminal.api.assist;
 
 import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
-import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.Objects;
 
 /**
  * A parameter with it's optionally parsed value. If the value is absent, this parameter hasn't been
@@ -33,23 +32,30 @@ public class ParamAndValue {
     private final Optional<String> value;
 
     public ParamAndValue(CommandParam param, Optional<String> value) {
-        this.param = checkNotNull(param, "param");
-        this.value = checkNotNull(value, "value");
+        this.param = Objects.requireNonNull(param);
+        this.value = Objects.requireNonNull(value);
     }
 
+    /**
+     * @return The parameter.
+     */
     public CommandParam getParam() {
         return param;
     }
 
+    /**
+     * @return The value, if there is one.
+     */
     public Optional<String> getValue() {
         return value;
     }
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
-            .add("param", param)
-            .add("value", value)
-            .toString();
+        final StringBuilder sb = new StringBuilder("ParamAndValue{");
+        sb.append("param=").append(param);
+        sb.append(", value=").append(value);
+        sb.append('}');
+        return sb.toString();
     }
 }

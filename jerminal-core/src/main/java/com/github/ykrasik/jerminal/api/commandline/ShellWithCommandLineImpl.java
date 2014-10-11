@@ -22,6 +22,9 @@ import com.google.common.base.Optional;
 import java.util.Objects;
 
 /**
+ * A convenience wrapper for a {@link Shell} that integrates it with a {@link CommandLineDriver} to
+ * be able to perform common command line logic.
+ *
  * @author Yevgeny Krasik
  */
 public class ShellWithCommandLineImpl implements ShellWithCommandLine {

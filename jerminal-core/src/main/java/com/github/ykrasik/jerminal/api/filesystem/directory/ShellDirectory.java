@@ -21,17 +21,19 @@ import com.github.ykrasik.jerminal.internal.Describable;
 
 import java.util.Collection;
 
-// FIXME: Incorrect JavaDoc
 /**
  * A container for {@link ShellDirectory directories} and {@link Command commands}.
  *
  * @author Yevgeny Krasik
  */
 public interface ShellDirectory extends Describable {
-
-    // FIXME: JavaDoc
-
+    /**
+     * @return Child directories.
+     */
     Collection<ShellDirectory> getDirectories();
 
+    /**
+     * @return Child commands.
+     */
     Collection<Command> getCommands();
 }

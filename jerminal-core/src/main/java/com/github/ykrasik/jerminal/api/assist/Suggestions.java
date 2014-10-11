@@ -16,9 +16,8 @@
 
 package com.github.ykrasik.jerminal.api.assist;
 
-import com.google.common.base.Objects;
-
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Possible suggestions, grouped by their type.
@@ -35,35 +34,48 @@ public class Suggestions {
                        List<String> commandSuggestions,
                        List<String> paramNameSuggestions,
                        List<String> paramValueSuggestions) {
-        this.directorySuggestions = directorySuggestions;
-        this.commandSuggestions = commandSuggestions;
-        this.paramNameSuggestions = paramNameSuggestions;
-        this.paramValueSuggestions = paramValueSuggestions;
+        this.directorySuggestions = Objects.requireNonNull(directorySuggestions);
+        this.commandSuggestions = Objects.requireNonNull(commandSuggestions);
+        this.paramNameSuggestions = Objects.requireNonNull(paramNameSuggestions);
+        this.paramValueSuggestions = Objects.requireNonNull(paramValueSuggestions);
     }
 
+    /**
+     * @return Directory suggestions.
+     */
     public List<String> getDirectorySuggestions() {
         return directorySuggestions;
     }
 
+    /**
+     * @return Command name suggestions.
+     */
     public List<String> getCommandSuggestions() {
         return commandSuggestions;
     }
 
+    /**
+     * @return Command parameter name suggestions.
+     */
     public List<String> getParamNameSuggestions() {
         return paramNameSuggestions;
     }
 
+    /**
+     * @return Command parameter value suggestions.
+     */
     public List<String> getParamValueSuggestions() {
         return paramValueSuggestions;
     }
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
-            .add("directorySuggestions", directorySuggestions)
-            .add("commandSuggestions", commandSuggestions)
-            .add("paramNameSuggestions", paramNameSuggestions)
-            .add("paramValueSuggestions", paramValueSuggestions)
-            .toString();
+        final StringBuilder sb = new StringBuilder("Suggestions{");
+        sb.append("directorySuggestions=").append(directorySuggestions);
+        sb.append(", commandSuggestions=").append(commandSuggestions);
+        sb.append(", paramNameSuggestions=").append(paramNameSuggestions);
+        sb.append(", paramValueSuggestions=").append(paramValueSuggestions);
+        sb.append('}');
+        return sb.toString();
     }
 }

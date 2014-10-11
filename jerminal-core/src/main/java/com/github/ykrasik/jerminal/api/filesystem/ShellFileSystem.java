@@ -29,6 +29,17 @@ import java.util.*;
 
 /**
  * A mutable container for a hierarchy of {@link ShellDirectory} and {@link Command}.<br>
+ * Supports 2 types of commands - local commands which must belong to some {@link ShellDirectory}
+ * and global commands, which don't belong to any {@link ShellDirectory} and are accessible from every
+ * part of the file system.<br>
+ * The {@link ShellFileSystem} builds a directory hierarchy and links commands to directories.
+ * For methods that take a path parameter, the path is separated by the delimiter '/', like "path/to/element".
+ * Any directories along that path that don't exist will be automatically created.<br>
+ * Directories may also provide an optional description. The description delimiter is ':'. A description may
+ * only be assigned to a directory when it is first created. Any subsequent calls may omit the description.<br>
+ * <p>For example: "this/is/a/path : This is a path element/to/some/directory : Everything up till now is a directory".<br>
+ * This will create the following directory structure: this/is/a/path/to/some/directory and also assign the given descriptions
+ * to "path" and "directory".</p>
  *
  * @author Yevgeny Krasik
  */
@@ -48,28 +59,32 @@ public class ShellFileSystem {
     /**
      * Add the commands as global commands.
      *
-     * @throws ShellException If one of the command names is invalid.
+     * @param commands Commands to add as global commands.
+     * @return this, for chained execution.
+     * @throws ShellException If one of the command names is invalid or a global command with that name already exists.
      */
-    public ShellFileSystem addGlobalCommands(Command... globalCommands) {
-        return addGlobalCommands(Arrays.asList(globalCommands));
+    public ShellFileSystem addGlobalCommands(Command... commands) {
+        return addGlobalCommands(Arrays.asList(commands));
     }
 
     /**
      * Add the commands as global commands.
      *
-     * @throws ShellException If one of the command names is invalid.
+     * @param commands Commands to add as global commands.
+     * @return this, for chained execution.
+     * @throws ShellException If one of the command names is invalid or a global command with that name already exists.
      */
-    public ShellFileSystem addGlobalCommands(List<Command> globalCommands) {
-        for (Command globalCommand : globalCommands) {
+    public ShellFileSystem addGlobalCommands(List<Command> commands) {
+        for (Command globalCommand : commands) {
             final String name = globalCommand.getName();
             if (!ShellConstants.isValidName(name)) {
                 throw new ShellException("Invalid name for global command: '%s'", name);
             }
-            if (this.globalCommands.containsKey(name)) {
+            if (globalCommands.containsKey(name)) {
                 throw new ShellException("FileSystem already contains a global command named: '%s'", name);
             }
 
-            this.globalCommands.put(name, globalCommand);
+            globalCommands.put(name, globalCommand);
         }
         return this;
     }
@@ -77,7 +92,9 @@ public class ShellFileSystem {
     /**
      * Add the commands to the root directory.
      *
-     * @throws ShellException If one of the command names is invalid.
+     * @param commands Commands to add.
+     * @return this, for chained execution.
+     * @throws ShellException If one of the command names is invalid or a command with that name already exists under root.
      */
     public ShellFileSystem addCommands(Command... commands) {
         return addCommands(Arrays.asList(commands));
@@ -86,7 +103,9 @@ public class ShellFileSystem {
     /**
      * Add the commands to the root directory.
      *
-     * @throws ShellException If one of the command names is invalid.
+     * @param commands Commands to add.
+     * @return this, for chained execution.
+     * @throws ShellException If one of the command names is invalid or a command with that name already exists under root.
      */
     public ShellFileSystem addCommands(List<Command> commands) {
         root.addCommands(commands);
@@ -97,7 +116,11 @@ public class ShellFileSystem {
      * Add the commands to the directory specified by the path.<br>
      * Any directory along the path that doesn't exist will be created.<br>
      *
-     * @throws ShellException If the path is invalid or one of the command names is invalid.
+     * @param path Path to add commands under.
+     * @param commands Commands to add.
+     * @return this, for chained execution.
+     * @throws ShellException If the path is invalid, one of the command names is invalid
+     *                        or a command with that name already exists under the path.
      */
     public ShellFileSystem addCommands(String path, Command... commands) {
         return addCommands(path, Arrays.asList(commands));
@@ -107,7 +130,11 @@ public class ShellFileSystem {
      * Add the commands to the directory specified by the path.<br>
      * Any directory along the path that doesn't exist will be created.<br>
      *
-     * @throws ShellException If the path is invalid or one of the command names is invalid.
+     * @param path Path to add commands under.
+     * @param commands Commands to add.
+     * @return this, for chained execution.
+     * @throws ShellException If the path is invalid, one of the command names is invalid
+     *                        or a command with that name already exists under the path.
      */
     public ShellFileSystem addCommands(String path, List<Command> commands) {
         final String trimmedPath = path.trim();
@@ -160,7 +187,7 @@ public class ShellFileSystem {
     }
 
     /**
-     * @return The global files.
+     * @return The global commands.
      */
     public Collection<Command> getGlobalCommands() {
         return Collections.unmodifiableCollection(globalCommands.values());

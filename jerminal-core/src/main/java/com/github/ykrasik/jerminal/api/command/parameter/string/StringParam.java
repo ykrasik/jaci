@@ -25,11 +25,11 @@ import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteType;
 import com.google.common.base.Function;
 import com.google.common.base.Supplier;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.Objects;
 
 /**
  * A {@link com.github.ykrasik.jerminal.api.command.parameter.CommandParam CommandParam} that parses string values.<br>
- * It can be configured in 3 modes - It can either accept any string, be constrained to a pre-determined set of strings
+ * Can be configured in 3 modes - can either accept any string, be constrained to a pre-determined set of strings
  * or be constrained to a set of strings that is supplied dynamically at runtime.
  *
  * @author Yevgeny Krasik
@@ -48,7 +48,7 @@ public class StringParam extends AbstractMandatoryCommandParam<String> {
 
     public StringParam(String name, String description, Supplier<Trie<String>> valuesSupplier) {
         super(name, description);
-        this.valuesSupplier = checkNotNull(valuesSupplier, "valuesSupplier");
+        this.valuesSupplier = Objects.requireNonNull(valuesSupplier);
     }
 
     @Override

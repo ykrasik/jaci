@@ -17,9 +17,10 @@
 package com.github.ykrasik.jerminal.api.commandline;
 
 /**
+ * A component that can communicate with the command line.
+ *
  * @author Yevgeny Krasik
  */
-// FIXME: JavaDoc
 public interface CommandLineDriver {
     /**
      * @return The command line.
@@ -33,6 +34,8 @@ public interface CommandLineDriver {
 
     /**
      * Set the command line to the given command line.
+     *
+     * @param commandLine Command line to set.
      */
     void set(String commandLine);
 

@@ -16,8 +16,6 @@
 
 package com.github.ykrasik.jerminal.api.command;
 
-import com.github.ykrasik.jerminal.api.exception.ExecuteException;
-
 /**
  * Executes code according to given arguments.
  *
@@ -31,7 +29,9 @@ public interface CommandExecutor {
      * in case of an invalid internal state. This will be considered an execution error. Any other exception
      * thrown will be considered as an unhandled exception.
      *
+     * @param args Parsed args. This object can be queried for arg values.
+     * @param outputPrinter Used to print text onto the display.
      * @throws Exception If an error occurs during execution.
      */
-    void execute(CommandArgs args, OutputPrinter outputPrinter) throws ExecuteException, Exception;
+    void execute(CommandArgs args, OutputPrinter outputPrinter) throws Exception;
 }

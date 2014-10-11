@@ -36,11 +36,15 @@ public interface Terminal {
 
     /**
      * Print the text and move to the next line.
+     *
+     * @param text Text to print.
      */
     void println(String text);
 
     /**
      * Print the text as an error and move to the next line.
+     *
+     * @param text Text to print as an error.
      */
     void printlnError(String text);
 }

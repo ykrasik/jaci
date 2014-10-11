@@ -44,20 +44,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * A builder for a {@link Shell}.<br>
- * This builder expects to receive a path to a command and a set of commands.
- * The path is separated by the delimiter '/', for example: "path/to/element". Any directories along that path that don't exist
- * will be automatically created.<br>
- * Directories may also provide an optional description. The description delimiter is ':'. A description may
- * only be assigned to a directory when it is first created. Any subsequent calls may omit the description.<br>
- * <p>For example: "this/is/a/path : This is a path element/to/some/directory : Everything up till now is a directory".<br>
- * This will create the following directory structure: this/is/a/path/to/some/directory and also assign the given descriptions
- * to "path" and "directory".</p>
+ * An implementation for a {@link Shell}.<br>
+ * Changes to the underlying {@link ShellFileSystem} will <b>not</b> be picked up after this object is constructed
+ * (and why would you want to keep changing the {@link ShellFileSystem} afterwards, anyway?)<br>
  *
  * @author Yevgeny Krasik
  */
-// FIXME: Update JavaDoc.
-// FIXME: Add JavaFX frontend gui
 public class ShellImpl implements Shell {
     private final InternalShellFileSystem fileSystem;
     private final DisplayDriver displayDriver;

@@ -18,7 +18,7 @@ package com.github.ykrasik.jerminal.api.command.parameter.flag;
 
 import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.Objects;
 
 /**
  * A builder for a {@link FlagParam}.<br>
@@ -31,7 +31,7 @@ public class FlagParamBuilder {
     private String description = "flag";
 
     public FlagParamBuilder(String name) {
-        this.name = checkNotNull(name, "name");
+        this.name = Objects.requireNonNull(name);
     }
 
     public CommandParam build() {
