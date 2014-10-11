@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2014 Yevgeny Krasik
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.github.ykrasik.jerminal.javafx;
 
 import com.github.ykrasik.jerminal.api.Shell;
@@ -9,7 +25,6 @@ import com.github.ykrasik.jerminal.api.command.OutputPrinter;
 import com.github.ykrasik.jerminal.api.command.parameter.bool.BooleanParamBuilder;
 import com.github.ykrasik.jerminal.api.command.parameter.numeric.IntegerParamBuilder;
 import com.github.ykrasik.jerminal.api.command.parameter.string.StringParamBuilder;
-import com.github.ykrasik.jerminal.api.commandline.CommandLineDriver;
 import com.github.ykrasik.jerminal.api.commandline.ShellWithCommandLine;
 import com.github.ykrasik.jerminal.api.commandline.ShellWithCommandLineImpl;
 import com.github.ykrasik.jerminal.api.display.terminal.Terminal;
@@ -35,12 +50,12 @@ import java.util.concurrent.Executors;
 /**
  * @author Yevgeny Krasik
  */
+// FIXME: JavaDoc
 public class JerminalJavaFxExample extends Application {
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     private Scene scene;
 
-    private TextArea textArea;
     private ShellWithCommandLine shell;
 
     public static void main(String[] args) {
@@ -69,9 +84,9 @@ public class JerminalJavaFxExample extends Application {
         stage.setScene(scene);
         stage.show();
 
-        textArea = findById("textArea", TextArea.class);
+        final TextArea textArea = findById("textArea", TextArea.class);
         textArea.setFocusTraversable(false);
-        final Terminal terminal = new JavaFxTerminal();
+        final Terminal terminal = new JavaFxTerminal(textArea);
 
         final ShellFileSystem fileSystem = createFileSystem();
 
@@ -83,32 +98,7 @@ public class JerminalJavaFxExample extends Application {
         this.shell = new ShellWithCommandLineImpl(shellImpl, commandLineDriver);
 
         textField.requestFocus();
-        textField.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
-            @Override
-            public void handle(KeyEvent keyEvent) {
-                switch (keyEvent.getCode()) {
-                    case ENTER:
-                        shell.execute();
-                        keyEvent.consume();
-                        break;
-
-                    case TAB:
-                        shell.assist();
-                        keyEvent.consume();
-                        break;
-
-                    case UP:
-                        shell.setPrevCommandLineFromHistory();
-                        keyEvent.consume();
-                        break;
-
-                    case DOWN:
-                        shell.setNextCommandLineFromHistory();
-                        keyEvent.consume();
-                        break;
-                }
-            }
-        });
+        textField.addEventFilter(KeyEvent.KEY_PRESSED, new ConsoleEventHandler());
     }
 
     private Object loadFxml(String path) throws IOException {
@@ -180,57 +170,33 @@ public class JerminalJavaFxExample extends Application {
             );
     }
 
-    private class JavaFxTerminal implements Terminal {
+    /**
+     * An event handler for specific input events that operates the {@link ShellWithCommandLine}.
+     */
+    private class ConsoleEventHandler implements EventHandler<KeyEvent> {
         @Override
-        public void begin() {
+        public void handle(KeyEvent keyEvent) {
+            switch (keyEvent.getCode()) {
+                case ENTER:
+                    shell.execute();
+                    keyEvent.consume();
+                    break;
 
-        }
+                case TAB:
+                    shell.assist();
+                    keyEvent.consume();
+                    break;
 
-        @Override
-        public void end() {
+                case UP:
+                    shell.setPrevCommandLineFromHistory();
+                    keyEvent.consume();
+                    break;
 
-        }
-
-        @Override
-        public void println(String text) {
-            textArea.appendText(text);
-            textArea.appendText("\n");
-        }
-
-        @Override
-        public void printlnError(String text) {
-            // TODO: Make this red.
-            println(text);
-        }
-    }
-
-    private class JavaFxCommandLineDriver implements CommandLineDriver {
-        private final TextField textField;
-
-        private JavaFxCommandLineDriver(TextField textField) {
-            this.textField = Objects.requireNonNull(textField);
-        }
-
-        @Override
-        public String read() {
-            return textField.getText();
-        }
-
-        @Override
-        public String readUntilCaret() {
-            final int caretPosition = textField.getCaretPosition();
-            return textField.getText(0, caretPosition);
-        }
-
-        @Override
-        public void set(String commandLine) {
-            textField.setText(commandLine);
-            textField.positionCaret(commandLine.length());
-        }
-
-        @Override
-        public void clear() {
-            textField.clear();
+                case DOWN:
+                    shell.setNextCommandLineFromHistory();
+                    keyEvent.consume();
+                    break;
+            }
         }
     }
 }

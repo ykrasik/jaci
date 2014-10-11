@@ -22,6 +22,7 @@ import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 
 import java.util.List;
+import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -34,19 +35,37 @@ public final class ParamUtils {
     private ParamUtils() {
     }
 
-    public static <T> Supplier<T> constValueSupplier(T defaultValue) {
-        return Suppliers.ofInstance(checkNotNull(defaultValue, "defaultValue"));
+    /**
+     * @param value Value to be returned by the created {@link Supplier}.
+     * @param <T> Supplier type.
+     * @return A {@link Supplier} that always returns the value.
+     */
+    public static <T> Supplier<T> constValueSupplier(T value) {
+        return Suppliers.ofInstance(Objects.requireNonNull(value));
     }
 
-    public static Supplier<Trie<String>> constStringValuesSupplier(List<String> possibleValues) {
-        final Trie<String> trie = Tries.toStringTrie(checkNotNull(possibleValues, "possibleValues"));
+    /**
+     * @param values Values to be returned by the created {@link Supplier}.
+     * @return A {@link Supplier} that always returns a {@link Trie} containing the values.
+     */
+    public static Supplier<Trie<String>> constStringValuesSupplier(List<String> values) {
+        final Trie<String> trie = Tries.toStringTrie(Objects.requireNonNull(values));
         return Suppliers.ofInstance(trie);
     }
 
+    /**
+     * @param supplier A {@link Supplier} that will supply a {@link List} of {@link String}.
+     * @return A {@link Supplier} that returns a {@link Trie} containing the values of the
+     *         {@link List} of {@link String} the supplier passed as an argument returned.
+     */
     public static Supplier<Trie<String>> dynamicStringValuesSupplier(Supplier<List<String>> supplier) {
         return new DynamicStringValuesSupplier(supplier);
     }
 
+    /**
+     * A {@link Supplier} that queries another {@link Supplier} for a List of String, transforms
+     * it into a {@link Trie} and returns that.
+     */
     private static class DynamicStringValuesSupplier implements Supplier<Trie<String>> {
         private final Supplier<List<String>> supplier;
 

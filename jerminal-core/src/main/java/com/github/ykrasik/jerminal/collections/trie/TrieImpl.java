@@ -296,6 +296,7 @@ public class TrieImpl<T> implements Trie<T> {
     }
 
     /**
+     * @param <T> Type of {@link Trie}.
      * @return An empty {@link Trie}.
      */
     @SuppressWarnings("unchecked")

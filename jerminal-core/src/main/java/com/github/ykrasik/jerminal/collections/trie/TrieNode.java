@@ -87,6 +87,7 @@ public interface TrieNode<T> {
 
     /**
      * @param function Function to apply to the value and every child node's value.
+     * @param <A> Type to transform values to.
      * @return A copy of this node in which the value (if present) and all the node's children are transformed by
      *         calling {@link Function#apply(Object)}.<br>
      *         If the result of the transformation returns 'null' for the node's value and for all it's children,

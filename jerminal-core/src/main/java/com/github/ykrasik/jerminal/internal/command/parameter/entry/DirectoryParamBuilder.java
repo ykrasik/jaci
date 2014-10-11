@@ -29,7 +29,7 @@ import java.util.Objects;
 /**
  * A builder for a {@link DirectoryParam}.<br>
  * By default creates mandatory parameters, but can be set to create optional parameters via
- * {@link #setOptional(ShellDirectory)} and {@link #setOptional(Supplier)}.<br>
+ * {@link #setOptional(InternalShellDirectory)} and {@link #setOptional(Supplier)}.<br>
  * Intended for internal use with control commands.
  *
  * @author Yevgeny Krasik

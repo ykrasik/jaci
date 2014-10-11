@@ -27,8 +27,7 @@ import java.util.Objects;
 
 
 /**
- * A {@link com.github.ykrasik.jerminal.api.command.parameter.CommandParam CommandParam} that parses
- * {@link com.github.ykrasik.jerminal.api.filesystem.command.ShellFile ShellFile} values.<br>
+ * A {@link com.github.ykrasik.jerminal.api.command.parameter.CommandParam CommandParam} that parses {@link InternalCommand} values.<br>
  * Intended for internal use with control commands.
  *
  * @author Yevgeny Krasik

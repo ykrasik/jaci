@@ -28,11 +28,14 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.github.ykrasik.jerminal.api.Shell;
-import com.github.ykrasik.jerminal.api.commandline.CommandLineDriver;
 import com.github.ykrasik.jerminal.api.commandline.ShellWithCommandLine;
 import com.github.ykrasik.jerminal.api.commandline.ShellWithCommandLineImpl;
 
+import java.util.Objects;
+
 /**
+ * A {@link Table} that contains the console (terminal + command line).<br>
+ *
  * @author Yevgeny Krasik
  */
 // FIXME: JavaDoc
@@ -47,16 +50,18 @@ public class LibGdxConsole extends Table {
     private ConsoleActivationListener activationListener;
     private Actor prevKeyboardFocus;
 
+    // FIXME: Construct the shell inside the ctor.
     public LibGdxConsole(LibGdxTerminal terminal,
                          Shell shell,
                          ConsoleToggler consoleToggler,
                          LibGdxConsoleWidgetFactory widgetFactory) {
-        this.shell = new ShellWithCommandLineImpl(shell, new LibGdxCommandLineDriver());
-        this.consoleToggler = consoleToggler;
+        this.consoleToggler = Objects.requireNonNull(consoleToggler);
 
         // TextField to input commands.
-        textField = widgetFactory.createInputTextField("");
+        textField = widgetFactory.createInputTextField();
         textField.setName("textField");
+
+        this.shell = new ShellWithCommandLineImpl(shell, new LibGdxCommandLineDriver(textField));
 
         terminal.bottom().left();
         terminal.debug();
@@ -64,6 +69,7 @@ public class LibGdxConsole extends Table {
         // A "current-path" thing.
         currentPath = widgetFactory.createCurrentPathLabel("$");
         currentPath.setName("currentPathLabel");
+
         final Table currentPathTable = new Table();
         currentPathTable.setName("currentPath");
         currentPathTable.add(currentPath).fill().padLeft(3).padRight(5);
@@ -117,14 +123,24 @@ public class LibGdxConsole extends Table {
         super.setStage(stage);
     }
 
+    /**
+     * @param listener The {@link ConsoleActivationListener} that will be called on {@link #activate()} and {@link #deactivate()}.
+     */
     public void setConsoleActivationListener(ConsoleActivationListener listener) {
         this.activationListener = listener;
     }
 
+    /**
+     * @return True if the console is currently active and visible.
+     */
     public boolean isActive() {
         return isVisible();
     }
 
+    /**
+     * Activate the console - make it visible. Will consume all input events.
+     * Has no effect if already activated.
+     */
     public void activate() {
         if (isActive()) {
             return;
@@ -145,6 +161,10 @@ public class LibGdxConsole extends Table {
         }
     }
 
+    /**
+     * Deactivate the console - make it invisible. Will not consume any input events.
+     * Has no effect if already deactivated.
+     */
     public void deactivate() {
         if (!isActive()) {
             return;
@@ -164,6 +184,9 @@ public class LibGdxConsole extends Table {
         }
     }
 
+    /**
+     * Toggle the console - if it is active, deactivate it and vice versa.
+     */
     public void toggle() {
         if (!isActive()) {
             activate();
@@ -172,6 +195,9 @@ public class LibGdxConsole extends Table {
         }
     }
 
+    /**
+     * A listener that toggles the console when the {@link ConsoleToggler} says it should.
+     */
     private class ConsoleToggleListener extends InputListener {
         @Override
         public boolean keyDown(InputEvent event, int keycode) {
@@ -184,29 +210,9 @@ public class LibGdxConsole extends Table {
         }
     }
 
-    private class LibGdxCommandLineDriver implements CommandLineDriver {
-        @Override
-        public String read() {
-            return textField.getText();
-        }
-
-        @Override
-        public String readUntilCaret() {
-            return textField.getText().substring(0, textField.getCursorPosition());
-        }
-
-        @Override
-        public void set(String commandLine) {
-            textField.setText(commandLine);
-            textField.setCursorPosition(commandLine.length());
-        }
-
-        @Override
-        public void clear() {
-            set("");
-        }
-    }
-
+    /**
+     * A listener for specific input events that operates the {@link ShellWithCommandLine}.
+     */
     private class ConsoleInputListener extends InputListener {
         @Override
         public boolean keyDown(InputEvent event, int keycode) {

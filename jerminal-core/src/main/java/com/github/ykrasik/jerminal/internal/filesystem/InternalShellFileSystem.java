@@ -244,6 +244,7 @@ public class InternalShellFileSystem {
      * Provide auto complete suggestions for the path either to an {@link InternalShellDirectory} or to an {@link InternalCommand}.<br>
      * The path is expected to be valid all the way except the last element, which will be auto completed.
      *
+     * @param rawPath Path to auto complete.
      * @return Auto complete suggestions for the next {@link InternalShellDirectory} or {@link InternalCommand} in this path.
      * @throws ParseException If the path is invalid.
      */

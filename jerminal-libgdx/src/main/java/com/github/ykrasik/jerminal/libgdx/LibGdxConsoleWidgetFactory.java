@@ -22,45 +22,47 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 
 /**
- * Creates all the libGdx widgets that will be display on screen.<br>
+ * Creates all the libGdx widgets that will be displayed on screen.<br>
  * This is how the console's appearance can be customized.
  *
  * @author Yevgeny Krasik
  */
 public interface LibGdxConsoleWidgetFactory {
     /**
-     * Create a terminal text line.
+     * @param text Text to be displayed on the returned {@link Label}.
+     * @return A terminal text line.
      */
     Label createBufferEntryLabel(String text);
 
     /**
-     * Create the terminal background.
+     * @return The terminal background.
      */
     Drawable createTerminalBufferBackground();
 
     /**
-     * Create the "bottom row" background.<br>
-     * The bottom row contains the current path, command line and close button.
+     * @return The "bottom row" background.
+     *         The bottom row contains the current path, command line and close button.
      */
     Drawable createConsoleBottomRowBackground();
 
     /**
-     * Create the "current path" label background.
+     * @return The "current path" label background.
      */
     Drawable createCurrentPathLabelBackground();
 
     /**
-     * Create a "current path" label from the given text.
+     * @param currentPath Current path to be displayed on the {@link Label}.
+     * @return A "current path" label from the given text.
      */
     Label createCurrentPathLabel(String currentPath);
 
     /**
-     * Create the input text field.
+     * @return The input text field.
      */
-    TextField createInputTextField(String initialText);
+    TextField createInputTextField();
 
     /**
-     * Create the close button.
+     * @return The close button.
      */
     Button createCloseButton();
 }

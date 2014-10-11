@@ -116,6 +116,7 @@ public interface Trie<T> {
 
     /**
      * @param function Function to apply to each value in this Trie.
+     * @param <A> Type to transform values to.
      * @return A Trie in which the value of each word was transformed by calling {@link Function#apply(Object)}.<br>
      *         If the result of the transformation returned 'null', that word and value will not appear in the returned Trie.<br>
      *         Does not alter this Trie.
@@ -144,7 +145,7 @@ public interface Trie<T> {
     Set<Entry<String, T>> entrySet();
 
     /**
-     * Returns a {@link Map} containing all word-value pairs in this Trie.
+     * @return A {@link Map} containing all word-value pairs in this Trie.
      */
     Map<String, T> toMap();
 }

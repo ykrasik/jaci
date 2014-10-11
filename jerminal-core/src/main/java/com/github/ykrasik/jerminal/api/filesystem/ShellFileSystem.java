@@ -52,7 +52,7 @@ public class ShellFileSystem {
     private final Map<String, Command> globalCommands;
 
     public ShellFileSystem() {
-        this.root = new ShellDirectoryImpl("/", "root");
+        this.root = new ShellDirectoryImpl("root", "root");
         this.globalCommands = new HashMap<>();
     }
 

@@ -24,7 +24,7 @@ import com.github.ykrasik.jerminal.internal.assist.AutoCompleteReturnValue;
 
 /**
  * A {@link CommandParam} that is optional.<br>
- * Optional parameters don't necessarily have to be bound, and if unbound they will use a default value.
+ * Optional parameters don't have to be bound, and if unbound they will use a default value.
  * This implementation delegates to a concrete {@link CommandParam} except for the call to {@link #unbound()},
  * in which case it returns the default value.
  *
@@ -57,6 +57,7 @@ public class OptionalParam<T> implements CommandParam {
     @Override
     public String getExternalForm() {
         // Replace the original param's braces with '[]'.
+        // TODO: This is an assumption that the original param has braces...
         final String originalExternalForm = delegate.getExternalForm();
         return '[' + originalExternalForm.substring(1, originalExternalForm.length() - 1) + ']';
     }

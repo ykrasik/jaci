@@ -32,6 +32,7 @@ import java.util.Objects;
  * @author Yevgeny Krasik
  */
 // FIXME: Explain the toggle functionality.
+// FIXME: I'm not sure this class is helpful.
 public class LibGdxConsoleBuilder {
     private static final ConsoleToggler DEFAULT_CONSOLE_TOGGLER = new ConsoleToggler() {
         @Override

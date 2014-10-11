@@ -24,9 +24,10 @@ import com.github.ykrasik.jerminal.api.display.terminal.Terminal;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.Objects;
 
 /**
- * The display part of the console. This is where all text is printed.<br>
+ * A {@link Terminal} implemented as a {@link Table} of {@link Label}.<br>
  * Keeps a configurable maximum number of lines.
  *
  * @author Yevgeny Krasik
@@ -40,7 +41,7 @@ public class LibGdxTerminal extends Table implements Terminal {
     private final Deque<Label> bufferEntries;
 
     public LibGdxTerminal(LibGdxConsoleWidgetFactory widgetFactory, int maxBufferEntries) {
-        this.widgetFactory = widgetFactory;
+        this.widgetFactory = Objects.requireNonNull(widgetFactory);
         this.maxBufferEntries = maxBufferEntries;
 
         // Create a buffer to hold out text labels.
@@ -76,15 +77,15 @@ public class LibGdxTerminal extends Table implements Terminal {
 
     @Override
     public void println(String text) {
-        print(text, Color.WHITE);
+        println(text, Color.WHITE);
     }
 
     @Override
     public void printlnError(String text) {
-        print(text, Color.PINK);
+        println(text, Color.PINK);
     }
 
-    public void print(String text, Color color) {
+    private void println(String text, Color color) {
         final Label label = widgetFactory.createBufferEntryLabel(text + '\n');
         label.setColor(color);
         addLabel(label);

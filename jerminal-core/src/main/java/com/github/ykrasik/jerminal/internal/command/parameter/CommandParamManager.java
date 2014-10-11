@@ -17,16 +17,15 @@
 package com.github.ykrasik.jerminal.internal.command.parameter;
 
 import com.github.ykrasik.jerminal.ShellConstants;
-import com.github.ykrasik.jerminal.api.assist.CommandInfo;
 import com.github.ykrasik.jerminal.api.command.CommandArgs;
 import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
 import com.github.ykrasik.jerminal.api.exception.ParseError;
 import com.github.ykrasik.jerminal.collections.trie.Trie;
 import com.github.ykrasik.jerminal.collections.trie.TrieImpl;
-import com.github.ykrasik.jerminal.internal.exception.ParseException;
-import com.github.ykrasik.jerminal.internal.exception.ShellException;
 import com.github.ykrasik.jerminal.internal.assist.AutoCompleteReturnValue;
 import com.github.ykrasik.jerminal.internal.assist.AutoCompleteType;
+import com.github.ykrasik.jerminal.internal.exception.ParseException;
+import com.github.ykrasik.jerminal.internal.exception.ShellException;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
@@ -36,8 +35,9 @@ import java.util.*;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Contains the current state of parsing a command's {@link CommandParam parameters}.<br>
- * Can create a {@link CommandInfo} from the current state with {@link #createCommandInfo()}.
+ * A manager for {@link CommandParam}s.<br>
+ * Can parse and auto complete positional and named args.<br>
+ * Keeps a state of the parsing process that can be queried later.
  *
  * @author Yevgeny Krasik
  */
@@ -67,6 +67,11 @@ public class CommandParamManager {
         this.currentParam = !positionalParams.isEmpty() ? Optional.of(positionalParams.get(0)) : Optional.<CommandParam>absent();
     }
 
+    /**
+     * @param args Args to be parsed.
+     * @return Parsed args.
+     * @throws ParseException If an invalid value was supplied for a param, or if a param wasn't bound.
+     */
     public CommandArgs parseCommandArgs(List<String> args) throws ParseException {
         // Parse all params that have been bound.
         parse(args);
@@ -150,6 +155,7 @@ public class CommandParamManager {
     }
 
     /**
+     * @param args Args to be parsed.
      * @return Auto complete suggestions for the last arg. Every other arg except the last is expected
      *         to be a valid param value.
      * @throws ParseException If any of the args except the last one can't be validly parsed.
@@ -250,6 +256,7 @@ public class CommandParamManager {
     }
 
     /**
+     * @param name Param name to be queried.
      * @return The raw value bound to the param 'name'.
      */
     public Optional<String> getParamRawValue(String name) {

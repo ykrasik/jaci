@@ -36,7 +36,7 @@ import com.google.common.base.Supplier;
 import java.util.List;
 
 /**
- * Creates all the default Control {@link com.github.ykrasik.jerminal.api.filesystem.command.Command}s.
+ * Creates control {@link com.github.ykrasik.jerminal.api.filesystem.command.Command}s.
  *
  * @author Yevgeny Krasik
  */
@@ -56,6 +56,9 @@ public class ControlCommandFactory {
 
     // TODO: Add the following commands: list all commands
 
+    /**
+     * Install the default control commands.
+     */
     public void installControlCommands() {
         // TODO: DOn't install directory navigation commands if no directories in fileSystem?
         fileSystem.addGlobalCommands(
@@ -66,6 +69,9 @@ public class ControlCommandFactory {
         );
     }
 
+    /**
+     * @return Create the change directory command.
+     */
     public Command createChangeDirectoryCommand() {
         return new CommandBuilder(CHANGE_DIRECTORY_COMMAND_NAME)
             .setDescription("Change working directory")
@@ -80,6 +86,9 @@ public class ControlCommandFactory {
             .build();
     }
 
+    /**
+     * @return Create the list directory command.
+     */
     public Command createListDirectoryCommand() {
         return new CommandBuilder(LIST_DIRECTORY_COMMAND_NAME)
             .setDescription("List directory content")
@@ -107,6 +116,9 @@ public class ControlCommandFactory {
             .build();
     }
 
+    /**
+     * @return Create the describe command command.
+     */
     public Command createDescribeCommandCommand() {
         return new CommandBuilder(DESCRIBE_COMMAND_COMMAND_NAME)
             .setDescription("Describe command")
@@ -122,6 +134,9 @@ public class ControlCommandFactory {
             .build();
     }
 
+    /**
+     * @return Create the print working directory command.
+     */
     public Command createPrintWorkingDirectoryCommand() {
         return new CommandBuilder(PRINT_WORKING_DIRECTORY_COMMAND_NAME)
             .setDescription("Print path to working directory")
