@@ -16,13 +16,15 @@
 
 package com.github.ykrasik.jerminal.internal.filesystem.directory;
 
+import com.github.ykrasik.jerminal.ShellConstants;
 import com.github.ykrasik.jerminal.api.filesystem.command.Command;
 import com.github.ykrasik.jerminal.api.filesystem.directory.ShellDirectory;
 import com.github.ykrasik.jerminal.collections.trie.Trie;
 import com.github.ykrasik.jerminal.collections.trie.TrieImpl;
 import com.github.ykrasik.jerminal.internal.AbstractDescribable;
+import com.github.ykrasik.jerminal.internal.exception.ShellException;
 import com.github.ykrasik.jerminal.internal.filesystem.command.InternalCommand;
-import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteType;
+import com.github.ykrasik.jerminal.internal.assist.AutoCompleteType;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 
@@ -32,6 +34,11 @@ import java.util.List;
 import java.util.Objects;
 
 /**
+ * An internal representation of a {@link ShellDirectory}.<br>
+ * Can parse and auto complete the directory's children.<br>
+ * Any changes to the underlying {@link ShellDirectory} will not be reflected in this object.
+ * But don't do this. Why would you do this, anyway?
+ *
  * @author Yevgeny Krasik
  */
 // FIXME: JavaDoc
@@ -60,6 +67,10 @@ public class InternalShellDirectory extends AbstractDescribable {
 
     private InternalShellDirectory(ShellDirectory directory, Optional<InternalShellDirectory> parent) {
         super(directory.getName(), directory.getDescription());
+        if (!ShellConstants.isValidName(directory.getName())) {
+            throw new ShellException("Invalid name for directory: '%s'", directory.getName());
+        }
+
         this.parent = parent;
         this.directoryTrie = createDirectoryTrie(directory);
         this.commandTrie = createCommandTrie(directory);
@@ -91,6 +102,7 @@ public class InternalShellDirectory extends AbstractDescribable {
     }
 
     /**
+     * @param name The child directory name to look up.
      * @return A child {@link InternalShellDirectory} with the given name, if one exists.
      */
     public Optional<InternalShellDirectory> getDirectory(String name) {
@@ -98,6 +110,7 @@ public class InternalShellDirectory extends AbstractDescribable {
     }
 
     /**
+     * @param name The child command name to look up.
      * @return A child {@link InternalCommand} with the given name, if one exists.
      */
     public Optional<InternalCommand> getCommand(String name) {
@@ -105,6 +118,7 @@ public class InternalShellDirectory extends AbstractDescribable {
     }
 
     /**
+     * @param prefix Prefix to offer auto complete for.
      * @return A {@link Trie} containing auto complete suggestions for the a child {@link InternalShellDirectory}
      *         that starts with the given prefix.
      */
@@ -113,6 +127,7 @@ public class InternalShellDirectory extends AbstractDescribable {
     }
 
     /**
+     * @param prefix Prefix to offer auto complete for.
      * @return A {@link Trie} containing auto complete suggestions for any child entry that starts with the given prefix.
      */
     public Trie<AutoCompleteType> autoCompleteEntry(String prefix) {
@@ -122,6 +137,7 @@ public class InternalShellDirectory extends AbstractDescribable {
     }
 
     /**
+     * @param recursive Whether to recurse into sub-directories.
      * @return A {@link ShellDirectory} representation of this object. If recursive, will contain the whole
      *         hierarchy, otherwise only the first-level children.
      */

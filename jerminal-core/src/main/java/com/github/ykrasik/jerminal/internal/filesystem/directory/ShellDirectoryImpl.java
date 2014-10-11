@@ -25,7 +25,7 @@ import com.github.ykrasik.jerminal.internal.exception.ShellException;
 import java.util.*;
 
 /**
- * An implementation for a {@link com.github.ykrasik.jerminal.api.filesystem.directory.ShellDirectory}.
+ * An implementation for a {@link MutableShellDirectory}.
  *
  * @author Yevgeny Krasik
  */

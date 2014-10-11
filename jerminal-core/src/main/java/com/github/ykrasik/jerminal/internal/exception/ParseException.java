@@ -23,7 +23,7 @@ import com.google.common.base.Optional;
 import java.util.Objects;
 
 /**
- * An exception that signifies an error while parsing the command line.
+ * An exception that signals an error while parsing the command line.
  *
  * @author Yevgeny Krasik
  */
@@ -45,20 +45,36 @@ public class ParseException extends Exception {
         this.commandInfo = commandInfo;
     }
 
+    /**
+     * Add command info to this exception.
+     *
+     * @param commandInfo Command info to add.
+     * @return A copy of this exception with command info added.
+     */
     public ParseException withCommandInfo(CommandInfo commandInfo) {
         return new ParseException(getMessage(), error, Optional.of(commandInfo));
     }
 
+    /**
+     * @return The parse error.
+     */
     public ParseError getError() {
         return error;
     }
 
+    /**
+     * @return The command info.
+     */
     public Optional<CommandInfo> getCommandInfo() {
         return commandInfo;
     }
 
     @Override
     public String toString() {
-        return "ParseException{" + "message=" + getMessage() + ", error=" + error + ", commandInfo=" + commandInfo + '}';
+        final StringBuilder sb = new StringBuilder("ParseException{");
+        sb.append("error=").append(error);
+        sb.append(", commandInfo=").append(commandInfo);
+        sb.append('}');
+        return sb.toString();
     }
 }

@@ -17,12 +17,21 @@
 package com.github.ykrasik.jerminal.internal.util;
 
 /**
+ * Utilities for working with Strings.
+ *
  * @author Yevgeny Krasik
  */
 public final class StringUtils {
     private StringUtils() {
     }
 
+    /**
+     * Removes the leading and trailing delimiter from a string.
+     *
+     * @param str String to process.
+     * @param delimiter Delimiter to remove.
+     * @return The string with the leading and trailing delimiter removed.
+     */
     public static String removeLeadingAndTrailingDelimiter(String str, String delimiter) {
         final int length = str.length();
         final boolean leadingDelimiter = str.startsWith(delimiter);

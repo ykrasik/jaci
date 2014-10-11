@@ -19,7 +19,7 @@ package com.github.ykrasik.jerminal.api.command.parameter;
 import com.github.ykrasik.jerminal.internal.Describable;
 import com.github.ykrasik.jerminal.internal.command.parameter.ParamType;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
-import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
+import com.github.ykrasik.jerminal.internal.assist.AutoCompleteReturnValue;
 
 // TODO: Rename this to just Parameter.
 /**

@@ -20,7 +20,7 @@ import com.google.common.base.Supplier;
 import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
 import com.github.ykrasik.jerminal.internal.command.parameter.ParamType;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
-import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
+import com.github.ykrasik.jerminal.internal.assist.AutoCompleteReturnValue;
 
 /**
  * A {@link CommandParam} that is optional.<br>

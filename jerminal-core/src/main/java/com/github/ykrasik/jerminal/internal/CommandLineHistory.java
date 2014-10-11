@@ -22,7 +22,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Manages a history of command lines.
+ * Manages a history of command lines.<br>
+ * Maintains state, so 2 consecutive calls to {@link #getPrevCommandLine()} will return different results
+ * from the history buffer.<br>
+ * The history buffer is limited and the oldest entries will be discarded when the buffer is full.
  *
  * @author Yevgeny Krasik
  */
@@ -39,6 +42,9 @@ public class CommandLineHistory {
         resetCurrentIndex();
     }
 
+    /**
+     * @return Previous command line from history.
+     */
     public Optional<String> getPrevCommandLine() {
         if (history.isEmpty()) {
             return Optional.absent();
@@ -52,6 +58,9 @@ public class CommandLineHistory {
         return getElementAtCurrentIndex();
     }
 
+    /**
+     * @return Next command line in history.
+     */
     public Optional<String> getNextCommandLine() {
         if (history.isEmpty()) {
             return Optional.absent();
@@ -69,6 +78,10 @@ public class CommandLineHistory {
         return Optional.of(element);
     }
 
+    /**
+     * Adds a new command line to the history buffer. Resets the current history index.
+     * @param commandLine Command line to add to history.
+     */
     public void pushCommandLine(String commandLine) {
         // Add new history entry to the end.
         history.add(commandLine);

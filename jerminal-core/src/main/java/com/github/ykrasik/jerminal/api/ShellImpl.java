@@ -30,10 +30,10 @@ import com.github.ykrasik.jerminal.internal.command.OutputPrinterImpl;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.internal.filesystem.InternalShellFileSystem;
 import com.github.ykrasik.jerminal.internal.filesystem.command.InternalCommand;
-import com.github.ykrasik.jerminal.internal.returnvalue.AssistReturnValue;
-import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
-import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteType;
-import com.github.ykrasik.jerminal.internal.returnvalue.SuggestionsBuilder;
+import com.github.ykrasik.jerminal.internal.assist.AssistReturnValue;
+import com.github.ykrasik.jerminal.internal.assist.AutoCompleteReturnValue;
+import com.github.ykrasik.jerminal.internal.assist.AutoCompleteType;
+import com.github.ykrasik.jerminal.internal.assist.SuggestionsBuilder;
 import com.google.common.base.Optional;
 
 import java.util.ArrayList;

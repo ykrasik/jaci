@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.internal.returnvalue;
+package com.github.ykrasik.jerminal.internal.assist;
+
+import com.github.ykrasik.jerminal.ShellConstants;
 
 /**
  * For an auto complete operation, this is the type of the value being auto completed.
@@ -22,11 +24,10 @@ package com.github.ykrasik.jerminal.internal.returnvalue;
  * @author Yevgeny Krasik
  */
 public enum AutoCompleteType {
-    // TODO: Get these constants out of somewhere more specific.
     // FIXME: Doesn't belong here.
-    DIRECTORY('/'),
+    DIRECTORY(ShellConstants.FILE_SYSTEM_DELIMITER.charAt(0)),
     COMMAND(' '),
-    COMMAND_PARAM_NAME('='),
+    COMMAND_PARAM_NAME(ShellConstants.ARG_VALUE_DELIMITER.charAt(0)),
     COMMAND_PARAM_VALUE(' '),
     COMMAND_PARAM_FLAG(' ');
 

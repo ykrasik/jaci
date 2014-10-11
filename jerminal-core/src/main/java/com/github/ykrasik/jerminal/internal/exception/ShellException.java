@@ -17,7 +17,7 @@
 package com.github.ykrasik.jerminal.internal.exception;
 
 /**
- * A general purpose exception that signifies an invalid configuration for the shell.
+ * A general purpose exception that mostly signals an invalid configuration for the shell.
  *
  * @author Yevgeny Krasik
  */

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.internal.returnvalue;
+package com.github.ykrasik.jerminal.internal.assist;
 
 import com.github.ykrasik.jerminal.api.assist.CommandInfo;
 import com.google.common.base.Optional;
@@ -23,7 +23,7 @@ import java.util.Objects;
 
 /**
  * The return value of an assist operation.<br>
- * Contains info about the command as well as auto complete suggestions.
+ * Contains info about the command and auto complete suggestions.
  *
  * @author Yevgeny Krasik
  */
@@ -36,16 +36,26 @@ public class AssistReturnValue {
         this.autoCompleteReturnValue = Objects.requireNonNull(autoCompleteReturnValue);
     }
 
+    /**
+     * @return The command info.
+     */
     public Optional<CommandInfo> getCommandInfo() {
         return commandInfo;
     }
 
+    /**
+     * @return The auto complete suggestions.
+     */
     public AutoCompleteReturnValue getAutoCompleteReturnValue() {
         return autoCompleteReturnValue;
     }
 
     @Override
     public String toString() {
-        return "AssistReturnValue{" + "commandInfo=" + commandInfo + ", autoCompleteReturnValue=" + autoCompleteReturnValue + '}';
+        final StringBuilder sb = new StringBuilder("AssistReturnValue{");
+        sb.append("commandInfo=").append(commandInfo);
+        sb.append(", autoCompleteReturnValue=").append(autoCompleteReturnValue);
+        sb.append('}');
+        return sb.toString();
     }
 }

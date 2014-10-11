@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.internal.returnvalue;
+package com.github.ykrasik.jerminal.internal.assist;
 
 import com.github.ykrasik.jerminal.api.assist.Suggestions;
 import com.github.ykrasik.jerminal.internal.exception.ShellException;

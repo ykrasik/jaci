@@ -21,7 +21,7 @@ import com.github.ykrasik.jerminal.internal.command.parameter.AbstractMandatoryC
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.internal.filesystem.InternalShellFileSystem;
 import com.github.ykrasik.jerminal.internal.filesystem.directory.InternalShellDirectory;
-import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
+import com.github.ykrasik.jerminal.internal.assist.AutoCompleteReturnValue;
 
 import java.util.Objects;
 

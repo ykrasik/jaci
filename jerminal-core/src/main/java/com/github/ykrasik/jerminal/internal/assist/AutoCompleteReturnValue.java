@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.internal.returnvalue;
+package com.github.ykrasik.jerminal.internal.assist;
 
-import com.google.common.base.Objects;
 import com.github.ykrasik.jerminal.collections.trie.Trie;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * The return value of an auto complete operation.<br>
@@ -35,23 +32,30 @@ public class AutoCompleteReturnValue {
     private final Trie<AutoCompleteType> possibilities;
 
     public AutoCompleteReturnValue(String prefix, Trie<AutoCompleteType> possibilities) {
-        this.prefix = checkNotNull(prefix, "prefix");
-        this.possibilities = checkNotNull(possibilities, "possibilities");
+        this.prefix = java.util.Objects.requireNonNull(prefix);
+        this.possibilities = java.util.Objects.requireNonNull(possibilities);
     }
 
+    /**
+     * @return The prefix that was auto completed.
+     */
     public String getPrefix() {
         return prefix;
     }
 
+    /**
+     * @return The auto complete possibilities for the prefix.
+     */
     public Trie<AutoCompleteType> getPossibilities() {
         return possibilities;
     }
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
-            .add("prefix", prefix)
-            .add("possibilities", possibilities)
-            .toString();
+        final StringBuilder sb = new StringBuilder("AutoCompleteReturnValue{");
+        sb.append("prefix='").append(prefix).append('\'');
+        sb.append(", possibilities=").append(possibilities);
+        sb.append('}');
+        return sb.toString();
     }
 }

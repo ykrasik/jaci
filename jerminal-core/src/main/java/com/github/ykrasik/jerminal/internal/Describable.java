@@ -23,12 +23,12 @@ package com.github.ykrasik.jerminal.internal;
  */
 public interface Describable {
     /**
-     * Returns the name of this entity.
+     * @return The name of this entity.
      */
     String getName();
 
     /**
-     * Returns the description of this entity.
+     * @return The description of this entity.
      */
     String getDescription();
 }

@@ -44,6 +44,10 @@ public abstract class AbstractDescribable implements Describable {
 
     @Override
     public String toString() {
-        return String.format("%s : %s", name, description);
+        return new StringBuilder()
+            .append(name)
+            .append(" : ")
+            .append(description)
+            .toString();
     }
 }

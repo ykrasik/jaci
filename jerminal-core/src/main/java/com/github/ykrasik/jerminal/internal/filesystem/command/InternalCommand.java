@@ -28,8 +28,8 @@ import com.github.ykrasik.jerminal.internal.Describable;
 import com.github.ykrasik.jerminal.internal.command.parameter.CommandParamManager;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.internal.exception.ShellException;
-import com.github.ykrasik.jerminal.internal.returnvalue.AssistReturnValue;
-import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
+import com.github.ykrasik.jerminal.internal.assist.AssistReturnValue;
+import com.github.ykrasik.jerminal.internal.assist.AutoCompleteReturnValue;
 import com.google.common.base.Optional;
 
 import java.util.ArrayList;
@@ -37,14 +37,22 @@ import java.util.List;
 import java.util.Objects;
 
 /**
+ * An internal representation of a {@link Command}.<br>
+ * Can parse and auto complete the command's arguments.<br>
+ * Any changes to the underlying {@link Command} will put this object in an <b>UNDEFINED STATE</b>.
+ * Don't do this. Why would you do this, anyway?
+ *
  * @author Yevgeny Krasik
  */
-// FIXME: JavaDoc
 public class InternalCommand implements Describable {
     private final Command command;
     private final Trie<CommandParam> paramsTrie;
 
     public InternalCommand(Command command) {
+        if (!ShellConstants.isValidName(command.getName())) {
+            throw new ShellException("Invalid name for command: '%s'", command.getName());
+        }
+
         this.command = Objects.requireNonNull(command);
         this.paramsTrie = createParamTrie(command.getParams());
     }
@@ -80,8 +88,10 @@ public class InternalCommand implements Describable {
     }
 
     /**
-     * @return Parsed args for the command.
+     * Parses arguments for the command.
      *
+     * @param args Args to be parsed.
+     * @return Parsed args for the command.
      * @throws ParseException If the one of the args is invalid or a mandatory parameter is missing.
      */
     public CommandArgs parseCommandArgs(List<String> args) throws ParseException {
@@ -96,8 +106,11 @@ public class InternalCommand implements Describable {
     }
 
     /**
-     * @return Assistance for the next available {@link CommandParam}.
+     * Offers assistance with the args. All args are expected to be validly parsable except the last one,
+     * for which the assistance will be offered.
      *
+     * @param args Args to be auto completed.
+     * @return Assistance for the next available {@link CommandParam}.
      * @throws ParseException If the one of the args is invalid or a mandatory parameter is missing.
      */
     public AssistReturnValue assistArgs(List<String> args) throws ParseException {

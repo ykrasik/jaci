@@ -25,8 +25,8 @@ import com.github.ykrasik.jerminal.collections.trie.TrieImpl;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.internal.filesystem.command.InternalCommand;
 import com.github.ykrasik.jerminal.internal.filesystem.directory.InternalShellDirectory;
-import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
-import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteType;
+import com.github.ykrasik.jerminal.internal.assist.AutoCompleteReturnValue;
+import com.github.ykrasik.jerminal.internal.assist.AutoCompleteType;
 import com.github.ykrasik.jerminal.internal.util.StringUtils;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -35,9 +35,14 @@ import com.google.common.base.Splitter;
 import java.util.*;
 
 /**
+ * An internal representation of a {@link ShellFileSystem}.<br>
+ * Processes the file system upon which it is based and constructs it's own nodes. After being built, changes
+ * to the underlying {@link ShellFileSystem} will not be reflected.<br>
+ * Is slightly mutable for convenience - allows to add global commands after being built, but doesn't allow
+ * changing the directory hierarchy.
+ *
  * @author Yevgeny Krasik
  */
-// FIXME: JavaDoc
 public class InternalShellFileSystem {
     private static final Splitter PATH_SPLITTER = Splitter.on(ShellConstants.FILE_SYSTEM_DELIMITER.charAt(0)).trimResults();
     private static final Function<InternalCommand, AutoCompleteType> AUTO_COMPLETE_TYPE_MAPPER = new Function<InternalCommand, AutoCompleteType>() {
@@ -60,26 +65,40 @@ public class InternalShellFileSystem {
         addGlobalCommands(fileSystem.getGlobalCommands());
     }
 
-    public void addGlobalCommands(Command... globalCommands) {
-        addGlobalCommands(Arrays.asList(globalCommands));
+    /**
+     * Add the commands as global commands.
+     *
+     * @param commands Commands to add as global commands.
+     * @throws com.github.ykrasik.jerminal.internal.exception.ShellException If one of the command names is invalid or a global command with that name already exists.
+     */
+    public void addGlobalCommands(Command... commands) {
+        addGlobalCommands(Arrays.asList(commands));
     }
 
-    public void addGlobalCommands(Collection<Command> globalCommands) {
-        for (Command globalCommand : globalCommands) {
-            final InternalCommand internalCommand = new InternalCommand(globalCommand);
-            this.globalCommands = this.globalCommands.add(globalCommand.getName(), internalCommand);
+    /**
+     * Add the commands as global commands.
+     *
+     * @param commands Commands to add as global commands.
+     * @throws com.github.ykrasik.jerminal.internal.exception.ShellException If one of the command names is invalid or a global command with that name already exists.
+     */
+    public void addGlobalCommands(Collection<Command> commands) {
+        for (Command command : commands) {
+            final InternalCommand internalCommand = new InternalCommand(command);
+            globalCommands = globalCommands.add(command.getName(), internalCommand);
         }
     }
 
     /**
-     * Returns the current directory.
+     * @return The working directory.
      */
     public InternalShellDirectory getWorkingDirectory() {
         return workingDirectory;
     }
 
     /**
-     * Sets the current directory.
+     * Set the working directory.
+     *
+     * @param directory New working directory to set.
      */
     public void setWorkingDirectory(InternalShellDirectory directory) {
         this.workingDirectory = Objects.requireNonNull(directory);
@@ -88,8 +107,9 @@ public class InternalShellFileSystem {
     /**
      * Parse the given path as a path to an {@link InternalShellDirectory}.<br>
      * Parsing a path always starts from the working directory, unless the path explicitly starts from root.
-     * * @return The {@link InternalShellDirectory} pointed to by the path.
      *
+     * @param rawPath Path to parse.
+     * @return The {@link InternalShellDirectory} pointed to by the path.
      * @throws ParseException If the path is invalid or doesn't point to an {@link InternalShellDirectory}.
      */
     public InternalShellDirectory parsePathToDirectory(String rawPath) throws ParseException {
@@ -140,11 +160,12 @@ public class InternalShellFileSystem {
     }
 
     /**
-     * Parse the given path as a path to an {@link com.github.ykrasik.jerminal.internal.filesystem.command.InternalCommand}.<br>
+     * Parse the given path as a path to an {@link InternalCommand}.<br>
      * Parsing a path always starts from the working directory, unless the path explicitly starts from root.
-     * @return The {@link com.github.ykrasik.jerminal.internal.filesystem.command.InternalCommand} pointed to by the path.
      *
-     * @throws ParseException If the path is invalid or doesn't point to an {@link com.github.ykrasik.jerminal.internal.filesystem.command.InternalCommand}.
+     * @param rawPath Path to parse.
+     * @return The {@link InternalCommand} pointed to by the path.
+     * @throws ParseException If the path is invalid or doesn't point to an {@link InternalCommand}.
      */
     public InternalCommand parsePathToCommand(String rawPath) throws ParseException {
         // If rawPath does not contain a single delimiter, we can try use it as the command name.
@@ -192,8 +213,11 @@ public class InternalShellFileSystem {
     }
 
     /**
-     * @return Auto complete suggestions for the next {@link InternalShellDirectory} in this path.
+     * Provide auto complete suggestions for the path to an {@link InternalShellDirectory}.<br>
+     * The path is expected to be valid all the way except the last element, which will be auto completed.
      *
+     * @param rawPath Path to auto complete.
+     * @return Auto complete suggestions for the next {@link InternalShellDirectory} in this path.
      * @throws ParseException If the path is invalid.
      */
     public AutoCompleteReturnValue autoCompletePathToDirectory(String rawPath) throws ParseException {
@@ -217,8 +241,10 @@ public class InternalShellFileSystem {
     }
 
     /**
-     * @return Auto complete suggestions for the next {@link InternalShellDirectory} or {@link com.github.ykrasik.jerminal.internal.filesystem.command.InternalCommand} in this path.
+     * Provide auto complete suggestions for the path either to an {@link InternalShellDirectory} or to an {@link InternalCommand}.<br>
+     * The path is expected to be valid all the way except the last element, which will be auto completed.
      *
+     * @return Auto complete suggestions for the next {@link InternalShellDirectory} or {@link InternalCommand} in this path.
      * @throws ParseException If the path is invalid.
      */
     public AutoCompleteReturnValue autoCompletePath(String rawPath) throws ParseException {
@@ -245,6 +271,7 @@ public class InternalShellFileSystem {
     }
 
     /**
+     * @param directory Directory to calculate the path from root to.
      * @return The full path from the root directory to the given directory.
      */
     public List<InternalShellDirectory> getPath(InternalShellDirectory directory) {

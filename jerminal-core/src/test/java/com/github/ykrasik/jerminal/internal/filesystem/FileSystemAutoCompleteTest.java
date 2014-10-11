@@ -17,8 +17,8 @@
 package com.github.ykrasik.jerminal.internal.filesystem;
 
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
-import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
-import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteType;
+import com.github.ykrasik.jerminal.internal.assist.AutoCompleteReturnValue;
+import com.github.ykrasik.jerminal.internal.assist.AutoCompleteType;
 import com.google.common.collect.ObjectArrays;
 import org.junit.Before;
 import org.junit.Test;

@@ -19,7 +19,7 @@ package com.github.ykrasik.jerminal.api.command.parameter.numeric;
 import com.github.ykrasik.jerminal.api.exception.ParseError;
 import com.github.ykrasik.jerminal.internal.command.parameter.AbstractMandatoryCommandParam;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
-import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
+import com.github.ykrasik.jerminal.internal.assist.AutoCompleteReturnValue;
 
 /**
  * An abstract implementation of a numeric {@link com.github.ykrasik.jerminal.api.command.parameter.CommandParam CommandParam}.

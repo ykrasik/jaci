@@ -20,17 +20,38 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
+ * Constants used throughout the whole program.
+ *
  * @author Yevgeny Krasik
  */
 public final class ShellConstants {
     private ShellConstants() {
     }
 
+    /**
+     * Path delimiter.
+     */
     public static final String FILE_SYSTEM_DELIMITER = "/";
+
+    /**
+     * In a path, will be interpreted as 'this directory'. Optional.
+     */
     public static final String FILE_SYSTEM_THIS = ".";
+
+    /**
+     * In a path, will be interpreted as 'parent directory'. Optional.
+     */
     public static final String FILE_SYSTEM_PARENT = "..";
+
+    /**
+     * When creating the file system, descriptions can be assigned to directories.
+     * This is the delimiter for the description.
+     */
     public static final String FILE_SYSTEM_DESCRIPTION_DELIMITER = ":";
 
+    /**
+     * When passing args by name, this is the delimiter between the parameter name and value.
+     */
     public static final String ARG_VALUE_DELIMITER = "=";
 
     private static final List<String> RESERVED_CHARS = Arrays.asList(
@@ -38,6 +59,10 @@ public final class ShellConstants {
         ARG_VALUE_DELIMITER
     );
 
+    /**
+     * @param name Name to check.
+     * @return True if the name is valid. A valid name cannot contain any of the reserved characters.
+     */
     public static boolean isValidName(String name) {
         if (name.isEmpty()) {
             return false;
