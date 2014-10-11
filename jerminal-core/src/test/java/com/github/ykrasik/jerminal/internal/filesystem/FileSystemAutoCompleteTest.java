@@ -217,7 +217,7 @@ public class FileSystemAutoCompleteTest extends AbstractFileSystemTest {
 
     private void assertAutoCompletePath(String rawPath, String expectedPrefix) {
         try {
-            final AutoCompleteReturnValue returnValue = fileSystem.autoCompletePath(rawPath);
+            final AutoCompleteReturnValue returnValue = internalFileSystem.autoCompletePath(rawPath);
             doAssertAutoComplete(returnValue, expectedPrefix);
         } catch (ParseException e) {
             throw new RuntimeException(e);
@@ -226,7 +226,7 @@ public class FileSystemAutoCompleteTest extends AbstractFileSystemTest {
 
     private void assertAutoCompleteDirectory(String rawPath, String expectedPrefix) {
         try {
-            final AutoCompleteReturnValue returnValue = fileSystem.autoCompletePathToDirectory(rawPath);
+            final AutoCompleteReturnValue returnValue = internalFileSystem.autoCompletePathToDirectory(rawPath);
             doAssertAutoComplete(returnValue, expectedPrefix);
         } catch (ParseException e) {
             throw new RuntimeException(e);
@@ -253,7 +253,7 @@ public class FileSystemAutoCompleteTest extends AbstractFileSystemTest {
 
     private void assertInvalidPath(String path) {
         try {
-            fileSystem.autoCompletePath(path);
+            internalFileSystem.autoCompletePath(path);
             fail();
         } catch (ParseException ignored) { }
     }

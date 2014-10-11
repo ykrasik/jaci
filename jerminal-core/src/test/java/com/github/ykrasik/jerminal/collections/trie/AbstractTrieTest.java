@@ -80,7 +80,7 @@ public class AbstractTrieTest {
 //            }
 //        });
 //        final Set<String> expectedValues = new HashSet<>(expectedValueMap.values());
-//        assertEquals("Values mismatch!", expectedValues, new HashSet<>(trie.getValues()));
+//        assertEquals("Values mismatch!", expectedValues, new HashSet<>(trie.values()));
     }
 
     protected void assertLongestPrefix(String expectedPrefix) {

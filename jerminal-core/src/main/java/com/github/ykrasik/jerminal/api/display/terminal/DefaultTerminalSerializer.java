@@ -19,9 +19,9 @@ package com.github.ykrasik.jerminal.api.display.terminal;
 import com.github.ykrasik.jerminal.api.assist.CommandInfo;
 import com.github.ykrasik.jerminal.api.assist.ParamAndValue;
 import com.github.ykrasik.jerminal.api.assist.Suggestions;
-import com.github.ykrasik.jerminal.api.command.parameter.view.ShellCommandParamView;
-import com.github.ykrasik.jerminal.api.command.view.ShellCommandView;
-import com.github.ykrasik.jerminal.api.filesystem.ShellEntryView;
+import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
+import com.github.ykrasik.jerminal.api.filesystem.command.Command;
+import com.github.ykrasik.jerminal.api.filesystem.directory.ShellDirectory;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 
@@ -99,54 +99,58 @@ public class DefaultTerminalSerializer implements TerminalSerializer {
     }
 
     @Override
-    public String serializeShellEntryView(ShellEntryView shellEntryView) {
+    public String serializeDirectory(ShellDirectory directory) {
         final StringBuilder sb = new StringBuilder();
-        doSerializeShellEntryView(sb, shellEntryView, 0);
+        doSerializeDirectory(sb, directory, 0);
         return sb.toString();
     }
 
-    private void doSerializeShellEntryView(StringBuilder sb, ShellEntryView shellEntryView, int depth) {
-        final boolean directory = shellEntryView.isDirectory();
+    private void doSerializeDirectory(StringBuilder sb, ShellDirectory directory, int depth) {
+        appendDepthSpaces(sb, depth);
 
         // Append root.
-        if (directory) {
-            sb.append('[');
-        }
-        sb.append(shellEntryView.getName());
-        if (directory) {
-            sb.append(']');
-        }
-
-        if (!directory) {
-            sb.append(" : ");
-            sb.append(shellEntryView.getDescription());
-        }
+        sb.append('[');
+        sb.append(directory.getName());
+        sb.append(']');
         sb.append('\n');
 
-        // Append children.
-        if (directory) {
-            for (ShellEntryView child : shellEntryView.getChildren()) {
-                sb.append('|');
-                appendDepthSpaces(sb, depth + 1);
-                doSerializeShellEntryView(sb, child, depth + 1);
-            }
+        for (ShellDirectory childDirectory : directory.getDirectories()) {
+            doSerializeDirectory(sb, childDirectory, depth + 1);
+        }
+
+        for (Command command : directory.getCommands()) {
+            doSerializeCommand(sb, command, depth + 1, false);
         }
     }
 
     @Override
-    public String serializeShellCommandView(ShellCommandView shellCommandView) {
+    public String serializeCommand(Command command) {
         final StringBuilder sb = new StringBuilder();
-        sb.append(shellCommandView.getName());
+        doSerializeCommand(sb, command, 0, true);
+        return sb.toString();
+    }
+
+    private void doSerializeCommand(StringBuilder sb, Command command, int depth, boolean parameters) {
+        appendDepthSpaces(sb, depth);
+
+        sb.append(command.getName());
         sb.append(" : ");
-        sb.append(shellCommandView.getDescription());
+        sb.append(command.getDescription());
         sb.append('\n');
 
-        for (ShellCommandParamView paramView : shellCommandView.getParams()) {
-            appendDepthSpaces(sb, 1);
-            serializedShellCommandParamView(sb, paramView);
-            sb.append('\n');
+        if (parameters) {
+            for (CommandParam param : command.getParams()) {
+                doSerializeCommandParam(sb, param, depth + 1);
+            }
         }
-        return sb.toString();
+    }
+
+    private void doSerializeCommandParam(StringBuilder sb, CommandParam param, int depth) {
+        appendDepthSpaces(sb, depth);
+        sb.append(param.getExternalForm());
+        sb.append(" - ");
+        sb.append(param.getDescription());
+        sb.append('\n');
     }
 
     @Override
@@ -155,7 +159,7 @@ public class DefaultTerminalSerializer implements TerminalSerializer {
         sb.append(e.toString());
         sb.append('\n');
         for (StackTraceElement stackTraceElement : e.getStackTrace()) {
-            sb.append("|    ");
+            appendDepthSpaces(sb, 1);
             sb.append(stackTraceElement.toString());
             sb.append('\n');
         }
@@ -163,14 +167,9 @@ public class DefaultTerminalSerializer implements TerminalSerializer {
     }
 
     private void appendDepthSpaces(StringBuilder sb, int depth) {
+        sb.append('|');
         for (int i = 0; i < depth; i++) {
             sb.append("    ");
         }
-    }
-
-    private void serializedShellCommandParamView(StringBuilder sb, ShellCommandParamView param) {
-        sb.append(param.getExternalForm());
-        sb.append(" - ");
-        sb.append(param.getDescription());
     }
 }

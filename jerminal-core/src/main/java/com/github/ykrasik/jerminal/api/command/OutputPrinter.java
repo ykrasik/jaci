@@ -28,7 +28,7 @@ public interface OutputPrinter {
     void println(String text);
 
     /**
-     * Add formatted text to the buffer.<br>
+     * Print formatted text.<br>
      * Text will be formatted with {@link String#format(String, Object...)}.
      */
     void println(String format, Object... args);

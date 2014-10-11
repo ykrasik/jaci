@@ -18,17 +18,18 @@ package com.github.ykrasik.jerminal.api;
 
 import com.github.ykrasik.jerminal.api.assist.CommandInfo;
 import com.github.ykrasik.jerminal.api.assist.Suggestions;
-import com.github.ykrasik.jerminal.api.command.Command;
 import com.github.ykrasik.jerminal.api.command.CommandArgs;
+import com.github.ykrasik.jerminal.api.command.OutputPrinter;
 import com.github.ykrasik.jerminal.api.display.DisplayDriver;
 import com.github.ykrasik.jerminal.api.exception.ExecuteException;
+import com.github.ykrasik.jerminal.api.filesystem.ShellFileSystem;
 import com.github.ykrasik.jerminal.collections.trie.Trie;
 import com.github.ykrasik.jerminal.internal.CommandLineHistory;
 import com.github.ykrasik.jerminal.internal.command.ControlCommandFactory;
 import com.github.ykrasik.jerminal.internal.command.OutputPrinterImpl;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
-import com.github.ykrasik.jerminal.internal.filesystem.ShellFileSystem;
-import com.github.ykrasik.jerminal.internal.filesystem.file.ShellFile;
+import com.github.ykrasik.jerminal.internal.filesystem.InternalShellFileSystem;
+import com.github.ykrasik.jerminal.internal.filesystem.command.InternalCommand;
 import com.github.ykrasik.jerminal.internal.returnvalue.AssistReturnValue;
 import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
 import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteType;
@@ -58,7 +59,7 @@ import java.util.regex.Pattern;
 // FIXME: Update JavaDoc.
 // FIXME: Add JavaFX frontend gui
 public class ShellImpl implements Shell {
-    private final ShellFileSystem fileSystem;
+    private final InternalShellFileSystem fileSystem;
     private final DisplayDriver displayDriver;
     private final CommandLineHistory history;
 
@@ -66,18 +67,21 @@ public class ShellImpl implements Shell {
         this(fileSystem, displayDriver, 30, "Welcome to Jerminal!\n");
     }
 
-    public ShellImpl(ShellFileSystem fileSystem,
-                     DisplayDriver displayDriver,
-                     int maxHistory,
-                     String welcomeMessage) {
+    public ShellImpl(ShellFileSystem fileSystem, DisplayDriver displayDriver, int maxHistory, String welcomeMessage) {
         this.displayDriver = Objects.requireNonNull(displayDriver);
-        this.fileSystem = new ControlCommandFactory(Objects.requireNonNull(fileSystem), displayDriver).installControlCommands();
+        this.fileSystem = createFileSystem(Objects.requireNonNull(fileSystem), displayDriver);
         this.history = new CommandLineHistory(maxHistory);
 
         // Display welcome message.
         displayDriver.begin();
         displayDriver.displayWelcomeMessage(welcomeMessage);
         displayDriver.end();
+    }
+
+    private InternalShellFileSystem createFileSystem(ShellFileSystem fileSystem, DisplayDriver displayDriver) {
+        final InternalShellFileSystem internalShellFileSystem = new InternalShellFileSystem(fileSystem);
+        new ControlCommandFactory(internalShellFileSystem, displayDriver).installControlCommands();
+        return internalShellFileSystem;
     }
 
     @Override
@@ -90,7 +94,6 @@ public class ShellImpl implements Shell {
         return history.getNextCommandLine();
     }
 
-    // FIXME: Javadoc
     @Override
     public Optional<String> assist(String rawCommandLine) {
         displayDriver.begin();
@@ -111,7 +114,7 @@ public class ShellImpl implements Shell {
         } catch (ParseException e) {
             handleParseException(e);
         } catch (Exception e) {
-            displayDriver.displayInternalError(e);
+            displayDriver.displayUnhandledException(e);
         } finally {
             displayDriver.end();
         }
@@ -134,7 +137,7 @@ public class ShellImpl implements Shell {
         }
 
         // The first arg is not the only arg on the commandLine, it is expected to be a valid path to a file(command).
-        final ShellFile file = fileSystem.parsePathToFile(rawPath);
+        final InternalCommand file = fileSystem.parsePathToCommand(rawPath);
 
         // Provide assistance with the command parameters.
         // The command args start from the 2nd commandLine element (the first was the command).
@@ -196,70 +199,50 @@ public class ShellImpl implements Shell {
         return autoCompletedPrefix.substring(prefix.length());
     }
 
-    // FIXME: JavaDoc
     @Override
     public boolean execute(String rawCommandLine) {
         displayDriver.begin();
         try {
-            return parseAndExecute(rawCommandLine);
+            parseAndExecute(rawCommandLine);
+            return true;
+        } catch (ParseException e) {
+            handleParseException(e);
+        } catch (ExecuteException e) {
+            displayDriver.displayExecuteError(e);
         } catch (Exception e) {
-            displayDriver.displayInternalError(e);
-            return false;
+            displayDriver.displayUnhandledException(e);
         } finally {
             displayDriver.end();
         }
+        return false;
     }
 
-    private boolean parseAndExecute(String rawCommandLine) {
+    private void parseAndExecute(String rawCommandLine) throws Exception {
         // Split the commandLine.
         final List<String> commandLine = splitCommandLine(rawCommandLine.trim());
         if (commandLine.isEmpty()) {
             // Received a commandLine that is either empty or full of spaces.
             displayDriver.displayEmptyLine();
-            return true;
+            return;
         }
 
         // Parse commandLine.
-        final ShellFile file;
-        final CommandArgs args;
-        try {
-            // The first arg of the commandLine must be a path to a file(command).
-            final String pathToCommand = commandLine.get(0);
-            file = fileSystem.parsePathToFile(pathToCommand);
+        // The first arg of the commandLine must be a path to a command.
+        final String pathToCommand = commandLine.get(0);
+        final InternalCommand command = fileSystem.parsePathToCommand(pathToCommand);
 
-            // Parse the command args.
-            // The command args start from the 2nd commandLine element (the first was the command).
-            final List<String> rawArgs = commandLine.subList(1, commandLine.size());
-            args = file.parseCommandArgs(rawArgs);
-        } catch (ParseException e) {
-            handleParseException(e);
-            return false;
-        }
+        // Parse the command args.
+        // The command args start from the 2nd commandLine element (the first was the command).
+        final List<String> rawArgs = commandLine.subList(1, commandLine.size());
+        final CommandArgs args = command.parseCommandArgs(rawArgs);
 
         // Successfully parsed commandLine.
         // Save command in history.
         history.pushCommandLine(rawCommandLine);
 
         // Execute the command.
-        executeFile(file, args);
-
-        // Command line was successfully parsed and executed.
-        return true;
-    }
-
-    private void executeFile(ShellFile file, CommandArgs args) {
-        final Command command = file.getCommand();
-        final OutputPrinterImpl outputPrinter = new OutputPrinterImpl(displayDriver);
-        try {
-            command.execute(args, outputPrinter);
-            // Print a generic success message.
-            outputPrinter.println("Command '%s' executed successfully.", command.getName());
-        } catch (ExecuteException e) {
-            displayDriver.displayExecuteError(e);
-        } catch (Exception e) {
-            outputPrinter.println("Command '%s' was terminated due to an unhandled exception!", command.getName());
-            displayDriver.displayExecuteUnhandledException(e);
-        }
+        final OutputPrinter outputPrinter = new OutputPrinterImpl(displayDriver);
+        command.getCommand().execute(args, outputPrinter);
     }
 
     private void handleParseException(ParseException e) {

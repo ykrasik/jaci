@@ -16,16 +16,14 @@
 
 package com.github.ykrasik.jerminal.internal.filesystem;
 
-import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.internal.exception.ShellException;
-import com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectory;
+import com.github.ykrasik.jerminal.internal.filesystem.directory.InternalShellDirectory;
 import com.google.common.collect.ObjectArrays;
 import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 /**
@@ -165,33 +163,33 @@ public class FileSystemBuilderTest extends AbstractFileSystemTest {
         add("dir1 : Directory1/  dir2   :   Directory2  /   dir3 : Description with spaces  /  dir4:  ");
         assertPath("dir1", "dir2", "dir3", "dir4");
 
-        ShellDirectory dir = getChild(fileSystem.getRoot(), "dir1");
-        assertEquals("Directory1", dir.getDescription());
-
-        dir = getChild(dir, "dir2");
-        assertEquals("Directory2", dir.getDescription());
-
-        dir = getChild(dir, "dir3");
-        assertEquals("Description with spaces", dir.getDescription());
-
-        dir = getChild(dir, "dir4");
-        assertEquals("", dir.getDescription());
-
-        // Try again with different descriptions, check that descriptions didn't change.
-        add("dir1:asd/dir2: asd/dir3 : asd/dir4:", "cmd2");
-        assertPath("dir1", "dir2", "dir3", "dir4");
-
-        dir = getChild(fileSystem.getRoot(), "dir1");
-        assertEquals("Directory1", dir.getDescription());
-
-        dir = getChild(dir, "dir2");
-        assertEquals("Directory2", dir.getDescription());
-
-        dir = getChild(dir, "dir3");
-        assertEquals("Description with spaces", dir.getDescription());
-
-        dir = getChild(dir, "dir4");
-        assertEquals("", dir.getDescription());
+//        ShellDirectory dir = getChild(fileSystem.getRoot(), "dir1");
+//        assertEquals("Directory1", dir.getDescription());
+//
+//        dir = getChild(dir, "dir2");
+//        assertEquals("Directory2", dir.getDescription());
+//
+//        dir = getChild(dir, "dir3");
+//        assertEquals("Description with spaces", dir.getDescription());
+//
+//        dir = getChild(dir, "dir4");
+//        assertEquals("", dir.getDescription());
+//
+//        // Try again with different descriptions, check that descriptions didn't change.
+//        add("dir1:asd/dir2: asd/dir3 : asd/dir4:", "cmd2");
+//        assertPath("dir1", "dir2", "dir3", "dir4");
+//
+//        dir = getChild(fileSystem.getRoot(), "dir1");
+//        assertEquals("Directory1", dir.getDescription());
+//
+//        dir = getChild(dir, "dir2");
+//        assertEquals("Directory2", dir.getDescription());
+//
+//        dir = getChild(dir, "dir3");
+//        assertEquals("Description with spaces", dir.getDescription());
+//
+//        dir = getChild(dir, "dir4");
+//        assertEquals("", dir.getDescription());
     }
 
     @Test
@@ -200,7 +198,7 @@ public class FileSystemBuilderTest extends AbstractFileSystemTest {
         add("/", "cmd1");
         add("", "cmd2");
         add("       ", "cmd3");
-        fileSystem = fileSystem.addCommands(cmd("cmd4"));
+        fileSystem.addCommands(cmd("cmd4"));
 
         assertPathToCommand("cmd1");
         assertPathToCommand("cmd2");
@@ -235,28 +233,26 @@ public class FileSystemBuilderTest extends AbstractFileSystemTest {
         final List<String> pathElements = Arrays.asList(path);
         final List<String> pathToDirectory = pathElements.subList(0, pathElements.size() - 1);
         final String commandName = pathElements.get(pathElements.size() - 1);
-        final ShellDirectory directory = getDirectory(pathToDirectory);
-        try {
-            directory.getFile(commandName);
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
+//        final ShellDirectory directory = getDirectory(pathToDirectory);
+//        try {
+//            directory.getFile(commandName);
+//        } catch (ParseException e) {
+//            throw new RuntimeException(e);
+//        }
+        fail();
     }
 
-    private ShellDirectory getDirectory(List<String> path) {
-        ShellDirectory currentDirectory = fileSystem.getRoot();
-        for (String pathElement : path) {
-            currentDirectory = getChild(currentDirectory, pathElement);
-        }
-        return currentDirectory;
+    private InternalShellDirectory getDirectory(List<String> path) {
+//        InternalShellDirectory currentDirectory = internalFileSystem.getRoot();
+//        for (String pathElement : path) {
+//            currentDirectory = getChild(currentDirectory, pathElement);
+//        }
+//        return currentDirectory;
+        throw new RuntimeException();
     }
 
-    private ShellDirectory getChild(ShellDirectory directory, String name) {
-        try {
-            return directory.getDirectory(name);
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
+    private InternalShellDirectory getChild(InternalShellDirectory directory, String name) {
+        return directory.getDirectory(name).get();
     }
 
     private void assertIllegal(String path) {

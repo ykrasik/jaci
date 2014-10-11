@@ -18,42 +18,42 @@ package com.github.ykrasik.jerminal.api.display.terminal;
 
 import com.github.ykrasik.jerminal.api.assist.CommandInfo;
 import com.github.ykrasik.jerminal.api.assist.Suggestions;
-import com.github.ykrasik.jerminal.api.command.view.ShellCommandView;
-import com.github.ykrasik.jerminal.api.filesystem.ShellEntryView;
+import com.github.ykrasik.jerminal.api.filesystem.command.Command;
+import com.github.ykrasik.jerminal.api.filesystem.directory.ShellDirectory;
 
 /**
- * Translates objects into {@link String Strings}, to be printed on a {@link Terminal}.
+ * Serializes objects into {@link String}.
  *
  * @author Yevgeny Krasik
  */
 public interface TerminalSerializer {
     /**
-     * Returns a {@link String} representing an empty line.
+     * @return A {@link String} representing an empty line.
      */
     String getEmptyLine();
 
     /**
-     * Serializes an {@link CommandInfo} into a {@link String}.
+     * @return A serialized {@link CommandInfo}.
      */
     String serializeCommandInfo(CommandInfo commandInfo);
 
     /**
-     * Serializes a {@link Suggestions} into a {@link String}.
+     * @return A serialized {@link Suggestions}.
      */
     String serializeSuggestions(Suggestions suggestions);
 
     /**
-     * Serializes a {@link ShellEntryView} into a {@link String}.
+     * @return A serialized {@link ShellDirectory}.
      */
-    String serializeShellEntryView(ShellEntryView shellEntryView);
+    String serializeDirectory(ShellDirectory directory);
 
     /**
-     * Serializes a {@link ShellCommandView} into a {@link String}.
+     * @return A serialized {@link Command}.
      */
-    String serializeShellCommandView(ShellCommandView shellCommandView);
+    String serializeCommand(Command command);
 
     /**
-     * Serializes an {@link Exception} into a {@link String}.
+     * @return A serialized {@link Exception}.
      */
     String serializeException(Exception e);
 }

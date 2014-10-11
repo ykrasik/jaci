@@ -18,8 +18,9 @@ package com.github.ykrasik.jerminal.internal.exception;
 
 import com.github.ykrasik.jerminal.api.assist.CommandInfo;
 import com.github.ykrasik.jerminal.api.exception.ParseError;
-import com.google.common.base.Objects;
 import com.google.common.base.Optional;
+
+import java.util.Objects;
 
 /**
  * An exception that signifies an error while parsing the command line.
@@ -30,18 +31,18 @@ public class ParseException extends Exception {
     private final ParseError error;
     private final Optional<CommandInfo> commandInfo;
 
-    private ParseException(String message, ParseError error, Optional<CommandInfo> commandInfo) {
-        super(message);
-        this.error = error;
-        this.commandInfo = commandInfo;
-    }
-
     public ParseException(ParseError error, String message) {
         this(message, error, Optional.<CommandInfo>absent());
     }
 
     public ParseException(ParseError error, String format, Object... args) {
         this(String.format(format, args), error, Optional.<CommandInfo>absent());
+    }
+
+    private ParseException(String message, ParseError error, Optional<CommandInfo> commandInfo) {
+        super(message);
+        this.error = Objects.requireNonNull(error);
+        this.commandInfo = commandInfo;
     }
 
     public ParseException withCommandInfo(CommandInfo commandInfo) {
@@ -58,10 +59,6 @@ public class ParseException extends Exception {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
-            .add("error", error)
-            .add("message", getMessage())
-            .add("commandInfo", commandInfo)
-            .toString();
+        return "ParseException{" + "message=" + getMessage() + ", error=" + error + ", commandInfo=" + commandInfo + '}';
     }
 }

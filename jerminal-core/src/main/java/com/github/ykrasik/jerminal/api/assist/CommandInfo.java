@@ -21,7 +21,7 @@ import com.google.common.base.Objects;
 import java.util.List;
 
 /**
- * Information about the command on the command line.
+ * Information about a command.
  *
  * @author Yevgeny Krasik
  */

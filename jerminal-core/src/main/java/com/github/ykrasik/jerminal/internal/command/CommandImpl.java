@@ -16,7 +16,7 @@
 
 package com.github.ykrasik.jerminal.internal.command;
 
-import com.github.ykrasik.jerminal.api.command.Command;
+import com.github.ykrasik.jerminal.api.filesystem.command.Command;
 import com.github.ykrasik.jerminal.api.command.CommandArgs;
 import com.github.ykrasik.jerminal.api.command.CommandExecutor;
 import com.github.ykrasik.jerminal.api.command.OutputPrinter;

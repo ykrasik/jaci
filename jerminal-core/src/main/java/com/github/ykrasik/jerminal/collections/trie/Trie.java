@@ -78,7 +78,7 @@ public interface Trie<T> {
     /**
      * @return All the values in this Trie.
      */
-    Collection<T> getValues();
+    Collection<T> values();
 
     /**
      * Calls {@link TrieVisitor#visit(String, Object)}

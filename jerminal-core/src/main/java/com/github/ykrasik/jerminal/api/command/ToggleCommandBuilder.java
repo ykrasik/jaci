@@ -16,6 +16,7 @@
 
 package com.github.ykrasik.jerminal.api.command;
 
+import com.github.ykrasik.jerminal.api.filesystem.command.Command;
 import com.google.common.base.Supplier;
 import com.github.ykrasik.jerminal.api.command.parameter.bool.BooleanParamBuilder;
 import com.github.ykrasik.jerminal.api.exception.ExecuteException;
@@ -23,7 +24,7 @@ import com.github.ykrasik.jerminal.api.exception.ExecuteException;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Creates toggle {@link Command}s.<br>
+ * Creates toggle {@link com.github.ykrasik.jerminal.api.filesystem.command.Command}s.<br>
  * A toggle command is a commmand that takes a single optional boolean parameter and toggles
  * the boolean state of some component on or off. The state of the component is accessed via a
  * {@link StateAccessor}.<br>

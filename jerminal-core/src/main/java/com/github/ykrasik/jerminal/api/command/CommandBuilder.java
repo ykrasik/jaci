@@ -16,6 +16,7 @@
 
 package com.github.ykrasik.jerminal.api.command;
 
+import com.github.ykrasik.jerminal.api.filesystem.command.Command;
 import com.github.ykrasik.jerminal.internal.command.CommandImpl;
 import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
 import com.github.ykrasik.jerminal.api.exception.ExecuteException;
@@ -27,7 +28,7 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A builder for a {@link Command}.
+ * A builder for a {@link com.github.ykrasik.jerminal.api.filesystem.command.Command}.
  *
  * @author Yevgeny Krasik
  */

@@ -16,7 +16,7 @@
 
 package com.github.ykrasik.jerminal.internal;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.Objects;
 
 /**
  * An abstract implementation of a {@link Describable}.
@@ -28,8 +28,8 @@ public abstract class AbstractDescribable implements Describable {
     private final String description;
 
     protected AbstractDescribable(String name, String description) {
-        this.name = checkNotNull(name, "name");
-        this.description = checkNotNull(description, "description");
+        this.name = Objects.requireNonNull(name);
+        this.description = Objects.requireNonNull(description);
     }
 
     @Override

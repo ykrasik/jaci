@@ -17,10 +17,9 @@
 package com.github.ykrasik.jerminal.internal.returnvalue;
 
 import com.github.ykrasik.jerminal.api.assist.CommandInfo;
-import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.Objects;
 
 /**
  * The return value of an assist operation.<br>
@@ -33,8 +32,8 @@ public class AssistReturnValue {
     private final AutoCompleteReturnValue autoCompleteReturnValue;
 
     public AssistReturnValue(Optional<CommandInfo> commandInfo, AutoCompleteReturnValue autoCompleteReturnValue) {
-        this.commandInfo = checkNotNull(commandInfo, "commandInfo");
-        this.autoCompleteReturnValue = checkNotNull(autoCompleteReturnValue, "autoCompleteReturnValue");
+        this.commandInfo = Objects.requireNonNull(commandInfo);
+        this.autoCompleteReturnValue = Objects.requireNonNull(autoCompleteReturnValue);
     }
 
     public Optional<CommandInfo> getCommandInfo() {
@@ -47,9 +46,6 @@ public class AssistReturnValue {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
-            .add("commandInfo", commandInfo)
-            .add("autoCompleteReturnValue", autoCompleteReturnValue)
-            .toString();
+        return "AssistReturnValue{" + "commandInfo=" + commandInfo + ", autoCompleteReturnValue=" + autoCompleteReturnValue + '}';
     }
 }

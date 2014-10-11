@@ -16,29 +16,27 @@
 
 package com.github.ykrasik.jerminal.internal.command;
 
-import com.github.ykrasik.jerminal.api.command.*;
-import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
+import com.github.ykrasik.jerminal.ShellConstants;
+import com.github.ykrasik.jerminal.api.command.CommandArgs;
+import com.github.ykrasik.jerminal.api.command.CommandBuilder;
+import com.github.ykrasik.jerminal.api.command.CommandExecutor;
+import com.github.ykrasik.jerminal.api.command.OutputPrinter;
 import com.github.ykrasik.jerminal.api.command.parameter.flag.FlagParamBuilder;
-import com.github.ykrasik.jerminal.api.command.parameter.view.ShellCommandParamView;
-import com.github.ykrasik.jerminal.api.command.view.ShellCommandView;
 import com.github.ykrasik.jerminal.api.display.DisplayDriver;
 import com.github.ykrasik.jerminal.api.exception.ExecuteException;
-import com.github.ykrasik.jerminal.api.filesystem.ShellEntryView;
+import com.github.ykrasik.jerminal.api.filesystem.command.Command;
+import com.github.ykrasik.jerminal.api.filesystem.directory.ShellDirectory;
 import com.github.ykrasik.jerminal.internal.command.parameter.entry.DirectoryParamBuilder;
 import com.github.ykrasik.jerminal.internal.command.parameter.entry.FileParamBuilder;
-import com.github.ykrasik.jerminal.internal.command.parameter.view.ShellCommandParamViewImpl;
-import com.github.ykrasik.jerminal.internal.command.view.ShellCommandViewImpl;
-import com.github.ykrasik.jerminal.internal.filesystem.ShellEntry;
-import com.github.ykrasik.jerminal.internal.filesystem.ShellFileSystem;
-import com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectory;
-import com.github.ykrasik.jerminal.internal.filesystem.file.ShellFile;
-import com.github.ykrasik.jerminal.internal.filesystem.view.ShellEntryViewImpl;
+import com.github.ykrasik.jerminal.internal.filesystem.InternalShellFileSystem;
+import com.github.ykrasik.jerminal.internal.filesystem.command.InternalCommand;
+import com.github.ykrasik.jerminal.internal.filesystem.directory.InternalShellDirectory;
 import com.google.common.base.Supplier;
 
-import java.util.*;
+import java.util.List;
 
 /**
- * Creates all the default Control {@link Command}s.
+ * Creates all the default Control {@link com.github.ykrasik.jerminal.api.filesystem.command.Command}s.
  *
  * @author Yevgeny Krasik
  */
@@ -48,21 +46,19 @@ public class ControlCommandFactory {
     private static final String DESCRIBE_COMMAND_COMMAND_NAME = "man";
     private static final String PRINT_WORKING_DIRECTORY_COMMAND_NAME = "pwd";
 
-    private static final ShellEntryViewComparator COMPARATOR = new ShellEntryViewComparator();
-
-    private final ShellFileSystem fileSystem;
+    private final InternalShellFileSystem fileSystem;
     private final DisplayDriver displayDriver;
 
-    public ControlCommandFactory(ShellFileSystem fileSystem, DisplayDriver displayDriver) {
+    public ControlCommandFactory(InternalShellFileSystem fileSystem, DisplayDriver displayDriver) {
         this.fileSystem = fileSystem;
         this.displayDriver = displayDriver;
     }
 
     // TODO: Add the following commands: list all commands
 
-    public ShellFileSystem installControlCommands() {
+    public void installControlCommands() {
         // TODO: DOn't install directory navigation commands if no directories in fileSystem?
-        return fileSystem.addGlobalCommands(
+        fileSystem.addGlobalCommands(
             createChangeDirectoryCommand(),
             createListDirectoryCommand(),
             createDescribeCommandCommand(),
@@ -72,17 +68,13 @@ public class ControlCommandFactory {
 
     public Command createChangeDirectoryCommand() {
         return new CommandBuilder(CHANGE_DIRECTORY_COMMAND_NAME)
-            .setDescription("Change current directory")
-            .addParam(
-                new DirectoryParamBuilder("dir", fileSystem)
-                    .setDescription("Directory to change to")
-                    .build()
-            )
+            .setDescription("Change working directory")
+            .addParam(new DirectoryParamBuilder("dir", fileSystem).setDescription("Directory to change to").build())
             .setExecutor(new CommandExecutor() {
                 @Override
                 public void execute(CommandArgs args, OutputPrinter outputPrinter) throws ExecuteException {
-                    final ShellDirectory directory = args.popDirectory();
-                    fileSystem.setCurrentDirectory(directory);
+                    final InternalShellDirectory directory = args.popDirectory();
+                    fileSystem.setWorkingDirectory(directory);
                 }
             })
             .build();
@@ -94,124 +86,71 @@ public class ControlCommandFactory {
             .addParam(
                 new DirectoryParamBuilder("dir", fileSystem)
                     .setDescription("Directory to list")
-                    .setOptional(new Supplier<ShellDirectory>() {
+                    .setOptional(new Supplier<InternalShellDirectory>() {
                         @Override
-                        public ShellDirectory get() {
-                            return fileSystem.getCurrentDirectory();
+                        public InternalShellDirectory get() {
+                            return fileSystem.getWorkingDirectory();
                         }
                     })
                     .build()
             )
-            .addParam(
-                new FlagParamBuilder("-r")
-                    .setDescription("Whether to recurse into sub-directories")
-                    .build()
-            )
+            .addParam(new FlagParamBuilder("-r").setDescription("Whether to recurse into sub-directories").build())
             .setExecutor(new CommandExecutor() {
                 @Override
                 public void execute(CommandArgs args, OutputPrinter outputPrinter) throws ExecuteException {
-                    final ShellDirectory directory = args.popDirectory();
+                    final InternalShellDirectory directory = args.popDirectory();
                     final boolean recursive = args.popBool();
-                    final ShellEntryView shellEntryView = createShellEntryView(directory, recursive);
-                    displayDriver.displayShellEntryView(shellEntryView);
+                    final ShellDirectory shellDirectory = directory.toShellDirectory(recursive);
+                    displayDriver.displayDirectory(shellDirectory);
                 }
             })
             .build();
-    }
-
-    private ShellEntryView createShellEntryView(ShellDirectory directory, boolean recursive) {
-        final Collection<ShellEntry> children = directory.getChildren();
-        final List<ShellEntryView> viewChildren = new ArrayList<>(children.size());
-        for (ShellEntry child : children) {
-            final ShellEntryView childToAdd;
-            if (child.isDirectory() && recursive) {
-                childToAdd = createShellEntryView((ShellDirectory) child, true);
-            } else {
-                childToAdd = new ShellEntryViewImpl(child.getName(), child.getDescription(), child.isDirectory(), Collections.<ShellEntryView>emptyList());
-            }
-            viewChildren.add(childToAdd);
-        }
-        Collections.sort(viewChildren, COMPARATOR);
-        return new ShellEntryViewImpl(directory.getName(), directory.getDescription(), true, viewChildren);
     }
 
     public Command createDescribeCommandCommand() {
         return new CommandBuilder(DESCRIBE_COMMAND_COMMAND_NAME)
             .setDescription("Describe command")
-            .addParam(
-                new FileParamBuilder("cmd", fileSystem)
-                    .setDescription("Command to describe")
-                    .build()
-            )
+            .addParam(new FileParamBuilder("cmd", fileSystem).setDescription("Command to describe").build())
             .setExecutor(new CommandExecutor() {
                 @Override
                 public void execute(CommandArgs args, OutputPrinter outputPrinter) throws ExecuteException {
-                    final ShellFile file = args.popFile();
-                    final Command command = file.getCommand();
-                    final ShellCommandView shellCommandView = createShellCommandView(command);
-                    displayDriver.displayShellCommandView(shellCommandView);
+                    final InternalCommand internalCommand = args.popCommand();
+                    final Command command = internalCommand.getCommand();
+                    displayDriver.displayCommand(command);
                 }
             })
             .build();
     }
 
-    private ShellCommandView createShellCommandView(Command command) {
-        final List<ShellCommandParamView> params = describeCommandParams(command.getParams());
-        return new ShellCommandViewImpl(command.getName(), command.getDescription(), params);
-    }
-
-    private List<ShellCommandParamView> describeCommandParams(List<CommandParam> params) {
-        final List<ShellCommandParamView> paramViews = new ArrayList<>(params.size());
-        for (CommandParam param : params) {
-            final ShellCommandParamView paramView = new ShellCommandParamViewImpl(param.getName(), param.getDescription(), param.getType(), param.getExternalForm());
-            paramViews.add(paramView);
-        }
-        return paramViews;
-    }
-
     public Command createPrintWorkingDirectoryCommand() {
         return new CommandBuilder(PRINT_WORKING_DIRECTORY_COMMAND_NAME)
-            .setDescription("Print working directory")
+            .setDescription("Print path to working directory")
             .setExecutor(new CommandExecutor() {
                 @Override
                 public void execute(CommandArgs args, OutputPrinter outputPrinter) throws ExecuteException {
-                    final String workingDirectoryStr = createWorkingDirectoryString();
+                    final InternalShellDirectory workingDirectory = fileSystem.getWorkingDirectory();
+                    final List<InternalShellDirectory> path = fileSystem.getPath(workingDirectory);
+                    final String workingDirectoryStr = serializePath(path);
                     outputPrinter.println(workingDirectoryStr);
                 }
             })
             .build();
     }
 
-    private String createWorkingDirectoryString() {
-        final ShellDirectory currentDirectory = fileSystem.getCurrentDirectory();
+    private String serializePath(List<InternalShellDirectory> path) {
         final StringBuilder sb = new StringBuilder();
-        doCreateWorkingDirectoryString(currentDirectory, sb);
+        if (path.size() == 1) {
+            // If the path only has 1 element, it's the root.
+            sb.append(ShellConstants.FILE_SYSTEM_DELIMITER);
+        } else {
+            // Don't append the root to the path, use a '/' instead.
+            for (int i = 1; i < path.size(); i++) {
+                final InternalShellDirectory directory = path.get(i);
+                sb.append(directory.getName());
+                sb.append(ShellConstants.FILE_SYSTEM_DELIMITER);
+            }
+            sb.deleteCharAt(sb.length() - 1);
+        }
         return sb.toString();
-    }
-
-    private void doCreateWorkingDirectoryString(ShellDirectory currentDirectory, StringBuilder sb) {
-        if (currentDirectory == fileSystem.getRoot()) {
-            sb.append('/');
-            return;
-        }
-
-        final ShellDirectory parent = currentDirectory.getParent().get();
-        doCreateWorkingDirectoryString(parent, sb);
-
-        sb.append(currentDirectory.getName());
-        sb.append('/');
-    }
-
-    private static class ShellEntryViewComparator implements Comparator<ShellEntryView> {
-        @Override
-        public int compare(ShellEntryView o1, ShellEntryView o2) {
-            if (o1.isDirectory() && !o2.isDirectory()) {
-                return 1;
-            }
-            if (o2.isDirectory() && !o1.isDirectory()) {
-                return -1;
-            }
-            return o1.getName().compareTo(o2.getName());
-        }
     }
 }

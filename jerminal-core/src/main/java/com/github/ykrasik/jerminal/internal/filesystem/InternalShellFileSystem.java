@@ -1,0 +1,294 @@
+/*
+ * Copyright (C) 2014 Yevgeny Krasik
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.github.ykrasik.jerminal.internal.filesystem;
+
+import com.github.ykrasik.jerminal.ShellConstants;
+import com.github.ykrasik.jerminal.api.exception.ParseError;
+import com.github.ykrasik.jerminal.api.filesystem.ShellFileSystem;
+import com.github.ykrasik.jerminal.api.filesystem.command.Command;
+import com.github.ykrasik.jerminal.collections.trie.Trie;
+import com.github.ykrasik.jerminal.collections.trie.TrieImpl;
+import com.github.ykrasik.jerminal.internal.exception.ParseException;
+import com.github.ykrasik.jerminal.internal.filesystem.command.InternalCommand;
+import com.github.ykrasik.jerminal.internal.filesystem.directory.InternalShellDirectory;
+import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
+import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteType;
+import com.github.ykrasik.jerminal.internal.util.StringUtils;
+import com.google.common.base.Function;
+import com.google.common.base.Optional;
+import com.google.common.base.Splitter;
+
+import java.util.*;
+
+/**
+ * @author Yevgeny Krasik
+ */
+// FIXME: JavaDoc
+public class InternalShellFileSystem {
+    private static final Splitter PATH_SPLITTER = Splitter.on(ShellConstants.FILE_SYSTEM_DELIMITER.charAt(0)).trimResults();
+    private static final Function<InternalCommand, AutoCompleteType> AUTO_COMPLETE_TYPE_MAPPER = new Function<InternalCommand, AutoCompleteType>() {
+        @Override
+        public AutoCompleteType apply(InternalCommand input) {
+            return AutoCompleteType.COMMAND;
+        }
+    };
+
+    private final InternalShellDirectory root;
+    private Trie<InternalCommand> globalCommands;
+
+    private InternalShellDirectory workingDirectory;
+
+    public InternalShellFileSystem(ShellFileSystem fileSystem) {
+        this.root = new InternalShellDirectory(Objects.requireNonNull(fileSystem.getRoot()));
+        this.globalCommands = TrieImpl.emptyTrie();
+        this.workingDirectory = root;
+
+        addGlobalCommands(fileSystem.getGlobalCommands());
+    }
+
+    public void addGlobalCommands(Command... globalCommands) {
+        addGlobalCommands(Arrays.asList(globalCommands));
+    }
+
+    public void addGlobalCommands(Collection<Command> globalCommands) {
+        for (Command globalCommand : globalCommands) {
+            final InternalCommand internalCommand = new InternalCommand(globalCommand);
+            this.globalCommands = this.globalCommands.add(globalCommand.getName(), internalCommand);
+        }
+    }
+
+    /**
+     * Returns the current directory.
+     */
+    public InternalShellDirectory getWorkingDirectory() {
+        return workingDirectory;
+    }
+
+    /**
+     * Sets the current directory.
+     */
+    public void setWorkingDirectory(InternalShellDirectory directory) {
+        this.workingDirectory = Objects.requireNonNull(directory);
+    }
+
+    /**
+     * Parse the given path as a path to an {@link InternalShellDirectory}.<br>
+     * Parsing a path always starts from the working directory, unless the path explicitly starts from root.
+     * * @return The {@link InternalShellDirectory} pointed to by the path.
+     *
+     * @throws ParseException If the path is invalid or doesn't point to an {@link InternalShellDirectory}.
+     */
+    public InternalShellDirectory parsePathToDirectory(String rawPath) throws ParseException {
+        if (rawPath.isEmpty()) {
+            throw emptyPath();
+        }
+
+        final boolean startsFromRoot = rawPath.startsWith(ShellConstants.FILE_SYSTEM_DELIMITER);
+        if (startsFromRoot && rawPath.length() == 1) {
+            return root;
+        }
+
+        // Remove leading and trailing '/'.
+        // TODO: Make sure this doesn't mask '//' or '///' as an error.
+        final String pathToSplit = StringUtils.removeLeadingAndTrailingDelimiter(rawPath, ShellConstants.FILE_SYSTEM_DELIMITER);
+
+        // Split the given path according to delimiter.
+        final List<String> splitPath = PATH_SPLITTER.splitToList(pathToSplit);
+
+        // Parse all pathElements as directories.
+        InternalShellDirectory currentDirectory = startsFromRoot ? root : workingDirectory;
+        for (String directoryName : splitPath) {
+            if (directoryName.isEmpty()) {
+                throw emptyDirectoryNameAlongPath(currentDirectory.getName());
+            }
+            if (ShellConstants.FILE_SYSTEM_THIS.equals(directoryName)) {
+                continue;
+            }
+            if (ShellConstants.FILE_SYSTEM_PARENT.equals(directoryName)) {
+                final Optional<InternalShellDirectory> parent = currentDirectory.getParent();
+                if (parent.isPresent()) {
+                    currentDirectory = parent.get();
+                    continue;
+                } else {
+                    throw directoryDoesNotHaveParent(currentDirectory.getName());
+                }
+            }
+
+            final Optional<InternalShellDirectory> childDirectory = currentDirectory.getDirectory(directoryName);
+            if (childDirectory.isPresent()) {
+                currentDirectory = childDirectory.get();
+            } else {
+                throw invalidEntry(currentDirectory.getName(), directoryName, "directory");
+            }
+        }
+
+        return currentDirectory;
+    }
+
+    /**
+     * Parse the given path as a path to an {@link com.github.ykrasik.jerminal.internal.filesystem.command.InternalCommand}.<br>
+     * Parsing a path always starts from the working directory, unless the path explicitly starts from root.
+     * @return The {@link com.github.ykrasik.jerminal.internal.filesystem.command.InternalCommand} pointed to by the path.
+     *
+     * @throws ParseException If the path is invalid or doesn't point to an {@link com.github.ykrasik.jerminal.internal.filesystem.command.InternalCommand}.
+     */
+    public InternalCommand parsePathToCommand(String rawPath) throws ParseException {
+        // If rawPath does not contain a single delimiter, we can try use it as the command name.
+        final int delimiterIndex = rawPath.lastIndexOf(ShellConstants.FILE_SYSTEM_DELIMITER);
+        if (delimiterIndex == -1) {
+            // rawPath does not contain a delimiter.
+            // It could either be a global command, or a command under the workingDirectory.
+            return getGlobalOrLocalCommand(rawPath);
+        }
+
+        // rawPath contains a delimiter.
+        // Parse the path until the pre-last entry as directories, and let the last directory parse the last entry as a command.
+        // So in "path/to/command", parse "path/to" as path to directory "to", and let "to" parse "command".
+        final String pathToLastDirectory = rawPath.substring(0, delimiterIndex + 1);
+        final InternalShellDirectory lastDirectory = parsePathToDirectory(pathToLastDirectory);
+
+        // If rawPath ends with the delimiter, it cannot possibly point to a command.
+        final String fileName = rawPath.substring(delimiterIndex + 1);
+        if (fileName.isEmpty()) {
+            throw pathDoesNotPointToCommand(rawPath);
+        }
+
+        final Optional<InternalCommand> file = lastDirectory.getCommand(fileName);
+        if (file.isPresent()) {
+            return file.get();
+        } else {
+            throw invalidEntry(lastDirectory.getName(), fileName, "command");
+        }
+    }
+
+    private InternalCommand getGlobalOrLocalCommand(String name) throws ParseException {
+        // If 'name' is a global file, return it.
+        final Optional<InternalCommand> globalFile = globalCommands.get(name);
+        if (globalFile.isPresent()) {
+            return globalFile.get();
+        }
+
+        // 'name' is not a global file, check if it is a child of the working directory.
+        final Optional<InternalCommand> file = workingDirectory.getCommand(name);
+        if (file.isPresent()) {
+            return file.get();
+        } else {
+            throw invalidCommandName(workingDirectory.getName(), name);
+        }
+    }
+
+    /**
+     * @return Auto complete suggestions for the next {@link InternalShellDirectory} in this path.
+     *
+     * @throws ParseException If the path is invalid.
+     */
+    public AutoCompleteReturnValue autoCompletePathToDirectory(String rawPath) throws ParseException {
+        // Parse the path until the last delimiter, after which we autoComplete the remaining arg.
+        final int delimiterIndex = rawPath.lastIndexOf(ShellConstants.FILE_SYSTEM_DELIMITER);
+        if (delimiterIndex == -1) {
+            // rawPath did not contain a delimiter, just autoComplete it from the workingDirectory.
+            final Trie<AutoCompleteType> possibilities = workingDirectory.autoCompleteDirectory(rawPath);
+            return new AutoCompleteReturnValue(rawPath, possibilities);
+        }
+
+        // rawPath contains a delimiter.
+        // Parse the path until the pre-last entry as directories, and let the last directory autoComplete the last entry as a directory.
+        // So in "path/to/directory", parse "path/to" as path to directory "to", and let "to" autoComplete "directory".
+        final String pathToLastDirectory = rawPath.substring(0, delimiterIndex + 1);
+        final InternalShellDirectory lastDirectory = parsePathToDirectory(pathToLastDirectory);
+
+        final String directoryPrefix = rawPath.substring(delimiterIndex + 1);
+        final Trie<AutoCompleteType> possibilities = lastDirectory.autoCompleteDirectory(directoryPrefix);
+        return new AutoCompleteReturnValue(directoryPrefix, possibilities);
+    }
+
+    /**
+     * @return Auto complete suggestions for the next {@link InternalShellDirectory} or {@link com.github.ykrasik.jerminal.internal.filesystem.command.InternalCommand} in this path.
+     *
+     * @throws ParseException If the path is invalid.
+     */
+    public AutoCompleteReturnValue autoCompletePath(String rawPath) throws ParseException {
+        // Parse the path until the last delimiter, after which we autoComplete the remaining arg.
+        final int delimiterIndex = rawPath.lastIndexOf(ShellConstants.FILE_SYSTEM_DELIMITER);
+        if (delimiterIndex == -1) {
+            // rawPath did not contain a delimiter.
+            // It could be an entry from the workingDirectory or a global command.
+            final Trie<AutoCompleteType> entryPossibilities = workingDirectory.autoCompleteEntry(rawPath);
+            final Trie<AutoCompleteType> globalFilePossibilities = globalCommands.subTrie(rawPath).map(AUTO_COMPLETE_TYPE_MAPPER);
+            final Trie<AutoCompleteType> possibilities = entryPossibilities.union(globalFilePossibilities);
+            return new AutoCompleteReturnValue(rawPath, possibilities);
+        }
+
+        // rawPath contains a delimiter.
+        // Parse the path until the pre-last entry as directories, and let the last directory autoComplete the last entry.
+        // So in "path/to/entry", parse "path/to" as path to directory "to", and let "to" autoComplete "entry".
+        final String pathToLastDirectory = rawPath.substring(0, delimiterIndex + 1);
+        final InternalShellDirectory lastDirectory = parsePathToDirectory(pathToLastDirectory);
+
+        final String entryPrefix = rawPath.substring(delimiterIndex + 1);
+        final Trie<AutoCompleteType> possibilities = lastDirectory.autoCompleteEntry(entryPrefix);
+        return new AutoCompleteReturnValue(entryPrefix, possibilities);
+    }
+
+    /**
+     * @return The full path from the root directory to the given directory.
+     */
+    public List<InternalShellDirectory> getPath(InternalShellDirectory directory) {
+        final List<InternalShellDirectory> path = new LinkedList<>();
+        doGetPath(path, directory);
+        return path;
+    }
+
+    private void doGetPath(List<InternalShellDirectory> path, InternalShellDirectory directory) {
+        path.add(0, directory);
+        final Optional<InternalShellDirectory> parent = directory.getParent();
+        if (parent.isPresent()) {
+            // Only the root dir doesn't have a parent.
+            doGetPath(path, parent.get());
+        }
+    }
+
+    private ParseException invalidEntry(String parentName, String entryName, String type) {
+        return new ParseException(
+            ParseError.INVALID_ENTRY,
+            "Directory '%s' doesn't contain %s: '%s'", parentName, type, entryName
+        );
+    }
+
+    private ParseException invalidCommandName(String parentName, String fileName) {
+        return new ParseException(
+            ParseError.INVALID_ENTRY,
+            "Command '%s' is neither a global command nor a child of directory '%s'", fileName, parentName
+        );
+    }
+
+    private ParseException emptyPath() {
+        return new ParseException(ParseError.INVALID_ENTRY, "Empty path!");
+    }
+
+    private ParseException directoryDoesNotHaveParent(String directoryName) {
+        return new ParseException(ParseError.INVALID_ENTRY, "Directory '%s' doesn't have a parent.", directoryName);
+    }
+
+    private ParseException pathDoesNotPointToCommand(String path) {
+        return new ParseException(ParseError.INVALID_ENTRY, "Path doesn't point to a command: %s", path);
+    }
+
+    private ParseException emptyDirectoryNameAlongPath(String parentName) {
+        return new ParseException(ParseError.INVALID_ENTRY, "Empty directory name! Under: '%s'", parentName);
+    }
+}

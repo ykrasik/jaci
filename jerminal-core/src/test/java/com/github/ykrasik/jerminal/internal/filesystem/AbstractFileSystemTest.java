@@ -16,10 +16,11 @@
 
 package com.github.ykrasik.jerminal.internal.filesystem;
 
-import com.github.ykrasik.jerminal.api.command.Command;
+import com.github.ykrasik.jerminal.api.filesystem.ShellFileSystem;
+import com.github.ykrasik.jerminal.api.filesystem.command.Command;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
-import com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectory;
-import com.github.ykrasik.jerminal.internal.filesystem.file.ShellFile;
+import com.github.ykrasik.jerminal.internal.filesystem.command.InternalCommand;
+import com.github.ykrasik.jerminal.internal.filesystem.directory.InternalShellDirectory;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -35,21 +36,33 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public abstract class AbstractFileSystemTest {
     protected ShellFileSystem fileSystem;
+    protected InternalShellFileSystem internalFileSystem;
 
     @Before
     public void setUp() {
-        this.fileSystem = new ShellFileSystemImpl();
+        this.fileSystem = new ShellFileSystem();
+        this.internalFileSystem = null;
+    }
+
+    protected void build() {
+        this.internalFileSystem = new InternalShellFileSystem(fileSystem);
+    }
+
+    protected void addToRoot(String... commandNames) {
+        for (String commandName : commandNames) {
+            fileSystem.addCommands(cmd(commandName));
+        }
     }
 
     protected void add(String path, String... commandNames) {
         for (String commandName : commandNames) {
-            fileSystem = fileSystem.addCommands(path, cmd(commandName));
+            fileSystem.addCommands(path, cmd(commandName));
         }
     }
 
     protected void addGlobalCommands(String... commandNames) {
         for (String commandName : commandNames) {
-            fileSystem = fileSystem.addGlobalCommands(cmd(commandName));
+            fileSystem.addGlobalCommands(cmd(commandName));
         }
     }
 
@@ -61,8 +74,8 @@ public abstract class AbstractFileSystemTest {
 
     protected void assertPathToCommand(String path, String commandName) {
         try {
-            final ShellFile file = fileSystem.parsePathToFile(path);
-            assertEquals(commandName, file.getName());
+            final InternalCommand command = internalFileSystem.parsePathToCommand(path);
+            assertEquals(commandName, command.getName());
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
@@ -70,7 +83,7 @@ public abstract class AbstractFileSystemTest {
 
     protected void assertPathToDirectory(String path, String directoryName) {
         try {
-            final ShellDirectory directory = fileSystem.parsePathToDirectory(path);
+            final InternalShellDirectory directory = internalFileSystem.parsePathToDirectory(path);
             assertEquals(directoryName, directory.getName());
         } catch (ParseException e) {
             throw new RuntimeException(e);
@@ -79,8 +92,8 @@ public abstract class AbstractFileSystemTest {
 
     protected void assertGlobalCommand(String commandName) {
         try {
-            final ShellFile file = fileSystem.parsePathToFile(commandName);
-            assertEquals(commandName, file.getName());
+            final InternalCommand command = internalFileSystem.parsePathToCommand(commandName);
+            assertEquals(commandName, command.getName());
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
@@ -88,7 +101,7 @@ public abstract class AbstractFileSystemTest {
 
     protected void assertDoesntExist(String path) {
         try {
-            fileSystem.parsePathToFile(path);
+            internalFileSystem.parsePathToCommand(path);
             fail();
         } catch (ParseException ignored) { }
     }

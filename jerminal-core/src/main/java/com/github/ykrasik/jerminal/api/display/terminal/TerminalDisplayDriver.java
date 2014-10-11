@@ -18,11 +18,11 @@ package com.github.ykrasik.jerminal.api.display.terminal;
 
 import com.github.ykrasik.jerminal.api.assist.CommandInfo;
 import com.github.ykrasik.jerminal.api.assist.Suggestions;
-import com.github.ykrasik.jerminal.api.command.view.ShellCommandView;
 import com.github.ykrasik.jerminal.api.display.DisplayDriver;
 import com.github.ykrasik.jerminal.api.exception.ExecuteException;
 import com.github.ykrasik.jerminal.api.exception.ParseError;
-import com.github.ykrasik.jerminal.api.filesystem.ShellEntryView;
+import com.github.ykrasik.jerminal.api.filesystem.command.Command;
+import com.github.ykrasik.jerminal.api.filesystem.directory.ShellDirectory;
 
 import java.util.Objects;
 
@@ -98,14 +98,14 @@ public class TerminalDisplayDriver implements DisplayDriver {
     }
 
     @Override
-    public void displayShellEntryView(ShellEntryView shellEntryView) {
-        final String shellEntryViewStr = serializer.serializeShellEntryView(shellEntryView);
+    public void displayDirectory(ShellDirectory directory) {
+        final String shellEntryViewStr = serializer.serializeDirectory(directory);
         print(shellEntryViewStr);
     }
 
     @Override
-    public void displayShellCommandView(ShellCommandView shellCommandView) {
-        final String shellCommandViewStr = serializer.serializeShellCommandView(shellCommandView);
+    public void displayCommand(Command command) {
+        final String shellCommandViewStr = serializer.serializeCommand(command);
         print(shellCommandViewStr);
     }
 
@@ -120,12 +120,7 @@ public class TerminalDisplayDriver implements DisplayDriver {
     }
 
     @Override
-    public void displayExecuteUnhandledException(Exception e) {
-        printException(e);
-    }
-
-    @Override
-    public void displayInternalError(Exception e) {
+    public void displayUnhandledException(Exception e) {
         printException(e);
     }
 

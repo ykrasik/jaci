@@ -22,7 +22,7 @@ import com.github.ykrasik.jerminal.api.Shell;
 import com.github.ykrasik.jerminal.api.ShellImpl;
 import com.github.ykrasik.jerminal.api.display.DisplayDriver;
 import com.github.ykrasik.jerminal.api.display.terminal.TerminalDisplayDriver;
-import com.github.ykrasik.jerminal.internal.filesystem.ShellFileSystem;
+import com.github.ykrasik.jerminal.api.filesystem.ShellFileSystem;
 
 import java.util.Objects;
 

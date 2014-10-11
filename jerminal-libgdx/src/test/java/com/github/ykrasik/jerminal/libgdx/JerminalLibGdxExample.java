@@ -31,8 +31,7 @@ import com.github.ykrasik.jerminal.api.command.parameter.bool.BooleanParamBuilde
 import com.github.ykrasik.jerminal.api.command.parameter.numeric.IntegerParamBuilder;
 import com.github.ykrasik.jerminal.api.command.parameter.string.StringParamBuilder;
 import com.github.ykrasik.jerminal.api.exception.ExecuteException;
-import com.github.ykrasik.jerminal.internal.filesystem.ShellFileSystem;
-import com.github.ykrasik.jerminal.internal.filesystem.ShellFileSystemImpl;
+import com.github.ykrasik.jerminal.api.filesystem.ShellFileSystem;
 
 /**
  * @author Yevgeny Krasik
@@ -71,7 +70,7 @@ public class JerminalLibGdxExample extends ApplicationAdapter {
     }
 
     private ShellFileSystem createFileSystem() {
-        return new ShellFileSystemImpl()
+        return new ShellFileSystem()
             .addCommands("nested/d/1possible")
             .addCommands("nested/d/2possible")
             .addCommands("nested/dir/singlePossible")

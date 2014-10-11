@@ -170,7 +170,7 @@ public class TrieImpl<T> implements Trie<T> {
     }
 
     @Override
-    public Collection<T> getValues() {
+    public Collection<T> values() {
         if (isEmpty()) {
             return Collections.emptyList();
         }

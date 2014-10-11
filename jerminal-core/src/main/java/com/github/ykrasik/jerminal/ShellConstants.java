@@ -16,8 +16,6 @@
 
 package com.github.ykrasik.jerminal;
 
-import com.github.ykrasik.jerminal.internal.exception.ShellException;
-
 import java.util.Arrays;
 import java.util.List;
 
@@ -40,18 +38,15 @@ public final class ShellConstants {
         ARG_VALUE_DELIMITER
     );
 
-    public static boolean isLegalName(String name) {
+    public static boolean isValidName(String name) {
+        if (name.isEmpty()) {
+            return false;
+        }
         for (String reservedChar : RESERVED_CHARS) {
             if (name.contains(reservedChar)) {
                 return false;
             }
         }
         return true;
-    }
-
-    public static void assertLegalName(String name) {
-        if (!isLegalName(name)) {
-            throw new ShellException("Illegal name for entry: '%s'", name);
-        }
     }
 }

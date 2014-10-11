@@ -17,26 +17,26 @@
 package com.github.ykrasik.jerminal.api.command;
 
 import com.github.ykrasik.jerminal.api.exception.MissingParameterException;
-import com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectory;
-import com.github.ykrasik.jerminal.internal.filesystem.file.ShellFile;
+import com.github.ykrasik.jerminal.internal.filesystem.command.InternalCommand;
+import com.github.ykrasik.jerminal.internal.filesystem.directory.InternalShellDirectory;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Queue;
 
 /**
- * Holds the args that were passed to the command.<br>
- * Arguments are always accessed by name.
+ * Holds the args that were passed to the command.
  *
  * @author Yevgeny Krasik
  */
 // TODO: Annotation based config.
 public class CommandArgs {
-    private final Map<String, Object> args;
-    private final Queue<Object> positionalArgValues;
+    private final Map<String, Object> namedArgs;
+    private final Queue<Object> positionalArgs;
 
-    public CommandArgs(Map<String, Object> args, Queue<Object> positionalArgValues) {
-        this.args = args;
-        this.positionalArgValues = positionalArgValues;
+    public CommandArgs(Map<String, Object> namedArgs, Queue<Object> positionalArgs) {
+        this.namedArgs = Objects.requireNonNull(namedArgs);
+        this.positionalArgs = Objects.requireNonNull(positionalArgs);
     }
 
     public String getString(String name) throws MissingParameterException {
@@ -71,37 +71,36 @@ public class CommandArgs {
         return popArg(Boolean.class);
     }
 
-    public ShellDirectory getDirectory(String name) throws MissingParameterException {
-        return getArg(name, ShellDirectory.class);
+    // FIXME: Hide these, only privileged commands should be able to access these classes.
+    public InternalShellDirectory getDirectory(String name) throws MissingParameterException {
+        return getArg(name, InternalShellDirectory.class);
     }
 
-    public ShellDirectory popDirectory() throws MissingParameterException {
-        return popArg(ShellDirectory.class);
+    public InternalShellDirectory popDirectory() throws MissingParameterException {
+        return popArg(InternalShellDirectory.class);
     }
 
-    public ShellFile getFile(String name) throws MissingParameterException {
-        return getArg(name, ShellFile.class);
+    public InternalCommand getCommand(String name) throws MissingParameterException {
+        return getArg(name, InternalCommand.class);
     }
 
-    public ShellFile popFile() throws MissingParameterException {
-        return popArg(ShellFile.class);
+    public InternalCommand popCommand() throws MissingParameterException {
+        return popArg(InternalCommand.class);
     }
 
     private <T> T getArg(String name, Class<T> clazz) throws MissingParameterException {
-        final Object value = args.get(name);
+        final Object value = namedArgs.get(name);
         if (value == null) {
             throw new MissingParameterException("No value defined for param '%s'!", name);
         }
-
         return clazz.cast(value);
     }
 
     private <T> T popArg(Class<T> clazz) throws MissingParameterException {
-        if (positionalArgValues.isEmpty()) {
+        if (positionalArgs.isEmpty()) {
             throw new MissingParameterException("No more arguments!");
         }
-
-        final Object value = positionalArgValues.poll();
+        final Object value = positionalArgs.poll();
         return clazz.cast(value);
     }
 }

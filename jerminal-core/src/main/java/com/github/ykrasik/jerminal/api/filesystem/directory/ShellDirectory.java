@@ -14,21 +14,24 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.api.command.view;
+package com.github.ykrasik.jerminal.api.filesystem.directory;
 
-import com.github.ykrasik.jerminal.api.command.parameter.view.ShellCommandParamView;
+import com.github.ykrasik.jerminal.api.filesystem.command.Command;
 import com.github.ykrasik.jerminal.internal.Describable;
 
-import java.util.List;
+import java.util.Collection;
 
+// FIXME: Incorrect JavaDoc
 /**
- * A view of a {@link com.github.ykrasik.jerminal.api.command.Command ShellCommand} and it's parameters.
+ * A container for {@link ShellDirectory directories} and {@link Command commands}.
  *
  * @author Yevgeny Krasik
  */
-public interface ShellCommandView extends Describable {
-    /**
-     * Returns a view of the command's parameters.
-     */
-    List<ShellCommandParamView> getParams();
+public interface ShellDirectory extends Describable {
+
+    // FIXME: JavaDoc
+
+    Collection<ShellDirectory> getDirectories();
+
+    Collection<Command> getCommands();
 }

@@ -18,8 +18,7 @@ package com.github.ykrasik.jerminal.internal.command.parameter;
 
 import com.github.ykrasik.jerminal.ShellConstants;
 import com.github.ykrasik.jerminal.api.assist.CommandInfo;
-import com.github.ykrasik.jerminal.api.assist.ParamAndValue;
-import com.github.ykrasik.jerminal.api.command.Command;
+import com.github.ykrasik.jerminal.api.filesystem.command.Command;
 import com.github.ykrasik.jerminal.api.command.CommandArgs;
 import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
 import com.github.ykrasik.jerminal.api.exception.ParseError;
@@ -27,7 +26,6 @@ import com.github.ykrasik.jerminal.collections.trie.Trie;
 import com.github.ykrasik.jerminal.collections.trie.TrieImpl;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.internal.exception.ShellException;
-import com.github.ykrasik.jerminal.internal.returnvalue.AssistReturnValue;
 import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
 import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteType;
 import com.google.common.base.Function;
@@ -44,7 +42,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Yevgeny Krasik
  */
-public class CommandParamContext {
+public class CommandParamManager {
     private static final Function<CommandParam, AutoCompleteType> AUTO_COMPLETE_TYPE_MAPPER = new Function<CommandParam, AutoCompleteType>() {
         @Override
         public AutoCompleteType apply(CommandParam input) {
@@ -52,8 +50,8 @@ public class CommandParamContext {
         }
     };
 
-    private final Command command;
     private final Trie<CommandParam> params;
+    private final List<CommandParam> positionalParams;
 
     private final List<CommandParam> unboundParams;
     private final Map<String, Object> boundParamValues;
@@ -61,14 +59,13 @@ public class CommandParamContext {
 
     private Optional<CommandParam> currentParam;
 
-    public CommandParamContext(Command command, Trie<CommandParam> params) {
-        this.command = command;
-        this.params = params;
-        final List<CommandParam> commandParams = command.getParams();
-        this.unboundParams = new ArrayList<>(commandParams);
-        this.boundParamValues = new HashMap<>(commandParams.size());
-        this.boundParamRawValues = new HashMap<>(commandParams.size());
-        this.currentParam = !commandParams.isEmpty() ? Optional.of(commandParams.get(0)) : Optional.<CommandParam>absent();
+    public CommandParamManager(Trie<CommandParam> params, List<CommandParam> positionalParams) {
+        this.params = Objects.requireNonNull(params);
+        this.positionalParams = Objects.requireNonNull(positionalParams);
+        this.unboundParams = new ArrayList<>(positionalParams);
+        this.boundParamValues = new HashMap<>(positionalParams.size());
+        this.boundParamRawValues = new HashMap<>(positionalParams.size());
+        this.currentParam = !positionalParams.isEmpty() ? Optional.of(positionalParams.get(0)) : Optional.<CommandParam>absent();
     }
 
     public CommandArgs parseCommandArgs(List<String> args) throws ParseException {
@@ -114,18 +111,20 @@ public class CommandParamContext {
             // rawArg does not contain a delimiter.
             // It can either be the value of the next positional param or the name of a flag.
             // TODO: This should be replaced with some form of double dispatch.
-            final Optional<CommandParam> flagOptional = params.get(rawArg);
-            if (flagOptional.isPresent() && flagOptional.get().getType() == ParamType.FLAG) {
+            final Optional<CommandParam> param = params.get(rawArg);
+            if (param.isPresent() && param.get().getType() == ParamType.FLAG) {
                 // rawArg is indeed a flag, however:
                 // If it is unbound, use it.
                 // If it is bound, it could still be a valid value for the next positional param.
                 if (!boundParamValues.containsKey(rawArg)) {
-                    return new ParsedParam(flagOptional.get(), true, "true");
+                    currentParam = Optional.of(param.get());
+                    return new ParsedParam(param.get(), true, "true");
                 }
             }
 
             // Try to parse rawArg as the value of the next positional param.
             final CommandParam nextPositionalParam = unboundParams.get(0);
+            currentParam = Optional.of(nextPositionalParam);
             final Object value = nextPositionalParam.parse(rawArg);
             return new ParsedParam(nextPositionalParam, value, rawArg);
         }
@@ -141,55 +140,53 @@ public class CommandParamContext {
     }
 
     private CommandParam parseUnboundParam(String paramName) throws ParseException {
-        final Optional<CommandParam> paramOptional = params.get(paramName);
-        if (!paramOptional.isPresent()) {
+        final Optional<CommandParam> param = params.get(paramName);
+        if (!param.isPresent()) {
             throw invalidParam(paramName);
         }
         if (boundParamValues.containsKey(paramName)) {
             throw paramAlreadyBound(paramName, boundParamValues.get(paramName));
         }
-        return paramOptional.get();
+        return param.get();
     }
 
-    public AssistReturnValue assistArgs(List<String> args) throws ParseException {
+    /**
+     * @return Auto complete suggestions for the last arg. Every other arg except the last is expected
+     *         to be a valid param value.
+     * @throws ParseException If any of the args except the last one can't be validly parsed.
+     */
+    public AutoCompleteReturnValue autoCompleteLastArg(List<String> args) throws ParseException {
         // Only the last arg is up for autoCompletion, the rest are expected to be valid args.
-        final List<String> argsToBeParsed = args.subList(0, args.size() - 1);
-        final String rawArg = args.get(args.size() - 1);
-
         // Parse all params that have been bound.
+        final List<String> argsToBeParsed = args.subList(0, args.size() - 1);
         parse(argsToBeParsed);
 
-        // AutoComplete rawArg.
-        return assistArg(rawArg);
-    }
-
-    private AssistReturnValue assistArg(String rawArg) throws ParseException {
-        // FIXME: AutoCompleting a Flag doesn't work.
+        // After parsing all but the last arg, there were no more unbound params left.
         if (unboundParams.isEmpty()) {
             throw noMoreParams();
         }
 
-        // rawArg is expected to be either:
+        // AutoComplete argPrefix.
+        // FIXME: AutoCompleting a Flag doesn't work.
+        final String argPrefix = args.get(args.size() - 1);
+
+        // argPrefix is expected to be either:
         // 1. A value that is accepted by the next positional param.
         // 2. A tuple of the form "{name}={value}", which can assign a value to any other param.
-        final AutoCompleteReturnValue autoCompleteReturnValue;
-        final int delimiterIndex = rawArg.indexOf(ShellConstants.ARG_VALUE_DELIMITER);
+        final int delimiterIndex = argPrefix.indexOf(ShellConstants.ARG_VALUE_DELIMITER);
         if (delimiterIndex == -1) {
-            autoCompleteReturnValue = autoCompleteParamNameOrValue(rawArg);
             // FIXME: If only 1 possibility to autoComplete param name, this is the current param.
             currentParam = Optional.of(unboundParams.get(0));
-        } else {
-            // rawArg contains a delimiter, the part before the '=' is expected to be a valid, unbound param.
-            final String paramName = rawArg.substring(0, delimiterIndex);
-            final CommandParam param = parseUnboundParam(paramName);
-
-            final String rawValue = rawArg.substring(delimiterIndex + 1);
-            autoCompleteReturnValue = param.autoComplete(rawValue);
-            currentParam = Optional.of(param);
+            return autoCompleteParamNameOrValue(argPrefix);
         }
 
-        final CommandInfo commandInfo = createCommandInfo();
-        return new AssistReturnValue(Optional.of(commandInfo), autoCompleteReturnValue);
+        // argPrefix contains a delimiter, the part before the '=' is expected to be a valid, unbound param.
+        final String paramName = argPrefix.substring(0, delimiterIndex);
+        final CommandParam param = parseUnboundParam(paramName);
+        currentParam = Optional.of(param);
+
+        final String valuePrefix = argPrefix.substring(delimiterIndex + 1);
+        return param.autoComplete(valuePrefix);
     }
 
     private AutoCompleteReturnValue autoCompleteParamNameOrValue(String prefix) throws ParseException {
@@ -232,6 +229,7 @@ public class CommandParamContext {
 
         final Trie<CommandParam> prefixParams = params.subTrie(prefix);
         final Trie<CommandParam> filteredParams = prefixParams.filter(new Predicate<CommandParam>() {
+            @Override
             public boolean apply(CommandParam value) {
                 // Filter all bound params.
                 return !boundParamValues.containsKey(value.getName());
@@ -240,52 +238,38 @@ public class CommandParamContext {
         return filteredParams.map(AUTO_COMPLETE_TYPE_MAPPER);
     }
 
-    private Queue<Object> createPositionalArgValues() {
-        final List<CommandParam> params = command.getParams();
-        final Queue<Object> values = new ArrayDeque<>(params.size());
-        for (CommandParam param : params) {
+    private Queue<Object> createPositionalArgValues() throws ParseException {
+        final Queue<Object> values = new ArrayDeque<>(positionalParams.size());
+        for (CommandParam param : positionalParams) {
             final Object value = boundParamValues.get(param.getName());
             if (value == null) {
-                throw new ShellException("Arg was bound but is missing a value: %s", param.getName());
+                throw new ShellException("Internal error: Param was bound but is missing a value: %s", param.getName());
             }
             values.add(value);
         }
         return values;
     }
 
-    public CommandInfo createCommandInfo() {
-        final String name = command.getName();
-        final List<ParamAndValue> paramAndValues = createParamAndValues();
-        final int currentParamIndex = findCurrentParamIndex();
-        return new CommandInfo(name, paramAndValues, currentParamIndex);
+    /**
+     * @return The raw value bound to the param 'name'.
+     */
+    public Optional<String> getParamRawValue(String name) {
+        return Optional.fromNullable(boundParamRawValues.get(name));
     }
 
-    private List<ParamAndValue> createParamAndValues() {
-        final List<CommandParam> params = command.getParams();
-        final List<ParamAndValue> paramAndValues = new ArrayList<>(params.size());
-        for (CommandParam param : params) {
-            final Optional<String> value = Optional.fromNullable(boundParamRawValues.get(param.getName()));
-            paramAndValues.add(new ParamAndValue(param, value));
-        }
-        return paramAndValues;
+    /**
+     * @return The current param being parsed or auto completed. If there was an exception during parsing,
+     *         this param would be the cause.
+     */
+    public Optional<CommandParam> getCurrentParam() {
+        return currentParam;
     }
 
-    private int findCurrentParamIndex() {
-        if (!currentParam.isPresent() || unboundParams.isEmpty()) {
-            return -1;
-        }
-
-        final CommandParam currentParam = this.currentParam.get();
-        final List<CommandParam> params = command.getParams();
-        for (int i = 0; i < params.size(); i++) {
-            if (currentParam == params.get(i)) {
-                return i;
-            }
-        }
-        throw new ShellException(
-            "Internal error: The next unbound parameter does not belong to command!? command=%s, param=%s",
-            command, currentParam
-        );
+    /**
+     * @return true if there are params still unbound.
+     */
+    public boolean hasUnboundParams() {
+        return !unboundParams.isEmpty();
     }
 
     private ParseException noMoreParams() {

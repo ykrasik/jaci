@@ -19,25 +19,27 @@ package com.github.ykrasik.jerminal.internal.command.parameter.entry;
 import com.github.ykrasik.jerminal.api.exception.ParseError;
 import com.github.ykrasik.jerminal.internal.command.parameter.AbstractMandatoryCommandParam;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
-import com.github.ykrasik.jerminal.internal.filesystem.ShellFileSystem;
-import com.github.ykrasik.jerminal.internal.filesystem.file.ShellFile;
+import com.github.ykrasik.jerminal.internal.filesystem.InternalShellFileSystem;
+import com.github.ykrasik.jerminal.internal.filesystem.command.InternalCommand;
 import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.Objects;
+
 
 /**
  * A {@link com.github.ykrasik.jerminal.api.command.parameter.CommandParam CommandParam} that parses
- * {@link com.github.ykrasik.jerminal.internal.filesystem.file.ShellFile ShellFile} values.<br>
+ * {@link com.github.ykrasik.jerminal.api.filesystem.command.ShellFile ShellFile} values.<br>
  * Intended for internal use with control commands.
  *
  * @author Yevgeny Krasik
  */
-public class FileParam extends AbstractMandatoryCommandParam<ShellFile> {
-    private final ShellFileSystem fileSystem;
+// FIXME: JavaDoc
+public class FileParam extends AbstractMandatoryCommandParam<InternalCommand> {
+    private final InternalShellFileSystem fileSystem;
 
-    public FileParam(String name, String description, ShellFileSystem fileSystem) {
+    public FileParam(String name, String description, InternalShellFileSystem fileSystem) {
         super(name, description);
-        this.fileSystem = checkNotNull(fileSystem, "fileSystem");
+        this.fileSystem = Objects.requireNonNull(fileSystem);
     }
 
     @Override
@@ -46,11 +48,11 @@ public class FileParam extends AbstractMandatoryCommandParam<ShellFile> {
     }
 
     @Override
-    public ShellFile parse(String rawValue) throws ParseException {
+    public InternalCommand parse(String rawValue) throws ParseException {
         if (rawValue.isEmpty()) {
             throw emptyValue();
         }
-        return fileSystem.parsePathToFile(rawValue);
+        return fileSystem.parsePathToCommand(rawValue);
     }
 
     @Override

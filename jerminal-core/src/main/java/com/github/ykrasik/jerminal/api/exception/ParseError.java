@@ -23,7 +23,6 @@ package com.github.ykrasik.jerminal.api.exception;
  */
 public enum ParseError {
     // Directory related.
-    EMPTY_DIRECTORY,
     INVALID_ENTRY,
 
     // Param related.

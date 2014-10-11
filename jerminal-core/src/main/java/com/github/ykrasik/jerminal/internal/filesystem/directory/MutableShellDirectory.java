@@ -14,11 +14,22 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.internal.filesystem.file;
+package com.github.ykrasik.jerminal.internal.filesystem.directory;
+
+import com.github.ykrasik.jerminal.api.filesystem.command.Command;
+import com.github.ykrasik.jerminal.api.filesystem.directory.ShellDirectory;
+
+import java.util.List;
 
 /**
  * @author Yevgeny Krasik
  */
-public class ShellFileTest {
-    // FIXME: Implement
+// FIXME: Use a ShellFileSystemBuilder.
+public interface MutableShellDirectory extends ShellDirectory {
+    // FIXME: JavaDoc
+    MutableShellDirectory getOrCreateDirectory(String name, String description);
+
+    void addCommands(Command... commands);
+
+    void addCommands(List<Command> commands);
 }

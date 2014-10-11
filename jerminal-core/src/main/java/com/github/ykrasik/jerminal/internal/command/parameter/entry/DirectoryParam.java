@@ -19,24 +19,24 @@ package com.github.ykrasik.jerminal.internal.command.parameter.entry;
 import com.github.ykrasik.jerminal.api.exception.ParseError;
 import com.github.ykrasik.jerminal.internal.command.parameter.AbstractMandatoryCommandParam;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
-import com.github.ykrasik.jerminal.internal.filesystem.ShellFileSystem;
-import com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectory;
+import com.github.ykrasik.jerminal.internal.filesystem.InternalShellFileSystem;
+import com.github.ykrasik.jerminal.internal.filesystem.directory.InternalShellDirectory;
 import com.github.ykrasik.jerminal.internal.returnvalue.AutoCompleteReturnValue;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.Objects;
 
 /**
- * A {@link com.github.ykrasik.jerminal.api.command.parameter.CommandParam CommandParam} that parses {@link ShellDirectory} values.<br>
+ * A {@link com.github.ykrasik.jerminal.api.command.parameter.CommandParam CommandParam} that parses {@link InternalShellDirectory} values.<br>
  * Intended for internal use with control commands.
  *
  * @author Yevgeny Krasik
  */
-public class DirectoryParam extends AbstractMandatoryCommandParam<ShellDirectory> {
-    private final ShellFileSystem fileSystem;
+public class DirectoryParam extends AbstractMandatoryCommandParam<InternalShellDirectory> {
+    private final InternalShellFileSystem fileSystem;
 
-    public DirectoryParam(String name, String description, ShellFileSystem fileSystem) {
+    public DirectoryParam(String name, String description, InternalShellFileSystem fileSystem) {
         super(name, description);
-        this.fileSystem = checkNotNull(fileSystem, "fileSystem");
+        this.fileSystem = Objects.requireNonNull(fileSystem);
     }
 
     @Override
@@ -45,7 +45,7 @@ public class DirectoryParam extends AbstractMandatoryCommandParam<ShellDirectory
     }
 
     @Override
-    public ShellDirectory parse(String rawValue) throws ParseException {
+    public InternalShellDirectory parse(String rawValue) throws ParseException {
         if (rawValue.isEmpty()) {
             throw emptyValue();
         }

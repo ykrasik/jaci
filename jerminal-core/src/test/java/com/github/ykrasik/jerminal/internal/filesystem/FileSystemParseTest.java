@@ -16,9 +16,9 @@
 
 package com.github.ykrasik.jerminal.internal.filesystem;
 
-import com.github.ykrasik.jerminal.api.command.Command;
+import com.github.ykrasik.jerminal.api.filesystem.command.Command;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
-import com.github.ykrasik.jerminal.internal.filesystem.file.ShellFile;
+import com.github.ykrasik.jerminal.internal.filesystem.command.InternalCommand;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -101,21 +101,21 @@ public class FileSystemParseTest extends AbstractFileSystemTest {
         final String name = "command";
 
         final Command globalCommand = cmd(name);
-        fileSystem = fileSystem.addGlobalCommands(globalCommand);
+        internalFileSystem.addGlobalCommands(globalCommand);
 
         final Command localCommand = cmd(name);
-        fileSystem = fileSystem.addCommands(localCommand);
+        fileSystem.addCommands(localCommand);
 
         try {
-            ShellFile file = fileSystem.parsePathToFile(name);
-            assertTrue(file.getCommand() == globalCommand);
+            InternalCommand command = internalFileSystem.parsePathToCommand(name);
+            assertTrue(command.getCommand() == globalCommand);
 
             // Adding anything else except the command name makes this no longer viable for a global command.
-            file = fileSystem.parsePathToFile('/' + name);
-            assertTrue(file.getCommand() == localCommand);
+            command = internalFileSystem.parsePathToCommand('/' + name);
+            assertTrue(command.getCommand() == localCommand);
 
-            file = fileSystem.parsePathToFile("./" + name);
-            assertTrue(file.getCommand() == localCommand);
+            command = internalFileSystem.parsePathToCommand("./" + name);
+            assertTrue(command.getCommand() == localCommand);
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }

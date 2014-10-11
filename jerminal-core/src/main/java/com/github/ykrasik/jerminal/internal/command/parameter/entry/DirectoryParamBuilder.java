@@ -16,14 +16,15 @@
 
 package com.github.ykrasik.jerminal.internal.command.parameter.entry;
 
-import com.google.common.base.Supplier;
 import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
+import com.github.ykrasik.jerminal.api.filesystem.directory.ShellDirectory;
 import com.github.ykrasik.jerminal.internal.command.parameter.ParamUtils;
 import com.github.ykrasik.jerminal.internal.command.parameter.optional.OptionalParam;
-import com.github.ykrasik.jerminal.internal.filesystem.ShellFileSystem;
-import com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectory;
+import com.github.ykrasik.jerminal.internal.filesystem.InternalShellFileSystem;
+import com.github.ykrasik.jerminal.internal.filesystem.directory.InternalShellDirectory;
+import com.google.common.base.Supplier;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.Objects;
 
 /**
  * A builder for a {@link DirectoryParam}.<br>
@@ -35,14 +36,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class DirectoryParamBuilder {
     private final String name;
-    private final ShellFileSystem fileSystem;
+    private final InternalShellFileSystem fileSystem;
 
     private String description = "directory";
-    private Supplier<ShellDirectory> defaultValueSupplier;
+    private Supplier<InternalShellDirectory> defaultValueSupplier;
 
-    public DirectoryParamBuilder(String name, ShellFileSystem fileSystem) {
-        this.name = checkNotNull(name, "name");
-        this.fileSystem = checkNotNull(fileSystem, "fileSystem");
+    public DirectoryParamBuilder(String name, InternalShellFileSystem fileSystem) {
+        this.name = Objects.requireNonNull(name);
+        this.fileSystem = Objects.requireNonNull(fileSystem);
     }
 
     public CommandParam build() {
@@ -58,11 +59,11 @@ public class DirectoryParamBuilder {
         return this;
     }
 
-    public DirectoryParamBuilder setOptional(ShellDirectory defaultValue) {
+    public DirectoryParamBuilder setOptional(InternalShellDirectory defaultValue) {
         return setOptional(ParamUtils.constValueSupplier(defaultValue));
     }
 
-    public DirectoryParamBuilder setOptional(Supplier<ShellDirectory> defaultValueSupplier) {
+    public DirectoryParamBuilder setOptional(Supplier<InternalShellDirectory> defaultValueSupplier) {
         this.defaultValueSupplier = defaultValueSupplier;
         return this;
     }

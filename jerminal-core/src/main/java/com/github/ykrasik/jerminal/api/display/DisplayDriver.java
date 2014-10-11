@@ -18,19 +18,19 @@ package com.github.ykrasik.jerminal.api.display;
 
 import com.github.ykrasik.jerminal.api.assist.CommandInfo;
 import com.github.ykrasik.jerminal.api.assist.Suggestions;
-import com.github.ykrasik.jerminal.api.command.view.ShellCommandView;
 import com.github.ykrasik.jerminal.api.exception.ExecuteException;
 import com.github.ykrasik.jerminal.api.exception.ParseError;
-import com.github.ykrasik.jerminal.api.filesystem.ShellEntryView;
+import com.github.ykrasik.jerminal.api.filesystem.command.Command;
+import com.github.ykrasik.jerminal.api.filesystem.directory.ShellDirectory;
 
 /**
- * In charge of displaying information to the user.<br>
+ * Displays information to the user.
  *
  * @author Yevgeny Krasik
  */
 public interface DisplayDriver {
     /**
-     * Called before any other events are called, to allow the {@link DisplayDriver} to prepare itself.<br>
+     * Called before any other events are called, to allow the driver to prepare itself.<br>
      * Will not be called again before {@link #end()} is called.
      */
     void begin();
@@ -57,42 +57,41 @@ public interface DisplayDriver {
     void displayText(String text);
 
     // FIXME: JavaDoc
+
+    /**
+     * Display command info along with it's parsed args.
+     */
     void displayCommandInfo(CommandInfo commandInfo);
 
+    /**
+     * Display suggestions. Called either because assistance was requested, or due to an error.
+     */
     void displaySuggestions(Suggestions suggestions);
 
     /**
-     * The user requested to display the directory structure of a directory.
+     * Display the directory structure.
      */
-    void displayShellEntryView(ShellEntryView shellEntryView);
+    void displayDirectory(ShellDirectory directory);
 
     /**
-     * The user requested to display information about a command.
+     * Display command info.
      */
-    void displayShellCommandView(ShellCommandView shellCommandView);
+    void displayCommand(Command command);
 
     /**
-     * A parse error occurred while parsing the command line.
+     * Display the parse error that occurred while parsing the command line.
      */
-    // TODO: Put all these params in a single ParseErrorContext?
     void displayParseError(ParseError error, String errorMessage);
 
     /**
-     * An execution error occurred while executing the command line.<br>
+     * Display the execution error that was thrown while executing the command line.
      */
     void displayExecuteError(ExecuteException e);
 
     /**
-     * An unhandled exception was thrown while executing the command line.<br>
-     * This is not an internal error -
-     * this exception was thrown from within the code associated with the command being run.
+     * Display the unhandled exception that was thrown while operating on the command line.
      */
-    void displayExecuteUnhandledException(Exception e);
-
-    /**
-     * An internal error has occurred. Shouldn't happen :)
-     */
-    void displayInternalError(Exception e);
+    void displayUnhandledException(Exception e);
 
     // TODO: Add a 'setPath' call, for 'cd'.
 }

@@ -19,11 +19,12 @@ package com.github.ykrasik.jerminal.internal.command.parameter.entry;
 import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
 import com.github.ykrasik.jerminal.internal.command.parameter.ParamUtils;
 import com.github.ykrasik.jerminal.internal.command.parameter.optional.OptionalParam;
-import com.github.ykrasik.jerminal.internal.filesystem.ShellFileSystem;
-import com.github.ykrasik.jerminal.internal.filesystem.file.ShellFile;
+import com.github.ykrasik.jerminal.internal.filesystem.InternalShellFileSystem;
+import com.github.ykrasik.jerminal.internal.filesystem.command.InternalCommand;
 import com.google.common.base.Supplier;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.Objects;
+
 
 /**
  * A builder for a {@link FileParam}.<br>
@@ -33,16 +34,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Yevgeny Krasik
  */
+// FIXME: JavaDoc
 public class FileParamBuilder {
     private final String name;
-    private final ShellFileSystem fileSystem;
+    private final InternalShellFileSystem fileSystem;
 
     private String description = "file";
-    private Supplier<ShellFile> defaultValueSupplier;
+    private Supplier<InternalCommand> defaultValueSupplier;
 
-    public FileParamBuilder(String name, ShellFileSystem fileSystem) {
-        this.name = checkNotNull(name, "name");
-        this.fileSystem = checkNotNull(fileSystem, "fileSystem");
+    // FIXME: Rename this to CommandParam?
+    public FileParamBuilder(String name, InternalShellFileSystem fileSystem) {
+        this.name = Objects.requireNonNull(name);
+        this.fileSystem = Objects.requireNonNull(fileSystem);
     }
 
     public CommandParam build() {
@@ -58,11 +61,11 @@ public class FileParamBuilder {
         return this;
     }
 
-    public FileParamBuilder setOptional(ShellFile defaultValue) {
+    public FileParamBuilder setOptional(InternalCommand defaultValue) {
         return setOptional(ParamUtils.constValueSupplier(defaultValue));
     }
 
-    public FileParamBuilder setOptional(Supplier<ShellFile> defaultValueSupplier) {
+    public FileParamBuilder setOptional(Supplier<InternalCommand> defaultValueSupplier) {
         this.defaultValueSupplier = defaultValueSupplier;
         return this;
     }
