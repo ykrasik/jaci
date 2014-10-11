@@ -75,17 +75,17 @@ public class LibGdxTerminal extends Table implements Terminal {
     }
 
     @Override
-    public void print(String text) {
+    public void println(String text) {
         print(text, Color.WHITE);
     }
 
     @Override
-    public void printError(String text) {
+    public void printlnError(String text) {
         print(text, Color.PINK);
     }
 
     public void print(String text, Color color) {
-        final Label label = widgetFactory.createBufferEntryLabel(text);
+        final Label label = widgetFactory.createBufferEntryLabel(text + '\n');
         label.setColor(color);
         addLabel(label);
     }

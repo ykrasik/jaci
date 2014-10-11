@@ -36,11 +36,6 @@ public class DefaultTerminalSerializer implements TerminalSerializer {
     private static final Joiner JOINER = Joiner.on(',').skipNulls();
 
     @Override
-    public String getEmptyLine() {
-        return "\n";
-    }
-
-    @Override
     public String serializeCommandInfo(CommandInfo commandInfo) {
         final String commandName = commandInfo.getCommandName();
         final List<ParamAndValue> paramAndValues = commandInfo.getParamAndValues();
@@ -85,6 +80,7 @@ public class DefaultTerminalSerializer implements TerminalSerializer {
         appendSuggestions(sb, suggestions.getCommandSuggestions(), "Commands");
         appendSuggestions(sb, suggestions.getParamNameSuggestions(), "Parameter names");
         appendSuggestions(sb, suggestions.getParamValueSuggestions(), "Parameter values");
+        sb.deleteCharAt(sb.length() - 1);
         return sb.toString();
     }
 

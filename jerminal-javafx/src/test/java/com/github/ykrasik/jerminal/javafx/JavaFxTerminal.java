@@ -26,13 +26,14 @@ public class JavaFxTerminal implements Terminal {
     }
 
     @Override
-    public void print(String text) {
+    public void println(String text) {
         textArea.appendText(text);
+        textArea.appendText("\n");
     }
 
     @Override
-    public void printError(String text) {
+    public void printlnError(String text) {
         // TODO: Make this red.
-        textArea.appendText(text);
+        println(text);
     }
 }

@@ -28,11 +28,6 @@ import com.github.ykrasik.jerminal.api.filesystem.directory.ShellDirectory;
  */
 public interface TerminalSerializer {
     /**
-     * @return A {@link String} representing an empty line.
-     */
-    String getEmptyLine();
-
-    /**
      * @return A serialized {@link CommandInfo}.
      */
     String serializeCommandInfo(CommandInfo commandInfo);

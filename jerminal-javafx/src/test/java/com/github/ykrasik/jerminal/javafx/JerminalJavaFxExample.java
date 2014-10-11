@@ -69,6 +69,7 @@ public class JerminalJavaFxExample extends Application {
         stage.show();
 
         final TextArea textArea = findById("textArea", TextArea.class);
+        textArea.setFocusTraversable(false);
         final Terminal terminal = new JavaFxTerminal(textArea);
 
         final ShellFileSystem fileSystem = createFileSystem();
@@ -80,14 +81,26 @@ public class JerminalJavaFxExample extends Application {
 
         this.shell = new ShellWithCommandLineImpl(shellImpl, commandLineDriver);
 
+        textField.requestFocus();
+//        textArea.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
+//            @Override
+//            public void handle(KeyEvent keyEvent) {
+//                switch (keyEvent.getCode()) {
+//                    case ENTER: shell.execute(); keyEvent.consume(); break;
+//                    case TAB: shell.assist(); keyEvent.consume(); textArea.requestFocus(); break;
+//                    case UP: shell.setPrevCommandLineFromHistory(); keyEvent.consume(); break;
+//                    case DOWN: shell.setNextCommandLineFromHistory(); keyEvent.consume(); break;
+//                }
+//            }
+//        });
         textField.setOnKeyPressed(new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent keyEvent) {
                 switch (keyEvent.getCode()) {
-                    case ENTER: shell.execute(); break;
-                    case TAB: shell.assist(); break;
-                    case UP: shell.setPrevCommandLineFromHistory(); break;
-                    case DOWN: shell.setNextCommandLineFromHistory(); break;
+                    case ENTER: shell.execute(); keyEvent.consume(); break;
+                    case TAB: shell.assist(); keyEvent.consume(); break;
+                    case UP: shell.setPrevCommandLineFromHistory(); keyEvent.consume(); break;
+                    case DOWN: shell.setNextCommandLineFromHistory(); keyEvent.consume(); break;
                 }
             }
         });
@@ -183,6 +196,7 @@ public class JerminalJavaFxExample extends Application {
         @Override
         public void set(String commandLine) {
             textField.setText(commandLine);
+            textField.positionCaret(commandLine.length());
         }
 
         @Override

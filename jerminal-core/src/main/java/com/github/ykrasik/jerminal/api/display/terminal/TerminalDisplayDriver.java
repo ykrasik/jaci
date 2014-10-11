@@ -77,7 +77,8 @@ public class TerminalDisplayDriver implements DisplayDriver {
 
     @Override
     public void displayEmptyLine() {
-        print(serializer.getEmptyLine());
+        // The terminal is expected to add a new line after any text.
+        print("");
     }
 
     @Override
@@ -131,11 +132,11 @@ public class TerminalDisplayDriver implements DisplayDriver {
 
     private void print(String message) {
         numInteractions++;
-        terminal.print(message);
+        terminal.println(message);
     }
 
     private void printError(String message) {
         numInteractions++;
-        terminal.printError(message);
+        terminal.printlnError(message);
     }
 }

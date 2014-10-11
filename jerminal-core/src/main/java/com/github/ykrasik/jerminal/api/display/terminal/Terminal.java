@@ -35,12 +35,12 @@ public interface Terminal {
     void end();
 
     /**
-     * Print the text.
+     * Print the text and move to the next line.
      */
-    void print(String text);
+    void println(String text);
 
     /**
-     * Print the text as an error.
+     * Print the text as an error and move to the next line.
      */
-    void printError(String text);
+    void printlnError(String text);
 }
