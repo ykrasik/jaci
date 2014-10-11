@@ -28,27 +28,32 @@ import com.github.ykrasik.jerminal.api.filesystem.directory.ShellDirectory;
  */
 public interface TerminalSerializer {
     /**
-     * @return A serialized {@link CommandInfo}.
+     * @param commandInfo {@link CommandInfo} to serialize.
+     * @return Serialized {@link CommandInfo}.
      */
     String serializeCommandInfo(CommandInfo commandInfo);
 
     /**
-     * @return A serialized {@link Suggestions}.
+     * @param suggestions {@link Suggestions} to serialize.
+     * @return Serialized {@link Suggestions}.
      */
     String serializeSuggestions(Suggestions suggestions);
 
     /**
-     * @return A serialized {@link ShellDirectory}.
+     * @param directory {@link ShellDirectory} to serialize.
+     * @return Serialized {@link ShellDirectory}.
      */
     String serializeDirectory(ShellDirectory directory);
 
     /**
-     * @return A serialized {@link Command}.
+     * @param command {@link Command} to serialize.
+     * @return Serialized {@link Command}.
      */
     String serializeCommand(Command command);
 
     /**
-     * @return A serialized {@link Exception}.
+     * @param e {@link Exception} to serialize.
+     * @return Serialized {@link Exception}.
      */
     String serializeException(Exception e);
 }

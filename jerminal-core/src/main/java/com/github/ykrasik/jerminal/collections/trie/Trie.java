@@ -27,6 +27,8 @@ import java.util.Set;
 
 /**
  * An <b>immutable</b> prefix tree.<br>
+ * The internal state of the Trie cannot be changed by any operation. All methods return a copy of the Trie
+ * with the alteration performed.
  *
  * @author Yevgeny Krasik
  */
@@ -42,6 +44,10 @@ public interface Trie<T> {
     boolean isEmpty();
 
     /**
+     * Add a word-value mapping to the Trie. Expects there not to be a previous mapping for the word.
+     *
+     * @param word The word for the word-value mapping.
+     * @param value The value for the word-value mapping.
      * @return A Trie with the given word-value mapping added.<br>
      *         Does not alter this Trie.
      * @throws java.lang.IllegalStateException If this Trie already contained a mapping for the given word.
@@ -49,6 +55,11 @@ public interface Trie<T> {
     Trie<T> add(String word, T value);
 
     /**
+     * Set a word-value mapping on the Trie. If a previous mapping exists, it will be overwritten.
+     * Otherwise, will create a new word-value mapping.
+     *
+     * @param word The word for the word-value mapping.
+     * @param value The value for the word-value mapping.
      * @return A Trie with the given word-value mapping set. Overwrites any previous mapping.<br>
      *         Does not alter this Trie.
      */
@@ -57,15 +68,17 @@ public interface Trie<T> {
     /**
      * @return The root {@link TrieNode}. {@link TrieNode}s are <b>immutable</b>.
      */
-    // FIXME: This is only needed for union, make sure this should be exposed.
+    // TODO: This is only needed for union, make sure this should be exposed.
     TrieNode<T> getRoot();
 
     /**
+     * @param word The word to check.
      * @return True if this Trie contains the word.<br>
      */
     boolean contains(String word);
 
     /**
+     * @param word The word to retrieve the value for.
      * @return The value associated with the word.
      */
     Optional<T> get(String word);
@@ -81,8 +94,9 @@ public interface Trie<T> {
     Collection<T> values();
 
     /**
-     * Calls {@link TrieVisitor#visit(String, Object)}
-     * for each word-value pair in this Trie.
+     * Calls {@link TrieVisitor#visit(String, Object)} for each word-value pair in this Trie.
+     *
+     * @param visitor The visitor that will visit each word-value pair.
      */
     void visitWords(TrieVisitor<T> visitor);
 
@@ -93,13 +107,15 @@ public interface Trie<T> {
     String getLongestPrefix();
 
     /**
-     * @return A {@link Trie} with words that start with the prefix. <br>
+     * @param prefix The prefix to get a subTrie for.
+     * @return A {@link Trie} with words that start with the prefix.<br>
      *         If no such words exist in the Trie, an empty Trie is returned.<br>
      *         Does not alter this Trie.
      */
     Trie<T> subTrie(String prefix);
 
     /**
+     * @param function Function to apply to each value in this Trie.
      * @return A Trie in which the value of each word was transformed by calling {@link Function#apply(Object)}.<br>
      *         If the result of the transformation returned 'null', that word and value will not appear in the returned Trie.<br>
      *         Does not alter this Trie.
@@ -107,12 +123,14 @@ public interface Trie<T> {
     <A> Trie<A> map(Function<T, A> function);
 
     /**
+     * @param filter Predicate that determines which values will remain in the Trie.
      * @return A Trie in which all values for which {@link Predicate#apply(Object)} returned false are removed.<br>
      *         Does not alter this Trie.
      */
     Trie<T> filter(Predicate<T> filter);
 
     /**
+     * @param other The other Trie of the union.
      * @return A Trie which contains words and values from this Trie and the other Trie.<br>
      *         If a word was contained in both Tries, the returned Trie will map that word to either one
      *         of the possible values.<br>

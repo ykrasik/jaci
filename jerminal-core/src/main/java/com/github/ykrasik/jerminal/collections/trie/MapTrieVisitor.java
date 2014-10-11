@@ -36,6 +36,9 @@ public class MapTrieVisitor<T> implements TrieVisitor<T> {
         values.put(word, value);
     }
 
+    /**
+     * @return The collected word-value map.
+     */
     public Map<String, T> getMap() {
         return values;
     }

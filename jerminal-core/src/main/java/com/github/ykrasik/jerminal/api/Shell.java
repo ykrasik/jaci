@@ -18,7 +18,6 @@ package com.github.ykrasik.jerminal.api;
 
 import com.google.common.base.Optional;
 
-// FIXME: JavaDoc
 /**
  * Processes command lines and displays results as a side effect through a {@link com.github.ykrasik.jerminal.api.display.DisplayDriver}.<br>
  * <br>
@@ -47,12 +46,16 @@ public interface Shell {
 
     /**
      * Provide assistance for the command line.
+     *
+     * @param commandLine Command line to provide assistance for.
      * @return The new command line if assistance was possible.
      */
     Optional<String> assist(String commandLine);
 
     /**
      * Execute the command line.
+     *
+     * @param commandLine Command line to execute.
      * @return True if the command line was executed successfully.
      */
     boolean execute(String commandLine);

@@ -23,5 +23,11 @@ package com.github.ykrasik.jerminal.collections.trie;
  * @author Yevgeny Krasik
  */
 public interface TrieVisitor<T> {
+    /**
+     * Called for each word-value mapping in a Trie.
+     *
+     * @param word The word in a word-value mapping.
+     * @param value The value in a word-value mapping.
+     */
     void visit(String word, T value);
 }

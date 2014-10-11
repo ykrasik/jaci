@@ -82,7 +82,6 @@ public class TrieImpl<T> implements Trie<T> {
 
     // FIXME: Doesn't work with subTries!
     // FIXME: Test this thoroughly!
-    // FIXME: This method is pretty ugly...
     private TrieNode<T> doPut(TrieNode<T> parent, String word, int index, T value, boolean replace) {
         final char c = word.charAt(index);
         final Optional<TrieNode<T>> child = parent.getChild(c);
@@ -105,36 +104,6 @@ public class TrieImpl<T> implements Trie<T> {
         }
         return parent.setChild(newChild);
     }
-
-//    private TrieNode<T> doPut(TrieNode<T> parent, String word, int index, T value) {
-//        final char c = word.charAt(index);
-//
-//        if (index == word.length() - 1) {
-//            // Last character of the word, create a value node.
-//            final Optional<TrieNode<T>> child = parent.getChild(c);
-//            final TrieNode<T> newChild;
-//            if (child.isPresent()) {
-//                if (child.get().getValue().isPresent()) {
-//                    throw new IllegalArgumentException("Trie already contains a value for: " + word);
-//                }
-//                newChild = child.get().setValue(value);
-//            } else {
-//                newChild = new TrieNodeImpl<>(c, value);
-//            }
-//            return parent.setChild(newChild);
-//        }
-//
-//        final Optional<TrieNode<T>> child = parent.getChild(c);
-//        final TrieNode<T> currentChild;
-//        if (child.isPresent()) {
-//            currentChild = child.get();
-//        } else {
-//            currentChild = new TrieNodeImpl<>(c);
-//        }
-//
-//        final TrieNode<T> newChild = doPut(currentChild, word, index + 1, value);
-//        return parent.setChild(newChild);
-//    }
 
     @Override
     public TrieNode<T> getRoot() {
@@ -327,7 +296,7 @@ public class TrieImpl<T> implements Trie<T> {
     }
 
     /**
-     * Returns an empty {@link Trie}.
+     * @return An empty {@link Trie}.
      */
     @SuppressWarnings("unchecked")
     public static <T> Trie<T> emptyTrie() {

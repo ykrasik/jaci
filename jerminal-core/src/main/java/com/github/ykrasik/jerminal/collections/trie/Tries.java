@@ -20,21 +20,36 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
+ * Trie related utilities.
+ *
  * @author Yevgeny Krasik
  */
 public final class Tries {
     private Tries() {
     }
 
-    // FIXME: JavaDoc
-    public static Trie<String> toStringTrie(String... strings) {
-        return toStringTrie(Arrays.asList(strings));
+    /**
+     * Sometimes a Trie's values aren't important, only the words matter.
+     * Convenience method that associates each word with a constant value.
+     *
+     * @param words Words to put in the Trie.
+     * @return A Trie where each word is present in the Trie, but associated to some constant value.
+     */
+    public static Trie<String> toStringTrie(String... words) {
+        return toStringTrie(Arrays.asList(words));
     }
 
-    public static Trie<String> toStringTrie(List<String> strings) {
+    /**
+     * Sometimes a Trie's values aren't important, only the words matter.
+     * Convenience method that associates each word with a constant value.
+     *
+     * @param words Words to put in the Trie.
+     * @return A Trie where each word is present in the Trie, but associated to some constant value.
+     */
+    public static Trie<String> toStringTrie(List<String> words) {
         Trie<String> trie = new TrieImpl<>();
-        for (String string : strings) {
-            trie = trie.add(string, "");
+        for (String word : words) {
+            trie = trie.add(word, "");
         }
         return trie;
     }
