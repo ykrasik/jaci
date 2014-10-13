@@ -30,4 +30,9 @@ public class LibGdxTerminalSerializer extends DefaultTerminalSerializer {
         sb.append('|');
         super.appendDepthSpaces(sb, depth);
     }
+
+    @Override
+    protected String getTab() {
+        return "    ";
+    }
 }

@@ -44,7 +44,7 @@ public class DefaultTerminalSerializer implements TerminalSerializer {
         final StringBuilder sb = new StringBuilder();
         appendDepthSpaces(sb, 0);
         sb.append(commandName);
-        sb.append(' ');
+        sb.append('\n');
         appendParams(sb, paramAndValues, currentParamIndex);
         return sb.toString();
     }
@@ -52,8 +52,13 @@ public class DefaultTerminalSerializer implements TerminalSerializer {
     protected void appendParams(StringBuilder sb, List<ParamAndValue> paramAndValues, int currentParamIndex) {
         // Surround the current param being parsed with >>> <<<
         for (int i = 0; i < paramAndValues.size(); i++) {
+            appendDepthSpaces(sb, 1);
             if (currentParamIndex == i) {
-                sb.append(">>> ");
+                sb.append("->");
+                sb.append(getTab());
+                sb.append(' ');
+            } else {
+                sb.append(getTab());
             }
 
             final ParamAndValue param = paramAndValues.get(i);
@@ -61,15 +66,19 @@ public class DefaultTerminalSerializer implements TerminalSerializer {
 
             final Optional<String> value = param.getValue();
             if (value.isPresent()) {
-                sb.append('=');
+                sb.append(" = ");
                 sb.append(value.get());
             } else {
                 if (currentParamIndex == i) {
-                    sb.append(" <<<");
+                    sb.append(' ');
+                    sb.append(getTab());
+                    sb.append("<-");
                 }
             }
 
-            sb.append(' ');
+            if (i != paramAndValues.size() - 1) {
+                sb.append('\n');
+            }
         }
     }
 
@@ -112,12 +121,12 @@ public class DefaultTerminalSerializer implements TerminalSerializer {
         sb.append(']');
         sb.append('\n');
 
-        for (ShellDirectory childDirectory : directory.getDirectories()) {
-            doSerializeDirectory(sb, childDirectory, depth + 1);
-        }
-
         for (Command command : directory.getCommands()) {
             doSerializeCommand(sb, command, depth + 1, false);
+        }
+
+        for (ShellDirectory childDirectory : directory.getDirectories()) {
+            doSerializeDirectory(sb, childDirectory, depth + 1);
         }
     }
 
@@ -173,6 +182,6 @@ public class DefaultTerminalSerializer implements TerminalSerializer {
     }
 
     protected String getTab() {
-        return "    ";
+        return "\t";
     }
 }
