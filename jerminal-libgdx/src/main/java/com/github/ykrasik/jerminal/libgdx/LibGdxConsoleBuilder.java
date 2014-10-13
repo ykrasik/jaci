@@ -18,10 +18,6 @@ package com.github.ykrasik.jerminal.libgdx;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
-import com.github.ykrasik.jerminal.api.Shell;
-import com.github.ykrasik.jerminal.api.ShellImpl;
-import com.github.ykrasik.jerminal.api.display.DisplayDriver;
-import com.github.ykrasik.jerminal.api.display.terminal.TerminalDisplayDriver;
 import com.github.ykrasik.jerminal.api.filesystem.ShellFileSystem;
 
 import java.util.Objects;
@@ -48,32 +44,30 @@ public class LibGdxConsoleBuilder {
         }
     };
 
-    private final LibGdxConsoleWidgetFactory widgetFactory;
+    private final ConsoleWidgetFactory widgetFactory;
+    private final ShellFileSystem fileSystem;
 
-    private final LibGdxTerminal terminal;
-    private ShellFileSystem fileSystem;
-    private int maxHistory = 30;
-    private String welcomeMessage = "Welcome to Jerminal!\n";
     private ConsoleToggler consoleToggler = DEFAULT_CONSOLE_TOGGLER;
+    private int maxTerminalEntries = 30;
+    private int maxCommandHistory = 30;
+    private String welcomeMessage = "Welcome to Jerminal!\n";
 
-    public LibGdxConsoleBuilder(LibGdxConsoleWidgetFactory widgetFactory, int maxBufferEntries) {
-        this.widgetFactory = widgetFactory;
-        this.terminal = new LibGdxTerminal(widgetFactory, maxBufferEntries);
+    public LibGdxConsoleBuilder(ShellFileSystem fileSystem, ConsoleWidgetFactory widgetFactory) {
+        this.fileSystem = Objects.requireNonNull(fileSystem);
+        this.widgetFactory = Objects.requireNonNull(widgetFactory);
     }
 
     public LibGdxConsole build() {
-        final DisplayDriver displayDriver = new TerminalDisplayDriver(terminal);
-        final Shell shell = new ShellImpl(fileSystem, displayDriver, maxHistory, welcomeMessage);
-        return new LibGdxConsole(terminal, shell, consoleToggler, widgetFactory);
+        return new LibGdxConsole(fileSystem, widgetFactory, consoleToggler, maxTerminalEntries, maxCommandHistory, welcomeMessage);
     }
 
-    public LibGdxConsoleBuilder setFileSystem(ShellFileSystem fileSystem) {
-        this.fileSystem = Objects.requireNonNull(fileSystem);
+    public LibGdxConsoleBuilder setMaxTerminalEntries(int maxTerminalEntries) {
+        this.maxTerminalEntries = maxTerminalEntries;
         return this;
     }
 
-    public LibGdxConsoleBuilder setMaxCommandHistory(int maxHistory) {
-        this.maxHistory = maxHistory;
+    public LibGdxConsoleBuilder setMaxCommandHistory(int maxCommandHistory) {
+        this.maxCommandHistory = maxCommandHistory;
         return this;
     }
 

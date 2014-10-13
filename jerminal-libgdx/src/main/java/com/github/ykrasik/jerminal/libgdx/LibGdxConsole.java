@@ -16,8 +16,6 @@
 
 package com.github.ykrasik.jerminal.libgdx;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
@@ -27,9 +25,13 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.github.ykrasik.jerminal.api.Console;
+import com.github.ykrasik.jerminal.api.ConsoleImpl;
 import com.github.ykrasik.jerminal.api.Shell;
-import com.github.ykrasik.jerminal.api.commandline.ShellWithCommandLine;
-import com.github.ykrasik.jerminal.api.commandline.ShellWithCommandLineImpl;
+import com.github.ykrasik.jerminal.api.ShellImpl;
+import com.github.ykrasik.jerminal.api.display.DisplayDriver;
+import com.github.ykrasik.jerminal.api.display.terminal.TerminalDisplayDriver;
+import com.github.ykrasik.jerminal.api.filesystem.ShellFileSystem;
 
 import java.util.Objects;
 
@@ -40,34 +42,36 @@ import java.util.Objects;
  */
 // FIXME: JavaDoc
 public class LibGdxConsole extends Table {
-    private final ShellWithCommandLine shell;
     private final ConsoleToggler consoleToggler;
-
-    private final Label currentPath;
     private final TextField textField;
-    private final Table terminalScreen;
 
     private ConsoleActivationListener activationListener;
     private Actor prevKeyboardFocus;
 
-    // FIXME: Construct the shell inside the ctor.
-    public LibGdxConsole(LibGdxTerminal terminal,
-                         Shell shell,
+    public LibGdxConsole(ShellFileSystem fileSystem,
+                         ConsoleWidgetFactory widgetFactory,
                          ConsoleToggler consoleToggler,
-                         LibGdxConsoleWidgetFactory widgetFactory) {
+                         int maxTerminalEntries,
+                         int maxCommandHistory,
+                         String welcomeMessage) {
         this.consoleToggler = Objects.requireNonNull(consoleToggler);
 
         // TextField to input commands.
         textField = widgetFactory.createInputTextField();
         textField.setName("textField");
 
-        this.shell = new ShellWithCommandLineImpl(shell, new LibGdxCommandLineDriver(textField));
+        final LibGdxTerminal terminal = new LibGdxTerminal(widgetFactory, maxTerminalEntries);
+        final DisplayDriver displayDriver = new TerminalDisplayDriver(terminal, new LibGdxTerminalSerializer());
+        final Shell shell = new ShellImpl(fileSystem, displayDriver, welcomeMessage);
+        final LibGdxCommandLineDriver commandLineDriver = new LibGdxCommandLineDriver(textField);
+        final Console console = new ConsoleImpl(shell, commandLineDriver, maxCommandHistory);
+        textField.addListener(new LibGdxConsoleDriver(console));
 
         terminal.bottom().left();
         terminal.debug();
 
-        // A "current-path" thing.
-        currentPath = widgetFactory.createCurrentPathLabel("$");
+        // A "current-path" label.
+        final Label currentPath = widgetFactory.createCurrentPathLabel("$");
         currentPath.setName("currentPathLabel");
 
         final Table currentPathTable = new Table();
@@ -95,7 +99,7 @@ public class LibGdxConsole extends Table {
         bottomRow.add(closeButton).fill().width(closeButton.getWidth());
         bottomRow.debug();
 
-        terminalScreen = new Table();
+        final Table terminalScreen = new Table();
         terminalScreen.setName("terminalScreen");
         terminalScreen.setBackground(widgetFactory.createTerminalBufferBackground());
         terminalScreen.pad(0);
@@ -107,12 +111,11 @@ public class LibGdxConsole extends Table {
         terminalScreen.setFillParent(true);
         terminalScreen.debug();
 
-        add(terminalScreen);
-        addListener(new ConsoleInputListener());
+        this.add(terminalScreen);
+        this.bottom().left();
 
-        bottom().left();
-
-        setVisible(false);
+        // Deactivated by default
+        this.setVisible(false);
     }
 
     @Override
@@ -196,7 +199,7 @@ public class LibGdxConsole extends Table {
     }
 
     /**
-     * A listener that toggles the console when the {@link ConsoleToggler} says it should.
+     * An {@link InputListener} that toggles the console when the {@link ConsoleToggler} says it should.
      */
     private class ConsoleToggleListener extends InputListener {
         @Override
@@ -206,33 +209,6 @@ public class LibGdxConsole extends Table {
                 event.cancel();
                 return true;
             }
-            return false;
-        }
-    }
-
-    /**
-     * A listener for specific input events that operates the {@link ShellWithCommandLine}.
-     */
-    private class ConsoleInputListener extends InputListener {
-        @Override
-        public boolean keyDown(InputEvent event, int keycode) {
-            if (!isActive()) {
-                // Shouldn't be called, but just in case.
-                return false;
-            }
-
-            switch (keycode) {
-                case Keys.DPAD_UP: shell.setPrevCommandLineFromHistory(); return true;
-                case Keys.DPAD_DOWN: shell.setNextCommandLineFromHistory(); return true;
-                case Keys.ENTER: shell.execute(); return true;
-                case Keys.TAB: shell.assist(); return true;
-                case Keys.Z:
-                    if (Gdx.input.isKeyPressed(Keys.CONTROL_LEFT)) {
-                        shell.clearCommandLine();
-                        return true;
-                    }
-            }
-
             return false;
         }
     }

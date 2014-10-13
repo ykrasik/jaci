@@ -46,5 +46,5 @@ public interface Terminal {
      *
      * @param text Text to print as an error.
      */
-    void printlnError(String text);
+    void errorPrintln(String text);
 }

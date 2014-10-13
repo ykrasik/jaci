@@ -24,16 +24,15 @@ import com.github.ykrasik.jerminal.api.display.DisplayDriver;
 import com.github.ykrasik.jerminal.api.exception.ExecuteException;
 import com.github.ykrasik.jerminal.api.filesystem.ShellFileSystem;
 import com.github.ykrasik.jerminal.collections.trie.Trie;
-import com.github.ykrasik.jerminal.internal.CommandLineHistory;
+import com.github.ykrasik.jerminal.internal.assist.AssistReturnValue;
+import com.github.ykrasik.jerminal.internal.assist.AutoCompleteReturnValue;
+import com.github.ykrasik.jerminal.internal.assist.AutoCompleteType;
+import com.github.ykrasik.jerminal.internal.assist.SuggestionsBuilder;
 import com.github.ykrasik.jerminal.internal.command.ControlCommandFactory;
 import com.github.ykrasik.jerminal.internal.command.OutputPrinterImpl;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.internal.filesystem.InternalShellFileSystem;
 import com.github.ykrasik.jerminal.internal.filesystem.command.InternalCommand;
-import com.github.ykrasik.jerminal.internal.assist.AssistReturnValue;
-import com.github.ykrasik.jerminal.internal.assist.AutoCompleteReturnValue;
-import com.github.ykrasik.jerminal.internal.assist.AutoCompleteType;
-import com.github.ykrasik.jerminal.internal.assist.SuggestionsBuilder;
 import com.google.common.base.Optional;
 
 import java.util.ArrayList;
@@ -53,16 +52,14 @@ import java.util.regex.Pattern;
 public class ShellImpl implements Shell {
     private final InternalShellFileSystem fileSystem;
     private final DisplayDriver displayDriver;
-    private final CommandLineHistory history;
 
     public ShellImpl(ShellFileSystem fileSystem, DisplayDriver displayDriver) {
-        this(fileSystem, displayDriver, 30, "Welcome to Jerminal!\n");
+        this(fileSystem, displayDriver, "Welcome to Jerminal!\n");
     }
 
-    public ShellImpl(ShellFileSystem fileSystem, DisplayDriver displayDriver, int maxHistory, String welcomeMessage) {
+    public ShellImpl(ShellFileSystem fileSystem, DisplayDriver displayDriver, String welcomeMessage) {
         this.displayDriver = Objects.requireNonNull(displayDriver);
         this.fileSystem = createFileSystem(Objects.requireNonNull(fileSystem), displayDriver);
-        this.history = new CommandLineHistory(maxHistory);
 
         // Display welcome message.
         displayDriver.begin();
@@ -74,16 +71,6 @@ public class ShellImpl implements Shell {
         final InternalShellFileSystem internalShellFileSystem = new InternalShellFileSystem(fileSystem);
         new ControlCommandFactory(internalShellFileSystem, displayDriver).installControlCommands();
         return internalShellFileSystem;
-    }
-
-    @Override
-    public Optional<String> getPrevCommandLineFromHistory() {
-        return history.getPrevCommandLine();
-    }
-
-    @Override
-    public Optional<String> getNextCommandLineFromHistory() {
-        return history.getNextCommandLine();
     }
 
     @Override
@@ -217,9 +204,6 @@ public class ShellImpl implements Shell {
             displayDriver.displayEmptyLine();
             return;
         }
-
-        // Save command in history.
-        history.pushCommandLine(rawCommandLine);
 
         // Parse commandLine.
         // The first arg of the commandLine must be a path to a command.

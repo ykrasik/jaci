@@ -14,33 +14,20 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.api.commandline;
+package com.github.ykrasik.jerminal.libgdx;
+
+import com.github.ykrasik.jerminal.api.display.terminal.DefaultTerminalSerializer;
 
 /**
- * A component that can communicate with the command line.
+ * A {@link com.github.ykrasik.jerminal.api.display.terminal.TerminalSerializer} with specializations for LibGdx.
  *
  * @author Yevgeny Krasik
  */
-public interface CommandLineDriver {
-    /**
-     * @return The command line.
-     */
-    String read();
-
-    /**
-     * @return The command line until the cursor.
-     */
-    String readUntilCaret();
-
-    /**
-     * Set the command line to the given command line.
-     *
-     * @param commandLine Command line to set.
-     */
-    void set(String commandLine);
-
-    /**
-     * Clear the command line.
-     */
-    void clear();
+public class LibGdxTerminalSerializer extends DefaultTerminalSerializer {
+    @Override
+    protected void appendDepthSpaces(StringBuilder sb, int depth) {
+        // LibGdx seems to ignore leading spaces, so we must prefix them with something.
+        sb.append('|');
+        super.appendDepthSpaces(sb, depth);
+    }
 }

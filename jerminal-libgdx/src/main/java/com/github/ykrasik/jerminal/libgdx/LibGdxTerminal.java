@@ -33,16 +33,16 @@ import java.util.Objects;
  * @author Yevgeny Krasik
  */
 public class LibGdxTerminal extends Table implements Terminal {
-    private final LibGdxConsoleWidgetFactory widgetFactory;
-    private final int maxBufferEntries;
+    private final ConsoleWidgetFactory widgetFactory;
+    private final int maxTerminalEntries;
 
     private final Table buffer;
     private final ScrollPane scrollPane;
     private final Deque<Label> bufferEntries;
 
-    public LibGdxTerminal(LibGdxConsoleWidgetFactory widgetFactory, int maxBufferEntries) {
+    public LibGdxTerminal(ConsoleWidgetFactory widgetFactory, int maxTerminalEntries) {
         this.widgetFactory = Objects.requireNonNull(widgetFactory);
-        this.maxBufferEntries = maxBufferEntries;
+        this.maxTerminalEntries = maxTerminalEntries;
 
         // Create a buffer to hold out text labels.
         this.buffer = new Table();
@@ -59,7 +59,7 @@ public class LibGdxTerminal extends Table implements Terminal {
         updateScroll();
 
         // Buffer history.
-        this.bufferEntries = new ArrayDeque<>(maxBufferEntries);
+        this.bufferEntries = new ArrayDeque<>(maxTerminalEntries);
 
         setName("terminal");
         add(scrollPane);
@@ -81,7 +81,7 @@ public class LibGdxTerminal extends Table implements Terminal {
     }
 
     @Override
-    public void printlnError(String text) {
+    public void errorPrintln(String text) {
         println(text, Color.PINK);
     }
 
@@ -92,7 +92,7 @@ public class LibGdxTerminal extends Table implements Terminal {
     }
 
     private void addLabel(Label newEntry) {
-        if (bufferEntries.size() == maxBufferEntries) {
+        if (bufferEntries.size() == maxTerminalEntries) {
             final Label lastEntry = bufferEntries.removeFirst();
             buffer.removeActor(lastEntry);
         }

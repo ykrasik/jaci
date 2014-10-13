@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.api.commandline;
+package com.github.ykrasik.jerminal.api;
 
 /**
- * A similar but different API to a {@link com.github.ykrasik.jerminal.api.Shell Shell}.<br>
+ * {@link com.github.ykrasik.jerminal.api.Shell} + {@link CommandLineDriver} = {@link Console}.<br>
  * This assumes access to the command line - specifically the ability to read from and write to the
- * command line. Only returns indications of success, because the actual logic is performed as a side effect.
+ * command line. Only returns indications of success, because the actual logic is performed as a side effect.<br>
+ * Keeps a command history that can be queried and keeps track of where in the command history it is,
+ * for consecutive calls to {@link #setPrevCommandLineFromHistory()} and {@link #setNextCommandLineFromHistory()}.
+ * Executing a new command line will reset the command line history pointer and add the new command line to the end of the history.<br>
+ * <br>
  *
  * @author Yevgeny Krasik
  */
-public interface ShellWithCommandLine {
+public interface Console {
     /**
      * Clear the command line.
      */

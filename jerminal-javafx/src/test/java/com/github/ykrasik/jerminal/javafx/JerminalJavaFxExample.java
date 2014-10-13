@@ -16,6 +16,8 @@
 
 package com.github.ykrasik.jerminal.javafx;
 
+import com.github.ykrasik.jerminal.api.Console;
+import com.github.ykrasik.jerminal.api.ConsoleImpl;
 import com.github.ykrasik.jerminal.api.Shell;
 import com.github.ykrasik.jerminal.api.ShellImpl;
 import com.github.ykrasik.jerminal.api.command.CommandArgs;
@@ -25,18 +27,16 @@ import com.github.ykrasik.jerminal.api.command.OutputPrinter;
 import com.github.ykrasik.jerminal.api.command.parameter.bool.BooleanParamBuilder;
 import com.github.ykrasik.jerminal.api.command.parameter.numeric.IntegerParamBuilder;
 import com.github.ykrasik.jerminal.api.command.parameter.string.StringParamBuilder;
-import com.github.ykrasik.jerminal.api.commandline.ShellWithCommandLine;
-import com.github.ykrasik.jerminal.api.commandline.ShellWithCommandLineImpl;
 import com.github.ykrasik.jerminal.api.display.terminal.Terminal;
 import com.github.ykrasik.jerminal.api.display.terminal.TerminalDisplayDriver;
 import com.github.ykrasik.jerminal.api.exception.ExecuteException;
 import com.github.ykrasik.jerminal.api.filesystem.ShellFileSystem;
 import javafx.application.Application;
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
@@ -55,8 +55,6 @@ public class JerminalJavaFxExample extends Application {
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     private Scene scene;
-
-    private ShellWithCommandLine shell;
 
     public static void main(String[] args) {
         launch(args);
@@ -90,15 +88,14 @@ public class JerminalJavaFxExample extends Application {
 
         final ShellFileSystem fileSystem = createFileSystem();
 
-        final Shell shellImpl = new ShellImpl(fileSystem, new TerminalDisplayDriver(terminal));
+        final Shell shell = new ShellImpl(fileSystem, new TerminalDisplayDriver(terminal));
 
         final TextField textField = findById("textField", TextField.class);
         final JavaFxCommandLineDriver commandLineDriver = new JavaFxCommandLineDriver(textField);
-
-        this.shell = new ShellWithCommandLineImpl(shellImpl, commandLineDriver);
+        final Console console = new ConsoleImpl(shell, commandLineDriver);
 
         textField.requestFocus();
-        textField.addEventFilter(KeyEvent.KEY_PRESSED, new ConsoleEventHandler());
+        textField.addEventFilter(KeyEvent.KEY_PRESSED, new JavaFxConsoleDriver(console));
     }
 
     private Object loadFxml(String path) throws IOException {
@@ -168,35 +165,5 @@ public class JerminalJavaFxExample extends Application {
                     })
                     .build()
             );
-    }
-
-    /**
-     * An event handler for specific input events that operates the {@link ShellWithCommandLine}.
-     */
-    private class ConsoleEventHandler implements EventHandler<KeyEvent> {
-        @Override
-        public void handle(KeyEvent keyEvent) {
-            switch (keyEvent.getCode()) {
-                case ENTER:
-                    shell.execute();
-                    keyEvent.consume();
-                    break;
-
-                case TAB:
-                    shell.assist();
-                    keyEvent.consume();
-                    break;
-
-                case UP:
-                    shell.setPrevCommandLineFromHistory();
-                    keyEvent.consume();
-                    break;
-
-                case DOWN:
-                    shell.setNextCommandLineFromHistory();
-                    keyEvent.consume();
-                    break;
-            }
-        }
     }
 }

@@ -68,47 +68,47 @@ public class TerminalDisplayDriver implements DisplayDriver {
 
     @Override
     public void displayWelcomeMessage(String welcomeMessage) {
-        print(welcomeMessage);
+        println(welcomeMessage);
     }
 
     @Override
     public void displayEmptyLine() {
         // The terminal is expected to add a new line after any text.
-        print("");
+        println("");
     }
 
     @Override
     public void displayText(String text) {
-        print(text);
+        println(text);
     }
 
     @Override
     public void displayCommandInfo(CommandInfo commandInfo) {
         final String assistInfoStr = serializer.serializeCommandInfo(commandInfo);
-        print(assistInfoStr);
+        println(assistInfoStr);
     }
 
     @Override
     public void displaySuggestions(Suggestions suggestions) {
         final String suggestionsStr = serializer.serializeSuggestions(suggestions);
-        print(suggestionsStr);
+        println(suggestionsStr);
     }
 
     @Override
     public void displayDirectory(ShellDirectory directory) {
         final String shellEntryViewStr = serializer.serializeDirectory(directory);
-        print(shellEntryViewStr);
+        println(shellEntryViewStr);
     }
 
     @Override
     public void displayCommand(Command command) {
         final String shellCommandViewStr = serializer.serializeCommand(command);
-        print(shellCommandViewStr);
+        println(shellCommandViewStr);
     }
 
     @Override
     public void displayParseError(ParseError error, String errorMessage) {
-        printError(errorMessage);
+        errorPrintln(errorMessage);
     }
 
     @Override
@@ -123,16 +123,16 @@ public class TerminalDisplayDriver implements DisplayDriver {
 
     private void printException(Exception e) {
         final String exceptionStr = serializer.serializeException(e);
-        printError(exceptionStr);
+        errorPrintln(exceptionStr);
     }
 
-    private void print(String message) {
+    private void println(String message) {
         numInteractions++;
         terminal.println(message);
     }
 
-    private void printError(String message) {
+    private void errorPrintln(String message) {
         numInteractions++;
-        terminal.printlnError(message);
+        terminal.errorPrintln(message);
     }
 }

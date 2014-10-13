@@ -17,7 +17,7 @@
 package com.github.ykrasik.jerminal.libgdx;
 
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
-import com.github.ykrasik.jerminal.api.commandline.CommandLineDriver;
+import com.github.ykrasik.jerminal.api.CommandLineDriver;
 
 import java.util.Objects;
 

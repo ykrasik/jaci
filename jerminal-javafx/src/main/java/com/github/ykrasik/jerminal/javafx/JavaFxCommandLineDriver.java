@@ -16,7 +16,7 @@
 
 package com.github.ykrasik.jerminal.javafx;
 
-import com.github.ykrasik.jerminal.api.commandline.CommandLineDriver;
+import com.github.ykrasik.jerminal.api.CommandLineDriver;
 import javafx.scene.control.TextField;
 
 import java.util.Objects;

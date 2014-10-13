@@ -22,12 +22,12 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 
 /**
- * Creates all the libGdx widgets that will be displayed on screen.<br>
+ * Creates all the widgets that will be displayed on screen.<br>
  * This is how the console's appearance can be customized.
  *
  * @author Yevgeny Krasik
  */
-public interface LibGdxConsoleWidgetFactory {
+public interface ConsoleWidgetFactory {
     /**
      * @param text Text to be displayed on the returned {@link Label}.
      * @return A terminal text line.

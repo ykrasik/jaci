@@ -42,13 +42,14 @@ public class DefaultTerminalSerializer implements TerminalSerializer {
         final int currentParamIndex = commandInfo.getCurrentParamIndex();
 
         final StringBuilder sb = new StringBuilder();
+        appendDepthSpaces(sb, 0);
         sb.append(commandName);
         sb.append(' ');
         appendParams(sb, paramAndValues, currentParamIndex);
         return sb.toString();
     }
 
-    private void appendParams(StringBuilder sb, List<ParamAndValue> paramAndValues, int currentParamIndex) {
+    protected void appendParams(StringBuilder sb, List<ParamAndValue> paramAndValues, int currentParamIndex) {
         // Surround the current param being parsed with >>> <<<
         for (int i = 0; i < paramAndValues.size(); i++) {
             if (currentParamIndex == i) {
@@ -75,7 +76,8 @@ public class DefaultTerminalSerializer implements TerminalSerializer {
     @Override
     public String serializeSuggestions(Suggestions suggestions) {
         final StringBuilder sb = new StringBuilder();
-        sb.append("|Suggestions: \n");
+        appendDepthSpaces(sb, 0);
+        sb.append("Suggestions: \n");
         appendSuggestions(sb, suggestions.getDirectorySuggestions(), "Directories");
         appendSuggestions(sb, suggestions.getCommandSuggestions(), "Commands");
         appendSuggestions(sb, suggestions.getParamNameSuggestions(), "Parameter names");
@@ -84,7 +86,7 @@ public class DefaultTerminalSerializer implements TerminalSerializer {
         return sb.toString();
     }
 
-    private void appendSuggestions(StringBuilder sb, List<String> suggestions, String suggestionTitle) {
+    protected void appendSuggestions(StringBuilder sb, List<String> suggestions, String suggestionTitle) {
         if (!suggestions.isEmpty()) {
             appendDepthSpaces(sb, 1);
             sb.append(suggestionTitle);
@@ -101,7 +103,7 @@ public class DefaultTerminalSerializer implements TerminalSerializer {
         return sb.toString();
     }
 
-    private void doSerializeDirectory(StringBuilder sb, ShellDirectory directory, int depth) {
+    protected void doSerializeDirectory(StringBuilder sb, ShellDirectory directory, int depth) {
         appendDepthSpaces(sb, depth);
 
         // Append root.
@@ -126,7 +128,7 @@ public class DefaultTerminalSerializer implements TerminalSerializer {
         return sb.toString();
     }
 
-    private void doSerializeCommand(StringBuilder sb, Command command, int depth, boolean parameters) {
+    protected void doSerializeCommand(StringBuilder sb, Command command, int depth, boolean parameters) {
         appendDepthSpaces(sb, depth);
 
         sb.append(command.getName());
@@ -141,7 +143,7 @@ public class DefaultTerminalSerializer implements TerminalSerializer {
         }
     }
 
-    private void doSerializeCommandParam(StringBuilder sb, CommandParam param, int depth) {
+    protected void doSerializeCommandParam(StringBuilder sb, CommandParam param, int depth) {
         appendDepthSpaces(sb, depth);
         sb.append(param.getExternalForm());
         sb.append(" - ");
@@ -152,6 +154,7 @@ public class DefaultTerminalSerializer implements TerminalSerializer {
     @Override
     public String serializeException(Exception e) {
         final StringBuilder sb = new StringBuilder();
+        appendDepthSpaces(sb, 0);
         sb.append(e.toString());
         sb.append('\n');
         for (StackTraceElement stackTraceElement : e.getStackTrace()) {
@@ -162,10 +165,14 @@ public class DefaultTerminalSerializer implements TerminalSerializer {
         return sb.toString();
     }
 
-    private void appendDepthSpaces(StringBuilder sb, int depth) {
-        sb.append('|');
+    protected void appendDepthSpaces(StringBuilder sb, int depth) {
+        final String tab = getTab();
         for (int i = 0; i < depth; i++) {
-            sb.append("    ");
+            sb.append(tab);
         }
+    }
+
+    protected String getTab() {
+        return "    ";
     }
 }

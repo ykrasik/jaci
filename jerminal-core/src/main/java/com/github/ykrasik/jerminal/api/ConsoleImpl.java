@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.api.commandline;
+package com.github.ykrasik.jerminal.api;
 
-import com.github.ykrasik.jerminal.api.Shell;
+import com.github.ykrasik.jerminal.internal.CommandLineHistory;
 import com.google.common.base.Optional;
 
 import java.util.Objects;
@@ -27,13 +27,19 @@ import java.util.Objects;
  *
  * @author Yevgeny Krasik
  */
-public class ShellWithCommandLineImpl implements ShellWithCommandLine {
+public class ConsoleImpl implements Console {
     private final Shell shell;
     private final CommandLineDriver commandLineDriver;
+    private final CommandLineHistory history;
 
-    public ShellWithCommandLineImpl(Shell shell, CommandLineDriver commandLineDriver) {
+    public ConsoleImpl(Shell shell, CommandLineDriver commandLineDriver) {
+        this(shell, commandLineDriver, 30);
+    }
+
+    public ConsoleImpl(Shell shell, CommandLineDriver commandLineDriver, int maxCommandHistory) {
         this.shell = Objects.requireNonNull(shell);
         this.commandLineDriver = Objects.requireNonNull(commandLineDriver);
+        this.history = new CommandLineHistory(maxCommandHistory);
     }
 
     @Override
@@ -43,13 +49,13 @@ public class ShellWithCommandLineImpl implements ShellWithCommandLine {
 
     @Override
     public boolean setPrevCommandLineFromHistory() {
-        final Optional<String> commandLine = shell.getPrevCommandLineFromHistory();
+        final Optional<String> commandLine = history.getPrevCommandLine();
         return setCommandLineIfPresent(commandLine);
     }
 
     @Override
     public boolean setNextCommandLineFromHistory() {
-        final Optional<String> commandLine = shell.getNextCommandLineFromHistory();
+        final Optional<String> commandLine = history.getNextCommandLine();
         return setCommandLineIfPresent(commandLine);
     }
 
@@ -60,13 +66,6 @@ public class ShellWithCommandLineImpl implements ShellWithCommandLine {
         return setCommandLineIfPresent(newCommandLine);
     }
 
-    @Override
-    public boolean execute() {
-        final String commandLine = commandLineDriver.read();
-        commandLineDriver.clear();
-        return shell.execute(commandLine);
-    }
-
     private boolean setCommandLineIfPresent(Optional<String> commandLine) {
         if (commandLine.isPresent()) {
             commandLineDriver.set(commandLine.get());
@@ -74,5 +73,19 @@ public class ShellWithCommandLineImpl implements ShellWithCommandLine {
         } else {
             return false;
         }
+    }
+
+    @Override
+    public boolean execute() {
+        final String commandLine = commandLineDriver.read();
+        commandLineDriver.clear();
+
+        // Save command in history, if it isn't empty.
+        if (!commandLine.trim().isEmpty()) {
+            history.pushCommandLine(commandLine);
+        }
+
+        // Execute.
+        return shell.execute(commandLine);
     }
 }

@@ -34,6 +34,8 @@ project("jerminal-core") {
 project("jerminal-javafx") {
     description "Jerminal JavaFX frontend"
 
+    apply from: "../publish.gradle"
+
     dependencies {
         compile project(":jerminal-core")
     }

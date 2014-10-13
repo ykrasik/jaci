@@ -55,12 +55,12 @@ public class JerminalLibGdxExample extends ApplicationAdapter {
 
     @Override
     public void create() {
-        final LibGdxConsoleWidgetFactory widgetFactory = new JerminalLibGdxTestConsoleWidgetFactory();
-        final LibGdxConsoleBuilder builder = new LibGdxConsoleBuilder(widgetFactory, 30);
-        builder.setFileSystem(createFileSystem());
-
+        final ConsoleWidgetFactory widgetFactory = new TestConsoleWidgetFactory();
+        final ShellFileSystem fileSystem = createFileSystem();
+        final LibGdxConsoleBuilder builder = new LibGdxConsoleBuilder(fileSystem, widgetFactory);
         final LibGdxConsole console = builder.build();
         console.setFillParent(true);
+
         stage = new Stage();
         stage.addActor(console);
 
@@ -134,10 +134,10 @@ public class JerminalLibGdxExample extends ApplicationAdapter {
         stage.draw();
     }
 
-    private static class JerminalLibGdxTestConsoleWidgetFactory implements LibGdxConsoleWidgetFactory {
+    private static class TestConsoleWidgetFactory implements ConsoleWidgetFactory {
         private final Skin skin;
 
-        private JerminalLibGdxTestConsoleWidgetFactory() {
+        private TestConsoleWidgetFactory() {
             this.skin = new Skin(Gdx.files.internal("debug-ui.cfg"));
         }
 
@@ -167,8 +167,8 @@ public class JerminalLibGdxExample extends ApplicationAdapter {
         }
 
         @Override
-        public TextField createInputTextField(String initialText) {
-            return new TextField(initialText, skin);
+        public TextField createInputTextField() {
+            return new TextField("", skin);
         }
 
         @Override

@@ -35,12 +35,12 @@ public class JavaFxTerminal implements Terminal {
 
     @Override
     public void begin() {
-
+        // Nothing to do here.
     }
 
     @Override
     public void end() {
-
+        // Nothing to do here.
     }
 
     @Override
@@ -50,7 +50,7 @@ public class JavaFxTerminal implements Terminal {
     }
 
     @Override
-    public void printlnError(String text) {
+    public void errorPrintln(String text) {
         // TODO: Make this red.
         println(text);
     }
