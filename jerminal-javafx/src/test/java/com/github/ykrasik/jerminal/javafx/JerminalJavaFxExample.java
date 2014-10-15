@@ -86,7 +86,7 @@ public class JerminalJavaFxExample extends Application {
         final Terminal terminal = new JavaFxTerminal(textArea);
 
         final ShellFileSystem fileSystem = createFileSystem();
-        fileSystem.processAnnotations(Example.class);
+        fileSystem.processAnnotations(AnnotationExample.class);
         final Shell shell = new Shell(fileSystem, new TerminalDisplayDriver(terminal));
 
         final TextField textField = findById("textField", TextField.class);

@@ -20,6 +20,8 @@ import com.github.ykrasik.jerminal.api.command.CommandArgs;
 import com.github.ykrasik.jerminal.internal.filesystem.command.InternalCommand;
 import com.github.ykrasik.jerminal.internal.filesystem.directory.InternalShellDirectory;
 
+import java.util.List;
+
 /**
  * A {@link CommandArgs} that provides access to more parameter types.
  * For internal use, should never be used externally.
@@ -58,7 +60,7 @@ public interface PrivilegedCommandArgs extends CommandArgs {
     InternalCommand popCommand() throws IllegalArgumentException;
 
     /**
-     * @return An array of {@link Object} representing the positional parameter values.
+     * @return A list of {@link Object} representing the positional parameter values.
      */
-    Object[] toObjectArray();
+    List<Object> getArgValues();
 }

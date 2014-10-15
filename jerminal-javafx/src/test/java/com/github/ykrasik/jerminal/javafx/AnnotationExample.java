@@ -17,22 +17,22 @@
 package com.github.ykrasik.jerminal.javafx;
 
 import com.github.ykrasik.jerminal.api.annotation.*;
+import com.github.ykrasik.jerminal.api.command.OutputPrinter;
 import com.github.ykrasik.jerminal.api.command.toggle.StateAccessor;
 
 /**
  * @author Yevgeny Krasik
  */
 @ShellPath("path/to/command")
-public class Example {
-
-
+public class AnnotationExample {
 
     @ShellPath("/new/path")
     @Command("Does something weird")
-    public void testCommand(@StringParam(value = "str", optional = true, defaultValue = "lala") String str,
+    public void testCommand(OutputPrinter outputPrinter,
+                            @StringParam(value = "str", optional = true, defaultValue = "lala") String str,
                             @BoolParam("bool") boolean bool,
                             int integer) {
-        System.out.println("Woo?");
+        outputPrinter.println("Oh yeah, str=%s, bool=%s, integer=%d", str, bool, integer);
     }
 
     @ToggleCommand("toggles this and that")
@@ -54,7 +54,7 @@ public class Example {
 
     @ShellPath(global = true)
     @Command("some global command")
-    public void globalCommandSomething(String str) {
-        System.out.println("Woo?");
+    public void globalCommandSomething(OutputPrinter outputPrinter, String str) {
+        outputPrinter.println("yes! str=%s", str);
     }
 }

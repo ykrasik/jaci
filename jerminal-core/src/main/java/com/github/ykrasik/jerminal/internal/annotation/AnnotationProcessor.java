@@ -51,14 +51,15 @@ public class AnnotationProcessor {
 
     // FIXME: JavaDoc
     public <T> void process(ShellFileSystem fileSystem, Class<T> clazz) {
-        final Object reference = createReference(clazz);
+        final Object instance = createInstance(clazz);
+
         // All method paths will be appended to the class's top level path.
         final String topLevelPath = getTopLevelPath(clazz);
 
         final Method[] methods = clazz.getMethods();
         final List<com.github.ykrasik.jerminal.api.filesystem.command.Command> globalCommands = new ArrayList<>();
         for (Method method : methods) {
-            final com.github.ykrasik.jerminal.api.filesystem.command.Command command = createCommand(reference, method);
+            final com.github.ykrasik.jerminal.api.filesystem.command.Command command = createCommand(instance, method);
             if (command != null) {
                 // If the method wasn't annotated, a command won't be created.
                 final boolean globalCommand = isGlobalCommand(method);
@@ -74,12 +75,12 @@ public class AnnotationProcessor {
         fileSystem.addGlobalCommands(globalCommands);
     }
 
-    private Object createReference(Class<?> clazz) {
+    private Object createInstance(Class<?> clazz) {
         try {
             final Constructor<?> constructor = clazz.getConstructor(NO_ARGS);
             return constructor.newInstance(NO_ARGS);
         } catch (NoSuchMethodException e) {
-            throw new IllegalArgumentException("Class doesn't have a no-args contrstructor: " + clazz, e);
+            throw new IllegalArgumentException("Class doesn't have a no-args constructor: " + clazz, e);
         } catch (Exception e) {
             throw new ShellException("Error creating new instance of type: " + clazz, e);
         }
@@ -102,15 +103,15 @@ public class AnnotationProcessor {
         return shellPathAnnotation != null && shellPathAnnotation.global();
     }
 
-    private com.github.ykrasik.jerminal.api.filesystem.command.Command createCommand(Object reference, Method method) {
+    private com.github.ykrasik.jerminal.api.filesystem.command.Command createCommand(Object instance, Method method) {
         final Command commandAnnotation = method.getAnnotation(Command.class);
         if (commandAnnotation != null) {
-            return doCreateCommand(reference, method, commandAnnotation);
+            return doCreateCommand(instance, method, commandAnnotation);
         } else {
             // Check if this is a toggle command.
             final ToggleCommand toggleCommandAnnotation = method.getAnnotation(ToggleCommand.class);
             if (toggleCommandAnnotation != null) {
-                return createToggleCommand(reference, method, toggleCommandAnnotation);
+                return createToggleCommand(instance, method, toggleCommandAnnotation);
             } else {
                 // This method is not annotated with any command annotation.
                 return null;
@@ -118,11 +119,18 @@ public class AnnotationProcessor {
         }
     }
 
-    private com.github.ykrasik.jerminal.api.filesystem.command.Command doCreateCommand(Object reference, Method method, Command annotation) {
+    private com.github.ykrasik.jerminal.api.filesystem.command.Command doCreateCommand(Object instance, Method method, Command annotation) {
         final Class<?>[] parameterTypes = method.getParameterTypes();
+        if (parameterTypes.length == 0 || parameterTypes[0] != OutputPrinter.class) {
+            final String message = String.format("Commands must receive an %s as their first parameter: class=%s, method=%s", OutputPrinter.class, method.getDeclaringClass(), method.getName());
+            throw new IllegalArgumentException(message);
+        }
+
+        // FIXME: Make outputPrinter optional.
+        // First parameter is the outputPrinter, actual params start afterwards.
         final Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         final List<CommandParam> params = new ArrayList<>(parameterTypes.length);
-        for (int i = 0; i < parameterTypes.length; i++) {
+        for (int i = 1; i < parameterTypes.length; i++) {
             final Class<?> parameterType = parameterTypes[i];
             final Annotation[] annotations = parameterAnnotations[i];
             final CommandParam param = createCommandParam(parameterType, annotations, i);
@@ -131,11 +139,11 @@ public class AnnotationProcessor {
 
         final String commandName = method.getName();
         final String description = annotation.value();
-        final ReflectionCommandExecutor executor = new ReflectionCommandExecutor(reference, method);
+        final ReflectionCommandExecutor executor = new ReflectionCommandExecutor(instance, method);
         return new CommandImpl(commandName, description, params, executor);
     }
 
-    private com.github.ykrasik.jerminal.api.filesystem.command.Command createToggleCommand(Object reference, Method method, ToggleCommand annotation) {
+    private com.github.ykrasik.jerminal.api.filesystem.command.Command createToggleCommand(Object instance, Method method, ToggleCommand annotation) {
         final Class<?> returnType = method.getReturnType();
         if (returnType != StateAccessor.class) {
             final String message = String.format("Methods annotated with @ToggleCommand must return a StateAccessor: class=%s, method=%s", method.getDeclaringClass(), method.getName());
@@ -148,7 +156,7 @@ public class AnnotationProcessor {
         }
 
         try {
-            final StateAccessor accessor = (StateAccessor) method.invoke(reference, NO_ARGS);
+            final StateAccessor accessor = (StateAccessor) method.invoke(instance, NO_ARGS);
             final ToggleCommandBuilder builder = new ToggleCommandBuilder(method.getName(), accessor);
 
             final String description = annotation != null ? annotation.value() : "";
@@ -287,7 +295,7 @@ public class AnnotationProcessor {
         if (!trimmedName.isEmpty()) {
             return trimmedName;
         } else {
-            return prefix + "Param" + (index + 1);
+            return prefix + "Param" + index;
         }
     }
 
@@ -302,19 +310,24 @@ public class AnnotationProcessor {
     }
 
     private static class ReflectionCommandExecutor implements CommandExecutor {
-        private final Object reference;
+        private final Object instance;
         private final Method method;
 
-        private ReflectionCommandExecutor(Object reference, Method method) {
-            this.reference = Objects.requireNonNull(reference);
+        private ReflectionCommandExecutor(Object instance, Method method) {
+            this.instance = Objects.requireNonNull(instance);
             this.method = Objects.requireNonNull(method);
         }
 
         @Override
         public void execute(CommandArgs args, OutputPrinter outputPrinter) throws Exception {
-            // Fetch all params and call method via reflection.
-            final Object[] reflectionArgs = ((PrivilegedCommandArgs) args).toObjectArray();
-            method.invoke(reference, reflectionArgs);
+            // Fetch all params.
+            final List<Object> reflectionArgs = ((PrivilegedCommandArgs) args).getArgValues();
+
+            // Add the outputPrinter as the first param.
+            reflectionArgs.add(0, outputPrinter);
+
+            // Invoke method.
+            method.invoke(instance, reflectionArgs.toArray());
         }
     }
 }

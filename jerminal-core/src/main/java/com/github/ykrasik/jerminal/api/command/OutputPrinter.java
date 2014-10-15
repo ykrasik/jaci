@@ -17,8 +17,7 @@
 package com.github.ykrasik.jerminal.api.command;
 
 /**
- * A printer for the output of a {@link CommandExecutor}.<br>
- * Relays information to the {@link com.github.ykrasik.jerminal.api.display.DisplayDriver DisplayDriver}.
+ * Output source of a Command.<br>
  *
  * @author Yevgeny Krasik
  */

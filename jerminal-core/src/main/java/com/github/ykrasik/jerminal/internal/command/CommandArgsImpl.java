@@ -19,9 +19,7 @@ package com.github.ykrasik.jerminal.internal.command;
 import com.github.ykrasik.jerminal.internal.filesystem.command.InternalCommand;
 import com.github.ykrasik.jerminal.internal.filesystem.directory.InternalShellDirectory;
 
-import java.util.Map;
-import java.util.Objects;
-import java.util.Queue;
+import java.util.*;
 
 /**
  * An implementation for {@link PrivilegedCommandArgs}.
@@ -98,14 +96,8 @@ public class CommandArgsImpl implements PrivilegedCommandArgs {
     }
 
     @Override
-    public Object[] toObjectArray() {
-        final Object[] objects = new Object[positionalArgs.size()];
-        int i = 0;
-        for (Object arg : positionalArgs) {
-            objects[i] = arg;
-            i++;
-        }
-        return objects;
+    public List<Object> getArgValues() {
+        return new LinkedList<>(positionalArgs);
     }
 
     private <T> T getArg(String name, Class<T> clazz) throws IllegalArgumentException {
