@@ -40,5 +40,5 @@ public @interface ToggleCommand {
     /**
      * @return Command description.
      */
-    String value() default "command";
+    String value() default "toggle";
 }

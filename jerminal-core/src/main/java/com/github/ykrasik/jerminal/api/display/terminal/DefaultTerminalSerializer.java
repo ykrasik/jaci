@@ -33,7 +33,7 @@ import java.util.List;
  * @author Yevgeny Krasik
  */
 public class DefaultTerminalSerializer implements TerminalSerializer {
-    private static final Joiner JOINER = Joiner.on(',').skipNulls();
+    private static final Joiner JOINER = Joiner.on(", ").skipNulls();
 
     @Override
     public String serializeCommandInfo(CommandInfo commandInfo) {

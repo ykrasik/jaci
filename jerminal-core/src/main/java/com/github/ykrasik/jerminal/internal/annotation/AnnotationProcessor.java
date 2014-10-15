@@ -16,30 +16,24 @@
 
 package com.github.ykrasik.jerminal.internal.annotation;
 
-import com.github.ykrasik.jerminal.ShellConstants;
 import com.github.ykrasik.jerminal.api.annotation.*;
-import com.github.ykrasik.jerminal.api.command.CommandArgs;
-import com.github.ykrasik.jerminal.api.command.CommandExecutor;
 import com.github.ykrasik.jerminal.api.command.OutputPrinter;
 import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
-import com.github.ykrasik.jerminal.api.command.parameter.bool.BooleanParamBuilder;
-import com.github.ykrasik.jerminal.api.command.parameter.flag.FlagParamBuilder;
-import com.github.ykrasik.jerminal.api.command.parameter.numeric.DoubleParamBuilder;
-import com.github.ykrasik.jerminal.api.command.parameter.numeric.IntegerParamBuilder;
-import com.github.ykrasik.jerminal.api.command.parameter.string.StringParamBuilder;
 import com.github.ykrasik.jerminal.api.command.toggle.StateAccessor;
 import com.github.ykrasik.jerminal.api.command.toggle.ToggleCommandBuilder;
 import com.github.ykrasik.jerminal.api.filesystem.ShellFileSystem;
+import com.github.ykrasik.jerminal.api.filesystem.command.Command;
 import com.github.ykrasik.jerminal.internal.command.CommandImpl;
-import com.github.ykrasik.jerminal.internal.command.PrivilegedCommandArgs;
 import com.github.ykrasik.jerminal.internal.exception.ShellException;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * @author Yevgeny Krasik
@@ -54,25 +48,41 @@ public class AnnotationProcessor {
         final Object instance = createInstance(clazz);
 
         // All method paths will be appended to the class's top level path.
-        final String topLevelPath = getTopLevelPath(clazz);
+        final AnnotatedPath topLevelPath = getTopLevelPath(clazz);
 
+        final List<Command> globalCommands = new ArrayList<>();
+        final Map<String, List<Command>> commandPaths = new HashMap<>();
+
+        // Find all methods annotated with @Command or @ToggleCommand and instantiate the commands.
         final Method[] methods = clazz.getMethods();
-        final List<com.github.ykrasik.jerminal.api.filesystem.command.Command> globalCommands = new ArrayList<>();
         for (Method method : methods) {
-            final com.github.ykrasik.jerminal.api.filesystem.command.Command command = createCommand(instance, method);
+            // If the method wasn't annotated, a command won't be created.
+            final Command command = createCommand(instance, method);
             if (command != null) {
-                // If the method wasn't annotated, a command won't be created.
-                final boolean globalCommand = isGlobalCommand(method);
-                if (globalCommand) {
+                // Compose the top level path of the declaring class with the method's path.
+                final AnnotatedPath localPath = getLocalPath(method);
+                final AnnotatedPath composedPath = topLevelPath.compose(localPath);
+
+                // The command will either be a global or local command, depending on the annotations.
+                if (composedPath.isGlobal()) {
                     globalCommands.add(command);
                 } else {
-                    // FIXME: Allow path composition.
-                    fileSystem.addCommands(topLevelPath, command);
+                    final String path = composedPath.getPath();
+                    List<Command> commands = commandPaths.get(path);
+                    if (commands == null) {
+                        commands = new ArrayList<>();
+                        commandPaths.put(path, commands);
+                    }
+                    commands.add(command);
                 }
             }
         }
 
+        // Add all collected global and local commands to the file system.
         fileSystem.addGlobalCommands(globalCommands);
+        for (Entry<String, List<Command>> entry : commandPaths.entrySet()) {
+            fileSystem.addCommands(entry.getKey(), entry.getValue());
+        }
     }
 
     private Object createInstance(Class<?> clazz) {
@@ -82,53 +92,59 @@ public class AnnotationProcessor {
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException("Class doesn't have a no-args constructor: " + clazz, e);
         } catch (Exception e) {
-            throw new ShellException("Error creating new instance of type: " + clazz, e);
+            throw new ShellException("Error instantiating new instance of type: " + clazz, e);
         }
     }
 
-    private String getTopLevelPath(Class<?> clazz) {
-        final ShellPath topLevelPathAnnotation = clazz.getAnnotation(ShellPath.class);
-        if (topLevelPathAnnotation != null) {
-            return topLevelPathAnnotation.value();
+    private AnnotatedPath getTopLevelPath(Class<?> clazz) {
+        final ShellPath annotation = clazz.getAnnotation(ShellPath.class);
+        if (annotation != null) {
+            return AnnotatedPath.fromAnnotation(annotation);
         } else {
             // Class does not declare a top level path, set it to root.
-            return ShellConstants.FILE_SYSTEM_DELIMITER;
+            return AnnotatedPath.root();
         }
     }
 
-    private boolean isGlobalCommand(Method method) {
-        // FIXME: A command should be global if the topLevelPath is global and it doesn't define it's own,
-        // FIXME: or if the topLevelPath isn't global, but the command overrides it.
-        final ShellPath shellPathAnnotation = method.getAnnotation(ShellPath.class);
-        return shellPathAnnotation != null && shellPathAnnotation.global();
+    private AnnotatedPath getLocalPath(Method method) {
+        final ShellPath annotation = method.getAnnotation(ShellPath.class);
+        if (annotation != null) {
+            return AnnotatedPath.fromAnnotation(annotation);
+        } else {
+            // Method does not declare a top level path, set it to an empty path.
+            return AnnotatedPath.empty();
+        }
     }
 
-    private com.github.ykrasik.jerminal.api.filesystem.command.Command createCommand(Object instance, Method method) {
-        final Command commandAnnotation = method.getAnnotation(Command.class);
+    private Command createCommand(Object instance, Method method) {
+        // Check if method has the @Command annotation.
+        final com.github.ykrasik.jerminal.api.annotation.Command commandAnnotation = method.getAnnotation(com.github.ykrasik.jerminal.api.annotation.Command.class);
         if (commandAnnotation != null) {
             return doCreateCommand(instance, method, commandAnnotation);
-        } else {
-            // Check if this is a toggle command.
-            final ToggleCommand toggleCommandAnnotation = method.getAnnotation(ToggleCommand.class);
-            if (toggleCommandAnnotation != null) {
-                return createToggleCommand(instance, method, toggleCommandAnnotation);
-            } else {
-                // This method is not annotated with any command annotation.
-                return null;
-            }
         }
+
+        // Check if method has the @ToggleCommand annotation.
+        final ToggleCommand toggleCommandAnnotation = method.getAnnotation(ToggleCommand.class);
+        if (toggleCommandAnnotation != null) {
+            return createToggleCommand(instance, method, toggleCommandAnnotation);
+        }
+
+        // This method is not annotated with any command annotation.
+        return null;
     }
 
-    private com.github.ykrasik.jerminal.api.filesystem.command.Command doCreateCommand(Object instance, Method method, Command annotation) {
+    private Command doCreateCommand(Object instance, Method method, com.github.ykrasik.jerminal.api.annotation.Command annotation) {
         final Class<?>[] parameterTypes = method.getParameterTypes();
+        final Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+
+        // First parameter must be the outputPrinter.
+        // FIXME: Make outputPrinter optional.
         if (parameterTypes.length == 0 || parameterTypes[0] != OutputPrinter.class) {
             final String message = String.format("Commands must receive an %s as their first parameter: class=%s, method=%s", OutputPrinter.class, method.getDeclaringClass(), method.getName());
             throw new IllegalArgumentException(message);
         }
 
-        // FIXME: Make outputPrinter optional.
-        // First parameter is the outputPrinter, actual params start afterwards.
-        final Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+        // Create command parameters from method parameters.
         final List<CommandParam> params = new ArrayList<>(parameterTypes.length);
         for (int i = 1; i < parameterTypes.length; i++) {
             final Class<?> parameterType = parameterTypes[i];
@@ -143,12 +159,13 @@ public class AnnotationProcessor {
         return new CommandImpl(commandName, description, params, executor);
     }
 
-    private com.github.ykrasik.jerminal.api.filesystem.command.Command createToggleCommand(Object instance, Method method, ToggleCommand annotation) {
+    private Command createToggleCommand(Object instance, Method method, ToggleCommand annotation) {
         final Class<?> returnType = method.getReturnType();
         if (returnType != StateAccessor.class) {
-            final String message = String.format("Methods annotated with @ToggleCommand must return a StateAccessor: class=%s, method=%s", method.getDeclaringClass(), method.getName());
+            final String message = String.format("Methods annotated with @ToggleCommand must return a %s: class=%s, method=%s", method.getDeclaringClass(), method.getName(), StateAccessor.class);
             throw new IllegalArgumentException(message);
         }
+
         final Class<?>[] parameterTypes = method.getParameterTypes();
         if (parameterTypes.length > 0) {
             final String message = String.format("Methods annotated with @ToggleCommand must not take any parameters: class=%s, method=%s", method.getDeclaringClass(), method.getName());
@@ -159,144 +176,46 @@ public class AnnotationProcessor {
             final StateAccessor accessor = (StateAccessor) method.invoke(instance, NO_ARGS);
             final ToggleCommandBuilder builder = new ToggleCommandBuilder(method.getName(), accessor);
 
-            final String description = annotation != null ? annotation.value() : "";
+            final String description = annotation.value();
             if (!description.trim().isEmpty()) {
                 builder.setCommandDescription(description);
             }
 
             return builder.build();
-
         } catch (Exception e) {
-            final String message = String.format("Error creating StateAccessor: class=%s, method=%s", method.getDeclaringClass(), method.getName());
-            throw new IllegalArgumentException(message);
+            final String message = String.format("Error creating ToggleCommand: class=%s, method=%s", method.getDeclaringClass(), method.getName());
+            throw new IllegalArgumentException(message, e);
         }
     }
 
     private CommandParam createCommandParam(Class<?> parameterType, Annotation[] annotations, int index) {
+        // Translate the method parameters into CommandParams.
         if (parameterType == String.class) {
             final StringParam annotation = findAnnotation(annotations, StringParam.class);
-            return createStringParam(annotation, index);
+            return AnnotationCommandParamFactory.createStringParam(annotation, index);
         }
 
         if (parameterType == Boolean.class || parameterType == Boolean.TYPE) {
             final FlagParam flagAnnotation = findAnnotation(annotations, FlagParam.class);
             if (flagAnnotation != null) {
-                return createFlagParam(flagAnnotation, index);
+                return AnnotationCommandParamFactory.createFlagParam(flagAnnotation, index);
             } else {
                 final BoolParam annotation = findAnnotation(annotations, BoolParam.class);
-                return createBooleanParam(annotation, index);
+                return AnnotationCommandParamFactory.createBooleanParam(annotation, index);
             }
         }
 
         if (parameterType == Integer.class || parameterType == Integer.TYPE) {
             final IntParam annotation = findAnnotation(annotations, IntParam.class);
-            return createIntParam(annotation, index);
+            return AnnotationCommandParamFactory.createIntParam(annotation, index);
         }
 
         if (parameterType == Double.class || parameterType == Double.TYPE) {
             final DoubleParam annotation = findAnnotation(annotations, DoubleParam.class);
-            return createDoubleParam(annotation, index);
+            return AnnotationCommandParamFactory.createDoubleParam(annotation, index);
         }
 
         throw new IllegalArgumentException("Invalid parameterType: " + parameterType);
-    }
-
-    private CommandParam createStringParam(StringParam annotation, int index) {
-        final String name = getOrGenerateName(annotation != null ? annotation.value() : "", "str", index);
-        final StringParamBuilder builder = new StringParamBuilder(name);
-
-        final String description = annotation != null ? annotation.description() : "";
-        if (!description.trim().isEmpty()) {
-            builder.setDescription(description);
-        }
-
-        final boolean optional = annotation != null && annotation.optional();
-        if (optional) {
-            final String defaultValue = annotation.defaultValue();
-            builder.setOptional(defaultValue);
-        }
-
-        final String[] accepts = annotation != null ? annotation.acceptsValues() : null;
-        if (accepts != null) {
-            builder.setConstantAcceptableValues(accepts);
-        }
-
-        return builder.build();
-    }
-
-    private CommandParam createFlagParam(FlagParam annotation, int index) {
-        final String name = getOrGenerateName(annotation != null ? annotation.value() : "", "flag", index);
-        final FlagParamBuilder builder = new FlagParamBuilder(name);
-
-        final String description = annotation != null ? annotation.description() : "";
-        if (!description.trim().isEmpty()) {
-            builder.setDescription(description);
-        }
-
-        return builder.build();
-    }
-
-    private CommandParam createBooleanParam(BoolParam annotation, int index) {
-        final String name = getOrGenerateName(annotation != null ? annotation.value() : "", "bool", index);
-        final BooleanParamBuilder builder = new BooleanParamBuilder(name);
-
-        final String description = annotation != null ? annotation.description() : "";
-        if (!description.trim().isEmpty()) {
-            builder.setDescription(description);
-        }
-
-        final boolean optional = annotation != null && annotation.optional();
-        if (optional) {
-            final boolean defaultValue = annotation.defaultValue();
-            builder.setOptional(defaultValue);
-        }
-
-        return builder.build();
-    }
-
-    private CommandParam createIntParam(IntParam annotation, int index) {
-        final String name = getOrGenerateName(annotation != null ? annotation.value() : "", "int", index);
-        final IntegerParamBuilder builder = new IntegerParamBuilder(name);
-
-        final String description = annotation != null ? annotation.description() : "";
-        if (!description.trim().isEmpty()) {
-            builder.setDescription(description);
-        }
-
-        final boolean optional = annotation != null && annotation.optional();
-        if (optional) {
-            final int defaultValue = annotation.defaultValue();
-            builder.setOptional(defaultValue);
-        }
-
-        return builder.build();
-    }
-
-    private CommandParam createDoubleParam(DoubleParam annotation, int index) {
-        final String name = getOrGenerateName(annotation != null ? annotation.value() : "", "double", index);
-        final DoubleParamBuilder builder = new DoubleParamBuilder(name);
-
-        final String description = annotation != null ? annotation.description() : "";
-        if (!description.trim().isEmpty()) {
-            builder.setDescription(description);
-        }
-
-        final boolean optional = annotation != null && annotation.optional();
-        if (optional) {
-            final double defaultValue = annotation.defaultValue();
-            builder.setOptional(defaultValue);
-        }
-
-        return builder.build();
-    }
-
-    private String getOrGenerateName(String name, String prefix, int index) {
-        final String trimmedName = name.trim();
-        if (!trimmedName.isEmpty()) {
-            return trimmedName;
-        } else {
-            return prefix + "Param" + index;
-        }
     }
 
     @SuppressWarnings("unchecked")
@@ -307,27 +226,5 @@ public class AnnotationProcessor {
             }
         }
         return null;
-    }
-
-    private static class ReflectionCommandExecutor implements CommandExecutor {
-        private final Object instance;
-        private final Method method;
-
-        private ReflectionCommandExecutor(Object instance, Method method) {
-            this.instance = Objects.requireNonNull(instance);
-            this.method = Objects.requireNonNull(method);
-        }
-
-        @Override
-        public void execute(CommandArgs args, OutputPrinter outputPrinter) throws Exception {
-            // Fetch all params.
-            final List<Object> reflectionArgs = ((PrivilegedCommandArgs) args).getArgValues();
-
-            // Add the outputPrinter as the first param.
-            reflectionArgs.add(0, outputPrinter);
-
-            // Invoke method.
-            method.invoke(instance, reflectionArgs.toArray());
-        }
     }
 }
