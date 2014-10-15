@@ -24,6 +24,7 @@ import com.github.ykrasik.jerminal.collections.trie.Trie;
 import com.github.ykrasik.jerminal.collections.trie.TrieImpl;
 import com.github.ykrasik.jerminal.internal.assist.AutoCompleteReturnValue;
 import com.github.ykrasik.jerminal.internal.assist.AutoCompleteType;
+import com.github.ykrasik.jerminal.internal.command.CommandArgsImpl;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.internal.exception.ShellException;
 import com.google.common.base.Function;
@@ -85,7 +86,7 @@ public class CommandParamManager {
         }
 
         final Queue<Object> positionalArgValues = createPositionalArgValues();
-        return new CommandArgs(boundParamValues, positionalArgValues);
+        return new CommandArgsImpl(boundParamValues, positionalArgValues);
     }
 
     private void parse(List<String> args) throws ParseException {

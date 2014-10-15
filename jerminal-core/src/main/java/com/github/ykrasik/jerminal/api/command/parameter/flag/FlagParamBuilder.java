@@ -28,7 +28,7 @@ import java.util.Objects;
  */
 public class FlagParamBuilder {
     private final String name;
-    private String description = "flag";
+    private String description = "flag parameter";
 
     public FlagParamBuilder(String name) {
         this.name = Objects.requireNonNull(name);

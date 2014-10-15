@@ -14,27 +14,23 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.internal.exception;
+package com.github.ykrasik.jerminal.api.annotation;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * A general purpose exception that mostly signals an invalid configuration for the shell.
+ * Indicates that this method returns a command.
  *
  * @author Yevgeny Krasik
  */
-// TODO: Replace this with an illegalArgumentException?
-public class ShellException extends RuntimeException {
-    public ShellException() {
-    }
-
-    public ShellException(String format, Object... args) {
-        super(String.format(format, args));
-    }
-
-    public ShellException(Throwable cause, String format, Object... args) {
-        super(String.format(format, args), cause);
-    }
-
-    public ShellException(Throwable cause) {
-        super(cause);
-    }
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface Command {
+    /**
+     * @return Command description.
+     */
+    String value() default "command";
 }

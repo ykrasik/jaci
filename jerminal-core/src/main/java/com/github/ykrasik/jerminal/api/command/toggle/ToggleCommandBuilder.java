@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.api.command;
+package com.github.ykrasik.jerminal.api.command.toggle;
 
+import com.github.ykrasik.jerminal.api.command.CommandArgs;
+import com.github.ykrasik.jerminal.api.command.CommandBuilder;
+import com.github.ykrasik.jerminal.api.command.CommandExecutor;
+import com.github.ykrasik.jerminal.api.command.OutputPrinter;
 import com.github.ykrasik.jerminal.api.command.parameter.bool.BooleanParamBuilder;
 import com.github.ykrasik.jerminal.api.exception.ExecuteException;
 import com.github.ykrasik.jerminal.api.filesystem.command.Command;
@@ -47,7 +51,7 @@ public class ToggleCommandBuilder {
         this.name = Objects.requireNonNull(name);
         this.accessor = Objects.requireNonNull(accessor);
         this.builder = new CommandBuilder(name);
-        this.builder.setDescription("toggle");
+        this.builder.setDescription("toggle command");
     }
 
     // TODO: Multiple calls to this will produce weird results.
@@ -79,25 +83,6 @@ public class ToggleCommandBuilder {
         return this;
     }
 
-    /**
-     * Accesses the boolean state of a component.
-     *
-     * @author Yevgeny Krasik
-     */
-    public interface StateAccessor {
-        /**
-         * Set the state of the component.
-         *
-         * @param value Value to set the component to.
-         */
-        void set(boolean value);
-
-        /**
-         * @return Current value of the component.
-         */
-        boolean get();
-    }
-
     private static class AccessorDefaultValueProvider implements Supplier<Boolean> {
         private final StateAccessor accessor;
 
@@ -107,7 +92,7 @@ public class ToggleCommandBuilder {
 
         @Override
         public Boolean get() {
-            return accessor.get();
+            return !accessor.get();
         }
     }
 }

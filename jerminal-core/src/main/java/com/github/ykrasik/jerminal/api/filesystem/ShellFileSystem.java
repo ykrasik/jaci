@@ -19,6 +19,7 @@ package com.github.ykrasik.jerminal.api.filesystem;
 import com.github.ykrasik.jerminal.ShellConstants;
 import com.github.ykrasik.jerminal.api.filesystem.command.Command;
 import com.github.ykrasik.jerminal.api.filesystem.directory.ShellDirectory;
+import com.github.ykrasik.jerminal.internal.annotation.AnnotationProcessor;
 import com.github.ykrasik.jerminal.internal.exception.ShellException;
 import com.github.ykrasik.jerminal.internal.filesystem.directory.MutableShellDirectory;
 import com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectoryImpl;
@@ -50,10 +51,18 @@ public class ShellFileSystem {
 
     private final MutableShellDirectory root;
     private final Map<String, Command> globalCommands;
+    private final AnnotationProcessor annotationProcessor;
 
     public ShellFileSystem() {
         this.root = new ShellDirectoryImpl("root", "root");
         this.globalCommands = new HashMap<>();
+        this.annotationProcessor = new AnnotationProcessor();
+    }
+
+    // FIXME: JavaDoc. Mention that class must have a no-args ctor.
+    public <T> ShellFileSystem processAnnotations(Class<T> clazz) {
+        annotationProcessor.process(this, clazz);
+        return this;
     }
 
     /**

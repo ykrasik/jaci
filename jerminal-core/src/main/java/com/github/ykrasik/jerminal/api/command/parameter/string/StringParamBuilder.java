@@ -32,8 +32,8 @@ import java.util.Objects;
  * By default creates mandatory parameters, but can create optional parameters via
  * {@link #setOptional(String)} and {@link #setOptional(Supplier)}.<br>
  * By default creates parameters that accept any string, but can be set to create parameters that are
- * constrained to a pre-defined set of strings with {@link #setConstantPossibleValues(List)} and {@link #setConstantPossibleValues(List)},
- * or to a dynamic set of strings that is supplied at runtime with {@link #setDynamicPossibleValuesSupplier(Supplier)}.
+ * constrained to a pre-defined set of strings with {@link #setConstantAcceptableValues(List)} and {@link #setConstantAcceptableValues(List)},
+ * or to a dynamic set of strings that is supplied at runtime with {@link #setDynamicAcceptableValuesSupplier(Supplier)}.
  *
  * @author Yevgeny Krasik
  */
@@ -41,8 +41,8 @@ public class StringParamBuilder {
     private static final Supplier<Trie<String>> NO_VALUES_SUPPLIER = ParamUtils.constStringValuesSupplier(Collections.<String>emptyList());
 
     private final String name;
-    private String description = "string";
-    private Supplier<Trie<String>> possibleValuesSupplier = NO_VALUES_SUPPLIER;
+    private String description = "string parameter";
+    private Supplier<Trie<String>> acceptableValuesSupplier = NO_VALUES_SUPPLIER;
     private Supplier<String> defaultValueSupplier;
 
     public StringParamBuilder(String name) {
@@ -50,7 +50,7 @@ public class StringParamBuilder {
     }
 
     public CommandParam build() {
-        final CommandParam param = new StringParam(name, description, possibleValuesSupplier);
+        final CommandParam param = new StringParam(name, description, acceptableValuesSupplier);
         if (defaultValueSupplier == null) {
             return param;
         }
@@ -62,17 +62,17 @@ public class StringParamBuilder {
         return this;
     }
 
-    public StringParamBuilder setConstantPossibleValues(String... possibleValues) {
-        return setConstantPossibleValues(Arrays.asList(possibleValues));
+    public StringParamBuilder setConstantAcceptableValues(String... possibleValues) {
+        return setConstantAcceptableValues(Arrays.asList(possibleValues));
     }
 
-    public StringParamBuilder setConstantPossibleValues(List<String> possibleValues) {
-        this.possibleValuesSupplier = ParamUtils.constStringValuesSupplier(possibleValues);
+    public StringParamBuilder setConstantAcceptableValues(List<String> possibleValues) {
+        this.acceptableValuesSupplier = ParamUtils.constStringValuesSupplier(possibleValues);
         return this;
     }
 
-    public StringParamBuilder setDynamicPossibleValuesSupplier(Supplier<List<String>> supplier) {
-        this.possibleValuesSupplier = ParamUtils.dynamicStringValuesSupplier(supplier);
+    public StringParamBuilder setDynamicAcceptableValuesSupplier(Supplier<List<String>> supplier) {
+        this.acceptableValuesSupplier = ParamUtils.dynamicStringValuesSupplier(supplier);
         return this;
     }
 

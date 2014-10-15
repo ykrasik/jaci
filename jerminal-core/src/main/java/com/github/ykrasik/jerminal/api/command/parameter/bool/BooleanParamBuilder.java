@@ -32,7 +32,7 @@ import java.util.Objects;
  */
 public class BooleanParamBuilder {
     private final String name;
-    private String description = "boolean";
+    private String description = "boolean parameter";
     private Supplier<Boolean> defaultValueSupplier;
 
     public BooleanParamBuilder(String name) {

@@ -79,7 +79,7 @@ public class ControlCommandFactory {
             .setExecutor(new CommandExecutor() {
                 @Override
                 public void execute(CommandArgs args, OutputPrinter outputPrinter) throws ExecuteException {
-                    final InternalShellDirectory directory = args.popDirectory();
+                    final InternalShellDirectory directory = ((PrivilegedCommandArgs) args).popDirectory();
                     fileSystem.setWorkingDirectory(directory);
                 }
             })
@@ -107,7 +107,7 @@ public class ControlCommandFactory {
             .setExecutor(new CommandExecutor() {
                 @Override
                 public void execute(CommandArgs args, OutputPrinter outputPrinter) throws ExecuteException {
-                    final InternalShellDirectory directory = args.popDirectory();
+                    final InternalShellDirectory directory = ((PrivilegedCommandArgs) args).popDirectory();
                     final boolean recursive = args.popBool();
                     final ShellDirectory shellDirectory = directory.toShellDirectory(recursive);
                     displayDriver.displayDirectory(shellDirectory);
@@ -126,7 +126,7 @@ public class ControlCommandFactory {
             .setExecutor(new CommandExecutor() {
                 @Override
                 public void execute(CommandArgs args, OutputPrinter outputPrinter) throws ExecuteException {
-                    final InternalCommand internalCommand = args.popCommand();
+                    final InternalCommand internalCommand = ((PrivilegedCommandArgs) args).popCommand();
                     final Command command = internalCommand.getCommand();
                     displayDriver.displayCommand(command);
                 }

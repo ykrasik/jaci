@@ -32,7 +32,7 @@ import java.util.Objects;
  */
 public class DoubleParamBuilder {
     private final String name;
-    private String description = "double";
+    private String description = "double parameter";
     private Supplier<Double> defaultValueSupplier;
 
     public DoubleParamBuilder(String name) {

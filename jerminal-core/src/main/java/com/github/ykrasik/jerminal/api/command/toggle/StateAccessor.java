@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.api.exception;
+package com.github.ykrasik.jerminal.api.command.toggle;
 
 /**
- * Thrown when a parameter is accessed that does not exist during execution.
+ * Accesses the boolean state of a component.
  *
  * @author Yevgeny Krasik
  */
-public class MissingParameterException extends ExecuteException {
-    public MissingParameterException(String message) {
-        super(message);
-    }
+public interface StateAccessor {
+    /**
+     * Set the state of the component.
+     *
+     * @param value Value to set the component to.
+     */
+    void set(boolean value);
 
-    public MissingParameterException(String format, Object... args) {
-        super(format, args);
-    }
+    /**
+     * @return Current value of the component.
+     */
+    boolean get();
 }

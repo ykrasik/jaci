@@ -104,7 +104,7 @@ public class JerminalLibGdxExample extends ApplicationAdapter {
                   .setDescription("test Command")
                   .addParam(
                       new StringParamBuilder("nested")
-                        .setConstantPossibleValues("test1", "value2", "param3", "long string")
+                        .setConstantAcceptableValues("test1", "value2", "param3", "long string")
                         .build()
                   )
                   .addParam(

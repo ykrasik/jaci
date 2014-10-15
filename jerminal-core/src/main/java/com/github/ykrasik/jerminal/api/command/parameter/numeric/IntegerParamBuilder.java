@@ -32,7 +32,7 @@ import java.util.Objects;
  */
 public class IntegerParamBuilder {
     private final String name;
-    private String description = "int";
+    private String description = "int parameter";
     private Supplier<Integer> defaultValueSupplier;
 
     public IntegerParamBuilder(String name) {

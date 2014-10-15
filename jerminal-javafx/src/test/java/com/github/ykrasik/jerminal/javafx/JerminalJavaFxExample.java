@@ -86,6 +86,7 @@ public class JerminalJavaFxExample extends Application {
         final Terminal terminal = new JavaFxTerminal(textArea);
 
         final ShellFileSystem fileSystem = createFileSystem();
+        fileSystem.processAnnotations(Example.class);
         final Shell shell = new Shell(fileSystem, new TerminalDisplayDriver(terminal));
 
         final TextField textField = findById("textField", TextField.class);
@@ -146,7 +147,7 @@ public class JerminalJavaFxExample extends Application {
                     .setDescription("test Command")
                     .addParam(
                         new StringParamBuilder("nested")
-                            .setConstantPossibleValues("test1", "value2", "param3", "long string")
+                            .setConstantAcceptableValues("test1", "value2", "param3", "long string")
                             .build()
                     )
                     .addParam(
