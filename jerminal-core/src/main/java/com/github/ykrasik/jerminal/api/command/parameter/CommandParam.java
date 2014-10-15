@@ -40,6 +40,7 @@ public interface CommandParam extends Describable {
      */
     String getExternalForm();
 
+    // TODO: Generic commandParam instead of object?
     /**
      * Parse the rawValue into a real value that this parameter can accept.
      *

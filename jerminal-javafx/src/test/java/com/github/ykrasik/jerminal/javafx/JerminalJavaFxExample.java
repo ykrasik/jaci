@@ -19,7 +19,6 @@ package com.github.ykrasik.jerminal.javafx;
 import com.github.ykrasik.jerminal.api.Console;
 import com.github.ykrasik.jerminal.api.ConsoleImpl;
 import com.github.ykrasik.jerminal.api.Shell;
-import com.github.ykrasik.jerminal.api.ShellImpl;
 import com.github.ykrasik.jerminal.api.command.CommandArgs;
 import com.github.ykrasik.jerminal.api.command.CommandBuilder;
 import com.github.ykrasik.jerminal.api.command.CommandExecutor;
@@ -87,8 +86,7 @@ public class JerminalJavaFxExample extends Application {
         final Terminal terminal = new JavaFxTerminal(textArea);
 
         final ShellFileSystem fileSystem = createFileSystem();
-
-        final Shell shell = new ShellImpl(fileSystem, new TerminalDisplayDriver(terminal));
+        final Shell shell = new Shell(fileSystem, new TerminalDisplayDriver(terminal));
 
         final TextField textField = findById("textField", TextField.class);
         final JavaFxCommandLineDriver commandLineDriver = new JavaFxCommandLineDriver(textField);

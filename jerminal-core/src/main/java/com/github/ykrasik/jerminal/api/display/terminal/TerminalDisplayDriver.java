@@ -19,7 +19,6 @@ package com.github.ykrasik.jerminal.api.display.terminal;
 import com.github.ykrasik.jerminal.api.assist.CommandInfo;
 import com.github.ykrasik.jerminal.api.assist.Suggestions;
 import com.github.ykrasik.jerminal.api.display.DisplayDriver;
-import com.github.ykrasik.jerminal.api.exception.ExecuteException;
 import com.github.ykrasik.jerminal.api.exception.ParseError;
 import com.github.ykrasik.jerminal.api.filesystem.command.Command;
 import com.github.ykrasik.jerminal.api.filesystem.directory.ShellDirectory;
@@ -112,16 +111,7 @@ public class TerminalDisplayDriver implements DisplayDriver {
     }
 
     @Override
-    public void displayExecuteError(ExecuteException e) {
-        printException(e);
-    }
-
-    @Override
-    public void displayUnhandledException(Exception e) {
-        printException(e);
-    }
-
-    private void printException(Exception e) {
+    public void displayException(Exception e) {
         final String exceptionStr = serializer.serializeException(e);
         errorPrintln(exceptionStr);
     }

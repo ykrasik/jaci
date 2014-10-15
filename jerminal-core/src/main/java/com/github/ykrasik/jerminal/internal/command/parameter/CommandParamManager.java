@@ -92,6 +92,7 @@ public class CommandParamManager {
         // Parse all args that have been passed.
         // Keep track of all params that are unbound.
         for (String rawArg : args) {
+            // FIXME: Change the flow here to getNextParamToParse() and parseNextParam()
             final ParsedParam parsedParam = parseParam(rawArg);
 
             // Mark the param as bound.
@@ -99,6 +100,11 @@ public class CommandParamManager {
             boundParamValues.put(paramName, parsedParam.value);
             boundParamRawValues.put(paramName, parsedParam.rawValue);
             unboundParams.remove(parsedParam.param);
+        }
+
+        if (unboundParams.isEmpty()) {
+            // TODO: I hate this.
+            currentParam = Optional.absent();
         }
     }
 

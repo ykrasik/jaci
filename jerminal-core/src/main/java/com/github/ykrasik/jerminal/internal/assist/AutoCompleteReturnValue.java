@@ -18,6 +18,8 @@ package com.github.ykrasik.jerminal.internal.assist;
 
 import com.github.ykrasik.jerminal.collections.trie.Trie;
 
+import java.util.Objects;
+
 /**
  * The return value of an auto complete operation.<br>
  * Contains the prefix that was auto completed and a trie of possible words from this prefix,
@@ -32,8 +34,8 @@ public class AutoCompleteReturnValue {
     private final Trie<AutoCompleteType> possibilities;
 
     public AutoCompleteReturnValue(String prefix, Trie<AutoCompleteType> possibilities) {
-        this.prefix = java.util.Objects.requireNonNull(prefix);
-        this.possibilities = java.util.Objects.requireNonNull(possibilities);
+        this.prefix = Objects.requireNonNull(prefix);
+        this.possibilities = Objects.requireNonNull(possibilities);
     }
 
     /**

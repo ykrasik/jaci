@@ -16,6 +16,11 @@
 
 package com.github.ykrasik.jerminal.api.assist;
 
+import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
+import com.github.ykrasik.jerminal.api.filesystem.command.Command;
+import com.google.common.base.Optional;
+
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -25,45 +30,46 @@ import java.util.Objects;
  * @author Yevgeny Krasik
  */
 public class CommandInfo {
-    private final String commandName;
-    private final List<ParamAndValue> paramAndValues;
-    private final int currentParamIndex;
+    private final Command command;
+    private final List<Optional<String>> paramValues;
+    private final Optional<CommandParam> currentParam;
 
-    public CommandInfo(String commandName, List<ParamAndValue> paramAndValues, int currentParamIndex) {
-        this.commandName = Objects.requireNonNull(commandName);
-        this.paramAndValues = Objects.requireNonNull(paramAndValues);
-        this.currentParamIndex = Objects.requireNonNull(currentParamIndex);
+    public CommandInfo(Command command, List<Optional<String>> paramValues, Optional<CommandParam> currentParam) {
+        this.command = Objects.requireNonNull(command);
+        this.paramValues = Collections.unmodifiableList(Objects.requireNonNull(paramValues));
+        this.currentParam = Objects.requireNonNull(currentParam);
     }
 
     /**
-     * @return The name of the command.
+     * @return The {@link Command}.
      */
-    public String getCommandName() {
-        return commandName;
+    public Command getCommand() {
+        return command;
+    }
+
+    // FIXME: Incorrect JavaDoc
+    /**
+     * @return A list of values bound to the command's {@link CommandParam}s, if any.<br>
+     *         The values appear in the same order as the {@link CommandParam}s returned by {@link Command#getParams()}.
+     */
+    public List<Optional<String>> getParamValues() {
+        return paramValues;
     }
 
     /**
-     * @return The command's parameters and their optionally parsed values, in the order they appear in the command.<br>
-     *         The size of this list is equal exactly to the amount of parameters the command defines.
+     * @return The current {@link CommandParam} being parsed. Will be absent if not parsing a command, or if all the params have been parsed.<br>
+     *         If present, will be == to one of the {@link CommandParam}s returned by {@link Command#getParams()}.
      */
-    public List<ParamAndValue> getParamAndValues() {
-        return paramAndValues;
-    }
-
-    /**
-     * @return The index of the current parameter being parsed. This is an index into the list returned by {@link #getParamAndValues()}.<br>
-     *         May be -1 if all parameters have been parsed.
-     */
-    public int getCurrentParamIndex() {
-        return currentParamIndex;
+    public Optional<CommandParam> getCurrentParam() {
+        return currentParam;
     }
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("CommandInfo{");
-        sb.append("commandName='").append(commandName).append('\'');
-        sb.append(", paramAndValues=").append(paramAndValues);
-        sb.append(", currentParamIndex=").append(currentParamIndex);
+        sb.append("command=").append(command);
+        sb.append(", paramValues=").append(paramValues);
+        sb.append(", currentParam=").append(currentParam);
         sb.append('}');
         return sb.toString();
     }

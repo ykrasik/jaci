@@ -18,7 +18,6 @@ package com.github.ykrasik.jerminal.internal.filesystem.command;
 
 import com.github.ykrasik.jerminal.ShellConstants;
 import com.github.ykrasik.jerminal.api.assist.CommandInfo;
-import com.github.ykrasik.jerminal.api.assist.ParamAndValue;
 import com.github.ykrasik.jerminal.api.command.CommandArgs;
 import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
 import com.github.ykrasik.jerminal.api.filesystem.command.Command;
@@ -127,37 +126,18 @@ public class InternalCommand implements Describable {
     }
 
     private CommandInfo createCommandInfo(CommandParamManager paramManager) {
-        final List<ParamAndValue> paramAndValues = createParamAndValues(paramManager);
-        final int currentParamIndex = findCurrentParamIndex(paramManager);
-        return new CommandInfo(getName(), paramAndValues, currentParamIndex);
+        final List<Optional<String>> paramValues = createParamValues(paramManager);
+        final Optional<CommandParam> currentParam = paramManager.getCurrentParam();
+        return new CommandInfo(command, paramValues, currentParam);
     }
 
-    private List<ParamAndValue> createParamAndValues(CommandParamManager paramManager) {
+    private List<Optional<String>> createParamValues(CommandParamManager paramManager) {
         final List<CommandParam> params = command.getParams();
-        final List<ParamAndValue> paramAndValues = new ArrayList<>(params.size());
+        final List<Optional<String>> paramValues = new ArrayList<>(params.size());
         for (CommandParam param : params) {
             final Optional<String> value = paramManager.getParamRawValue(param.getName());
-            paramAndValues.add(new ParamAndValue(param, value));
+            paramValues.add(value);
         }
-        return paramAndValues;
-    }
-
-    private int findCurrentParamIndex(CommandParamManager paramManager) {
-        final Optional<CommandParam> currentParamOptional = paramManager.getCurrentParam();
-        if (!currentParamOptional.isPresent() || !paramManager.hasUnboundParams()) {
-            return -1;
-        }
-
-        final CommandParam currentParam = currentParamOptional.get();
-        final List<CommandParam> params = command.getParams();
-        for (int i = 0; i < params.size(); i++) {
-            if (currentParam == params.get(i)) {
-                return i;
-            }
-        }
-        throw new ShellException(
-            "Internal error: The next unbound parameter does not belong to command!? command=%s, param=%s",
-            command, currentParam
-        );
+        return paramValues;
     }
 }

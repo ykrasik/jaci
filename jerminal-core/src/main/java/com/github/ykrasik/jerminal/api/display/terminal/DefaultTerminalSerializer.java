@@ -17,7 +17,6 @@
 package com.github.ykrasik.jerminal.api.display.terminal;
 
 import com.github.ykrasik.jerminal.api.assist.CommandInfo;
-import com.github.ykrasik.jerminal.api.assist.ParamAndValue;
 import com.github.ykrasik.jerminal.api.assist.Suggestions;
 import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
 import com.github.ykrasik.jerminal.api.filesystem.command.Command;
@@ -25,6 +24,7 @@ import com.github.ykrasik.jerminal.api.filesystem.directory.ShellDirectory;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -37,49 +37,13 @@ public class DefaultTerminalSerializer implements TerminalSerializer {
 
     @Override
     public String serializeCommandInfo(CommandInfo commandInfo) {
-        final String commandName = commandInfo.getCommandName();
-        final List<ParamAndValue> paramAndValues = commandInfo.getParamAndValues();
-        final int currentParamIndex = commandInfo.getCurrentParamIndex();
+        final Command command = commandInfo.getCommand();
+        final List<Optional<String>> paramValues = commandInfo.getParamValues();
+        final Optional<CommandParam> currentParam = commandInfo.getCurrentParam();
 
         final StringBuilder sb = new StringBuilder();
-        appendDepthSpaces(sb, 0);
-        sb.append(commandName);
-        sb.append('\n');
-        appendParams(sb, paramAndValues, currentParamIndex);
+        doSerializeCommand(sb, 0, command, false, true, paramValues, currentParam);
         return sb.toString();
-    }
-
-    protected void appendParams(StringBuilder sb, List<ParamAndValue> paramAndValues, int currentParamIndex) {
-        // Surround the current param being parsed with >>> <<<
-        for (int i = 0; i < paramAndValues.size(); i++) {
-            appendDepthSpaces(sb, 1);
-            if (currentParamIndex == i) {
-                sb.append("->");
-                sb.append(getTab());
-                sb.append(' ');
-            } else {
-                sb.append(getTab());
-            }
-
-            final ParamAndValue param = paramAndValues.get(i);
-            sb.append(param.getParam().getExternalForm());
-
-            final Optional<String> value = param.getValue();
-            if (value.isPresent()) {
-                sb.append(" = ");
-                sb.append(value.get());
-            } else {
-                if (currentParamIndex == i) {
-                    sb.append(' ');
-                    sb.append(getTab());
-                    sb.append("<-");
-                }
-            }
-
-            if (i != paramAndValues.size() - 1) {
-                sb.append('\n');
-            }
-        }
     }
 
     @Override
@@ -122,7 +86,7 @@ public class DefaultTerminalSerializer implements TerminalSerializer {
         sb.append('\n');
 
         for (Command command : directory.getCommands()) {
-            doSerializeCommand(sb, command, depth + 1, false);
+            doSerializeCommand(sb, depth + 1, command, true, false, Collections.<Optional<String>>emptyList(), Optional.<CommandParam>absent());
         }
 
         for (ShellDirectory childDirectory : directory.getDirectories()) {
@@ -133,30 +97,76 @@ public class DefaultTerminalSerializer implements TerminalSerializer {
     @Override
     public String serializeCommand(Command command) {
         final StringBuilder sb = new StringBuilder();
-        doSerializeCommand(sb, command, 0, true);
+        doSerializeCommand(sb, 0, command, true, true, Collections.<Optional<String>>emptyList(), Optional.<CommandParam>absent());
         return sb.toString();
     }
 
-    protected void doSerializeCommand(StringBuilder sb, Command command, int depth, boolean parameters) {
+    protected void doSerializeCommand(StringBuilder sb,
+                                      int depth,
+                                      Command command,
+                                      boolean withDescription,
+                                      boolean withParams,
+                                      List<Optional<String>> paramValues,
+                                      Optional<CommandParam> currentParam) {
         appendDepthSpaces(sb, depth);
 
+        // Append name : description
         sb.append(command.getName());
-        sb.append(" : ");
-        sb.append(command.getDescription());
+        if (withDescription) {
+            sb.append(" : ");
+            sb.append(command.getDescription());
+        }
         sb.append('\n');
 
-        if (parameters) {
-            for (CommandParam param : command.getParams()) {
-                doSerializeCommandParam(sb, param, depth + 1);
+        // Append params.
+        if (withParams) {
+            final List<CommandParam> params = command.getParams();
+            for (int i = 0; i < params.size(); i++) {
+                final CommandParam param = params.get(i);
+                final Optional<String> value = !paramValues.isEmpty() ? paramValues.get(i) : Optional.<String>absent();
+                final boolean isCurrent = currentParam.isPresent() && currentParam.get() == param;
+                appendParam(sb, depth + 1, param, withDescription, value, isCurrent);
+            }
+            if (!params.isEmpty()) {
+                // Remove last \n
+                sb.deleteCharAt(sb.length() - 1);
             }
         }
     }
 
-    protected void doSerializeCommandParam(StringBuilder sb, CommandParam param, int depth) {
+    protected void appendParam(StringBuilder sb,
+                               int depth,
+                               CommandParam param,
+                               boolean withDescription,
+                               Optional<String> value,
+                               boolean isCurrent) {
         appendDepthSpaces(sb, depth);
+
+        // Surround the current param being parsed with -> <-
+        if (isCurrent) {
+            sb.append("-> ");
+            sb.append(getTab());
+        } else {
+            sb.append(getTab());
+        }
+
         sb.append(param.getExternalForm());
-        sb.append(" - ");
-        sb.append(param.getDescription());
+        if (withDescription) {
+            sb.append(" : ");
+            sb.append(param.getDescription());
+        }
+
+        if (value.isPresent()) {
+            sb.append(" = ");
+            sb.append(value.get());
+        }
+
+        // Actually, value.isPresent and isCurrent cannot both be true at the same time.
+        if (isCurrent) {
+            sb.append(getTab());
+            sb.append(" <-");
+        }
+
         sb.append('\n');
     }
 

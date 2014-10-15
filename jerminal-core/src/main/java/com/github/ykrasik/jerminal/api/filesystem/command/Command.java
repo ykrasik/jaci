@@ -43,9 +43,7 @@ public interface Command extends Describable {
     /**
      * Execute with the given arguments.<br>
      * Output can be written to the supplied {@link com.github.ykrasik.jerminal.api.command.OutputPrinter}.
-     * May throw an {@link com.github.ykrasik.jerminal.api.exception.ExecuteException ExecuteException}
-     * in case of an invalid internal state. This will be considered an execution error. Any other exception
-     * thrown will be considered as an unhandled exception.
+     * May throw any exception.
      *
      * @param args Parsed args. This object can be queried for arg values.
      * @param outputPrinter Used to print text onto the display.

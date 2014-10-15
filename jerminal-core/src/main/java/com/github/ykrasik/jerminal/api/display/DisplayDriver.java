@@ -18,7 +18,6 @@ package com.github.ykrasik.jerminal.api.display;
 
 import com.github.ykrasik.jerminal.api.assist.CommandInfo;
 import com.github.ykrasik.jerminal.api.assist.Suggestions;
-import com.github.ykrasik.jerminal.api.exception.ExecuteException;
 import com.github.ykrasik.jerminal.api.exception.ParseError;
 import com.github.ykrasik.jerminal.api.filesystem.command.Command;
 import com.github.ykrasik.jerminal.api.filesystem.directory.ShellDirectory;
@@ -101,18 +100,11 @@ public interface DisplayDriver {
     void displayParseError(ParseError error, String errorMessage);
 
     /**
-     * Display the execution error that was thrown while executing the command line.
+     * Display the exception that was thrown while executing the command line.
      *
      * @param e Exception to display.
      */
-    void displayExecuteError(ExecuteException e);
-
-    /**
-     * Display the unhandled exception that was thrown while operating on the command line.
-     *
-     * @param e Exception to display.
-     */
-    void displayUnhandledException(Exception e);
+    void displayException(Exception e);
 
     // TODO: Add a 'setPath' call, for 'cd'.
 }
