@@ -26,14 +26,17 @@ import com.github.ykrasik.jerminal.api.command.OutputPrinter;
 import com.github.ykrasik.jerminal.api.command.parameter.bool.BooleanParamBuilder;
 import com.github.ykrasik.jerminal.api.command.parameter.numeric.IntegerParamBuilder;
 import com.github.ykrasik.jerminal.api.command.parameter.string.StringParamBuilder;
+import com.github.ykrasik.jerminal.api.display.DisplayDriver;
 import com.github.ykrasik.jerminal.api.display.terminal.Terminal;
 import com.github.ykrasik.jerminal.api.display.terminal.TerminalDisplayDriver;
+import com.github.ykrasik.jerminal.api.display.terminal.TerminalGuiController;
 import com.github.ykrasik.jerminal.api.exception.ExecuteException;
 import com.github.ykrasik.jerminal.api.filesystem.ShellFileSystem;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
@@ -43,16 +46,12 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Objects;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * @author Yevgeny Krasik
  */
 // FIXME: JavaDoc
 public class JerminalJavaFxExample extends Application {
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
-
     private Scene scene;
 
     public static void main(String[] args) {
@@ -70,7 +69,6 @@ public class JerminalJavaFxExample extends Application {
 
     @Override
     public void stop() throws Exception {
-        executor.shutdownNow();
     }
 
     private void doStart(Stage stage) throws IOException {
@@ -85,9 +83,13 @@ public class JerminalJavaFxExample extends Application {
         textArea.setFocusTraversable(false);
         final Terminal terminal = new JavaFxTerminal(textArea);
 
+        final Label currentPathLabel = findById("currentPathLabel", Label.class);
+        final TerminalGuiController guiController = new JavaFxGuiController(currentPathLabel);
+
         final ShellFileSystem fileSystem = createFileSystem();
         fileSystem.processAnnotations(AnnotationExample.class);
-        final Shell shell = new Shell(fileSystem, new TerminalDisplayDriver(terminal));
+        final DisplayDriver displayDriver = new TerminalDisplayDriver(terminal, guiController);
+        final Shell shell = new Shell(fileSystem, displayDriver);
 
         final TextField textField = findById("textField", TextField.class);
         final JavaFxCommandLineDriver commandLineDriver = new JavaFxCommandLineDriver(textField);

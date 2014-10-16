@@ -16,7 +16,6 @@
 
 package com.github.ykrasik.jerminal.internal.command;
 
-import com.github.ykrasik.jerminal.ShellConstants;
 import com.github.ykrasik.jerminal.api.command.CommandArgs;
 import com.github.ykrasik.jerminal.api.command.CommandBuilder;
 import com.github.ykrasik.jerminal.api.command.CommandExecutor;
@@ -33,6 +32,7 @@ import com.github.ykrasik.jerminal.internal.filesystem.command.InternalCommand;
 import com.github.ykrasik.jerminal.internal.filesystem.directory.InternalShellDirectory;
 import com.google.common.base.Supplier;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -65,15 +65,14 @@ public class ControlCommandFactory {
      */
     public void installControlCommands() {
         final List<Command> controlCommands = new LinkedList<>();
-        controlCommands.add(createListDirectoryCommand());
+        controlCommands.addAll(Arrays.asList(
+            createListDirectoryCommand(),
+            createDescribeCommandCommand()
+        ));
 
         // Don't install directory navigation commands if no directories in the fileSystem.
         if (fileSystem.containsDirectories()) {
-            controlCommands.addAll(Arrays.asList(
-                createChangeDirectoryCommand(),
-                createDescribeCommandCommand(),
-                createPrintWorkingDirectoryCommand()
-            ));
+            controlCommands.add(createChangeDirectoryCommand());
         }
 
         fileSystem.addGlobalCommands(controlCommands);
@@ -91,6 +90,14 @@ public class ControlCommandFactory {
                 public void execute(CommandArgs args, OutputPrinter outputPrinter) throws ExecuteException {
                     final InternalShellDirectory directory = ((PrivilegedCommandArgs) args).popDirectory();
                     fileSystem.setWorkingDirectory(directory);
+
+                    // Notify the display that the working directory changed.
+                    final List<InternalShellDirectory> internalPath = fileSystem.getPath(directory);
+                    final List<String> path = new ArrayList<>(internalPath.size());
+                    for (InternalShellDirectory pathDirectory : internalPath) {
+                        path.add(pathDirectory.getName());
+                    }
+                    displayDriver.setWorkingDirectory(path);
                 }
             })
             .build();
@@ -142,37 +149,5 @@ public class ControlCommandFactory {
                 }
             })
             .build();
-    }
-
-    /**
-     * @return Create the print working directory command.
-     */
-    public Command createPrintWorkingDirectoryCommand() {
-        return new CommandBuilder(PRINT_WORKING_DIRECTORY_COMMAND_NAME)
-            .setDescription("Print path to working directory")
-            .setExecutor(new CommandExecutor() {
-                @Override
-                public void execute(CommandArgs args, OutputPrinter outputPrinter) throws ExecuteException {
-                    final InternalShellDirectory workingDirectory = fileSystem.getWorkingDirectory();
-                    final List<InternalShellDirectory> path = fileSystem.getPath(workingDirectory);
-                    final String workingDirectoryStr = serializePath(path);
-                    outputPrinter.println(workingDirectoryStr);
-                }
-            })
-            .build();
-    }
-
-    private String serializePath(List<InternalShellDirectory> path) {
-        final StringBuilder sb = new StringBuilder();
-        // All paths should start with '/'.
-        sb.append(ShellConstants.FILE_SYSTEM_DELIMITER);
-
-        // The first element is always the root, skip it.
-        for (int i = 1; i < path.size(); i++) {
-            final InternalShellDirectory directory = path.get(i);
-            sb.append(directory.getName());
-            sb.append(ShellConstants.FILE_SYSTEM_DELIMITER);
-        }
-        return sb.toString();
     }
 }

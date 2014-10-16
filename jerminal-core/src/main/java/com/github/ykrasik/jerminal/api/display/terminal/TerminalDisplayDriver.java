@@ -23,31 +23,40 @@ import com.github.ykrasik.jerminal.api.exception.ParseError;
 import com.github.ykrasik.jerminal.api.filesystem.command.Command;
 import com.github.ykrasik.jerminal.api.filesystem.directory.ShellDirectory;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
  * A {@link DisplayDriver} that translates all received events into text through a {@link TerminalSerializer}
- * and sends them to a {@link Terminal} to be printed.
+ * and sends them to a {@link Terminal} to be printed.<br>
+ * Any events that aren't directly printable, but rather affect the GUI surrounding the terminal
+ * (e.g. {@link #setWorkingDirectory(java.util.List)}) are handled by the {@link TerminalGuiController}.
  *
  * @author Yevgeny Krasik
  */
 public class TerminalDisplayDriver implements DisplayDriver {
     private final Terminal terminal;
+    private final TerminalGuiController guiController;
     private final TerminalSerializer serializer;
 
     private int numInteractions;
 
-    public TerminalDisplayDriver(Terminal terminal) {
-        this(terminal, new DefaultTerminalSerializer());
+    public TerminalDisplayDriver(Terminal terminal, TerminalGuiController guiController) {
+        this(terminal, guiController, new DefaultTerminalSerializer());
     }
 
-    public TerminalDisplayDriver(Terminal terminal, TerminalSerializer serializer) {
+    public TerminalDisplayDriver(Terminal terminal, TerminalGuiController guiController, TerminalSerializer serializer) {
         this.terminal = Objects.requireNonNull(terminal);
+        this.guiController = Objects.requireNonNull(guiController);
         this.serializer = Objects.requireNonNull(serializer);
     }
 
     public Terminal getTerminal() {
         return terminal;
+    }
+
+    public TerminalGuiController getGuiController() {
+        return guiController;
     }
 
     public TerminalSerializer getSerializer() {
@@ -107,6 +116,11 @@ public class TerminalDisplayDriver implements DisplayDriver {
     public void displayCommand(Command command) {
         final String commandStr = serializer.serializeCommand(command);
         println(commandStr);
+    }
+
+    @Override
+    public void setWorkingDirectory(List<String> path) {
+        guiController.setWorkingDirectory(path);
     }
 
     @Override

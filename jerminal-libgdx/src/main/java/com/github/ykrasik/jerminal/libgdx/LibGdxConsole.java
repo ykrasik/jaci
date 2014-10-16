@@ -29,6 +29,7 @@ import com.github.ykrasik.jerminal.api.Console;
 import com.github.ykrasik.jerminal.api.ConsoleImpl;
 import com.github.ykrasik.jerminal.api.Shell;
 import com.github.ykrasik.jerminal.api.display.DisplayDriver;
+import com.github.ykrasik.jerminal.api.display.terminal.TerminalGuiController;
 import com.github.ykrasik.jerminal.api.filesystem.ShellFileSystem;
 
 import java.util.Objects;
@@ -58,19 +59,22 @@ public class LibGdxConsole extends Table {
         textField = widgetFactory.createInputTextField();
         textField.setName("textField");
 
+        // A "current-path" label.
+        final Label currentPath = widgetFactory.createCurrentPathLabel("$");
+        currentPath.setName("currentPathLabel");
+
+        // The actual console and all it's components.
         final LibGdxTerminal terminal = new LibGdxTerminal(widgetFactory, maxTerminalEntries);
-        final DisplayDriver displayDriver = new LibGdxTerminalDisplayDriver(terminal, new LibGdxTerminalSerializer());
+        final TerminalGuiController guiController = new LibGdxTerminalGuiController(currentPath);
+        final DisplayDriver displayDriver = new LibGdxTerminalDisplayDriver(terminal, guiController, new LibGdxTerminalSerializer());
         final Shell shell = new Shell(fileSystem, displayDriver, welcomeMessage);
         final LibGdxCommandLineDriver commandLineDriver = new LibGdxCommandLineDriver(textField);
         final Console console = new ConsoleImpl(shell, commandLineDriver, maxCommandHistory);
+
         textField.addListener(new LibGdxConsoleDriver(console));
 
         terminal.bottom().left();
         terminal.debug();
-
-        // A "current-path" label.
-        final Label currentPath = widgetFactory.createCurrentPathLabel("$");
-        currentPath.setName("currentPathLabel");
 
         final Table currentPathTable = new Table();
         currentPathTable.setName("currentPath");

@@ -20,6 +20,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.github.ykrasik.jerminal.api.assist.Suggestions;
 import com.github.ykrasik.jerminal.api.display.terminal.Terminal;
 import com.github.ykrasik.jerminal.api.display.terminal.TerminalDisplayDriver;
+import com.github.ykrasik.jerminal.api.display.terminal.TerminalGuiController;
 import com.github.ykrasik.jerminal.api.display.terminal.TerminalSerializer;
 
 /**
@@ -28,12 +29,8 @@ import com.github.ykrasik.jerminal.api.display.terminal.TerminalSerializer;
  * @author Yevgeny Krasik
  */
 public class LibGdxTerminalDisplayDriver extends TerminalDisplayDriver {
-    public LibGdxTerminalDisplayDriver(Terminal terminal) {
-        super(terminal);
-    }
-
-    public LibGdxTerminalDisplayDriver(Terminal terminal, TerminalSerializer serializer) {
-        super(terminal, serializer);
+    public LibGdxTerminalDisplayDriver(Terminal terminal, TerminalGuiController guiController, TerminalSerializer serializer) {
+        super(terminal, guiController, serializer);
     }
 
     @Override

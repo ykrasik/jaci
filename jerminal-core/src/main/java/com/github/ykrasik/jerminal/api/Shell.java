@@ -36,6 +36,7 @@ import com.github.ykrasik.jerminal.internal.filesystem.command.InternalCommand;
 import com.google.common.base.Optional;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -70,8 +71,9 @@ public class Shell {
         this.fileSystem = createFileSystem(Objects.requireNonNull(fileSystem), displayDriver);
         this.outputPrinter = new OutputPrinterImpl(displayDriver);
 
-        // Display welcome message.
+        // Initial displayDriver stuff.
         displayDriver.begin();
+        displayDriver.setWorkingDirectory(Collections.singletonList(fileSystem.getRoot().getName()));
         displayDriver.displayWelcomeMessage(welcomeMessage);
         displayDriver.end();
     }
