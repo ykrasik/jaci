@@ -33,6 +33,8 @@ import com.github.ykrasik.jerminal.internal.filesystem.command.InternalCommand;
 import com.github.ykrasik.jerminal.internal.filesystem.directory.InternalShellDirectory;
 import com.google.common.base.Supplier;
 
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -58,15 +60,23 @@ public class ControlCommandFactory {
 
     /**
      * Install the default control commands.
+     * If the file system does not contain any directories, directory navigation commands
+     * will not be installed.
      */
     public void installControlCommands() {
-        // TODO: DOn't install directory navigation commands if no directories in fileSystem?
-        fileSystem.addGlobalCommands(
-            createChangeDirectoryCommand(),
-            createListDirectoryCommand(),
-            createDescribeCommandCommand(),
-            createPrintWorkingDirectoryCommand()
-        );
+        final List<Command> controlCommands = new LinkedList<>();
+        controlCommands.add(createListDirectoryCommand());
+
+        // Don't install directory navigation commands if no directories in the fileSystem.
+        if (fileSystem.containsDirectories()) {
+            controlCommands.addAll(Arrays.asList(
+                createChangeDirectoryCommand(),
+                createDescribeCommandCommand(),
+                createPrintWorkingDirectoryCommand()
+            ));
+        }
+
+        fileSystem.addGlobalCommands(controlCommands);
     }
 
     /**

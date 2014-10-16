@@ -163,4 +163,11 @@ public class InternalShellDirectory extends AbstractDescribable {
             }
         }
     }
+
+    /**
+     * @return True if this directory has any child directories.
+     */
+    public boolean containsDirectories() {
+        return !directoryTrie.isEmpty();
+    }
 }

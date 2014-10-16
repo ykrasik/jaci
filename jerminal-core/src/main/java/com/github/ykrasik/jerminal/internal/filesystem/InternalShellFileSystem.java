@@ -22,11 +22,11 @@ import com.github.ykrasik.jerminal.api.filesystem.ShellFileSystem;
 import com.github.ykrasik.jerminal.api.filesystem.command.Command;
 import com.github.ykrasik.jerminal.collections.trie.Trie;
 import com.github.ykrasik.jerminal.collections.trie.TrieImpl;
+import com.github.ykrasik.jerminal.internal.assist.AutoCompleteReturnValue;
+import com.github.ykrasik.jerminal.internal.assist.AutoCompleteType;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.internal.filesystem.command.InternalCommand;
 import com.github.ykrasik.jerminal.internal.filesystem.directory.InternalShellDirectory;
-import com.github.ykrasik.jerminal.internal.assist.AutoCompleteReturnValue;
-import com.github.ykrasik.jerminal.internal.assist.AutoCompleteType;
 import com.github.ykrasik.jerminal.internal.util.StringUtils;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -269,6 +269,13 @@ public class InternalShellFileSystem {
         final String entryPrefix = rawPath.substring(delimiterIndex + 1);
         final Trie<AutoCompleteType> possibilities = lastDirectory.autoCompleteEntry(entryPrefix);
         return new AutoCompleteReturnValue(entryPrefix, possibilities);
+    }
+
+    /**
+     * @return True if this file system has at least 1 child directory.
+     */
+    public boolean containsDirectories() {
+        return root.containsDirectories();
     }
 
     /**
