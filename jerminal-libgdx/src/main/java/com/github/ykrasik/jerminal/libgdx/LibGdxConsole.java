@@ -31,6 +31,10 @@ import com.github.ykrasik.jerminal.api.Shell;
 import com.github.ykrasik.jerminal.api.display.DisplayDriver;
 import com.github.ykrasik.jerminal.api.display.terminal.TerminalGuiController;
 import com.github.ykrasik.jerminal.api.filesystem.ShellFileSystem;
+import com.github.ykrasik.jerminal.libgdx.terminal.LibGdxTerminal;
+import com.github.ykrasik.jerminal.libgdx.terminal.LibGdxTerminalDisplayDriver;
+import com.github.ykrasik.jerminal.libgdx.terminal.LibGdxTerminalGuiController;
+import com.github.ykrasik.jerminal.libgdx.terminal.LibGdxTerminalSerializer;
 
 import java.util.Objects;
 

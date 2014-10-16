@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.libgdx;
+package com.github.ykrasik.jerminal.libgdx.terminal;
 
 import com.badlogic.gdx.graphics.Color;
 import com.github.ykrasik.jerminal.api.assist.Suggestions;

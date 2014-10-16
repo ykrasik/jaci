@@ -140,4 +140,9 @@ public class InternalCommand implements Describable {
         }
         return paramValues;
     }
+
+    @Override
+    public String toString() {
+        return command.toString();
+    }
 }

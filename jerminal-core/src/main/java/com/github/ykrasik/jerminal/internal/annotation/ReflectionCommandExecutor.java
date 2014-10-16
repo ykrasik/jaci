@@ -44,7 +44,7 @@ public class ReflectionCommandExecutor implements CommandExecutor {
         // Fetch all params.
         final List<Object> reflectionArgs = ((PrivilegedCommandArgs) args).getArgValues();
 
-        // Add the outputPrinter as the first param.
+        // Add the outputPrinter as the first arg.
         reflectionArgs.add(0, outputPrinter);
 
         // Invoke method.

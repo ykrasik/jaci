@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.libgdx;
+package com.github.ykrasik.jerminal.libgdx.terminal;
 
 import com.github.ykrasik.jerminal.api.display.terminal.DefaultTerminalSerializer;
 

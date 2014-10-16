@@ -16,9 +16,6 @@
 
 package com.github.ykrasik.jerminal.javafx;
 
-import com.github.ykrasik.jerminal.api.Console;
-import com.github.ykrasik.jerminal.api.ConsoleImpl;
-import com.github.ykrasik.jerminal.api.Shell;
 import com.github.ykrasik.jerminal.api.command.CommandArgs;
 import com.github.ykrasik.jerminal.api.command.CommandBuilder;
 import com.github.ykrasik.jerminal.api.command.CommandExecutor;
@@ -26,34 +23,20 @@ import com.github.ykrasik.jerminal.api.command.OutputPrinter;
 import com.github.ykrasik.jerminal.api.command.parameter.bool.BooleanParamBuilder;
 import com.github.ykrasik.jerminal.api.command.parameter.numeric.IntegerParamBuilder;
 import com.github.ykrasik.jerminal.api.command.parameter.string.StringParamBuilder;
-import com.github.ykrasik.jerminal.api.display.DisplayDriver;
-import com.github.ykrasik.jerminal.api.display.terminal.Terminal;
-import com.github.ykrasik.jerminal.api.display.terminal.TerminalDisplayDriver;
-import com.github.ykrasik.jerminal.api.display.terminal.TerminalGuiController;
 import com.github.ykrasik.jerminal.api.exception.ExecuteException;
 import com.github.ykrasik.jerminal.api.filesystem.ShellFileSystem;
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.net.URL;
-import java.util.Objects;
 
 /**
  * @author Yevgeny Krasik
  */
 // FIXME: JavaDoc
 public class JerminalJavaFxExample extends Application {
-    private Scene scene;
-
     public static void main(String[] args) {
         launch(args);
     }
@@ -72,45 +55,14 @@ public class JerminalJavaFxExample extends Application {
     }
 
     private void doStart(Stage stage) throws IOException {
-        final BorderPane mainWindow = (BorderPane) loadFxml("main.fxml");
-        this.scene = new Scene(mainWindow);
+        final ShellFileSystem fileSystem = createFileSystem();
 
+        final BorderPane mainWindow = JavaFxConsoleFactory.create(fileSystem);
+
+        final Scene scene = new Scene(mainWindow);
         stage.setTitle("Jerminal");
         stage.setScene(scene);
         stage.show();
-
-        final TextArea textArea = findById("textArea", TextArea.class);
-        textArea.setFocusTraversable(false);
-        final Terminal terminal = new JavaFxTerminal(textArea);
-
-        final Label currentPathLabel = findById("currentPathLabel", Label.class);
-        final TerminalGuiController guiController = new JavaFxGuiController(currentPathLabel);
-
-        final ShellFileSystem fileSystem = createFileSystem();
-        fileSystem.processAnnotations(AnnotationExample.class);
-        final DisplayDriver displayDriver = new TerminalDisplayDriver(terminal, guiController);
-        final Shell shell = new Shell(fileSystem, displayDriver);
-
-        final TextField textField = findById("textField", TextField.class);
-        final JavaFxCommandLineDriver commandLineDriver = new JavaFxCommandLineDriver(textField);
-        final Console console = new ConsoleImpl(shell, commandLineDriver);
-
-        textField.requestFocus();
-        textField.addEventFilter(KeyEvent.KEY_PRESSED, new JavaFxConsoleDriver(console));
-    }
-
-    private Object loadFxml(String path) throws IOException {
-        final URL resource = Objects.requireNonNull(getClass().getResource(path));
-        final FXMLLoader loader = new FXMLLoader(resource);
-        return loader.load();
-    }
-
-    private <T> T findById(String id, Class<T> clazz) {
-        return clazz.cast(findById(id));
-    }
-
-    private Node findById(String id) {
-        return scene.lookup('#' + id);
     }
 
     private ShellFileSystem createFileSystem() {
@@ -165,6 +117,7 @@ public class JerminalJavaFxExample extends Application {
                         }
                     })
                     .build()
-            );
+            )
+            .processAnnotations(AnnotationExample.class);
     }
 }

@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.libgdx;
+package com.github.ykrasik.jerminal.libgdx.terminal;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.github.ykrasik.jerminal.api.display.terminal.Terminal;
+import com.github.ykrasik.jerminal.libgdx.ConsoleWidgetFactory;
 
 import java.util.ArrayDeque;
 import java.util.Deque;

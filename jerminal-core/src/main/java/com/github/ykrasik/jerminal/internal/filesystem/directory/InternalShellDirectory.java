@@ -170,4 +170,9 @@ public class InternalShellDirectory extends AbstractDescribable {
     public boolean containsDirectories() {
         return !directoryTrie.isEmpty();
     }
+
+    @Override
+    public String toString() {
+        return "InternalShellDirectory{" + "name=" + getName() + '}';
+    }
 }
