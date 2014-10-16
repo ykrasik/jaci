@@ -34,6 +34,7 @@ import java.util.List;
  *
  * @author Yevgeny Krasik
  */
+// TODO: Since the annotation API is intended to be used mostly, this should probably be renamed to ShellCommand.
 public interface Command extends Describable {
     /**
      * @return The command's declared parameters.

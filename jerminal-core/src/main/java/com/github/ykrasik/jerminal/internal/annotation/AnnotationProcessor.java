@@ -49,9 +49,27 @@ public class AnnotationProcessor {
      * @param clazz Class to process.
      * @return A {@link AnnotationProcessorReturnValue} with the commands and global commands that were
      *         defined in this class through annotations.
+     * @throws IllegalArgumentException If the class doesn't have a no-args constructor.
+     * @throws ShellException If an error occurs while instantiating the class.
      */
-    public AnnotationProcessorReturnValue process(Class<?> clazz) {
+    public AnnotationProcessorReturnValue processClass(Class<?> clazz) {
         final Object instance = createInstance(clazz);
+        return processObject(instance);
+    }
+
+    /**
+     * Process the object and return the commands and global commands that were defined in the object's class
+     * with annotations.<br>
+     * Intended for use when the commands need to operate on a specific object, due to internal state.
+     * The caller should instantiate the object and pass it to this.
+     * Never returns null.
+     *
+     * @param instance Object to process.
+     * @return A {@link AnnotationProcessorReturnValue} with the commands and global commands that were
+     *         defined in the object's class through annotations.
+     */
+    public AnnotationProcessorReturnValue processObject(Object instance) {
+        final Class<?> clazz = instance.getClass();
 
         // All method paths will be appended to the class's top level path.
         final AnnotatedPath topLevelPath = getTopLevelPath(clazz);

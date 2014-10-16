@@ -76,6 +76,8 @@ public class ShellFileSystem {
      *
      * @param clazz Class to process.
      * @return this, for chained execution.
+     * @throws IllegalArgumentException If the class doesn't have a no-args constructor.
+     * @throws ShellException If an error occurs while instantiating the class.
      * @see com.github.ykrasik.jerminal.api.annotation.ShellPath
      * @see com.github.ykrasik.jerminal.api.annotation.Command
      * @see com.github.ykrasik.jerminal.api.annotation.ToggleCommand
@@ -86,15 +88,39 @@ public class ShellFileSystem {
      * @see com.github.ykrasik.jerminal.api.annotation.IntParam
      * @see com.github.ykrasik.jerminal.api.annotation.DoubleParam
      */
-    public ShellFileSystem processAnnotations(Class<?> clazz) throws IllegalArgumentException {
-        final AnnotationProcessorReturnValue returnValue = annotationProcessor.process(clazz);
+    // TODO: Do I even need this? Could always just process objects...
+    public ShellFileSystem processAnnotations(Class<?> clazz) throws IllegalArgumentException, ShellException {
+        return handleAnnotationProcessorReturnValue(annotationProcessor.processClass(clazz));
+    }
 
+    /**
+     * Process the object and add any {@link com.github.ykrasik.jerminal.api.filesystem.command.Command}s defined in it's class
+     * through annotations to this file system.<br>
+     * Intended for use when the commands need to operate on a specific object, due to internal state.
+     * The caller should instantiate the object and pass it to this.
+     *
+     * @param instance Object to process.
+     * @return this, for chained execution.
+     * @see com.github.ykrasik.jerminal.api.annotation.ShellPath
+     * @see com.github.ykrasik.jerminal.api.annotation.Command
+     * @see com.github.ykrasik.jerminal.api.annotation.ToggleCommand
+     * @see com.github.ykrasik.jerminal.api.annotation.CommandFactory
+     * @see com.github.ykrasik.jerminal.api.annotation.StringParam
+     * @see com.github.ykrasik.jerminal.api.annotation.BoolParam
+     * @see com.github.ykrasik.jerminal.api.annotation.FlagParam
+     * @see com.github.ykrasik.jerminal.api.annotation.IntParam
+     * @see com.github.ykrasik.jerminal.api.annotation.DoubleParam
+     */
+    public ShellFileSystem processAnnotationsOfObject(Object instance) {
+        return handleAnnotationProcessorReturnValue(annotationProcessor.processObject(instance));
+    }
+
+    private ShellFileSystem handleAnnotationProcessorReturnValue(AnnotationProcessorReturnValue returnValue) {
         // Add all collected global and local commands to the file system.
         addGlobalCommands(returnValue.getGlobalCommands());
         for (Entry<String, List<Command>> entry : returnValue.getCommandPaths().entrySet()) {
             addCommands(entry.getKey(), entry.getValue());
         }
-
         return this;
     }
 

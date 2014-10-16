@@ -120,7 +120,7 @@ public class JerminalLibGdxExample extends ApplicationAdapter {
                       }
                   })
                   .build()
-            );
+            ).processAnnotations(AnnotationExample.class);
     }
 
     @Override
