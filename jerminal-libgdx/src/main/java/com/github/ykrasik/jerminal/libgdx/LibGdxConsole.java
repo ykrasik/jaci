@@ -60,7 +60,7 @@ public class LibGdxConsole extends Table {
         textField.setName("textField");
 
         // A "current-path" label.
-        final Label currentPath = widgetFactory.createCurrentPathLabel("$");
+        final Label currentPath = widgetFactory.createCurrentPathLabel("");
         currentPath.setName("currentPathLabel");
 
         // The actual console and all it's components.
