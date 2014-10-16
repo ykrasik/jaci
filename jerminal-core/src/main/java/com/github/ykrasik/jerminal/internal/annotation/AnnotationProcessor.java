@@ -32,7 +32,8 @@ import java.util.*;
  * @author Yevgeny Krasik
  */
 public class AnnotationProcessor {
-    private static final Class<?>[] NO_ARGS = {};
+    private static final Class<?>[] NO_ARGS_TYPE = {};
+    private static final Object[] NO_ARGS = {};
 
     private final AnnotationCommandFactory commandFactory;
 
@@ -91,7 +92,7 @@ public class AnnotationProcessor {
 
     private Object createInstance(Class<?> clazz) {
         try {
-            final Constructor<?> constructor = clazz.getConstructor(NO_ARGS);
+            final Constructor<?> constructor = clazz.getConstructor(NO_ARGS_TYPE);
             return constructor.newInstance(NO_ARGS);
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException("Class doesn't have a no-args constructor: " + clazz, e);

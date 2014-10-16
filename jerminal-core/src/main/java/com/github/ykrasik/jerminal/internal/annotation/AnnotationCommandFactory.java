@@ -40,7 +40,7 @@ import java.util.Objects;
  * @author Yevgeny Krasik
  */
 public class AnnotationCommandFactory {
-    private static final Class<?>[] NO_ARGS = {};
+    private static final Object[] NO_ARGS = {};
 
     private final AnnotationCommandParamFactory paramFactory;
 

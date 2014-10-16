@@ -45,7 +45,7 @@ public class AnnotationProcessorReturnValue {
     }
 
     /**
-     * @return Map of path -> List of commands contained in the processed class.
+     * @return Map of path to List of commands contained in the processed class.
      */
     public Map<String, List<Command>> getCommandPaths() {
         return commandPaths;
