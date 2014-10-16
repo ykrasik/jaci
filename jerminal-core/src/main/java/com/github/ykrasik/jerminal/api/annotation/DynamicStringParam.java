@@ -57,10 +57,9 @@ public @interface DynamicStringParam {
     String defaultValue() default "";
 
     /**
-     * @return The name of a method that takes no args and returns a {@link com.google.common.base.Supplier} of {@link java.util.List}
-     *         of {@link String} defined in the same object. This method will be invoked in runtime to determine
-     *         the possible values for this parameter. If the supplier returns an empty list, all values will be
-     *         permitted.
+     * @return The name of a method that takes no args and returns an array of {@link String} defined in the same object.
+     *         This method will be invoked in runtime to determine the possible values for this parameter.
+     *         If the supplier returns an empty list, all values will be permitted.
      */
     String supplier();
 }
