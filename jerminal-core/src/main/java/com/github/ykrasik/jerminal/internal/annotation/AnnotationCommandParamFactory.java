@@ -23,8 +23,10 @@ import com.github.ykrasik.jerminal.api.command.parameter.flag.FlagParamBuilder;
 import com.github.ykrasik.jerminal.api.command.parameter.numeric.DoubleParamBuilder;
 import com.github.ykrasik.jerminal.api.command.parameter.numeric.IntegerParamBuilder;
 import com.github.ykrasik.jerminal.api.command.parameter.string.StringParamBuilder;
+import com.google.common.base.Supplier;
 
 import java.lang.annotation.Annotation;
+import java.util.List;
 
 /**
  * Creates {@link com.github.ykrasik.jerminal.api.command.parameter.CommandParam}s from param annotations.<br>
@@ -39,17 +41,23 @@ public class AnnotationCommandParamFactory {
      * Since parameter names aren't always available to be reflected, parameter names can only be set through
      * the annotation. If absent, a name will be generated for the parameter.
      *
+     * @param instance The instance that contains the method this parameter is being generated for.
      * @param parameterType Type of parameter to create.
      * @param annotations The parameter's annotations. May be empty if parameter has none.
      * @param index The parameter index as a positional parameter. Used to generate a name if required.
      * @return A {@link CommandParam} constructed from the annotation if it was present,
      *         or one with sensible defaults if it wasn't.
      */
-    public CommandParam createCommandParam(Class<?> parameterType, Annotation[] annotations, int index) {
+    public CommandParam createCommandParam(Object instance, Class<?> parameterType, Annotation[] annotations, int index) {
         // Translate the method parameters into CommandParams.
         if (parameterType == String.class) {
-            final StringParam annotation = findAnnotation(annotations, StringParam.class);
-            return createStringParam(annotation, index);
+            final DynamicStringParam dynamicStringAnnotation = findAnnotation(annotations, DynamicStringParam.class);
+            if (dynamicStringAnnotation != null) {
+                return createDynamicStringParam(instance, dynamicStringAnnotation, index);
+            } else {
+                final StringParam annotation = findAnnotation(annotations, StringParam.class);
+                return createStringParam(annotation, index);
+            }
         }
 
         if (parameterType == Boolean.class || parameterType == Boolean.TYPE) {
@@ -83,6 +91,28 @@ public class AnnotationCommandParamFactory {
             }
         }
         return null;
+    }
+
+    private CommandParam createDynamicStringParam(Object instance, DynamicStringParam annotation, int index) {
+        final String name = getOrGenerateName(annotation.value(), "dynamicStr", index);
+        final StringParamBuilder builder = new StringParamBuilder(name);
+
+        final String description = annotation.description();
+        if (!description.trim().isEmpty()) {
+            builder.setDescription(description);
+        }
+
+        final boolean optional = annotation.optional();
+        if (optional) {
+            final String defaultValue = annotation.defaultValue();
+            builder.setOptional(defaultValue);
+        }
+
+        final String supplierName = annotation.supplier();
+        final Supplier<List<String>> supplier = new ReflectionValuesSupplier(instance, supplierName);
+        builder.setDynamicAcceptableValuesSupplier(supplier);
+
+        return builder.build();
     }
 
     private CommandParam createStringParam(StringParam annotation, int index) {

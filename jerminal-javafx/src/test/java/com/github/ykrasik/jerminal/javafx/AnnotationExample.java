@@ -32,10 +32,15 @@ public class AnnotationExample {
     @ShellPath("new/path")
     @Command(description = "Does nothing, really.")
     public void testCommand(OutputPrinter outputPrinter,
-                            @StringParam(value = "str", optional = true, defaultValue = "lala") String str,
+                            @DynamicStringParam(value = "str", supplier = "testSupplier") String str,
                             @BoolParam("bool") boolean bool,
                             int integer) {
         outputPrinter.println("Oh yeah, str=%s, bool=%s, integer=%d", str, bool, integer);
+    }
+
+    private String[] testSupplier() {
+        // This should execute some sort of computation... for the sake of example, returns a const array.
+        return new String[] { "a", "b", "c", "d", "e", "ee" };
     }
 
     @ToggleCommand(description = "toggles this and that")

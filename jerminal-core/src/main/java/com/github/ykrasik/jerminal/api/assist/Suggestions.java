@@ -16,6 +16,7 @@
 
 package com.github.ykrasik.jerminal.api.assist;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -38,6 +39,17 @@ public class Suggestions {
         this.commandSuggestions = Objects.requireNonNull(commandSuggestions);
         this.paramNameSuggestions = Objects.requireNonNull(paramNameSuggestions);
         this.paramValueSuggestions = Objects.requireNonNull(paramValueSuggestions);
+
+        sortIfApplicable(directorySuggestions);
+        sortIfApplicable(commandSuggestions);
+        sortIfApplicable(paramNameSuggestions);
+        sortIfApplicable(paramValueSuggestions);
+    }
+
+    private void sortIfApplicable(List<String> suggestions) {
+        if (suggestions.size() > 1) {
+            Collections.sort(suggestions);
+        }
     }
 
     /**

@@ -34,7 +34,6 @@ import java.util.Objects;
  *
  * @author Yevgeny Krasik
  */
-// FIXME: This is incorrect. A situation where a dynamicSupplier returns an empty values list, any string will be accepted.
 // FIXME: Add proper support for quoted strings (autoComplete).
 public class StringParam extends AbstractMandatoryCommandParam<String> {
     private static final Function<String, AutoCompleteType> AUTO_COMPLETE_TYPE_MAPPER = new Function<String, AutoCompleteType>() {

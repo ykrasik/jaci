@@ -135,7 +135,7 @@ public class AnnotationCommandFactory {
         for (int i = 1; i < parameterTypes.length; i++) {
             final Class<?> parameterType = parameterTypes[i];
             final Annotation[] annotations = parameterAnnotations[i];
-            final CommandParam param = paramFactory.createCommandParam(parameterType, annotations, i);
+            final CommandParam param = paramFactory.createCommandParam(instance, parameterType, annotations, i);
             builder.addParam(param);
         }
 
