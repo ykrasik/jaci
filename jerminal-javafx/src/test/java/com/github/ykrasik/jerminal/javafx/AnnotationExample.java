@@ -17,18 +17,20 @@
 package com.github.ykrasik.jerminal.javafx;
 
 import com.github.ykrasik.jerminal.api.annotation.*;
+import com.github.ykrasik.jerminal.api.command.CommandArgs;
 import com.github.ykrasik.jerminal.api.command.CommandBuilder;
+import com.github.ykrasik.jerminal.api.command.CommandExecutor;
 import com.github.ykrasik.jerminal.api.command.OutputPrinter;
 import com.github.ykrasik.jerminal.api.command.toggle.StateAccessor;
 
 /**
  * @author Yevgeny Krasik
  */
-@ShellPath("path/to/command")
+@ShellPath("annotation/example")
 public class AnnotationExample {
 
     @ShellPath("new/path")
-    @Command(description = "Does something weird")
+    @Command(description = "Does nothing, really.")
     public void testCommand(OutputPrinter outputPrinter,
                             @StringParam(value = "str", optional = true, defaultValue = "lala") String str,
                             @BoolParam("bool") boolean bool,
@@ -61,6 +63,20 @@ public class AnnotationExample {
 
     @CommandFactory
     public com.github.ykrasik.jerminal.api.filesystem.command.Command commandFromFactory() {
-        return new CommandBuilder("bla").build();
+        return new CommandBuilder("bla")
+            .setExecutor(new CommandExecutor() {
+                @Override
+                public void execute(CommandArgs args, OutputPrinter outputPrinter) throws Exception {
+                    outputPrinter.println("Great success.");
+                }
+            })
+            .build();
+    }
+
+    @Command(description = "test command")
+    public void nestCommand(OutputPrinter outputPrinter,
+                            @StringParam(value = "nested", accepts = {"test1", "value2", "param3", "long string"}) String str,
+                            @BoolParam("booleany") boolean booleany) {
+        outputPrinter.println("yay: string = %s, booleany = %s", str, booleany);
     }
 }
