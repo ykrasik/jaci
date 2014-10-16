@@ -27,6 +27,7 @@ package com.github.ykrasik.jerminal.api;
  *
  * @author Yevgeny Krasik
  */
+// TODO: This isn't really an interface... remove it.
 public interface Console {
     /**
      * Clear the command line.

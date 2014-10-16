@@ -27,6 +27,7 @@ import java.lang.annotation.Target;
  * limitations and has to be constructed through the programmatic API.<br>
  * <br>
  * Annotated methods must be no-args and return a {@link com.github.ykrasik.jerminal.api.filesystem.command.Command}.<br>
+ * <b>There is very little reason to use this annotation and it exists "just in case".</b><br>
  *
  * @author Yevgeny Krasik
  */

@@ -16,6 +16,7 @@
 
 package com.github.ykrasik.jerminal.javafx;
 
+import com.github.ykrasik.jerminal.api.CommandLineDriver;
 import com.github.ykrasik.jerminal.api.Console;
 import com.github.ykrasik.jerminal.api.ConsoleImpl;
 import com.github.ykrasik.jerminal.api.Shell;
@@ -33,20 +34,29 @@ import javafx.scene.layout.BorderPane;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Objects;
 
 /**
- * A {@link BorderPane} that contains the console (terminal + command line).<br>
+ * A builder for a JavaFx console.<br>
+ * The console is a {@link BorderPane} that contains a {@link TextArea} acting as a {@link Terminal}
+ * and a {@link TextField} acting as a {@link CommandLineDriver}.
  *
  * @author Yevgeny Krasik
  */
 // FIXME: JavaDoc
-public final class JavaFxConsoleFactory {
-    private JavaFxConsoleFactory() {
+public class JavaFxConsoleBuilder {
+    // TODO: Add some sort of toggler?
+    private final ShellFileSystem fileSystem;
 
+    private String welcomeMessage = "Welcome to Jerminal!\n";
+    private int maxCommandHistory = 30;
+
+    public JavaFxConsoleBuilder(ShellFileSystem fileSystem) {
+        this.fileSystem = Objects.requireNonNull(fileSystem);
     }
 
     // FIXME: JavaDoc
-    public static BorderPane create(ShellFileSystem fileSystem) throws IOException {
+    public BorderPane build() throws IOException {
         final BorderPane borderPane = (BorderPane) loadFxml("/com/github/ykrasik/jerminal/javafx/main.fxml");
 
         // Create the terminal.
@@ -60,14 +70,14 @@ public final class JavaFxConsoleFactory {
 
         // Create the shell.
         final DisplayDriver displayDriver = new TerminalDisplayDriver(terminal, guiController);
-        final Shell shell = new Shell(fileSystem, displayDriver);
+        final Shell shell = new Shell(fileSystem, displayDriver, welcomeMessage);
 
         // Create the command line.
         final TextField textField = (TextField) borderPane.lookup("#textField");
-        final JavaFxCommandLineDriver commandLineDriver = new JavaFxCommandLineDriver(textField);
+        final CommandLineDriver commandLineDriver = new JavaFxCommandLineDriver(textField);
 
         // Create the console.
-        final Console console = new ConsoleImpl(shell, commandLineDriver);
+        final Console console = new ConsoleImpl(shell, commandLineDriver, maxCommandHistory);
 
         // Hook the textField to the console.
         textField.requestFocus();
@@ -76,8 +86,18 @@ public final class JavaFxConsoleFactory {
         return borderPane;
     }
 
-    private static Object loadFxml(String path) throws IOException {
-        final URL resource = JavaFxConsoleFactory.class.getResource(path);
+    public JavaFxConsoleBuilder setWelcomeMessage(String welcomeMessage) {
+        this.welcomeMessage = Objects.requireNonNull(welcomeMessage);
+        return this;
+    }
+
+    public JavaFxConsoleBuilder setMaxCommandHistory(int maxCommandHistory) {
+        this.maxCommandHistory = maxCommandHistory;
+        return this;
+    }
+
+    private Object loadFxml(String path) throws IOException {
+        final URL resource = JavaFxConsoleBuilder.class.getResource(path);
         if (resource == null) {
             throw new IllegalStateException("Resource not found: " + path);
         }

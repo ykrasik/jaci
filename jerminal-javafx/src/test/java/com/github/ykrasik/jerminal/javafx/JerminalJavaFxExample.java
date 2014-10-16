@@ -57,7 +57,7 @@ public class JerminalJavaFxExample extends Application {
     private void doStart(Stage stage) throws IOException {
         final ShellFileSystem fileSystem = createFileSystem();
 
-        final BorderPane mainWindow = JavaFxConsoleFactory.create(fileSystem);
+        final BorderPane mainWindow = new JavaFxConsoleBuilder(fileSystem).build();
 
         final Scene scene = new Scene(mainWindow);
         stage.setTitle("Jerminal");
