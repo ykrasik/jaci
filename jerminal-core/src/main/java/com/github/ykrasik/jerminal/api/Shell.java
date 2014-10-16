@@ -21,6 +21,7 @@ import com.github.ykrasik.jerminal.api.assist.Suggestions;
 import com.github.ykrasik.jerminal.api.command.CommandArgs;
 import com.github.ykrasik.jerminal.api.command.OutputPrinter;
 import com.github.ykrasik.jerminal.api.display.DisplayDriver;
+import com.github.ykrasik.jerminal.api.display.InteractionCountingDisplayDriver;
 import com.github.ykrasik.jerminal.api.filesystem.ShellFileSystem;
 import com.github.ykrasik.jerminal.api.filesystem.command.Command;
 import com.github.ykrasik.jerminal.collections.trie.Trie;
@@ -59,7 +60,7 @@ import java.util.regex.Pattern;
 // TODO: Create AssistReturnValue and ExecuteReturnValue instead of having a DisplayDriver with side effects?
 public class Shell {
     private final InternalShellFileSystem fileSystem;
-    private final DisplayDriver displayDriver;
+    private final InteractionCountingDisplayDriver displayDriver;
     private final OutputPrinter outputPrinter;
 
     public Shell(ShellFileSystem fileSystem, DisplayDriver displayDriver) {
@@ -67,9 +68,9 @@ public class Shell {
     }
 
     public Shell(ShellFileSystem fileSystem, DisplayDriver displayDriver, String welcomeMessage) {
-        this.displayDriver = Objects.requireNonNull(displayDriver);
-        this.fileSystem = createFileSystem(Objects.requireNonNull(fileSystem), displayDriver);
-        this.outputPrinter = new OutputPrinterImpl(displayDriver);
+        this.displayDriver = new InteractionCountingDisplayDriver(displayDriver);
+        this.fileSystem = createFileSystem(Objects.requireNonNull(fileSystem), this.displayDriver);
+        this.outputPrinter = new OutputPrinterImpl(this.displayDriver);
 
         // Initial displayDriver stuff.
         displayDriver.begin();
@@ -99,6 +100,9 @@ public class Shell {
         } catch (Exception e) {
             displayDriver.displayException(e);
         } finally {
+            if (displayDriver.getInteractions() > 0) {
+                displayDriver.displayEmptyLine();
+            }
             displayDriver.end();
         }
         return Optional.absent();
@@ -211,6 +215,7 @@ public class Shell {
         } catch (Exception e) {
             displayDriver.displayException(e);
         } finally {
+            displayDriver.displayEmptyLine();
             displayDriver.end();
         }
         return false;
@@ -221,7 +226,6 @@ public class Shell {
         final List<String> commandLine = splitCommandLine(rawCommandLine.trim());
         if (commandLine.isEmpty()) {
             // Received a commandLine that is either empty or full of spaces.
-            displayDriver.displayEmptyLine();
             return;
         }
 
@@ -238,6 +242,11 @@ public class Shell {
         // Execute the command.
         final Command command = internalCommand.getCommand();
         command.execute(args, outputPrinter);
+
+        if (displayDriver.getInteractions() == 0) {
+            final String message = String.format("Command '%s' executed successfully.", command.getName());
+            displayDriver.displayText(message);
+        }
     }
 
     private void handleParseException(ParseException e) {

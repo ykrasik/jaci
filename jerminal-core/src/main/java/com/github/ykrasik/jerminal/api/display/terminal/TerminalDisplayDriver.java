@@ -39,8 +39,6 @@ public class TerminalDisplayDriver implements DisplayDriver {
     private final TerminalGuiController guiController;
     private final TerminalSerializer serializer;
 
-    private int numInteractions;
-
     public TerminalDisplayDriver(Terminal terminal, TerminalGuiController guiController) {
         this(terminal, guiController, new DefaultTerminalSerializer());
     }
@@ -66,15 +64,10 @@ public class TerminalDisplayDriver implements DisplayDriver {
     @Override
     public void begin() {
         terminal.begin();
-        numInteractions = 0;
     }
 
     @Override
     public void end() {
-        if (numInteractions != 0) {
-            // If anything was printed, add an empty line afterwards.
-            displayEmptyLine();
-        }
         terminal.end();
     }
 
@@ -135,12 +128,10 @@ public class TerminalDisplayDriver implements DisplayDriver {
     }
 
     private void println(String message) {
-        numInteractions++;
         terminal.println(message);
     }
 
     private void errorPrintln(String message) {
-        numInteractions++;
         terminal.errorPrintln(message);
     }
 }

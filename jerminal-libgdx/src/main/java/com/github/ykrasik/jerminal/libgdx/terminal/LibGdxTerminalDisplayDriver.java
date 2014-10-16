@@ -36,6 +36,6 @@ public class LibGdxTerminalDisplayDriver extends TerminalDisplayDriver {
     @Override
     public void displaySuggestions(Suggestions suggestions) {
         final String suggestionsStr = getSerializer().serializeSuggestions(suggestions);
-        ((LibGdxTerminal) getTerminal()).println(suggestionsStr + '\n', Color.YELLOW);
+        ((LibGdxTerminal) getTerminal()).println(suggestionsStr, Color.YELLOW);
     }
 }

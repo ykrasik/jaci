@@ -77,6 +77,10 @@ public class DefaultTerminalSerializer implements TerminalSerializer {
     public String serializeDirectory(ShellDirectory directory) {
         final StringBuilder sb = new StringBuilder();
         doSerializeDirectory(sb, directory, 0);
+        if (sb.length() > 0) {
+            // Delete the last \n
+            sb.deleteCharAt(sb.length() - 1);
+        }
         return sb.toString();
     }
 
