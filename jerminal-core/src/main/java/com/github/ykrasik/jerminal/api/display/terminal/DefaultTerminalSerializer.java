@@ -21,10 +21,13 @@ import com.github.ykrasik.jerminal.api.assist.Suggestions;
 import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
 import com.github.ykrasik.jerminal.api.filesystem.command.Command;
 import com.github.ykrasik.jerminal.api.filesystem.directory.ShellDirectory;
+import com.github.ykrasik.jerminal.internal.Describable;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -34,6 +37,7 @@ import java.util.List;
  */
 public class DefaultTerminalSerializer implements TerminalSerializer {
     private static final Joiner JOINER = Joiner.on(", ").skipNulls();
+    private static final NameComparator NAME_COMPARATOR = new NameComparator();
 
     @Override
     public String serializeCommandInfo(CommandInfo commandInfo) {
@@ -85,11 +89,15 @@ public class DefaultTerminalSerializer implements TerminalSerializer {
         sb.append(']');
         sb.append('\n');
 
-        for (Command command : directory.getCommands()) {
+        final List<Command> commands = new ArrayList<>(directory.getCommands());
+        Collections.sort(commands, NAME_COMPARATOR);
+        for (Command command : commands) {
             doSerializeCommand(sb, depth + 1, command, true, false, Collections.<Optional<String>>emptyList(), Optional.<CommandParam>absent());
         }
 
-        for (ShellDirectory childDirectory : directory.getDirectories()) {
+        final List<ShellDirectory> directories = new ArrayList<>(directory.getDirectories());
+        Collections.sort(directories, NAME_COMPARATOR);
+        for (ShellDirectory childDirectory : directories) {
             doSerializeDirectory(sb, childDirectory, depth + 1);
         }
     }
@@ -193,5 +201,12 @@ public class DefaultTerminalSerializer implements TerminalSerializer {
 
     protected String getTab() {
         return "\t";
+    }
+
+    private static final class NameComparator implements Comparator<Describable> {
+        @Override
+        public int compare(Describable o1, Describable o2) {
+            return o1.getName().compareTo(o2.getName());
+        }
     }
 }
