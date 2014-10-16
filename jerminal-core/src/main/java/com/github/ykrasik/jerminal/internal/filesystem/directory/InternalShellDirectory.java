@@ -36,12 +36,11 @@ import java.util.Objects;
 /**
  * An internal representation of a {@link ShellDirectory}.<br>
  * Can parse and auto complete the directory's children.<br>
- * Any changes to the underlying {@link ShellDirectory} will not be reflected in this object.
+ * Any changes to the underlying {@link ShellDirectory} after creation will not be reflected in this object.
  * But don't do this. Why would you do this, anyway?
  *
  * @author Yevgeny Krasik
  */
-// FIXME: JavaDoc
 public class InternalShellDirectory extends AbstractDescribable {
     private static final Function<InternalShellDirectory, AutoCompleteType> AUTO_COMPLETE_DIRECTORY_MAPPER = new Function<InternalShellDirectory, AutoCompleteType>() {
         @Override

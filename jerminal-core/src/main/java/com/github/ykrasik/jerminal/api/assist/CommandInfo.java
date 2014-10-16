@@ -47,7 +47,6 @@ public class CommandInfo {
         return command;
     }
 
-    // FIXME: Incorrect JavaDoc
     /**
      * @return A list of values bound to the command's {@link CommandParam}s, if any.<br>
      *         The values appear in the same order as the {@link CommandParam}s returned by {@link Command#getParams()}.

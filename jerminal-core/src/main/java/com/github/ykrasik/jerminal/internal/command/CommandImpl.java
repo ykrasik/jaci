@@ -41,7 +41,7 @@ public class CommandImpl extends AbstractDescribable implements Command {
 
     public CommandImpl(String name, String description, List<CommandParam> params, CommandExecutor executor) {
         super(name, description);
-        this.executor = Objects.requireNonNull(executor, "executor");
+        this.executor = Objects.requireNonNull(executor);
         this.params = Collections.unmodifiableList(new ArrayList<>(Objects.requireNonNull(params)));
 
         if (!ShellConstants.isValidName(name)) {

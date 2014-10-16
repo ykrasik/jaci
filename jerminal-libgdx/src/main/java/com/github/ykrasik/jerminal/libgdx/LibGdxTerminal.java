@@ -85,7 +85,7 @@ public class LibGdxTerminal extends Table implements Terminal {
         println(text, Color.PINK);
     }
 
-    private void println(String text, Color color) {
+    public void println(String text, Color color) {
         final Label label = widgetFactory.createBufferEntryLabel(text + '\n');
         label.setColor(color);
         addLabel(label);

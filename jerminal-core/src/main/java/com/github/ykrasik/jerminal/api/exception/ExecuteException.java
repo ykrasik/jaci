@@ -21,6 +21,7 @@ package com.github.ykrasik.jerminal.api.exception;
  *
  * @author Yevgeny Krasik
  */
+// TODO: Can probably remove this class.
 public class ExecuteException extends Exception {
     public ExecuteException(String message) {
         super(message);

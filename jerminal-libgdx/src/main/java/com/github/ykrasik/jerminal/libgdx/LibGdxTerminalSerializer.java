@@ -19,7 +19,7 @@ package com.github.ykrasik.jerminal.libgdx;
 import com.github.ykrasik.jerminal.api.display.terminal.DefaultTerminalSerializer;
 
 /**
- * A {@link com.github.ykrasik.jerminal.api.display.terminal.TerminalSerializer} with specializations for LibGdx.
+ * A specialized version of a {@link com.github.ykrasik.jerminal.api.display.terminal.TerminalSerializer} for LibGdx.
  *
  * @author Yevgeny Krasik
  */

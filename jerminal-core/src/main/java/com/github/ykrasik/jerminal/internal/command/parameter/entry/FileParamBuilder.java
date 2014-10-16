@@ -34,7 +34,6 @@ import java.util.Objects;
  *
  * @author Yevgeny Krasik
  */
-// FIXME: JavaDoc
 public class FileParamBuilder {
     private final String name;
     private final InternalShellFileSystem fileSystem;
@@ -42,7 +41,7 @@ public class FileParamBuilder {
     private String description = "file";
     private Supplier<InternalCommand> defaultValueSupplier;
 
-    // FIXME: Rename this to CommandParam?
+    // FIXME: Rename this to CommandParamBuilder?
     public FileParamBuilder(String name, InternalShellFileSystem fileSystem) {
         this.name = Objects.requireNonNull(name);
         this.fileSystem = Objects.requireNonNull(fileSystem);

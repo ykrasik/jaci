@@ -50,6 +50,10 @@ public class TerminalDisplayDriver implements DisplayDriver {
         return terminal;
     }
 
+    public TerminalSerializer getSerializer() {
+        return serializer;
+    }
+
     @Override
     public void begin() {
         terminal.begin();
@@ -95,14 +99,14 @@ public class TerminalDisplayDriver implements DisplayDriver {
 
     @Override
     public void displayDirectory(ShellDirectory directory) {
-        final String shellEntryViewStr = serializer.serializeDirectory(directory);
-        println(shellEntryViewStr);
+        final String directoryStr = serializer.serializeDirectory(directory);
+        println(directoryStr);
     }
 
     @Override
     public void displayCommand(Command command) {
-        final String shellCommandViewStr = serializer.serializeCommand(command);
-        println(shellCommandViewStr);
+        final String commandStr = serializer.serializeCommand(command);
+        println(commandStr);
     }
 
     @Override

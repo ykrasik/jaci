@@ -32,7 +32,7 @@ import java.util.Objects;
  *
  * @author Yevgeny Krasik
  */
-// FIXME: JavaDoc
+// FIXME: Rename to CommandParam?
 public class FileParam extends AbstractMandatoryCommandParam<InternalCommand> {
     private final InternalShellFileSystem fileSystem;
 

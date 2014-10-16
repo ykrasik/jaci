@@ -27,7 +27,7 @@ import java.util.List;
  *
  * @author Yevgeny Krasik
  */
-// FIXME: Use a ShellFileSystemBuilder.
+// FIXME: Use a ShellFileSystemBuilder?
 public interface MutableShellDirectory extends ShellDirectory {
     /**
      * If a directory with the requested name is already a child directory of this directory, will return

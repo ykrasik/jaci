@@ -29,7 +29,6 @@ import com.github.ykrasik.jerminal.api.Console;
 import com.github.ykrasik.jerminal.api.ConsoleImpl;
 import com.github.ykrasik.jerminal.api.Shell;
 import com.github.ykrasik.jerminal.api.display.DisplayDriver;
-import com.github.ykrasik.jerminal.api.display.terminal.TerminalDisplayDriver;
 import com.github.ykrasik.jerminal.api.filesystem.ShellFileSystem;
 
 import java.util.Objects;
@@ -60,7 +59,7 @@ public class LibGdxConsole extends Table {
         textField.setName("textField");
 
         final LibGdxTerminal terminal = new LibGdxTerminal(widgetFactory, maxTerminalEntries);
-        final DisplayDriver displayDriver = new TerminalDisplayDriver(terminal, new LibGdxTerminalSerializer());
+        final DisplayDriver displayDriver = new LibGdxTerminalDisplayDriver(terminal, new LibGdxTerminalSerializer());
         final Shell shell = new Shell(fileSystem, displayDriver, welcomeMessage);
         final LibGdxCommandLineDriver commandLineDriver = new LibGdxCommandLineDriver(textField);
         final Console console = new ConsoleImpl(shell, commandLineDriver, maxCommandHistory);
