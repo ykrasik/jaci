@@ -22,11 +22,11 @@ import com.github.ykrasik.jerminal.api.annotation.ShellPath;
 import java.util.Objects;
 
 /**
- * Represents the path specified by an annotation.
+ * Represents the path specified by an annotation.<br>
+ * Paths can be either global or local, and support path composition.
  *
  * @author Yevgeny Krasik
  */
-// FIXME: JavaDoc
 public class AnnotatedPath {
     private static final AnnotatedPath ROOT = new AnnotatedPath(ShellConstants.FILE_SYSTEM_DELIMITER, false);
     private static final AnnotatedPath EMPTY = new AnnotatedPath("", false);
@@ -39,10 +39,17 @@ public class AnnotatedPath {
         this.global = global;
     }
 
+    /**
+     * @return The path. If {@link #isGlobal()} is true, this may return anything.
+     *         Otherwise, must return a valid path.
+     */
     public String getPath() {
         return path;
     }
 
+    /**
+     * @return True if this path is global.
+     */
     public boolean isGlobal() {
         return global;
     }
@@ -54,37 +61,51 @@ public class AnnotatedPath {
      * If this is not a global path but the other path is, the composed path will again be the other path.
      * Otherwise, the composed path will be this path + other path.
      *
-     * @param other
-     * @return
+     * @param other Path to compose against.
+     * @return A composed {@link AnnotatedPath} according to the above rules.
      */
-    // FIXME: JavaDoc
     public AnnotatedPath compose(AnnotatedPath other) {
         if (global || other.global) {
             return other;
         }
 
-        final String composedPath;
-        if (path.endsWith(ShellConstants.FILE_SYSTEM_DELIMITER) &&
-            other.path.startsWith(ShellConstants.FILE_SYSTEM_DELIMITER)) {
-            // Can't concat the 2 paths, will create an illegal path.
-            // Remove one of the delimiters.
-            composedPath = path + other.path.substring(1);
-        } else {
-            composedPath = path + other.path;
-        }
-        return new AnnotatedPath(composedPath, false);
+        // Make sure the first path ends with a delimiter and the second path doesn't start with one.
+        final String path1 = endsWithDelimiter(this.path) ? this.path : this.path + ShellConstants.FILE_SYSTEM_DELIMITER;
+        final String path2 = startsWithDelimiter(other.path) ? other.path.substring(1) : other.path;
+        return new AnnotatedPath(path1 + path2, false);
     }
 
+    /**
+     * @param annotation Input annotation.
+     * @return An {@link AnnotatedPath} constructed from the annotation.
+     */
     public static AnnotatedPath fromAnnotation(ShellPath annotation) {
-        return new AnnotatedPath(Objects.requireNonNull(annotation.value()), annotation.global());
+        // Make sure the path always ends with a delimiter - easier to work with.
+        final String path = Objects.requireNonNull(annotation.value());
+        final String pathToUse = path.endsWith(ShellConstants.FILE_SYSTEM_DELIMITER) ? path : path + ShellConstants.FILE_SYSTEM_DELIMITER;
+        return new AnnotatedPath(pathToUse, annotation.global());
     }
 
+    /**
+     * @return An {@link AnnotatedPath} that points to root.
+     */
     public static AnnotatedPath root() {
         return ROOT;
     }
 
+    /**
+     * @return An {@link AnnotatedPath} that doesn't point to anything.
+     */
     public static AnnotatedPath empty() {
         return EMPTY;
+    }
+
+    private static boolean endsWithDelimiter(String path) {
+        return path.endsWith(ShellConstants.FILE_SYSTEM_DELIMITER);
+    }
+
+    private static boolean startsWithDelimiter(String path) {
+        return path.startsWith(ShellConstants.FILE_SYSTEM_DELIMITER);
     }
 
     @Override

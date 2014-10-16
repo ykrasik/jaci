@@ -22,9 +22,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that the parameter annotated by this annotation is a String parameter.<br>
- * Optional, any parameter not annotated will be considered a mandatory String parameter that accepts
- * all Strings, and will have a name and description generated for it.
+ * Indicates that this parameter is a string parameter.<br>
+ * Optional, any parameter not annotated will be considered a mandatory parameter that accepts
+ * all strings, and will have a name and description generated for it.
+ * However, if a bit more control over the parameter is required, annotate it.
  *
  * @author Yevgeny Krasik
  */
@@ -43,7 +44,7 @@ public @interface StringParam {
 
     /**
      * @return True if this parameter is optional.
-     *         Optional parameters will use the value returned by {@link #defaultValue()} if they weren't passed.
+     *         Optional parameters will use the value returned by {@link #defaultValue()} if they weren't bound.
      */
     boolean optional() default false;
 
@@ -58,5 +59,5 @@ public @interface StringParam {
      *         array, the parameter will accept any String value. If not, the parameter will only accept
      *         values that are contained in the array.
      */
-    String[] acceptsValues() default {};
+    String[] accepts() default {};
 }

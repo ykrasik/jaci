@@ -26,9 +26,10 @@ import java.util.List;
 import java.util.Objects;
 
 /**
+ * A {@link CommandExecutor} that calls the underlying method via reflection.
+ *
  * @author Yevgeny Krasik
  */
-// FIXME: JavaDoc
 public class ReflectionCommandExecutor implements CommandExecutor {
     private final Object instance;
     private final Method method;

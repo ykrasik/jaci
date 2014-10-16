@@ -30,7 +30,7 @@ import java.lang.annotation.Target;
  * will toggle the state of the {@link com.github.ykrasik.jerminal.api.command.toggle.StateAccessor} - If it was previously 'false', it will now be 'true'
  * and vice versa.<br>
  * <br>
- * Methods annotated with this must return a {@link com.github.ykrasik.jerminal.api.command.toggle.StateAccessor}.<br>
+ * Annotated methods must be no-args and return a {@link com.github.ykrasik.jerminal.api.command.toggle.StateAccessor}.<br>
  *
  * @author Yevgeny Krasik
  */
@@ -38,7 +38,12 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface ToggleCommand {
     /**
+     * @return Command name. If empty, the method name will be used.
+     */
+    String value() default "";
+
+    /**
      * @return Command description.
      */
-    String value() default "toggle";
+    String description() default "toggle";
 }

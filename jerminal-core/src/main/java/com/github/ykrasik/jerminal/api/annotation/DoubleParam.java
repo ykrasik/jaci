@@ -22,9 +22,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that the parameter annotated by this annotation is a double parameter.<br>
- * Optional, any parameter not annotated will be considered a mandatory double parameter
- * and will have a name and description generated for it.
+ * Indicates that this parameter is a double parameter.<br>
+ * Optional, any parameter not annotated will be considered a mandatory parameter
+ * and will have a name and description generated for it.<br>
+ * However, if a bit more control over the parameter is required, annotate it.
  *
  * @author Yevgeny Krasik
  */
@@ -43,7 +44,7 @@ public @interface DoubleParam {
 
     /**
      * @return True if this parameter is optional.
-     *         Optional parameters will use the value returned by {@link #defaultValue()} if they weren't passed.
+     *         Optional parameters will use the value returned by {@link #defaultValue()} if they weren't bound.
      */
     boolean optional() default false;
 

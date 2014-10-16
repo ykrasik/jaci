@@ -41,6 +41,10 @@ public class ShellDirectoryImpl extends AbstractDescribable implements MutableSh
         super(name, description);
         this.childDirectories = new HashMap<>();
         this.childCommands = new HashMap<>();
+
+        if (!ShellConstants.isValidName(name)) {
+            throw new ShellException("Invalid name for directory: '%s'", name);
+        }
     }
 
     @Override
@@ -60,7 +64,7 @@ public class ShellDirectoryImpl extends AbstractDescribable implements MutableSh
             return existingDirectory;
         }
 
-        assertLegalName(name);
+        assertLegalName(name, false);
         final MutableShellDirectory newDirectory = new ShellDirectoryImpl(name, description);
         childDirectories.put(name, newDirectory);
         return newDirectory;
@@ -75,14 +79,14 @@ public class ShellDirectoryImpl extends AbstractDescribable implements MutableSh
     public void addCommands(List<Command> commands) {
         for (Command command : commands) {
             final String name = command.getName();
-            assertLegalName(name);
+            assertLegalName(name, true);
             childCommands.put(name, command);
         }
     }
 
-    private void assertLegalName(String name) {
+    private void assertLegalName(String name, boolean command) {
         if (!ShellConstants.isValidName(name)) {
-            throw new ShellException("Invalid name for entry: '%s'", name);
+            throw new ShellException("Invalid name for %s: '%s'", command ? "command" : "directory", name);
         }
         if (childDirectories.containsKey(name) || childCommands.containsKey(name)) {
             throw new ShellException("Directory '%s' already contains a child entry named: '%s'", getName(), name);

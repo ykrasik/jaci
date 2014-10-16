@@ -22,12 +22,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that the parameter annotated by this annotation is a flag parameter.<br>
- * Optional, any parameter not annotated will be considered a mandatory boolean parameter
- * and will have a name and description generated for it.<br>
+ * Indicates that this parameter is a flag parameter.<br>
+ * Only applicable to boolean parameters, but is optional - any parameter not annotated will be
+ * considered a mandatory parameter and will have a name and description generated for it.<br>
  * Flags are special optional boolean parameter that doesn't take values and are set to 'true'
  * if their name is present on the command line.<br>
- * Flag parameters must have a name.
  *
  * @author Yevgeny Krasik
  */
@@ -37,7 +36,7 @@ public @interface FlagParam {
     /**
      * @return Parameter name.
      */
-    String value();
+    String value() default "";
 
     /**
      * @return Parameter description. If empty, a default description will be generated.

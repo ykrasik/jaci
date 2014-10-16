@@ -22,9 +22,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that the parameter annotated by this annotation is an int parameter.<br>
- * Optional, any parameter not annotated will be considered a mandatory int parameter
- * and will have a name and description generated for it.
+ * Indicates that this parameter is a int parameter.<br>
+ * Optional, any parameter not annotated will be considered a mandatory parameter
+ * and will have a name and description generated for it.<br>
+ * However, if a bit more control over the parameter is required, annotate it.
  *
  * @author Yevgeny Krasik
  */

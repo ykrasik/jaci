@@ -17,6 +17,7 @@
 package com.github.ykrasik.jerminal.javafx;
 
 import com.github.ykrasik.jerminal.api.annotation.*;
+import com.github.ykrasik.jerminal.api.command.CommandBuilder;
 import com.github.ykrasik.jerminal.api.command.OutputPrinter;
 import com.github.ykrasik.jerminal.api.command.toggle.StateAccessor;
 
@@ -26,8 +27,8 @@ import com.github.ykrasik.jerminal.api.command.toggle.StateAccessor;
 @ShellPath("path/to/command")
 public class AnnotationExample {
 
-    @ShellPath("/new/path")
-    @Command("Does something weird")
+    @ShellPath("new/path")
+    @Command(description = "Does something weird")
     public void testCommand(OutputPrinter outputPrinter,
                             @StringParam(value = "str", optional = true, defaultValue = "lala") String str,
                             @BoolParam("bool") boolean bool,
@@ -35,7 +36,7 @@ public class AnnotationExample {
         outputPrinter.println("Oh yeah, str=%s, bool=%s, integer=%d", str, bool, integer);
     }
 
-    @ToggleCommand("toggles this and that")
+    @ToggleCommand(description = "toggles this and that")
     public StateAccessor toggleCommand() {
         return new StateAccessor() {
             private boolean test;
@@ -53,8 +54,13 @@ public class AnnotationExample {
     }
 
     @ShellPath(global = true)
-    @Command("some global command")
+    @Command(description = "some global command")
     public void globalCommandSomething(OutputPrinter outputPrinter, String str) {
         outputPrinter.println("yes! str=%s", str);
+    }
+
+    @CommandFactory
+    public com.github.ykrasik.jerminal.api.filesystem.command.Command commandFromFactory() {
+        return new CommandBuilder("bla").build();
     }
 }

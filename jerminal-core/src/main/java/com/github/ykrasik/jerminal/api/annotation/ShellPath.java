@@ -22,7 +22,17 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates the path under which commands should be added.
+ * Indicates the path under which commands should be added.<br>
+ * If a class is annotated with this, all it's methods that are annotated with {@link Command}, {@link ToggleCommand} or
+ * {@link CommandFactory} will inherit the path of this class. This is referred to as the 'top level path'.<br>
+ * Each method annotated with the above mentioned annotations can also specify it's own path, with the following conditions:<br>
+ *   If the top level path is global, any method annotation overrides it.<br>
+ *   If the top level path is not global but the method annotation is, the method annotation overrides it.<br>
+ *   Else (neither annotations is global), the path of the command will be the top level path composed with
+ *     the method annotation path.<br>
+ * <br>
+ * Optional annotation, classes not annotated will be considered as though they are under root and methods not annotated
+ * will inherit the class's annotation.
  *
  * @author Yevgeny Krasik
  */
@@ -30,7 +40,8 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE, ElementType.METHOD})
 public @interface ShellPath {
     /**
-     * @return The path.
+     * @return The path. Must be a valid path and use '/' as delimiters.<br>
+     *         Any directory along the path that doesn't exist will be created.
      */
     String value() default "";
 

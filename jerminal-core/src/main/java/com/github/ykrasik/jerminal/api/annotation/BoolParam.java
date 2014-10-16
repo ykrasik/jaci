@@ -22,9 +22,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that the parameter annotated by this annotation is a boolean parameter.<br>
- * Optional, any parameter not annotated will be considered a mandatory boolean parameter
+ * Indicates that this parameter is a boolean parameter.<br>
+ * Optional, any parameter not annotated will be considered a mandatory parameter
  * and will have a name and description generated for it.<br>
+ * However, if a bit more control over the parameter is required, annotate it.
  *
  * @author Yevgeny Krasik
  */
@@ -43,12 +44,12 @@ public @interface BoolParam {
 
     /**
      * @return True if this parameter is optional.
-     *         Optional parameters will use the value returned by {@link #defaultValue()} if they weren't passed.
+     *         Optional parameters will use the value returned by {@link #defaultValue()} if they weren't bound.
      */
     boolean optional() default false;
 
     /**
-     * @return The default value acceptable by this parameter if a value isn't explicitly passed.
+     * @return The default value the parameter should have if a value isn't explicitly passed.
      *         Only used if {@link #optional()} is true.
      */
     boolean defaultValue() default false;

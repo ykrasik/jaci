@@ -19,7 +19,10 @@ package com.github.ykrasik.jerminal.api.filesystem;
 import com.github.ykrasik.jerminal.ShellConstants;
 import com.github.ykrasik.jerminal.api.filesystem.command.Command;
 import com.github.ykrasik.jerminal.api.filesystem.directory.ShellDirectory;
+import com.github.ykrasik.jerminal.internal.annotation.AnnotationCommandFactory;
+import com.github.ykrasik.jerminal.internal.annotation.AnnotationCommandParamFactory;
 import com.github.ykrasik.jerminal.internal.annotation.AnnotationProcessor;
+import com.github.ykrasik.jerminal.internal.annotation.AnnotationProcessorReturnValue;
 import com.github.ykrasik.jerminal.internal.exception.ShellException;
 import com.github.ykrasik.jerminal.internal.filesystem.directory.MutableShellDirectory;
 import com.github.ykrasik.jerminal.internal.filesystem.directory.ShellDirectoryImpl;
@@ -27,6 +30,7 @@ import com.github.ykrasik.jerminal.internal.util.StringUtils;
 import com.google.common.base.Splitter;
 
 import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * A mutable container for a hierarchy of {@link ShellDirectory} and {@link Command}.<br>
@@ -44,7 +48,6 @@ import java.util.*;
  *
  * @author Yevgeny Krasik
  */
-// FIXME: JavaDoc
 public class ShellFileSystem {
     private static final Splitter PATH_SPLITTER = Splitter.on(ShellConstants.FILE_SYSTEM_DELIMITER.charAt(0)).trimResults();
     private static final Splitter DESCRIPTION_SPLITTER = Splitter.on(ShellConstants.FILE_SYSTEM_DESCRIPTION_DELIMITER.charAt(0)).trimResults();
@@ -54,14 +57,44 @@ public class ShellFileSystem {
     private final AnnotationProcessor annotationProcessor;
 
     public ShellFileSystem() {
-        this.root = new ShellDirectoryImpl("root", "root");
-        this.globalCommands = new HashMap<>();
-        this.annotationProcessor = new AnnotationProcessor();
+        this(new AnnotationProcessor(new AnnotationCommandFactory(new AnnotationCommandParamFactory())));
     }
 
-    // FIXME: JavaDoc. Mention that class must have a no-args ctor.
-    public <T> ShellFileSystem processAnnotations(Class<T> clazz) {
-        annotationProcessor.process(this, clazz);
+    /**
+     * For testing.
+     */
+    ShellFileSystem(AnnotationProcessor annotationProcessor) {
+        this.root = new ShellDirectoryImpl("root", "root");
+        this.globalCommands = new HashMap<>();
+        this.annotationProcessor = Objects.requireNonNull(annotationProcessor);
+    }
+
+    /**
+     * Process the class and add any {@link com.github.ykrasik.jerminal.api.filesystem.command.Command}s defined in it
+     * through annotations to this file system.<br>
+     * In order to be eligible for annotation processing, the class <b>must</b> provide a no-args constructor.<br>
+     *
+     * @param clazz Class to process.
+     * @return this, for chained execution.
+     * @see com.github.ykrasik.jerminal.api.annotation.ShellPath
+     * @see com.github.ykrasik.jerminal.api.annotation.Command
+     * @see com.github.ykrasik.jerminal.api.annotation.ToggleCommand
+     * @see com.github.ykrasik.jerminal.api.annotation.CommandFactory
+     * @see com.github.ykrasik.jerminal.api.annotation.StringParam
+     * @see com.github.ykrasik.jerminal.api.annotation.BoolParam
+     * @see com.github.ykrasik.jerminal.api.annotation.FlagParam
+     * @see com.github.ykrasik.jerminal.api.annotation.IntParam
+     * @see com.github.ykrasik.jerminal.api.annotation.DoubleParam
+     */
+    public ShellFileSystem processAnnotations(Class<?> clazz) throws IllegalArgumentException {
+        final AnnotationProcessorReturnValue returnValue = annotationProcessor.process(clazz);
+
+        // Add all collected global and local commands to the file system.
+        addGlobalCommands(returnValue.getGlobalCommands());
+        for (Entry<String, List<Command>> entry : returnValue.getCommandPaths().entrySet()) {
+            addCommands(entry.getKey(), entry.getValue());
+        }
+
         return this;
     }
 

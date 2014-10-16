@@ -22,22 +22,16 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that this method is a command.<br>
- * Will generate all the required wiring so this command is part of the {@link com.github.ykrasik.jerminal.api.filesystem.ShellFileSystem}.<br>
- * If the command name isn't used or is empty, the command will receive the name of the method.
+ * Indicates that this method returns a pre-made {@link com.github.ykrasik.jerminal.api.filesystem.command.Command}.<br>
+ * This is meant to be used when a command cannot be constructed through the annotation-based API due to it's
+ * limitations and has to be constructed through the programmatic API.<br>
+ * <br>
+ * Annotated methods must be no-args and return a {@link com.github.ykrasik.jerminal.api.filesystem.command.Command}.<br>
  *
  * @author Yevgeny Krasik
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface Command {
-    /**
-     * @return Command name. If empty, the method name will be used.
-     */
-    String value() default "";
+public @interface CommandFactory {
 
-    /**
-     * @return Command description.
-     */
-    String description() default "command";
 }

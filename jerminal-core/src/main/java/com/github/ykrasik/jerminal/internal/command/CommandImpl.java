@@ -16,12 +16,14 @@
 
 package com.github.ykrasik.jerminal.internal.command;
 
+import com.github.ykrasik.jerminal.ShellConstants;
 import com.github.ykrasik.jerminal.api.command.CommandArgs;
 import com.github.ykrasik.jerminal.api.command.CommandExecutor;
 import com.github.ykrasik.jerminal.api.command.OutputPrinter;
 import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
 import com.github.ykrasik.jerminal.api.filesystem.command.Command;
 import com.github.ykrasik.jerminal.internal.AbstractDescribable;
+import com.github.ykrasik.jerminal.internal.exception.ShellException;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,6 +43,10 @@ public class CommandImpl extends AbstractDescribable implements Command {
         super(name, description);
         this.executor = Objects.requireNonNull(executor, "executor");
         this.params = Collections.unmodifiableList(new ArrayList<>(Objects.requireNonNull(params)));
+
+        if (!ShellConstants.isValidName(name)) {
+            throw new ShellException("Invalid name for command: '%s'", name);
+        }
     }
 
     @Override

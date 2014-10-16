@@ -54,9 +54,9 @@ public final class ShellConstants {
      */
     public static final String ARG_VALUE_DELIMITER = "=";
 
-    private static final List<String> RESERVED_CHARS = Arrays.asList(
+    private static final List<String> NOT_ALLOWED_IN_NAME = Arrays.asList(
         FILE_SYSTEM_DELIMITER, FILE_SYSTEM_THIS, FILE_SYSTEM_PARENT, FILE_SYSTEM_DESCRIPTION_DELIMITER,
-        ARG_VALUE_DELIMITER
+        ARG_VALUE_DELIMITER, " ", "\t", "\n", "\r"
     );
 
     /**
@@ -67,8 +67,8 @@ public final class ShellConstants {
         if (name.isEmpty()) {
             return false;
         }
-        for (String reservedChar : RESERVED_CHARS) {
-            if (name.contains(reservedChar)) {
+        for (String notAllowed : NOT_ALLOWED_IN_NAME) {
+            if (name.contains(notAllowed)) {
                 return false;
             }
         }
