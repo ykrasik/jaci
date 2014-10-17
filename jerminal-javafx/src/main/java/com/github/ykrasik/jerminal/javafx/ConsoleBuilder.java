@@ -25,8 +25,9 @@ import com.github.ykrasik.jerminal.api.display.terminal.Terminal;
 import com.github.ykrasik.jerminal.api.display.terminal.TerminalDisplayDriver;
 import com.github.ykrasik.jerminal.api.display.terminal.TerminalGuiController;
 import com.github.ykrasik.jerminal.api.filesystem.ShellFileSystem;
-import com.github.ykrasik.jerminal.javafx.terminal.JavaFxGuiController;
-import com.github.ykrasik.jerminal.javafx.terminal.JavaFxTerminal;
+import com.github.ykrasik.jerminal.javafx.impl.JavaFxCommandLineDriver;
+import com.github.ykrasik.jerminal.javafx.impl.JavaFxGuiController;
+import com.github.ykrasik.jerminal.javafx.impl.JavaFxTerminal;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -56,7 +57,7 @@ import java.util.Objects;
  *
  * @author Yevgeny Krasik
  */
-public class JavaFxConsoleBuilder {
+public class ConsoleBuilder {
     private final ShellFileSystem fileSystem;
     private final FXMLLoader loader;
 
@@ -67,7 +68,7 @@ public class JavaFxConsoleBuilder {
      * Constructs a console from the fileSystem using a default layout.
      * @param fileSystem FileSystem to use.
      */
-    public JavaFxConsoleBuilder(ShellFileSystem fileSystem) {
+    public ConsoleBuilder(ShellFileSystem fileSystem) {
         this(fileSystem, "/com/github/ykrasik/jerminal/javafx/console.fxml");
     }
 
@@ -76,8 +77,8 @@ public class JavaFxConsoleBuilder {
      * @param fileSystem FileSystem to use.
      * @param fxmlPath Path to the .fxml file.
      */
-    public JavaFxConsoleBuilder(ShellFileSystem fileSystem, String fxmlPath) {
-        this(fileSystem, JavaFxConsoleBuilder.class.getResource(fxmlPath));
+    public ConsoleBuilder(ShellFileSystem fileSystem, String fxmlPath) {
+        this(fileSystem, ConsoleBuilder.class.getResource(fxmlPath));
     }
 
     /**
@@ -85,14 +86,14 @@ public class JavaFxConsoleBuilder {
      * @param fileSystem FileSystem to use.
      * @param fxmlUrl URL to the .fxml file.
      */
-    public JavaFxConsoleBuilder(ShellFileSystem fileSystem, URL fxmlUrl) {
+    public ConsoleBuilder(ShellFileSystem fileSystem, URL fxmlUrl) {
         this.fileSystem = Objects.requireNonNull(fileSystem);
         this.loader = new FXMLLoader(Objects.requireNonNull(fxmlUrl));
     }
 
     /**
      * Builds a {@link Node} that is the console. Will load the .fxml file passed by the constructor.
-     * The console can be set toggle-able by attaching a {@link JavaFxConsoleToggler} to the {@link javafx.scene.Parent}
+     * The console can be set toggle-able by attaching a {@link ConsoleToggler} to the {@link javafx.scene.Parent}
      * it is added to.
      *
      * @return A {@link Node} representing the console.
@@ -107,23 +108,23 @@ public class JavaFxConsoleBuilder {
         final Terminal terminal = new JavaFxTerminal(textArea);
 
         // Create the current path label.
-        final Label currentPathLabel = (Label) consoleNode.lookup("#currentPath");
-        final TerminalGuiController guiController = new JavaFxGuiController(currentPathLabel);
+        final Label currentPath = (Label) consoleNode.lookup("#currentPath");
+        final TerminalGuiController guiController = new JavaFxGuiController(currentPath);
 
         // Create the shell.
         final DisplayDriver displayDriver = new TerminalDisplayDriver(terminal, guiController);
         final Shell shell = new Shell(fileSystem, displayDriver, welcomeMessage);
 
         // Create the command line.
-        final TextField textField = (TextField) consoleNode.lookup("#commandLine");
-        final CommandLineDriver commandLineDriver = new JavaFxCommandLineDriver(textField);
+        final TextField commandLine = (TextField) consoleNode.lookup("#commandLine");
+        final CommandLineDriver commandLineDriver = new JavaFxCommandLineDriver(commandLine);
 
         // Create the console.
         final Console console = new ConsoleImpl(shell, commandLineDriver, maxCommandHistory);
 
-        // Hook the textField to the console.
-        textField.requestFocus();
-        textField.addEventFilter(KeyEvent.KEY_PRESSED, new JavaFxConsoleDriver(console));
+        // Hook the commandLine to the console.
+        commandLine.requestFocus();
+        commandLine.addEventFilter(KeyEvent.KEY_PRESSED, new JavaFxConsoleDriver(console));
 
         return consoleNode;
     }
@@ -132,7 +133,7 @@ public class JavaFxConsoleBuilder {
      * @param welcomeMessage Welcome message to set.
      * @return this, for chained execution.
      */
-    public JavaFxConsoleBuilder setWelcomeMessage(String welcomeMessage) {
+    public ConsoleBuilder setWelcomeMessage(String welcomeMessage) {
         this.welcomeMessage = Objects.requireNonNull(welcomeMessage);
         return this;
     }
@@ -141,7 +142,7 @@ public class JavaFxConsoleBuilder {
      * @param maxCommandHistory Max command history to set.
      * @return this, for chained execution.
      */
-    public JavaFxConsoleBuilder setMaxCommandHistory(int maxCommandHistory) {
+    public ConsoleBuilder setMaxCommandHistory(int maxCommandHistory) {
         this.maxCommandHistory = maxCommandHistory;
         return this;
     }

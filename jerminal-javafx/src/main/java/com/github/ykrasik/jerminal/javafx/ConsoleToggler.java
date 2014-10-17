@@ -30,10 +30,10 @@ import java.util.Objects;
  *
  * @author Yevgeny Krasik
  */
-public class JavaFxConsoleToggler implements EventHandler<KeyEvent> {
+public class ConsoleToggler implements EventHandler<KeyEvent> {
     private final Node console;
 
-    public JavaFxConsoleToggler(Node console) {
+    public ConsoleToggler(Node console) {
         this.console = Objects.requireNonNull(console);
     }
 

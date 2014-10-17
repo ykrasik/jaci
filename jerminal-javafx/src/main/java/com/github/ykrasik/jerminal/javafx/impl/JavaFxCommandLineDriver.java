@@ -14,7 +14,7 @@
 * limitations under the License.
 */
 
-package com.github.ykrasik.jerminal.javafx;
+package com.github.ykrasik.jerminal.javafx.impl;
 
 import com.github.ykrasik.jerminal.api.CommandLineDriver;
 import javafx.scene.control.TextField;

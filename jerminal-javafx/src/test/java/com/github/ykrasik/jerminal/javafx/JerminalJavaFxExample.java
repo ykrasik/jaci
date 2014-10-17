@@ -58,9 +58,9 @@ public class JerminalJavaFxExample extends Application {
     private void doStart(Stage stage) throws IOException {
         final ShellFileSystem fileSystem = createFileSystem();
 
-        final Parent console = new JavaFxConsoleBuilder(fileSystem).build();
+        final Parent console = new ConsoleBuilder(fileSystem).build();
         final Scene scene = new Scene(console, 1280, 720);
-        scene.addEventFilter(KeyEvent.KEY_PRESSED, new JavaFxConsoleToggler(console));
+        scene.addEventFilter(KeyEvent.KEY_PRESSED, new ConsoleToggler(console));
 
         stage.setTitle("Jerminal");
         stage.setScene(scene);
