@@ -59,7 +59,7 @@ public class JerminalJavaFxExample extends Application {
         final ShellFileSystem fileSystem = createFileSystem();
 
         final Parent console = new JavaFxConsoleBuilder(fileSystem).build();
-        final Scene scene = new Scene(console);
+        final Scene scene = new Scene(console, 1280, 720);
         scene.addEventFilter(KeyEvent.KEY_PRESSED, new JavaFxConsoleToggler(console));
 
         stage.setTitle("Jerminal");
