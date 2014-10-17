@@ -48,9 +48,9 @@ import java.util.Objects;
  * Will use a default console layout if built with the default constructor, but can be built with a custom
  * .fxml through other constructors.<br>
  * A custom .fxml must provide 3 nodes:<br>
- *   A {@link TextArea} with id #terminal<br>
- *   A {@link TextField} with id #commandLine<br>
- *   A {@link Label} with id #currentPath<br>
+ *   A {@link TextArea} with id 'terminal'<br>
+ *   A {@link TextField} with id 'commandLine'<br>
+ *   A {@link Label} with id 'currentPath'<br>
  * <br>
  * The custom .fxml must return a {@link javafx.scene.Parent}.
  *
@@ -68,7 +68,7 @@ public class JavaFxConsoleBuilder {
      * @param fileSystem FileSystem to use.
      */
     public JavaFxConsoleBuilder(ShellFileSystem fileSystem) {
-        this(fileSystem, "/com/github/ykrasik/jerminal/javafx/main.fxml");
+        this(fileSystem, "/com/github/ykrasik/jerminal/javafx/console.fxml");
     }
 
     /**
@@ -99,7 +99,7 @@ public class JavaFxConsoleBuilder {
      * @throws IOException If an error loading the .fxml file occurs.
      */
     public Parent build() throws IOException {
-        final Parent consoleNode = loader.load();
+        final Parent consoleNode = (Parent) loader.load();
 
         // Create the terminal.
         final TextArea textArea = (TextArea) consoleNode.lookup("#terminal");
