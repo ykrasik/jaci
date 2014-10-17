@@ -30,7 +30,6 @@ import java.util.Objects;
  * @author Yevgeny Krasik
  */
 public class ReflectionValuesSupplier implements Supplier<List<String>> {
-    private static final Object[] NO_ARGS = {};
     private static final String ERROR_MESSAGE = String.format("Value suppliers must be no-args and return an array of %s!", String.class);
 
     private final Object instance;
@@ -48,7 +47,9 @@ public class ReflectionValuesSupplier implements Supplier<List<String>> {
             if (!returnType.isArray() || returnType.getComponentType() != String.class) {
                 throw new IllegalArgumentException(ERROR_MESSAGE);
             }
-            method.setAccessible(true);
+            if (!method.isAccessible()) {
+                method.setAccessible(true);
+            }
             return method;
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException(ERROR_MESSAGE, e);
@@ -63,7 +64,7 @@ public class ReflectionValuesSupplier implements Supplier<List<String>> {
 
     private String[] getValues() {
         try {
-            return (String[]) supplierMethod.invoke(instance, NO_ARGS);
+            return (String[]) supplierMethod.invoke(instance, null);
         } catch (Exception e) {
             throw new ShellException(e);
         }

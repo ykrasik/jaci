@@ -48,7 +48,7 @@ public class JavaFxCommandLineDriver implements CommandLineDriver {
     @Override
     public void set(String commandLine) {
         textField.setText(commandLine);
-        textField.positionCaret(commandLine.length());
+        textField.end();
     }
 
     @Override

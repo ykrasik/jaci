@@ -40,8 +40,6 @@ import java.util.Objects;
  * @author Yevgeny Krasik
  */
 public class AnnotationCommandFactory {
-    private static final Object[] NO_ARGS = {};
-
     private final AnnotationCommandParamFactory paramFactory;
 
     public AnnotationCommandFactory(AnnotationCommandParamFactory paramFactory) {
@@ -182,7 +180,7 @@ public class AnnotationCommandFactory {
 
     private <T> T invokeNoArgs(Object instance, Method method, Class<T> returnType) {
         try {
-            final Object returnValue = method.invoke(instance, NO_ARGS);
+            final Object returnValue = method.invoke(instance, null);
             return returnType.cast(returnValue);
         } catch (Exception e) {
             final String message = String.format(

@@ -29,6 +29,8 @@ import com.github.ykrasik.jerminal.api.command.toggle.StateAccessor;
 @ShellPath("annotation/example")
 public class AnnotationExample {
 
+    // TODO: More examples.
+
     @ShellPath("new/path")
     @Command(description = "Does nothing, really.")
     public void testCommand(OutputPrinter outputPrinter,

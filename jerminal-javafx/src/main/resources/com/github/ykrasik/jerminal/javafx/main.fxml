@@ -10,22 +10,22 @@
 
 <BorderPane id="BorderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
     <center>
-        <TextArea fx:id="textArea" editable="false" prefHeight="376.0" prefWidth="210.0" style="-fx-background-color: DARKGRAY;" wrapText="true" />
+        <TextArea fx:id="terminal" editable="false" prefHeight="376.0" prefWidth="210.0" style="-fx-background-color: DARKGRAY;" wrapText="true" />
     </center>
-   <bottom>
-      <BorderPane prefHeight="41.0" prefWidth="1280.0" style="-fx-background-color: GRAY;" BorderPane.alignment="CENTER">
-         <left>
-            <Label fx:id="currentPathLabel" text="" BorderPane.alignment="CENTER" />
-         </left>
-         <center>
-            <TextField fx:id="textField" prefHeight="25.0" prefWidth="1147.0" BorderPane.alignment="CENTER" />
-         </center>
-         <BorderPane.margin>
-            <Insets />
-         </BorderPane.margin>
-         <padding>
-            <Insets left="5.0" right="5.0" />
-         </padding>
-      </BorderPane>
-   </bottom>
+    <bottom>
+        <BorderPane prefHeight="41.0" prefWidth="1280.0" style="-fx-background-color: GRAY;" BorderPane.alignment="CENTER">
+            <left>
+                <Label fx:id="currentPath" text="" BorderPane.alignment="CENTER" />
+            </left>
+            <center>
+                <TextField fx:id="commandLine" prefHeight="25.0" prefWidth="1147.0" BorderPane.alignment="CENTER" />
+            </center>
+            <BorderPane.margin>
+                <Insets />
+            </BorderPane.margin>
+            <padding>
+                <Insets left="5.0" right="5.0" />
+            </padding>
+        </BorderPane>
+    </bottom>
 </BorderPane>

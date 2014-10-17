@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.javafx;
+package com.github.ykrasik.jerminal.javafx.terminal;
 
 import com.github.ykrasik.jerminal.api.display.terminal.DefaultTerminalGuiController;
 import javafx.scene.control.Label;

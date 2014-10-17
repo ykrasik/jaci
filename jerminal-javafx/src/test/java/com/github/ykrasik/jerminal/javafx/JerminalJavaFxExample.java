@@ -26,8 +26,9 @@ import com.github.ykrasik.jerminal.api.command.parameter.string.StringParamBuild
 import com.github.ykrasik.jerminal.api.exception.ExecuteException;
 import com.github.ykrasik.jerminal.api.filesystem.ShellFileSystem;
 import javafx.application.Application;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.layout.BorderPane;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -57,9 +58,10 @@ public class JerminalJavaFxExample extends Application {
     private void doStart(Stage stage) throws IOException {
         final ShellFileSystem fileSystem = createFileSystem();
 
-        final BorderPane mainWindow = new JavaFxConsoleBuilder(fileSystem).build();
+        final Parent console = new JavaFxConsoleBuilder(fileSystem).build();
+        final Scene scene = new Scene(console);
+        scene.addEventFilter(KeyEvent.KEY_PRESSED, new JavaFxConsoleToggler(console));
 
-        final Scene scene = new Scene(mainWindow);
         stage.setTitle("Jerminal");
         stage.setScene(scene);
         stage.show();

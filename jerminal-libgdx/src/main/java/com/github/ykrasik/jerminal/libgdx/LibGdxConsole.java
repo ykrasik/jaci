@@ -126,6 +126,8 @@ public class LibGdxConsole extends Table {
 
     @Override
     protected void setStage(Stage stage) {
+        // TODO: This is quite the hack, consider moving this logic outside... however that will
+        // TODO: force the user to create this wiring.
         if (stage != null) {
             stage.addListener(new ConsoleToggleListener());
         }
@@ -205,7 +207,7 @@ public class LibGdxConsole extends Table {
     }
 
     /**
-     * An {@link InputListener} that toggles the console when the {@link ConsoleToggler} says it should.
+     * An {@link InputListener} that toggles the console when {@link ConsoleToggler#shouldToggle(int)} returns true.
      */
     private class ConsoleToggleListener extends InputListener {
         @Override

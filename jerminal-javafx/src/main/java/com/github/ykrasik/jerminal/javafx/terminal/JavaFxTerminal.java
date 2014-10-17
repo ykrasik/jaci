@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.javafx;
+package com.github.ykrasik.jerminal.javafx.terminal;
 
 import com.github.ykrasik.jerminal.api.display.terminal.Terminal;
 import javafx.scene.control.TextArea;
@@ -22,7 +22,7 @@ import javafx.scene.control.TextArea;
 import java.util.Objects;
 
 /**
- * A {@link Terminal} implemented as a {@link TextArea}.
+ * A {@link Terminal} implemented as as a JavaFx {@link TextArea}.
  *
  * @author Yevgeny Krasik
  */
