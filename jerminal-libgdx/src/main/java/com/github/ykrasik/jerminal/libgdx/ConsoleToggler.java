@@ -55,7 +55,10 @@ public class ConsoleToggler extends InputListener {
 
     /**
      * The default toggle combination is Ctrl+` (back tick, usually above tab).
-     * Can be overridden by subclasses that want to toggle on a different combination.
+     * Can be overridden by subclasses that want to toggle on a different combination.<br>
+     * If overriding, it is recommended to not use any text keys as the toggles but combine them with another key.
+     * For example, don't use `, use Ctrl+` instead, because ` is a text character  that will be printed onto the
+     * command line when it regains focus, but Ctrl+` isn't.
      *
      * @param keycode keycode that was pressed.
      * @return True if the console should be toggled on this event.

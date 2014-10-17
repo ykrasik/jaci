@@ -65,7 +65,8 @@ public class ConsoleBuilder {
     private int maxCommandHistory = 30;
 
     /**
-     * Constructs a console from the fileSystem using a default layout.
+     * Constructs a console from the fileSystem using a default layout..
+     *
      * @param fileSystem FileSystem to use.
      */
     public ConsoleBuilder(ShellFileSystem fileSystem) {
@@ -74,6 +75,7 @@ public class ConsoleBuilder {
 
     /**
      * Constructs a console from the fileSystem using the .fxml pointed to by the path.
+     *
      * @param fileSystem FileSystem to use.
      * @param fxmlPath Path to the .fxml file.
      */
@@ -83,6 +85,7 @@ public class ConsoleBuilder {
 
     /**
      * Constructs a console from the fileSystem using the .fxml pointed to by the url.
+     *
      * @param fileSystem FileSystem to use.
      * @param fxmlUrl URL to the .fxml file.
      */

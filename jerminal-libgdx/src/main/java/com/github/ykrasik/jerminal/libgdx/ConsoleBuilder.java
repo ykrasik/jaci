@@ -34,11 +34,31 @@ import com.github.ykrasik.jerminal.libgdx.impl.*;
 import java.util.Objects;
 
 /**
- * A builder for a {@link LibGdxConsole}.<br>
+ * A builder for a LibGdx console.<br>
+ * The console contains a {@link com.github.ykrasik.jerminal.api.display.terminal.Terminal}
+ * and a {@link com.github.ykrasik.jerminal.api.CommandLineDriver}.<br>
+ * <br>
+ * Will use a default skin if built with the default constructor, but can be built with a custom
+ * skin through other constructors.<br>
+ * Custom skins must provide:<br>
+ *   A {@link com.badlogic.gdx.scenes.scene2d.utils.Drawable} called 'bottomRowBackground'
+ *     that will be used as the background of the 'bottom row' (current path area, command line, close button).<br>
+ *   A {@link com.badlogic.gdx.scenes.scene2d.utils.Drawable} called 'consoleBackground'
+ *     that will be used as the background of the console.<br>
+ *   A {@link com.badlogic.gdx.scenes.scene2d.utils.Drawable} called 'currentPathBackground'
+ *     that will be used as the background of the 'current path' area.<br>
+ *   A {@link com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle} called 'closeConsoleButton'
+ *     that will be used to style the close button.<br>
+ *   A {@link com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle} called 'currentPath'
+ *     that will be used to style the 'current path' label.<br>
+ *   A {@link com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle} called 'terminalEntry'
+ *     that will be used to style every entry in the terminal.<br>
+ *   A {@link com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldStyle} called 'commandLine'
+ *     that will be used to style the command line.<br>
+ * <br>
  *
  * @author Yevgeny Krasik
  */
-// FIXME: Explain the toggle functionality.
 public class ConsoleBuilder {
     private final ShellFileSystem fileSystem;
     private final Skin skin;
@@ -47,15 +67,33 @@ public class ConsoleBuilder {
     private int maxCommandHistory = 30;
     private String welcomeMessage = "Welcome to Jerminal!\n";
 
+    /**
+     * Constructs a console from the fileSystem using the default skin.
+     *
+     * @param fileSystem FileSystem to use.
+     */
     public ConsoleBuilder(ShellFileSystem fileSystem) {
         this(fileSystem, new Skin(Gdx.files.classpath("com/github/ykrasik/jerminal/libgdx/console.cfg")));
     }
 
+    /**
+     * Constructs a console from the fileSystem using the provided skin.
+     *
+     * @param fileSystem FileSystem to use.
+     * @param skin Skin to use.
+     */
     public ConsoleBuilder(ShellFileSystem fileSystem, Skin skin) {
         this.fileSystem = Objects.requireNonNull(fileSystem);
         this.skin = Objects.requireNonNull(skin);
     }
 
+    /**
+     * Builds a {@link LibGdxConsole} that is the console. Will load the .fxml file passed by the constructor.
+     * The console can be set toggle-able by attaching a {@link ConsoleToggler} to the {@link com.badlogic.gdx.scenes.scene2d.Stage}
+     * it is added to.
+     *
+     * @return A console.
+     */
     public LibGdxConsole build() {
         // Create the terminal.
         final LibGdxTerminal terminal = new LibGdxTerminal(skin, maxTerminalEntries);
@@ -102,6 +140,7 @@ public class ConsoleBuilder {
         });
 
         // A close console button.
+        // TODO: This should be a button, not a text button.
         final Button closeButton = new TextButton("X", skin, "closeConsoleButton");
         closeButton.padRight(15).padLeft(15);
         closeButton.setName("closeButton");
@@ -136,16 +175,31 @@ public class ConsoleBuilder {
         return consoleTable;
     }
 
+    /**
+     * Sets the maximum amount of terminal entries to keep.
+     * Generally, the result of each command execution or assistance is considered as 1 entry.
+     *
+     * @param maxTerminalEntries Max terminal entries to set.
+     * @return this, for chained execution.
+     */
     public ConsoleBuilder setMaxTerminalEntries(int maxTerminalEntries) {
         this.maxTerminalEntries = maxTerminalEntries;
         return this;
     }
 
+    /**
+     * @param maxCommandHistory Max command history to set.
+     * @return this, for chained execution.
+     */
     public ConsoleBuilder setMaxCommandHistory(int maxCommandHistory) {
         this.maxCommandHistory = maxCommandHistory;
         return this;
     }
 
+    /**
+     * @param welcomeMessage Welcome message to set.
+     * @return this, for chained execution.
+     */
     public ConsoleBuilder setWelcomeMessage(String welcomeMessage) {
         this.welcomeMessage = Objects.requireNonNull(welcomeMessage);
         return this;

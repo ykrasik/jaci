@@ -40,6 +40,8 @@ public interface Terminal {
      * @param text Text to print.
      */
     void println(String text);
+    // TODO: Consider printing lines one by one - instead of serializing a string and then printing it,
+    // TODO: serialize and print immediately.
 
     /**
      * Print the text as an error and move to the next line.
