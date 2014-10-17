@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.libgdx.terminal;
+package com.github.ykrasik.jerminal.libgdx.impl;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.github.ykrasik.jerminal.api.display.terminal.Terminal;
-import com.github.ykrasik.jerminal.libgdx.ConsoleWidgetFactory;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -34,15 +34,16 @@ import java.util.Objects;
  * @author Yevgeny Krasik
  */
 public class LibGdxTerminal extends Table implements Terminal {
-    private final ConsoleWidgetFactory widgetFactory;
+    private final Skin skin;
     private final int maxTerminalEntries;
 
     private final Table buffer;
     private final ScrollPane scrollPane;
     private final Deque<Label> bufferEntries;
 
-    public LibGdxTerminal(ConsoleWidgetFactory widgetFactory, int maxTerminalEntries) {
-        this.widgetFactory = Objects.requireNonNull(widgetFactory);
+    // FIXME: Refactor
+    public LibGdxTerminal(Skin skin, int maxTerminalEntries) {
+        this.skin = Objects.requireNonNull(skin);
         this.maxTerminalEntries = maxTerminalEntries;
 
         // Create a buffer to hold out text labels.
@@ -62,7 +63,6 @@ public class LibGdxTerminal extends Table implements Terminal {
         // Buffer history.
         this.bufferEntries = new ArrayDeque<>(maxTerminalEntries);
 
-        setName("terminal");
         add(scrollPane);
     }
 
@@ -87,8 +87,9 @@ public class LibGdxTerminal extends Table implements Terminal {
     }
 
     public void println(String text, Color color) {
-        final Label label = widgetFactory.createBufferEntryLabel(text + '\n');
+        final Label label = new Label(text + '\n', skin, "terminalEntry");
         label.setColor(color);
+        label.setWrap(true);
         addLabel(label);
     }
 
@@ -98,8 +99,8 @@ public class LibGdxTerminal extends Table implements Terminal {
             buffer.removeActor(lastEntry);
         }
 
-        newEntry.setWrap(true);
         bufferEntries.addLast(newEntry);
+        // TODO: Why expandX?
         buffer.add(newEntry).left().fillX().expandX();
 
         updateScroll();

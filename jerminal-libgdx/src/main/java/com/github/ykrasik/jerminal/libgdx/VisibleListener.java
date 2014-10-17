@@ -17,18 +17,10 @@
 package com.github.ykrasik.jerminal.libgdx;
 
 /**
- * A listener for console activation/deactivation.
+ * Invoked by {@link LibGdxConsole} whenever it's visibility status changes.
  *
  * @author Yevgeny Krasik
  */
-public interface ConsoleActivationListener {
-    /**
-     * Called when the console is activated.
-     */
-    void activated();
-
-    /**
-     * Called when the console is deactivated.
-     */
-    void deactivated();
+public interface VisibleListener {
+    void onVisibleChange(boolean wasVisible, boolean isVisible);
 }

@@ -1,5 +1,5 @@
 
-debug-ui.png
+console.png
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
@@ -39,6 +39,14 @@ textfield
   offset: 0, 0
   index: -1
 textfield
+  rotate: false
+  xy: 11, 5
+  size: 14, 14
+  split: 4, 9, 4, 9
+  orig: 14, 14
+  offset: 0, 0
+  index: -1
+currentPathBackground
   rotate: false
   xy: 11, 5
   size: 14, 14

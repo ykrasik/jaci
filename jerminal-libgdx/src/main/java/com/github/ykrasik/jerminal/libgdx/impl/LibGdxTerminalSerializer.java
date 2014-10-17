@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.libgdx.terminal;
+package com.github.ykrasik.jerminal.libgdx.impl;
 
 import com.github.ykrasik.jerminal.api.display.terminal.DefaultTerminalSerializer;
 
@@ -26,7 +26,7 @@ import com.github.ykrasik.jerminal.api.display.terminal.DefaultTerminalSerialize
 public class LibGdxTerminalSerializer extends DefaultTerminalSerializer {
     @Override
     protected void appendDepthSpaces(StringBuilder sb, int depth) {
-        // LibGdx seems to ignore leading spaces, so we must prefix them with something.
+        // LibGdx labels seem to ignore leading spaces, so we must prefix them with something.
         sb.append('|');
         super.appendDepthSpaces(sb, depth);
     }

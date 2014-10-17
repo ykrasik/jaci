@@ -1,4 +1,4 @@
-package com.github.ykrasik.jerminal.libgdx.terminal;
+package com.github.ykrasik.jerminal.libgdx.impl;
 
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.github.ykrasik.jerminal.api.display.terminal.DefaultTerminalGuiController;

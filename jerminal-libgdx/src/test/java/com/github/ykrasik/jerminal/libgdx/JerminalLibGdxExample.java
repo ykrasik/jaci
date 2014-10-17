@@ -21,8 +21,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.*;
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.github.ykrasik.jerminal.api.command.CommandArgs;
 import com.github.ykrasik.jerminal.api.command.CommandBuilder;
 import com.github.ykrasik.jerminal.api.command.CommandExecutor;
@@ -55,17 +53,15 @@ public class JerminalLibGdxExample extends ApplicationAdapter {
 
     @Override
     public void create() {
-        final ConsoleWidgetFactory widgetFactory = new TestConsoleWidgetFactory();
         final ShellFileSystem fileSystem = createFileSystem();
-        final LibGdxConsoleBuilder builder = new LibGdxConsoleBuilder(fileSystem, widgetFactory);
-        final LibGdxConsole console = builder.build();
+        final LibGdxConsole console = new ConsoleBuilder(fileSystem).build();
         console.setFillParent(true);
 
         stage = new Stage();
         stage.addActor(console);
+        stage.addListener(new ConsoleToggler(console));
 
         Gdx.input.setInputProcessor(stage);
-        console.activate();
     }
 
     private ShellFileSystem createFileSystem() {
@@ -132,50 +128,5 @@ public class JerminalLibGdxExample extends ApplicationAdapter {
     public void render() {
         stage.act();
         stage.draw();
-    }
-
-    private static class TestConsoleWidgetFactory implements ConsoleWidgetFactory {
-        private final Skin skin;
-
-        private TestConsoleWidgetFactory() {
-            this.skin = new Skin(Gdx.files.internal("debug-ui.cfg"));
-        }
-
-        @Override
-        public Label createBufferEntryLabel(String text) {
-            return new Label(text, skin);
-        }
-
-        @Override
-        public Drawable createTerminalBufferBackground() {
-            return skin.getDrawable("semi-transparent-gray");
-        }
-
-        @Override
-        public Drawable createConsoleBottomRowBackground() {
-            return skin.getDrawable("gray");
-        }
-
-        @Override
-        public Drawable createCurrentPathLabelBackground() {
-            return skin.getDrawable("textfield");
-        }
-
-        @Override
-        public Label createCurrentPathLabel(String currentPath) {
-            return new Label(currentPath, skin);
-        }
-
-        @Override
-        public TextField createInputTextField() {
-            return new TextField("", skin);
-        }
-
-        @Override
-        public Button createCloseButton() {
-            final TextButton button = new TextButton("X", skin);
-            button.setWidth(40);
-            return button;
-        }
     }
 }

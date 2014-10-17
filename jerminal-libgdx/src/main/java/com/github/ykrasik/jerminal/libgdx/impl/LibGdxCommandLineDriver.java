@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.libgdx;
+package com.github.ykrasik.jerminal.libgdx.impl;
 
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.github.ykrasik.jerminal.api.CommandLineDriver;

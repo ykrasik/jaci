@@ -16,18 +16,51 @@
 
 package com.github.ykrasik.jerminal.libgdx;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
+
+import java.util.Objects;
+
 /**
- * A component that decides whether to toggle (activate/deactivate) the console.<br>
- * It is highly recommended to only toggle on Ctrl+{key} or some other combination that is not just
- * a simple key, because otherwise that event will be propagated to the textField and that key will be typed into
- * the textField after the console was activated.
+ * An {@link InputListener} that should be registered with a {@link com.badlogic.gdx.scenes.scene2d.Stage} as a listener
+ * {@link com.badlogic.gdx.scenes.scene2d.Stage#addListener(com.badlogic.gdx.scenes.scene2d.EventListener)}.
+ * Will toggle the console on and off according to {@link InputEvent}s.
  *
  * @author Yevgeny Krasik
  */
-public interface ConsoleToggler {
+public class ConsoleToggler extends InputListener {
+    private final LibGdxConsole console;
+
+    public ConsoleToggler(LibGdxConsole console) {
+        this.console = Objects.requireNonNull(console);
+    }
+
+    @Override
+    public boolean keyDown(InputEvent event, int keycode) {
+        if (shouldToggle(keycode)) {
+            toggle();
+            event.cancel();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private void toggle() {
+        final boolean toggle = !console.isVisible();
+        console.setVisible(toggle);
+    }
+
     /**
-     * @param keycode Keycode that was typed.
-     * @return True if the console should be toggled because of the key that was typed.
+     * The default toggle combination is Ctrl+` (back tick, usually above tab).
+     * Can be overridden by subclasses that want to toggle on a different combination.
+     *
+     * @param keycode keycode that was pressed.
+     * @return True if the console should be toggled on this event.
      */
-    boolean shouldToggle(int keycode);
+    protected boolean shouldToggle(int keycode) {
+        return keycode == Keys.GRAVE && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT);
+    }
 }
