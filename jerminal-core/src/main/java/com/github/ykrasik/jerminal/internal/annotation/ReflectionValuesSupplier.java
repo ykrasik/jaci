@@ -16,7 +16,7 @@
 
 package com.github.ykrasik.jerminal.internal.annotation;
 
-import com.github.ykrasik.jerminal.internal.exception.ShellException;
+import com.github.ykrasik.jerminal.internal.util.ReflectionUtils;
 import com.google.common.base.Supplier;
 
 import java.lang.reflect.Method;
@@ -30,8 +30,6 @@ import java.util.Objects;
  * @author Yevgeny Krasik
  */
 public class ReflectionValuesSupplier implements Supplier<List<String>> {
-    private static final String ERROR_MESSAGE = String.format("Value suppliers must be no-args and return an array of %s!", String.class);
-
     private final Object instance;
     private final Method supplierMethod;
 
@@ -42,31 +40,16 @@ public class ReflectionValuesSupplier implements Supplier<List<String>> {
 
     private Method getValuesSupplierMethod(Object instance, String valuesSupplierName) {
         try {
-            final Method method = instance.getClass().getDeclaredMethod(valuesSupplierName, null);
-            final Class<?> returnType = method.getReturnType();
-            if (!returnType.isArray() || returnType.getComponentType() != String.class) {
-                throw new IllegalArgumentException(ERROR_MESSAGE);
-            }
-            if (!method.isAccessible()) {
-                method.setAccessible(true);
-            }
-            return method;
-        } catch (NoSuchMethodException e) {
-            throw new IllegalArgumentException(ERROR_MESSAGE, e);
+            return ReflectionUtils.findNoArgsMethod(instance.getClass(), valuesSupplierName, String[].class);
+        } catch (Exception e) {
+            final String message = String.format("Value suppliers must be no-args and return an array of %s: '%s'", String.class, valuesSupplierName);
+            throw new IllegalArgumentException(message, e);
         }
     }
 
     @Override
     public List<String> get() {
-        final String[] values = getValues();
+        final String[] values = ReflectionUtils.invokeNoArgs(instance, supplierMethod, String[].class);
         return Arrays.asList(values);
-    }
-
-    private String[] getValues() {
-        try {
-            return (String[]) supplierMethod.invoke(instance, null);
-        } catch (Exception e) {
-            throw new ShellException(e);
-        }
     }
 }

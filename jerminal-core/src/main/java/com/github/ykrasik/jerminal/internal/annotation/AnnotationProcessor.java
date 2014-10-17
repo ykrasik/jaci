@@ -19,9 +19,9 @@ package com.github.ykrasik.jerminal.internal.annotation;
 import com.github.ykrasik.jerminal.api.annotation.ShellPath;
 import com.github.ykrasik.jerminal.api.filesystem.command.Command;
 import com.github.ykrasik.jerminal.internal.exception.ShellException;
+import com.github.ykrasik.jerminal.internal.util.ReflectionUtils;
 import com.google.common.base.Optional;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.*;
 
@@ -50,7 +50,7 @@ public class AnnotationProcessor {
      * @throws ShellException If an error occurs while instantiating the class.
      */
     public AnnotationProcessorReturnValue processClass(Class<?> clazz) {
-        final Object instance = createInstance(clazz);
+        final Object instance = ReflectionUtils.createInstanceNoArgs(clazz);
         return processObject(instance);
     }
 
@@ -103,17 +103,6 @@ public class AnnotationProcessor {
         }
 
         return new AnnotationProcessorReturnValue(globalCommands, commandPaths);
-    }
-
-    private Object createInstance(Class<?> clazz) {
-        try {
-            final Constructor<?> constructor = clazz.getConstructor(null);
-            return constructor.newInstance(null);
-        } catch (NoSuchMethodException e) {
-            throw new IllegalArgumentException("Class doesn't have a no-args constructor: " + clazz, e);
-        } catch (Exception e) {
-            throw new ShellException("Error instantiating new instance of type: " + clazz, e);
-        }
     }
 
     private AnnotatedPath getTopLevelPath(Class<?> clazz) {

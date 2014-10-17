@@ -24,6 +24,7 @@ import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
 import com.github.ykrasik.jerminal.api.command.toggle.StateAccessor;
 import com.github.ykrasik.jerminal.api.command.toggle.ToggleCommandBuilder;
 import com.github.ykrasik.jerminal.api.filesystem.command.Command;
+import com.github.ykrasik.jerminal.internal.util.ReflectionUtils;
 import com.google.common.base.Optional;
 
 import java.lang.annotation.Annotation;
@@ -144,7 +145,7 @@ public class AnnotationCommandFactory {
         assertReturnValue(method, StateAccessor.class, ToggleCommand.class);
         assertNoParameters(method, ToggleCommand.class);
 
-        final StateAccessor accessor = invokeNoArgs(instance, method, StateAccessor.class);
+        final StateAccessor accessor = ReflectionUtils.invokeNoArgs(instance, method, StateAccessor.class);
         final ToggleCommandBuilder builder = new ToggleCommandBuilder(name, accessor);
         builder.setCommandDescription(description);
         return builder.build();
@@ -153,7 +154,7 @@ public class AnnotationCommandFactory {
     private Command createCommandFromFactory(Object instance, Method method) {
         assertReturnValue(method, Command.class, CommandFactory.class);
         assertNoParameters(method, CommandFactory.class);
-        return invokeNoArgs(instance, method, Command.class);
+        return ReflectionUtils.invokeNoArgs(instance, method, Command.class);
     }
 
     private void assertReturnValue(Method method, Class<?> expectedReturnValue, Class<?> annotation) {
@@ -175,19 +176,6 @@ public class AnnotationCommandFactory {
                 annotation, method.getDeclaringClass(), method.getName()
             );
             throw new IllegalArgumentException(message);
-        }
-    }
-
-    private <T> T invokeNoArgs(Object instance, Method method, Class<T> returnType) {
-        try {
-            final Object returnValue = method.invoke(instance, null);
-            return returnType.cast(returnValue);
-        } catch (Exception e) {
-            final String message = String.format(
-                "Error invoking no-args method: class=%s, method=%s",
-                method.getDeclaringClass(), method.getName()
-            );
-            throw new IllegalStateException(message, e);
         }
     }
 }
