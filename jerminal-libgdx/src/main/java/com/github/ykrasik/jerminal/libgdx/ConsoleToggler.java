@@ -30,6 +30,7 @@ import java.util.Objects;
  *
  * @author Yevgeny Krasik
  */
+// FIXME: Separate this into VisibilityToggler and StageToggler (wraps an InputHandler and toggles between different stages).
 public class ConsoleToggler extends InputListener {
     private final LibGdxConsole console;
 

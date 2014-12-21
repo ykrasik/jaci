@@ -96,7 +96,7 @@ public class ConsoleBuilder {
 
     /**
      * Builds a {@link Node} that is the console. Will load the .fxml file passed by the constructor.
-     * The console can be set toggle-able by attaching a {@link ConsoleToggler} to the {@link javafx.scene.Parent}
+     * The console can be set toggle-able by attaching a {@link NodeVisibilityToggler} to the {@link javafx.scene.Parent}
      * it is added to.
      *
      * @return A {@link Node} representing the console.

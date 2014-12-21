@@ -46,7 +46,6 @@ public class ControlCommandFactory {
     private static final String CHANGE_DIRECTORY_COMMAND_NAME = "cd";
     private static final String LIST_DIRECTORY_COMMAND_NAME = "ls";
     private static final String DESCRIBE_COMMAND_COMMAND_NAME = "man";
-    private static final String PRINT_WORKING_DIRECTORY_COMMAND_NAME = "pwd";
 
     private final InternalShellFileSystem fileSystem;
     private final DisplayDriver displayDriver;

@@ -20,7 +20,6 @@ import com.github.ykrasik.jerminal.api.command.CommandArgs;
 import com.github.ykrasik.jerminal.api.command.CommandExecutor;
 import com.github.ykrasik.jerminal.api.command.OutputPrinter;
 import com.github.ykrasik.jerminal.internal.command.PrivilegedCommandArgs;
-import com.github.ykrasik.jerminal.internal.exception.ShellException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -53,7 +52,7 @@ public class ReflectionCommandExecutor implements CommandExecutor {
         try {
             method.invoke(instance, reflectionArgs.toArray());
         } catch (InvocationTargetException e) {
-            throw new ShellException(e.getCause());
+            throw (Exception) e.getCause();
         }
     }
 }

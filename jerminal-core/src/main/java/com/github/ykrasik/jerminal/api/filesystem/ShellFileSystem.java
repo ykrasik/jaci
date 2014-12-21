@@ -19,8 +19,6 @@ package com.github.ykrasik.jerminal.api.filesystem;
 import com.github.ykrasik.jerminal.ShellConstants;
 import com.github.ykrasik.jerminal.api.filesystem.command.Command;
 import com.github.ykrasik.jerminal.api.filesystem.directory.ShellDirectory;
-import com.github.ykrasik.jerminal.internal.annotation.AnnotationCommandFactory;
-import com.github.ykrasik.jerminal.internal.annotation.AnnotationCommandParamFactory;
 import com.github.ykrasik.jerminal.internal.annotation.AnnotationProcessor;
 import com.github.ykrasik.jerminal.internal.annotation.AnnotationProcessorReturnValue;
 import com.github.ykrasik.jerminal.internal.exception.ShellException;
@@ -48,6 +46,7 @@ import java.util.Map.Entry;
  *
  * @author Yevgeny Krasik
  */
+// TODO: Rename this to CommandHierarchy?
 public class ShellFileSystem {
     private static final Splitter PATH_SPLITTER = Splitter.on(ShellConstants.FILE_SYSTEM_DELIMITER.charAt(0)).trimResults();
     private static final Splitter DESCRIPTION_SPLITTER = Splitter.on(ShellConstants.FILE_SYSTEM_DESCRIPTION_DELIMITER.charAt(0)).trimResults();
@@ -57,7 +56,7 @@ public class ShellFileSystem {
     private final AnnotationProcessor annotationProcessor;
 
     public ShellFileSystem() {
-        this(new AnnotationProcessor(new AnnotationCommandFactory(new AnnotationCommandParamFactory())));
+        this(new AnnotationProcessor());
     }
 
     /**

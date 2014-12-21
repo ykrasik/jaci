@@ -26,6 +26,7 @@ import java.util.Collection;
  *
  * @author Yevgeny Krasik
  */
+// TODO: Rename this to CommandContainer?
 public interface ShellDirectory extends Describable {
     /**
      * @return Child directories.

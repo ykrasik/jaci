@@ -34,7 +34,14 @@ import java.util.*;
 public class AnnotationProcessor {
     private final AnnotationCommandFactory commandFactory;
 
-    public AnnotationProcessor(AnnotationCommandFactory commandFactory) {
+    public AnnotationProcessor() {
+        this(new AnnotationCommandFactory());
+    }
+
+    /**
+     * For testing.
+     */
+    AnnotationProcessor(AnnotationCommandFactory commandFactory) {
         this.commandFactory = Objects.requireNonNull(commandFactory);
     }
 

@@ -43,7 +43,14 @@ import java.util.Objects;
 public class AnnotationCommandFactory {
     private final AnnotationCommandParamFactory paramFactory;
 
-    public AnnotationCommandFactory(AnnotationCommandParamFactory paramFactory) {
+    public AnnotationCommandFactory() {
+        this(new AnnotationCommandParamFactory());
+    }
+
+    /**
+     * For testing.
+     */
+    AnnotationCommandFactory(AnnotationCommandParamFactory paramFactory) {
         this.paramFactory = Objects.requireNonNull(paramFactory);
     }
 

@@ -28,7 +28,10 @@ import com.github.ykrasik.jerminal.api.filesystem.ShellFileSystem;
 import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -56,14 +59,28 @@ public class JerminalJavaFxExample extends Application {
     }
 
     private void doStart(Stage stage) throws IOException {
-        final ShellFileSystem fileSystem = createFileSystem();
-
-        final Parent console = new ConsoleBuilder(fileSystem).build();
-        final Scene scene = new Scene(console, 1280, 720);
-        scene.addEventFilter(KeyEvent.KEY_PRESSED, new ConsoleToggler(console));
-
         stage.setTitle("Jerminal");
+        stage.setWidth(1280);
+        stage.setHeight(720);
+
+        // Create a console
+        final ShellFileSystem fileSystem = createFileSystem();
+        final Parent console = new ConsoleBuilder(fileSystem).build();
+
+        // Add a console toggler. The toggler will switch between the main scene and the console scene.
+        SceneToggler.register(stage, console);
+
+        // Create a boring main scene.
+        final Pane root = new Pane();
+        root.getChildren().add(new Label("Nothing to see here"));
+        final Scene scene = new Scene(root);
+
         stage.setScene(scene);
+
+        // This is just a hack to get the console to be toggled immediately when the application starts.
+        // Not required in production code.
+        stage.fireEvent(new KeyEvent(KeyEvent.KEY_PRESSED, "`", "`", KeyCode.BACK_QUOTE, false, true, false, false));
+
         stage.show();
     }
 

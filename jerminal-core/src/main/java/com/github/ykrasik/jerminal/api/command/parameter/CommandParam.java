@@ -41,6 +41,9 @@ public interface CommandParam extends Describable {
     String getExternalForm();
 
     // TODO: Generic commandParam instead of object?
+
+    // FIXME: Have a bind pass, and then a parse pass.
+    // FIXME: Use InternalParams to wrap these, and the params themselves should just offer an annotation-style API.
     /**
      * Parse the rawValue into a real value that this parameter can accept.
      *
