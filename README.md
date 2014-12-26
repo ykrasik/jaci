@@ -21,7 +21,35 @@ Here are some of Jerminal's prominent features:
    in the host application.<br>
    The 'outputPrinter' parameter is an optional parameter that the command should declare if it wishes to print anything.
 
-* It is easy to integrate into your application. TODO: Code example.
+* It is easy to integrate into your application. For example, with JavaFx:
+    ```
+    public class JavaFxExample extends Application {
+        @Override
+        public void start(Stage stage) {
+            try {
+                // Create a console and have it process the annotations of the above defined class.
+                final ShellFileSystem fileSystem = new ShellFileSystem().processAnnotations(new AnnotationExample());
+                final Parent console = new ConsoleBuilder(fileSystem).build();
+
+                // Add a console toggler. The toggler will switch between the main scene and the console scene
+                // when the default ctrl+` key combination is pressed.
+                SceneToggler.register(stage, console);
+
+                // Create a boring main scene.
+                final Pane root = new Pane();
+                root.getChildren().add(new Label("Nothing to see here"));
+                final Scene scene = new Scene(root);
+
+                stage.setScene(scene);
+
+                stage.show();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+    ```
+
 * Commands can be grouped under directory hierarchies with unix-style directory navigation commands. TODO: Code example.
 * Command parameters can be mandatory, or optional with default values or flags. TODO: Example.
 * Command parameters can be passed either by position or by name (scala-style parameter passing). TODO: Example.
