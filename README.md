@@ -1,7 +1,30 @@
 # What is Jerminal?
-Jerminal is a Java library for creating embedded command-line interfaces.
-It is mostly intended for creating debug consoles.<br>
-The main feature of Jerminal is it's auto complete suggestions (more info below).
+Jerminal is a Java library for creating embedded command-line interfaces.<br>
+Most applications today require (or could benefit from) a debug console. This is what Jerminal was created for:
+to remove the burden of creating debug consoles that can be easily embedded into the host application.<br>
+<br>
+Here are some of Jerminal's prominent features:
+
+* Auto-complete suggestions are supported for everything (directory names, command names, parameter names, parameter values).
+* Commands can be created via an annotations-based API.<br>
+   ```
+   public class AnnotationExample {
+       @Command(description = "Does nothing, really.")
+       public void testCommand(OutputPrinter outputPrinter) {
+           outputPrinter.println("Hello, world!");
+       }
+   }
+   ```
+   <br>
+   The above code creates a command called 'testCommand' that takes no parameters.
+   When executed from the command line, the command will print "Hello, world!" to the element defined as it's output
+   in the host application.<br>
+   The 'outputPrinter' parameter is an optional parameter that the command should declare if it wishes to print anything.
+
+* It is easy to integrate into your application. TODO: Code example.
+* Commands can be grouped under directory hierarchies with unix-style directory navigation commands. TODO: Code example.
+* Command parameters can be mandatory, or optional with default values or flags. TODO: Example.
+* Command parameters can be passed either by position or by name (scala-style parameter passing). TODO: Example.
 
 ## Terminology
 First of all, some quick terminology.<br>
@@ -17,13 +40,13 @@ This terminology may not be accurately used (with real world counterparts), but 
 * **Console** - The complete package - a Shell, a Terminal and a Command Line Driver.
 
 ## More In Depth
-Jerminal aims to remove the burden of creating command line interfaces (that will from now on be referred to as 'consoles')
-  by providing all the necessary tools out of the box.<br>
+Jerminal is separated into 2 basic components: backend and frontend. The backend is the core logic and the frontend is the
+integration layer of the backend with a specific platform.<br>
+<br>
 All that is required to create a console is:
 
-1. Provide the command hierarchy that will act as the Shell's File System.
-2. Implement Jerminal's SPI (Service provider interfaces): Display Driver and Command Line Driver.
-3. Hooks calls to Jerminal's API.
+1. Provide the debug command hierarchy that will act as the Shell's File System.
+2. Hooks calls to Jerminal's API.
 
 ### 1. The Command Hierarchy
 The basic unit of Jerminal is a command. In a file system structure, a command can be thought of as a file.

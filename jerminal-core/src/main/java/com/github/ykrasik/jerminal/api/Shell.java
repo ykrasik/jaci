@@ -89,7 +89,7 @@ public class Shell {
      * Provide assistance for the command line.
      *
      * @param commandLine Command line to provide assistance for.
-     * @return The new command line if assistance was possible.
+     * @return The new command line if assistance was possible, or {@link com.google.common.base.Optional#absent()} otherwise.
      */
     public Optional<String> assist(String commandLine) {
         displayDriver.begin();

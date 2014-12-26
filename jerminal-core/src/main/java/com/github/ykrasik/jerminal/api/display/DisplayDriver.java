@@ -29,6 +29,7 @@ import java.util.List;
  *
  * @author Yevgeny Krasik
  */
+// FIXME: Should this be renamed to Output?
 public interface DisplayDriver {
     /**
      * Called before any other events are called, to allow the driver to prepare itself.<br>

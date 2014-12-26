@@ -21,7 +21,7 @@ import com.github.ykrasik.jerminal.internal.command.parameter.ParamType;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.internal.assist.AutoCompleteReturnValue;
 
-// TODO: Rename this to just Parameter.
+// TODO: Rename this to just Parameter. Or maybe something with spec?
 /**
  * A command parameter.<br>
  * Parameters can parse values they are given and autoComplete them from prefixes.
