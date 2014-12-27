@@ -32,7 +32,7 @@ import java.util.Set;
  *
  * @author Yevgeny Krasik
  */
-// FIXME: Optimize: Use word segments as children, not characters.
+// TODO: Consider Optimizing: Use word segments as children, not characters.
 public interface Trie<T> {
     /**
      * @return The amount of words in this Trie.

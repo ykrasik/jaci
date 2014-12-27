@@ -19,6 +19,6 @@ package com.github.ykrasik.jerminal.internal.command.parameter;
 /**
  * @author Yevgeny Krasik
  */
-public class CommandParamContextTest {
+public class CommandParamManagerTest {
     // FIXME: Implement
 }
