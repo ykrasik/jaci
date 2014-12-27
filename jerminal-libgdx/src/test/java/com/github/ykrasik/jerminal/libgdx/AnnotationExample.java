@@ -17,9 +17,6 @@
 package com.github.ykrasik.jerminal.libgdx;
 
 import com.github.ykrasik.jerminal.api.annotation.*;
-import com.github.ykrasik.jerminal.api.command.CommandArgs;
-import com.github.ykrasik.jerminal.api.command.CommandBuilder;
-import com.github.ykrasik.jerminal.api.command.CommandExecutor;
 import com.github.ykrasik.jerminal.api.command.OutputPrinter;
 import com.github.ykrasik.jerminal.api.command.toggle.StateAccessor;
 
@@ -59,18 +56,6 @@ public class AnnotationExample {
     @Command(description = "some global command")
     public void globalCommandSomething(OutputPrinter outputPrinter, String str) {
         outputPrinter.println("yes! str=%s", str);
-    }
-
-    @CommandFactory
-    public com.github.ykrasik.jerminal.api.filesystem.command.Command commandFromFactory() {
-        return new CommandBuilder("bla")
-            .setExecutor(new CommandExecutor() {
-                @Override
-                public void execute(CommandArgs args, OutputPrinter outputPrinter) throws Exception {
-                    outputPrinter.println("Great success.");
-                }
-            })
-            .build();
     }
 
     @Command(description = "test command")

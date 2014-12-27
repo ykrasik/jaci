@@ -24,7 +24,7 @@ import org.junit.Test;
  * @author Yevgeny Krasik
  */
 public class StaticStringParamTest extends BaseParamTest<String> {
-    private static final String[] VALUES = { "a", "bc", "1122", "abra", "cadabra" };
+    private static final String[] VALUES = { "a", "bc", "1122", "abra", "cadabra", "e f g" };
 
     @Before
     public void setUp() {
@@ -43,12 +43,17 @@ public class StaticStringParamTest extends BaseParamTest<String> {
         parse("Cadabra", "Cadabra");
         parse("A", "A");
 
+        parseInvalid("");
         parseInvalid("ab");
         parseInvalid("bd");
         parseInvalid("bcd");
         parseInvalid("112");
         parseInvalid("abra1");
         parseInvalid("1cadabra");
+        parseInvalid("e");
+        parseInvalid("e f");
+        parseInvalid("e f gh");
+        parseInvalid("e f g h");
     }
 
     @Test
@@ -66,8 +71,12 @@ public class StaticStringParamTest extends BaseParamTest<String> {
         autoComplete("c", "cadabra");
         autoComplete("cad", "cadabra");
         autoComplete("cadA", "cadAbra");
+        autoComplete("e", "e f g");
+        autoComplete("e f", "e f g");
 
         autoCompleteEmpty("cad1");
         autoCompleteEmpty("d");
+        autoCompleteEmpty("ef");
+        autoCompleteEmpty("e f1");
     }
 }

@@ -46,7 +46,7 @@ public class DynamicStringParamTest extends BaseParamTest<String> {
     @Test
     public void parseTest() {
         // Dynamically-constrained string params should only accept strings in their constraints.
-        setValues("a", "bc", "1122", "abra", "cadabra");
+        setValues("a", "bc", "1122", "abra", "cadabra", "e f g");
         assertParseValues();
 
         parse("Abra", "Abra");
@@ -54,12 +54,17 @@ public class DynamicStringParamTest extends BaseParamTest<String> {
         parse("Cadabra", "Cadabra");
         parse("A", "A");
 
+        parseInvalid("");
         parseInvalid("ab");
         parseInvalid("bd");
         parseInvalid("bcd");
         parseInvalid("112");
         parseInvalid("abra1");
         parseInvalid("1cadabra");
+        parseInvalid("e");
+        parseInvalid("e f");
+        parseInvalid("e f gh");
+        parseInvalid("e f g h");
 
         setValues("a", "b", "c");
         assertParseValues();
@@ -78,7 +83,7 @@ public class DynamicStringParamTest extends BaseParamTest<String> {
     @Test
     public void autoCompleteTest() {
         // Statically-constrained string params should auto complete strings in their constraints.
-        setValues("a", "bc", "1122", "abra", "cadabra");
+        setValues("a", "bc", "1122", "abra", "cadabra", "e f g");
         autoComplete("", (String[]) values.toArray());
         autoComplete("a", "a", "abra");
         autoComplete("A", "A", "Abra");
@@ -91,6 +96,8 @@ public class DynamicStringParamTest extends BaseParamTest<String> {
         autoComplete("c", "cadabra");
         autoComplete("cad", "cadabra");
         autoComplete("cadA", "cadAbra");
+        autoComplete("e", "e f g");
+        autoComplete("e f", "e f g");
 
         autoCompleteEmpty("cad1");
         autoCompleteEmpty("d");
@@ -106,6 +113,8 @@ public class DynamicStringParamTest extends BaseParamTest<String> {
 
         autoCompleteEmpty("ab");
         autoCompleteEmpty("d");
+        autoCompleteEmpty("ef");
+        autoCompleteEmpty("e f1");
     }
 
     private void setValues(String... values) {

@@ -16,7 +16,6 @@
 
 package com.github.ykrasik.jerminal.internal.annotation;
 
-import com.github.ykrasik.jerminal.api.annotation.CommandFactory;
 import com.github.ykrasik.jerminal.api.annotation.ToggleCommand;
 import com.github.ykrasik.jerminal.api.command.CommandBuilder;
 import com.github.ykrasik.jerminal.api.command.OutputPrinter;
@@ -36,11 +35,13 @@ import java.util.Objects;
  * Empty names or descriptions aren't allowed.
  * @see com.github.ykrasik.jerminal.api.annotation.Command Command
  * @see com.github.ykrasik.jerminal.api.annotation.ToggleCommand
- * @see com.github.ykrasik.jerminal.api.annotation.CommandFactory
  *
  * @author Yevgeny Krasik
  */
 public class AnnotationCommandFactory {
+    public static final String DEFAULT_DESCRIPTION = "command";
+    public static final String DEFAULT_TOGGLE_DESCRIPTION = "toggle";
+
     private final AnnotationCommandParamFactory paramFactory;
 
     public AnnotationCommandFactory() {
@@ -64,7 +65,7 @@ public class AnnotationCommandFactory {
         final com.github.ykrasik.jerminal.api.annotation.Command commandAnnotation = method.getAnnotation(com.github.ykrasik.jerminal.api.annotation.Command.class);
         if (commandAnnotation != null) {
             final String name = getOrGenerateCommandName(commandAnnotation.value(), method);
-            final String description = getOrGenerateCommandDescription(commandAnnotation.description(), "command");
+            final String description = getOrGenerateCommandDescription(commandAnnotation.description(), DEFAULT_DESCRIPTION);
             try {
                 return Optional.of(createCommand(instance, method, name, description));
             } catch (Exception e) {
@@ -77,22 +78,11 @@ public class AnnotationCommandFactory {
         final ToggleCommand toggleCommandAnnotation = method.getAnnotation(ToggleCommand.class);
         if (toggleCommandAnnotation != null) {
             final String name = getOrGenerateCommandName(toggleCommandAnnotation.value(), method);
-            final String description = getOrGenerateCommandDescription(toggleCommandAnnotation.description(), "toggle");
+            final String description = getOrGenerateCommandDescription(toggleCommandAnnotation.description(), DEFAULT_TOGGLE_DESCRIPTION);
             try {
                 return Optional.of(createToggleCommand(instance, method, name, description));
             } catch (Exception e){
                 final String message = String.format("Error creating toggle command: class=%s, method=%s", method.getDeclaringClass(), method.getName());
-                throw new IllegalArgumentException(message, e);
-            }
-        }
-
-        // Check if method has the @CommandFactory annotation.
-        final CommandFactory commandFactoryAnnotation = method.getAnnotation(CommandFactory.class);
-        if (commandFactoryAnnotation != null) {
-            try {
-                return Optional.of(createCommandFromFactory(instance, method));
-            } catch (Exception e) {
-                final String message = String.format("Error creating command from factory: class=%s, method=%s", method.getDeclaringClass(), method.getName());
                 throw new IllegalArgumentException(message, e);
             }
         }
@@ -160,12 +150,6 @@ public class AnnotationCommandFactory {
         final ToggleCommandBuilder builder = new ToggleCommandBuilder(name, accessor);
         builder.setCommandDescription(description);
         return builder.build();
-    }
-
-    private Command createCommandFromFactory(Object instance, Method method) {
-        assertReturnValue(method, Command.class, CommandFactory.class);
-        assertNoParameters(method, CommandFactory.class);
-        return ReflectionUtils.invokeNoArgs(instance, method, Command.class);
     }
 
     private void assertReturnValue(Method method, Class<?> expectedReturnValue, Class<?> annotation) {

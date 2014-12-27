@@ -35,6 +35,7 @@ public class UnconstrainedStringParamTest extends BaseParamTest<String> {
         parse("test", "test");
         parse("a11bc23", "a11bc23");
         parse("", "");
+        parse("a b c", "a b c");
     }
 
     @Test
@@ -43,5 +44,6 @@ public class UnconstrainedStringParamTest extends BaseParamTest<String> {
         autoCompleteEmpty("");
         autoCompleteEmpty("test");
         autoCompleteEmpty("a11bc23");
+        autoCompleteEmpty("a b c");
     }
 }

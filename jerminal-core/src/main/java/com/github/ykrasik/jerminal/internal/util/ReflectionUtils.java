@@ -54,18 +54,18 @@ public final class ReflectionUtils {
     }
 
     /**
-     * Find the method with the provided name that takes no-args and returns the provided return type.
+     * Find a method with the provided name that takes no-args and returns the provided return type.
      * If the method is private, it will be made invokable outside of it's class.
      *
      * @param clazz Class to search.
      * @param methodName Method name.
      * @param returnType The method's expected return type.
-     * @return The method with the provided name that takes no-args and returns the provded return type.
-     * @throws java.lang.IllegalArgumentException If the method doesn't exist or doesn't return the expected return type.
+     * @return A method with the provided name that takes no-args and returns the provided return type.
+     * @throws java.lang.IllegalArgumentException If the class doesn't contain a method with the provided name the method doesn't return the expected return type.
      */
     public static Method findNoArgsMethod(Class<?> clazz, String methodName, Class<?> returnType) {
         try {
-            final Method method = clazz.getDeclaredMethod(methodName, NO_ARGS_TYPE);
+            final Method method = clazz.getMethod(methodName, NO_ARGS_TYPE);
             final Class<?> methodReturnType = method.getReturnType();
             if (methodReturnType != returnType) {
                 final String message = String.format("Method does not return expected return type: expected=%s, actual=%s", returnType, methodReturnType);
@@ -82,6 +82,24 @@ public final class ReflectionUtils {
     }
 
     /**
+     * Find the first encountered method with the provided name. Doesn't take parameter into account.
+     * Includes inherited methods.
+     *
+     * @param clazz Class to search.
+     * @param methodName Method name.
+     * @return First encountered method with the provided name.
+     * @throws java.lang.IllegalArgumentException If the class doesn't contain a method with the provided name.
+     */
+    public static Method lookupMethod(Class<?> clazz, String methodName) {
+        for (Method method : clazz.getMethods()) {
+            if (method.getName().equals(methodName)) {
+                return method;
+            }
+        }
+        throw new IllegalArgumentException(String.format("Class '%s' doesn't have method: '%s'", clazz, methodName));
+    }
+
+    /**
      * Invokes the method, using the provided instance as 'this', and casts the return value to the provided return type.
      * Method must be no-args and return the correct type.
      *
@@ -94,6 +112,9 @@ public final class ReflectionUtils {
      */
     public static <T> T invokeNoArgs(Object instance, Method method, Class<T> returnType) {
         try {
+            if (!method.isAccessible()) {
+                method.setAccessible(true);
+            }
             final Object returnValue = method.invoke(instance, NO_ARGS);
             return returnType.cast(returnValue);
         } catch (Exception e) {

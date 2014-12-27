@@ -19,6 +19,7 @@ package com.github.ykrasik.jerminal.api.command;
 /**
  * @author Yevgeny Krasik
  */
+// FIXME: This should be an integration test.
 public class ToggleCommandBuilderTest {
-    // FIXME: Implement
+
 }
