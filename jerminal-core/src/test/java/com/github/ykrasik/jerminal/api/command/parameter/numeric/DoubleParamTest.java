@@ -16,9 +16,41 @@
 
 package com.github.ykrasik.jerminal.api.command.parameter.numeric;
 
+import com.github.ykrasik.jerminal.api.command.parameter.BaseParamTest;
+import org.junit.Before;
+import org.junit.Test;
+
 /**
  * @author Yevgeny Krasik
  */
-public class DoubleParamTest {
-    // FIXME: Implement
+public class DoubleParamTest extends BaseParamTest<Double> {
+    @Before
+    public void setUp() {
+        param = new DoubleParamBuilder("double").build();
+    }
+
+    @Test
+    public void parseTest() {
+        // Numeric params should only accept numeric values.
+        parse("1", 1.0);
+        parse("1.", 1.0);
+        parse("1.5", 1.5);
+        parse("2.345", 2.345);
+        parse("-0.123456", -0.123456);
+        parse("99.9999", 99.9999);
+
+        parseInvalid("a");
+        parseInvalid("0.a");
+        parseInvalid("1.a");
+        parseInvalid("99.99a");
+        parseInvalid("100a11");
+    }
+
+    @Test
+    public void autoCompleteTest() {
+        // Numeric params cannot be auto completed.
+        autoCompleteInvalid("1.5");
+        autoCompleteInvalid("1.");
+        autoCompleteInvalid("5a");
+    }
 }

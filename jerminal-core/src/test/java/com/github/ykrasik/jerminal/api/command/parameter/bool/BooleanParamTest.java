@@ -26,7 +26,7 @@ import org.junit.Test;
 public class BooleanParamTest extends BaseParamTest<Boolean> {
     @Before
     public void setUp() {
-        param = new BooleanParam("boolean", "boolean");
+        param = new BooleanParamBuilder("boolean").build();
     }
 
     @Test
