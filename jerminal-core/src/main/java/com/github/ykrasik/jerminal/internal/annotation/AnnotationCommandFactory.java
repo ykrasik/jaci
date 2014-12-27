@@ -123,29 +123,33 @@ public class AnnotationCommandFactory {
         final Class<?>[] parameterTypes = method.getParameterTypes();
         final Annotation[][] parameterAnnotations = method.getParameterAnnotations();
 
-        // First parameter must be the outputPrinter.
-        // FIXME: Make outputPrinter optional.
-        if (parameterTypes.length == 0 || parameterTypes[0] != OutputPrinter.class) {
-            final String message = String.format(
-                "Methods annotated with @Command must receive an %s as their first parameter: class=%s, method=%s",
-                OutputPrinter.class, method.getDeclaringClass(), method.getName()
-            );
-            throw new IllegalArgumentException(message);
-        }
+        // If present, the outputPrinter must be the first arg.
+        final boolean hasOutputPrinter = parameterTypes.length > 0 && isOutputPrinter(parameterTypes[0]);
 
         final CommandBuilder builder = new CommandBuilder(name);
         builder.setDescription(description);
-        builder.setExecutor(new ReflectionCommandExecutor(instance, method));
+        builder.setExecutor(new ReflectionCommandExecutor(instance, method, hasOutputPrinter));
 
         // Create command parameters from method parameters.
-        for (int i = 1; i < parameterTypes.length; i++) {
+        for (int i = hasOutputPrinter ? 1 : 0; i < parameterTypes.length; i++) {
             final Class<?> parameterType = parameterTypes[i];
+            if (isOutputPrinter(parameterType)) {
+                final String message = String.format(
+                    "OutputPrinters must either be the first argument of a method or not be present at all: class=%s, method=%s",
+                    method.getDeclaringClass(), method.getName()
+                );
+                throw new IllegalArgumentException(message);
+            }
             final Annotation[] annotations = parameterAnnotations[i];
             final CommandParam param = paramFactory.createCommandParam(instance, parameterType, annotations, i);
             builder.addParam(param);
         }
 
         return builder.build();
+    }
+
+    private boolean isOutputPrinter(Class<?> clazz) {
+        return OutputPrinter.class.isAssignableFrom(clazz);
     }
 
     private Command createToggleCommand(Object instance, Method method, String name, String description) {

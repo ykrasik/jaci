@@ -34,10 +34,12 @@ import java.util.Objects;
 public class ReflectionCommandExecutor implements CommandExecutor {
     private final Object instance;
     private final Method method;
+    private final boolean hasOutputPrinter;
 
-    public ReflectionCommandExecutor(Object instance, Method method) {
+    public ReflectionCommandExecutor(Object instance, Method method, boolean hasOutputPrinter) {
         this.instance = Objects.requireNonNull(instance);
         this.method = Objects.requireNonNull(method);
+        this.hasOutputPrinter = hasOutputPrinter;
     }
 
     @Override
@@ -45,8 +47,10 @@ public class ReflectionCommandExecutor implements CommandExecutor {
         // Fetch all params.
         final List<Object> reflectionArgs = ((PrivilegedCommandArgs) args).getArgValues();
 
-        // Add the outputPrinter as the first arg.
-        reflectionArgs.add(0, outputPrinter);
+        // Add the outputPrinter as the first arg, if method declares it.
+        if (hasOutputPrinter) {
+            reflectionArgs.add(0, outputPrinter);
+        }
 
         // Invoke method.
         try {

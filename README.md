@@ -51,7 +51,7 @@ Here are some of Jerminal's prominent features:
     console scene when the key combination ctrl+` is pressed (and back to the main scene if pressed again).<br>
     The console will contain any commands that were defined in the AnnotationExample class.
 
-* Commands can be grouped under directory hierarchies with unix-style directory navigation commands.<br>
+* Commands can be grouped under directory hierarchies and navigated with the help of unix-style directory navigation commands. TODO: Example
 * Command parameters can be mandatory, or optional with default values or flags.<br>
     ```
     @Command(description = "Parameters example")
@@ -81,6 +81,12 @@ Here are some of Jerminal's prominent features:
     mandatoryInt=5
     optionalString=default
     flagParam=false
+
+    > paramExample
+      	-> 	{mandatoryInt: int}	 <-
+      		[optionalString: string]
+      		[flagParam: flag]
+      Parse Error: Mandatory parameter was not bound: 'mandatoryInt'
     ```
 
 * Command parameters can be passed either by position or by name (scala-style parameter passing).<br>
@@ -124,7 +130,7 @@ Here are some of Jerminal's prominent features:
     		[flagParam: flag]
 
     > paramExample optionalString=string m {Auto-complete}
-    > paramExample optionalString=string mandatoryInt=
+    > paramExample optionalString=string mandatoryInt= {Auto-complete}
     paramExample
     	-> 	{mandatoryInt: int}	 <-
     		[optionalString: string] = string

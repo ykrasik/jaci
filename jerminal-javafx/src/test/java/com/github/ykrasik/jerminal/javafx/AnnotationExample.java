@@ -40,6 +40,11 @@ public class AnnotationExample {
         outputPrinter.println("Oh yeah, str=%s, bool=%s, integer=%d", str, bool, integer);
     }
 
+    @Command
+    public void commandWithoutPrinter() {
+        System.out.println("asd");
+    }
+
     @Command(description = "Parameters example")
     public void paramExample(OutputPrinter outputPrinter,
                              @IntParam(value = "mandatoryInt", description = "Mandatory int param") int intParam,
