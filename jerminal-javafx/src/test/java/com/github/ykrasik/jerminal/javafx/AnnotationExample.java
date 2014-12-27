@@ -40,6 +40,16 @@ public class AnnotationExample {
         outputPrinter.println("Oh yeah, str=%s, bool=%s, integer=%d", str, bool, integer);
     }
 
+    @Command(description = "Parameters example")
+    public void paramExample(OutputPrinter outputPrinter,
+                             @IntParam(value = "mandatoryInt", description = "Mandatory int param") int intParam,
+                             @StringParam(value = "optionalString", description = "Optional string param", optional = true, defaultValue = "default") String stringParam,
+                             @FlagParam("flagParam") boolean flag) {
+        outputPrinter.println("mandatoryInt=%d", intParam);
+        outputPrinter.println("optionalString=%s", stringParam);
+        outputPrinter.println("flagParam=%s", flag);
+    }
+
     private String[] testSupplier() {
         // This should execute some sort of computation... for the sake of example, returns a const array.
         return new String[] { "a", "b", "c", "d", "e", "ee" };
