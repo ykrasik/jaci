@@ -61,7 +61,7 @@ public class BooleanParam extends AbstractMandatoryCommandParam<Boolean> {
 
     @Override
     public AutoCompleteReturnValue autoComplete(String prefix) throws ParseException {
-        final Trie<AutoCompleteType> possibilities = VALUES.subTrie(prefix).map(AUTO_COMPLETE_TYPE_MAPPER);
+        final Trie<AutoCompleteType> possibilities = VALUES.subTrie(prefix.toLowerCase()).map(AUTO_COMPLETE_TYPE_MAPPER);
         return new AutoCompleteReturnValue(prefix, possibilities);
     }
 

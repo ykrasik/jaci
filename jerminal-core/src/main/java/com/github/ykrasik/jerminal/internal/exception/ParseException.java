@@ -27,6 +27,7 @@ import java.util.Objects;
  *
  * @author Yevgeny Krasik
  */
+// TODO: Split this into 2 exceptions: CommandParseException, ParamParseException? will save the optional<commandInfo>.
 public class ParseException extends Exception {
     private final ParseError error;
     private final Optional<CommandInfo> commandInfo;

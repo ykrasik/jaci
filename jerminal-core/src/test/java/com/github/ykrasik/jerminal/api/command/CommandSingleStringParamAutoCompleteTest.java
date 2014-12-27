@@ -19,6 +19,7 @@ package com.github.ykrasik.jerminal.api.command;
 /**
  * @author Yevgeny Krasik
  */
+// TODO: Do something with this file
 //public class CommandSingleStringParamAutoCompleteTest {
 //    private TestTerminal terminal;
 //    private Shell shell;
