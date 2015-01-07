@@ -22,13 +22,13 @@ import com.github.ykrasik.jerminal.api.command.CommandArgs;
 import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
 import com.github.ykrasik.jerminal.api.filesystem.command.Command;
 import com.github.ykrasik.jerminal.collections.trie.Trie;
-import com.github.ykrasik.jerminal.collections.trie.TrieImpl;
+import com.github.ykrasik.jerminal.collections.trie.TrieBuilder;
 import com.github.ykrasik.jerminal.internal.Describable;
+import com.github.ykrasik.jerminal.internal.assist.AssistReturnValue;
+import com.github.ykrasik.jerminal.internal.assist.AutoCompleteReturnValue;
 import com.github.ykrasik.jerminal.internal.command.parameter.CommandParamManager;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.internal.exception.ShellException;
-import com.github.ykrasik.jerminal.internal.assist.AssistReturnValue;
-import com.github.ykrasik.jerminal.internal.assist.AutoCompleteReturnValue;
 import com.google.common.base.Optional;
 
 import java.util.ArrayList;
@@ -57,16 +57,16 @@ public class InternalCommand implements Describable {
     }
 
     private Trie<CommandParam> createParamTrie(List<CommandParam> params) {
-        Trie<CommandParam> trie = new TrieImpl<>();
+        final TrieBuilder<CommandParam> builder = new TrieBuilder<>();
         for (CommandParam param : params) {
             final String name = param.getName();
             if (!ShellConstants.isValidName(name)) {
                 throw new ShellException("Invalid name for parameter: '%s'", name);
             }
 
-            trie = trie.add(name, param);
+            builder.add(name, param);
         }
-        return trie;
+        return builder.build();
     }
 
     @Override

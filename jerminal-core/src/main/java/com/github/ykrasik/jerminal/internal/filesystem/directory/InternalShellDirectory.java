@@ -20,11 +20,11 @@ import com.github.ykrasik.jerminal.ShellConstants;
 import com.github.ykrasik.jerminal.api.filesystem.command.Command;
 import com.github.ykrasik.jerminal.api.filesystem.directory.ShellDirectory;
 import com.github.ykrasik.jerminal.collections.trie.Trie;
-import com.github.ykrasik.jerminal.collections.trie.TrieImpl;
+import com.github.ykrasik.jerminal.collections.trie.TrieBuilder;
 import com.github.ykrasik.jerminal.internal.AbstractDescribable;
+import com.github.ykrasik.jerminal.internal.assist.AutoCompleteType;
 import com.github.ykrasik.jerminal.internal.exception.ShellException;
 import com.github.ykrasik.jerminal.internal.filesystem.command.InternalCommand;
-import com.github.ykrasik.jerminal.internal.assist.AutoCompleteType;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 
@@ -76,21 +76,21 @@ public class InternalShellDirectory extends AbstractDescribable {
     }
 
     private Trie<InternalShellDirectory> createDirectoryTrie(ShellDirectory directory) {
-        Trie<InternalShellDirectory> trie = new TrieImpl<>();
+        final TrieBuilder<InternalShellDirectory> builder = new TrieBuilder<>();
         for (ShellDirectory childDirectory : directory.getDirectories()) {
-            final InternalShellDirectory childDirectoryManager = new InternalShellDirectory(childDirectory, Optional.of(this));
-            trie = trie.add(childDirectory.getName(), childDirectoryManager);
+            final InternalShellDirectory internalDirectory = new InternalShellDirectory(childDirectory, Optional.of(this));
+            builder.add(childDirectory.getName(), internalDirectory);
         }
-        return trie;
+        return builder.build();
     }
 
     private Trie<InternalCommand> createCommandTrie(ShellDirectory directory) {
-        Trie<InternalCommand> trie = new TrieImpl<>();
+        final TrieBuilder<InternalCommand> builder = new TrieBuilder<>();
         for (Command command : directory.getCommands()) {
             final InternalCommand internalCommand = new InternalCommand(command);
-            trie = trie.add(command.getName(), internalCommand);
+            builder.add(command.getName(), internalCommand);
         }
-        return trie;
+        return builder.build();
     }
 
     /**

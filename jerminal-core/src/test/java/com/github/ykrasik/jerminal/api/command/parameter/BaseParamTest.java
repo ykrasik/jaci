@@ -44,7 +44,7 @@ public class BaseParamTest<T> {
 
     protected void autoComplete(String str, String... expectedWords) {
         final Trie<AutoCompleteType> possibilities = doAutoComplete(str);
-        final Collection<String> words = possibilities.getWords();
+        final Collection<String> words = possibilities.words();
         final List<String> expected = Arrays.asList(expectedWords);
         for (String word : words) {
             assertTrue(expected.contains(word));

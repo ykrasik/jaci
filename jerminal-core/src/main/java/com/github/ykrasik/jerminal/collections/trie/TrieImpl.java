@@ -1,18 +1,18 @@
-/*
- * Copyright (C) 2014 Yevgeny Krasik
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+/******************************************************************************
+ * Copyright (C) 2014 Yevgeny Krasik                                          *
+ *                                                                            *
+ * Licensed under the Apache License, Version 2.0 (the "License");            *
+ * you may not use this file except in compliance with the License.           *
+ * You may obtain a copy of the License at                                    *
+ *                                                                            *
+ * http://www.apache.org/licenses/LICENSE-2.0                                 *
+ *                                                                            *
+ * Unless required by applicable law or agreed to in writing, software        *
+ * distributed under the License is distributed on an "AS IS" BASIS,          *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   *
+ * See the License for the specific language governing permissions and        *
+ * limitations under the License.                                             *
+ ******************************************************************************/
 
 package com.github.ykrasik.jerminal.collections.trie;
 
@@ -37,17 +37,14 @@ public class TrieImpl<T> implements Trie<T> {
     // This is the prefix of the current trie. Used by subTries.
     private final String triePrefix;
 
-    public TrieImpl() {
-        this(new TrieNodeImpl<T>((char) 0));
-    }
-
-    private TrieImpl(TrieNode<T> root) {
+    TrieImpl(TrieNode<T> root) {
         this(root, "");
     }
 
     private TrieImpl(TrieNode<T> root, String triePrefix) {
         this.root = root;
         this.triePrefix = triePrefix;
+        root.refershNumWords();
     }
 
     @Override
@@ -58,56 +55,6 @@ public class TrieImpl<T> implements Trie<T> {
     @Override
     public boolean isEmpty() {
         return root.isEmpty();
-    }
-
-    @Override
-    public Trie<T> add(String word, T value) {
-        if (word.isEmpty()) {
-            throw new IllegalArgumentException("Empty words aren't allowed!");
-        }
-
-        final TrieNode<T> newRoot = doPut(root, word, 0, value, false);
-        return new TrieImpl<>(newRoot, triePrefix);
-    }
-
-    @Override
-    public Trie<T> set(String word, T value) {
-        if (word.isEmpty()) {
-            throw new IllegalArgumentException("Empty words aren't allowed!");
-        }
-
-        final TrieNode<T> newRoot = doPut(root, word, 0, value, true);
-        return new TrieImpl<>(newRoot, triePrefix);
-    }
-
-    // FIXME: Doesn't work with subTries!
-    // FIXME: Test this thoroughly!
-    private TrieNode<T> doPut(TrieNode<T> parent, String word, int index, T value, boolean replace) {
-        final char c = word.charAt(index);
-        final Optional<TrieNode<T>> child = parent.getChild(c);
-        final TrieNode<T> currentChild;
-        if (child.isPresent()) {
-            currentChild = child.get();
-        } else {
-            currentChild = new TrieNodeImpl<>(c);
-        }
-
-        final TrieNode<T> newChild;
-        if (index == word.length() - 1) {
-            // Last character of the word, set node.
-            if (!replace && currentChild.getValue().isPresent()) {
-                throw new IllegalArgumentException("Trie already contains a value for: " + word);
-            }
-            newChild = currentChild.setValue(value);
-        } else {
-            newChild = doPut(currentChild, word, index + 1, value, replace);
-        }
-        return parent.setChild(newChild);
-    }
-
-    @Override
-    public TrieNode<T> getRoot() {
-        return root;
     }
 
     @Override
@@ -124,67 +71,6 @@ public class TrieImpl<T> implements Trie<T> {
             return node.getValue();
         } else {
             return Optional.absent();
-        }
-    }
-
-    @Override
-    public Collection<String> getWords() {
-        if (isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        final MapTrieVisitor<T> visitor = new MapTrieVisitor<>();
-        visitWords(visitor);
-        return visitor.getMap().keySet();
-    }
-
-    @Override
-    public Collection<T> values() {
-        if (isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        final MapTrieVisitor<T> visitor = new MapTrieVisitor<>();
-        visitWords(visitor);
-        return visitor.getMap().values();
-    }
-
-    @Override
-    public void visitWords(TrieVisitor<T> visitor) {
-        if (isEmpty()) {
-            return;
-        }
-
-        final StringBuilder prefixBuilder = new StringBuilder(triePrefix);
-        visitWordsFromNode(root, visitor, prefixBuilder);
-    }
-
-    private void visitWordsFromNode(TrieNode<T> node, TrieVisitor<T> visitor, StringBuilder prefixBuilder) {
-        // Started processing node, push it's character to the prefix.
-        if (node != root) {
-            // The root node has no char.
-            prefixBuilder.append(node.getCharacter());
-        }
-
-        // Visit the node, if it has a value.
-        visitNodeIfHasValue(node, visitor, prefixBuilder);
-
-        // Visit all the node's children.
-        for (TrieNode<T> child : node.getChildren()) {
-            visitWordsFromNode(child, visitor, prefixBuilder);
-        }
-
-        // Done processing node, pop it's character from the prefix.
-        if (node != root && prefixBuilder.length() > 0) {
-            prefixBuilder.deleteCharAt(prefixBuilder.length() - 1);
-        }
-    }
-
-    private void visitNodeIfHasValue(TrieNode<T> node, TrieVisitor<T> visitor, StringBuilder prefixBuilder) {
-        final Optional<T> value = node.getValue();
-        if (value.isPresent()) {
-            final String word = prefixBuilder.toString();
-            visitor.visit(word, value.get());
         }
     }
 
@@ -222,14 +108,14 @@ public class TrieImpl<T> implements Trie<T> {
         if (node != null) {
             return new TrieImpl<>(node, triePrefix + prefix);
         } else {
-            return emptyTrie();
+            return Tries.emptyTrie();
         }
     }
 
     @Override
     public <A> Trie<A> map(Function<T, A> function) {
         if (isEmpty()) {
-            return emptyTrie();
+            return Tries.emptyTrie();
         }
 
         final Optional<TrieNode<A>> newRoot = root.map(function);
@@ -237,7 +123,7 @@ public class TrieImpl<T> implements Trie<T> {
             return new TrieImpl<>(newRoot.get(), triePrefix);
         } else {
             // Empty root.
-            return emptyTrie();
+            return Tries.emptyTrie();
         }
     }
 
@@ -260,8 +146,67 @@ public class TrieImpl<T> implements Trie<T> {
             return this;
         }
 
-        final TrieNode<T> unionRoot = root.union(other.getRoot());
-        return new TrieImpl<>(unionRoot, triePrefix);
+        if (other instanceof TrieImpl) {
+            // Other Trie is of the same implementation, we can have an efficient union.
+            final TrieImpl<T> otherTrie = (TrieImpl<T>) other;
+            if (!triePrefix.equals(otherTrie.triePrefix)) {
+                // TODO: Is this a correct limitation?
+                throw new IllegalArgumentException("Trying to create a union of tries with a different prefix!: " + triePrefix + " and " + otherTrie.triePrefix);
+            }
+            final TrieNode<T> unionRoot = root.union(otherTrie.root);
+            return new TrieImpl<>(unionRoot, triePrefix);
+        }
+
+        // Other Trie is of a different implementation, create a stupid new union trie.
+        final TrieBuilder<T> builder = new TrieBuilder<>();
+        builder.setAll(this.toMap());
+        builder.setAll(other.toMap());
+        return builder.build();
+    }
+
+    @Override
+    public void visitWords(TrieVisitor<T> visitor) {
+        if (isEmpty()) {
+            return;
+        }
+
+        final StringBuilder prefixBuilder = new StringBuilder(triePrefix);
+        visitWordsFromNode(root, visitor, prefixBuilder);
+    }
+
+    private void visitWordsFromNode(TrieNode<T> node, TrieVisitor<T> visitor, StringBuilder prefixBuilder) {
+        // Started processing node, push it's character to the prefix.
+        if (node != root) {
+            // The root node has no char.
+            prefixBuilder.append(node.getCharacter());
+        }
+
+        // Visit the node, if it has a value.
+        final Optional<T> value = node.getValue();
+        if (value.isPresent()) {
+            final String word = prefixBuilder.toString();
+            visitor.visit(word, value.get());
+        }
+
+        // Visit all the node's children.
+        for (TrieNode<T> child : node.getChildren()) {
+            visitWordsFromNode(child, visitor, prefixBuilder);
+        }
+
+        // Done processing node, pop it's character from the prefix.
+        if (node != root && prefixBuilder.length() > 0) {
+            prefixBuilder.deleteCharAt(prefixBuilder.length() - 1);
+        }
+    }
+
+    @Override
+    public Collection<String> words() {
+        return toMap().keySet();
+    }
+
+    @Override
+    public Collection<T> values() {
+        return toMap().values();
     }
 
     @Override
@@ -281,6 +226,7 @@ public class TrieImpl<T> implements Trie<T> {
     }
 
     private TrieNode<T> getNode(String prefix) {
+        // TODO: Should ignore letters that are already in the current prefix.
         // Navigate the tree by the letters of the prefix, starting from the root.
         TrieNode<T> currentNode = root;
         for (int i = 0; i < prefix.length(); i++) {
@@ -294,16 +240,6 @@ public class TrieImpl<T> implements Trie<T> {
         }
         return currentNode;
     }
-
-    /**
-     * @param <T> Type of {@link Trie}.
-     * @return An empty {@link Trie}.
-     */
-    @SuppressWarnings("unchecked")
-    public static <T> Trie<T> emptyTrie() {
-        return (Trie<T>) EMPTY_TRIE;
-    }
-    private static final Trie<?> EMPTY_TRIE = new TrieImpl<>();
 
     @Override
     public String toString() {

@@ -21,7 +21,7 @@ import com.github.ykrasik.jerminal.api.command.CommandArgs;
 import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
 import com.github.ykrasik.jerminal.api.exception.ParseError;
 import com.github.ykrasik.jerminal.collections.trie.Trie;
-import com.github.ykrasik.jerminal.collections.trie.TrieImpl;
+import com.github.ykrasik.jerminal.collections.trie.Tries;
 import com.github.ykrasik.jerminal.internal.assist.AutoCompleteReturnValue;
 import com.github.ykrasik.jerminal.internal.assist.AutoCompleteType;
 import com.github.ykrasik.jerminal.internal.command.CommandArgsImpl;
@@ -236,7 +236,7 @@ public class CommandParamManager {
     private Trie<AutoCompleteType> autoCompleteParamName(String prefix) {
         if (unboundParams.size() == 1) {
             // Don't suggest param names if there is only 1 option available.
-            return TrieImpl.emptyTrie();
+            return Tries.emptyTrie();
         }
 
         final Trie<CommandParam> prefixParams = params.subTrie(prefix);

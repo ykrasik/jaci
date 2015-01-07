@@ -111,6 +111,6 @@ public class TrieUnionTest extends AbstractTrieTest {
 
     @Override
     protected void assertWords(String... expectedWords) {
-        assertEquals("Words mismatch!", Sets.newHashSet(expectedWords), new HashSet<>(trie.getWords()));
+        assertEquals("Words mismatch!", Sets.newHashSet(expectedWords), new HashSet<>(trie.words()));
     }
 }

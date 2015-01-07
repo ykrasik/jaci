@@ -65,7 +65,7 @@ public final class ReflectionUtils {
      */
     public static Method findNoArgsMethod(Class<?> clazz, String methodName, Class<?> returnType) {
         try {
-            final Method method = clazz.getMethod(methodName, NO_ARGS_TYPE);
+            final Method method = clazz.getDeclaredMethod(methodName, NO_ARGS_TYPE);
             final Class<?> methodReturnType = method.getReturnType();
             if (methodReturnType != returnType) {
                 final String message = String.format("Method does not return expected return type: expected=%s, actual=%s", returnType, methodReturnType);

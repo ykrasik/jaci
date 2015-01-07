@@ -21,7 +21,8 @@ import com.github.ykrasik.jerminal.api.exception.ParseError;
 import com.github.ykrasik.jerminal.api.filesystem.ShellFileSystem;
 import com.github.ykrasik.jerminal.api.filesystem.command.Command;
 import com.github.ykrasik.jerminal.collections.trie.Trie;
-import com.github.ykrasik.jerminal.collections.trie.TrieImpl;
+import com.github.ykrasik.jerminal.collections.trie.TrieBuilder;
+import com.github.ykrasik.jerminal.collections.trie.Tries;
 import com.github.ykrasik.jerminal.internal.assist.AutoCompleteReturnValue;
 import com.github.ykrasik.jerminal.internal.assist.AutoCompleteType;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
@@ -59,7 +60,7 @@ public class InternalShellFileSystem {
 
     public InternalShellFileSystem(ShellFileSystem fileSystem) {
         this.root = new InternalShellDirectory(Objects.requireNonNull(fileSystem.getRoot()));
-        this.globalCommands = TrieImpl.emptyTrie();
+        this.globalCommands = Tries.emptyTrie();
         this.workingDirectory = root;
 
         addGlobalCommands(fileSystem.getGlobalCommands());
@@ -82,10 +83,16 @@ public class InternalShellFileSystem {
      * @throws com.github.ykrasik.jerminal.internal.exception.ShellException If one of the command names is invalid or a global command with that name already exists.
      */
     public void addGlobalCommands(Collection<Command> commands) {
+        if (commands.isEmpty()) {
+            return;
+        }
+
+        final TrieBuilder<InternalCommand> builder = new TrieBuilder<>(this.globalCommands.toMap());
         for (Command command : commands) {
             final InternalCommand internalCommand = new InternalCommand(command);
-            globalCommands = globalCommands.add(command.getName(), internalCommand);
+            builder.add(command.getName(), internalCommand);
         }
+        this.globalCommands = builder.build();
     }
 
     /**
@@ -255,8 +262,8 @@ public class InternalShellFileSystem {
             // rawPath did not contain a delimiter.
             // It could be an entry from the workingDirectory or a global command.
             final Trie<AutoCompleteType> entryPossibilities = workingDirectory.autoCompleteEntry(rawPath);
-            final Trie<AutoCompleteType> globalFilePossibilities = globalCommands.subTrie(rawPath).map(AUTO_COMPLETE_TYPE_MAPPER);
-            final Trie<AutoCompleteType> possibilities = entryPossibilities.union(globalFilePossibilities);
+            final Trie<AutoCompleteType> globalCommandPossibilities = globalCommands.subTrie(rawPath).map(AUTO_COMPLETE_TYPE_MAPPER);
+            final Trie<AutoCompleteType> possibilities = entryPossibilities.union(globalCommandPossibilities);
             return new AutoCompleteReturnValue(rawPath, possibilities);
         }
 
