@@ -16,6 +16,8 @@
 
 package com.github.ykrasik.jerminal.collections.trie;
 
+import com.google.common.base.Optional;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -121,7 +123,16 @@ public class TrieBuilder<T> {
         TrieNode<T> currentNode = root;
         for (int i = 0; i < word.length(); i++) {
             final char c = word.charAt(i);
-            currentNode = currentNode.getOrCreateChild(c);
+            final Optional<TrieNode<T>> child = currentNode.getChild(c);
+            if (child.isPresent()) {
+                // currentNode already has a child node for 'c'.
+                currentNode = child.get();
+            } else {
+                // currentNode does not have a child node for 'c', create a new one.
+                final TrieNode<T> newChild = new TrieNode<>(c);
+                currentNode.setChild(newChild);
+                currentNode = newChild;
+            }
         }
         currentNode.setValue(value);
     }

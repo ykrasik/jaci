@@ -20,11 +20,8 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 
 /**
  * An implementation for a {@link Trie}.
@@ -34,17 +31,9 @@ import java.util.Set;
 public class TrieImpl<T> implements Trie<T> {
     private final TrieNode<T> root;
 
-    // This is the prefix of the current trie. Used by subTries.
-    private final String triePrefix;
-
     TrieImpl(TrieNode<T> root) {
-        this(root, "");
-    }
-
-    private TrieImpl(TrieNode<T> root, String triePrefix) {
         this.root = root;
-        this.triePrefix = triePrefix;
-        root.refershNumWords();
+        root.refreshNumWords();
     }
 
     @Override
@@ -54,7 +43,7 @@ public class TrieImpl<T> implements Trie<T> {
 
     @Override
     public boolean isEmpty() {
-        return root.isEmpty();
+        return size() == 0;
     }
 
     @Override
@@ -64,7 +53,6 @@ public class TrieImpl<T> implements Trie<T> {
     }
 
     @Override
-    // FIXME: This will not function correctly for subTries!
     public Optional<T> get(String word) {
         final TrieNode<T> node = getNode(word);
         if (node != null) {
@@ -81,7 +69,7 @@ public class TrieImpl<T> implements Trie<T> {
         }
 
         // Keep going down the tree, until a node has more than 1 children or is a word.
-        final StringBuilder prefixBuilder = new StringBuilder(triePrefix);
+        final StringBuilder prefixBuilder = new StringBuilder();
         TrieNode<T> currentNode = root;
         while (currentNode.getChildren().size() == 1 && !currentNode.isWord()) {
             // currentNode only has 1 child and is not a word.
@@ -100,13 +88,33 @@ public class TrieImpl<T> implements Trie<T> {
     @Override
     // FIXME: This requires testing.
     public Trie<T> subTrie(String prefix) {
-        if (isEmpty()) {
+        if (prefix.isEmpty() || this.isEmpty()) {
             return this;
         }
 
-        final TrieNode<T> node = getNode(prefix);
-        if (node != null) {
-            return new TrieImpl<>(node, triePrefix + prefix);
+        // Save the new root node, will be required for later.
+//        final Optional<TrieNode<T>> newRootOptional = root.subTrieNode(prefix.charAt(0));
+//        if (!newRootOptional.isPresent()) {
+//            return Tries.emptyTrie();
+//        }
+//        final TrieNode<T> newRoot = newRootOptional.get();
+//
+//        // newRoot is guaranteed to have a child under the first character of the prefix at this point.
+//        TrieNode<T> currentNode = newRoot.getChild(prefix.charAt(0)).get();
+//        for (int i = 1; i < prefix.length(); i++) {
+//            final char c = prefix.charAt(i);
+//            final Optional<TrieNode<T>> newNodeOptional = currentNode.subTrieNode(c);
+//            if (!newNodeOptional.isPresent()) {
+//                return Tries.emptyTrie();
+//            }
+//
+//            final TrieNode<T> newNode = newNodeOptional.get();
+//            currentNode.setChild(newNode);
+//            currentNode = newNode.getChild(c).get();
+//        }
+        final Optional<TrieNode<T>> newRoot = root.subTrie(prefix);
+        if (newRoot.isPresent()) {
+            return new TrieImpl<>(newRoot.get());
         } else {
             return Tries.emptyTrie();
         }
@@ -120,9 +128,8 @@ public class TrieImpl<T> implements Trie<T> {
 
         final Optional<TrieNode<A>> newRoot = root.map(function);
         if (newRoot.isPresent()) {
-            return new TrieImpl<>(newRoot.get(), triePrefix);
+            return new TrieImpl<>(newRoot.get());
         } else {
-            // Empty root.
             return Tries.emptyTrie();
         }
     }
@@ -148,16 +155,11 @@ public class TrieImpl<T> implements Trie<T> {
 
         if (other instanceof TrieImpl) {
             // Other Trie is of the same implementation, we can have an efficient union.
-            final TrieImpl<T> otherTrie = (TrieImpl<T>) other;
-            if (!triePrefix.equals(otherTrie.triePrefix)) {
-                // TODO: Is this a correct limitation?
-                throw new IllegalArgumentException("Trying to create a union of tries with a different prefix!: " + triePrefix + " and " + otherTrie.triePrefix);
-            }
-            final TrieNode<T> unionRoot = root.union(otherTrie.root);
-            return new TrieImpl<>(unionRoot, triePrefix);
+            final TrieNode<T> unionRoot = root.union(((TrieImpl<T>) other).root);
+            return new TrieImpl<>(unionRoot);
         }
 
-        // Other Trie is of a different implementation, create a stupid new union trie.
+        // Other Trie is of a different implementation, create a naive union trie.
         final TrieBuilder<T> builder = new TrieBuilder<>();
         builder.setAll(this.toMap());
         builder.setAll(other.toMap());
@@ -170,8 +172,7 @@ public class TrieImpl<T> implements Trie<T> {
             return;
         }
 
-        final StringBuilder prefixBuilder = new StringBuilder(triePrefix);
-        visitWordsFromNode(root, visitor, prefixBuilder);
+        visitWordsFromNode(root, visitor, new StringBuilder());
     }
 
     private void visitWordsFromNode(TrieNode<T> node, TrieVisitor<T> visitor, StringBuilder prefixBuilder) {
@@ -194,7 +195,7 @@ public class TrieImpl<T> implements Trie<T> {
         }
 
         // Done processing node, pop it's character from the prefix.
-        if (node != root && prefixBuilder.length() > 0) {
+        if (node != root) {
             prefixBuilder.deleteCharAt(prefixBuilder.length() - 1);
         }
     }
@@ -226,7 +227,6 @@ public class TrieImpl<T> implements Trie<T> {
     }
 
     private TrieNode<T> getNode(String prefix) {
-        // TODO: Should ignore letters that are already in the current prefix.
         // Navigate the tree by the letters of the prefix, starting from the root.
         TrieNode<T> currentNode = root;
         for (int i = 0; i < prefix.length(); i++) {

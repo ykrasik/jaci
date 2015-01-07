@@ -32,25 +32,17 @@ import java.util.Map;
 // FIXME: Test this class thoroughly!
 public class TrieNode<T> {
     private final char c;
-    private Optional<T> value;
     private final Map<Character, TrieNode<T>> children;
+
+    private Optional<T> value = Optional.absent();
     private int numWords;
 
     public TrieNode(char c) {
-        this(c, Optional.<T>absent());
+        this(c, new HashMap<Character, TrieNode<T>>(1));
     }
 
-    public TrieNode(char c, T value) {
-        this(c, Optional.of(value));
-    }
-
-    private TrieNode(char c, Optional<T> value) {
-        this(c, value, new HashMap<Character, TrieNode<T>>(0));
-    }
-
-    private TrieNode(char c, Optional<T> value, Map<Character, TrieNode<T>> children) {
+    private TrieNode(char c, Map<Character, TrieNode<T>> children) {
         this.c = c;
-        this.value = value;
         this.children = children;
     }
 
@@ -73,10 +65,10 @@ public class TrieNode<T> {
      * The amount of words reachable from this node is cached.<br>
      * This should be called after an outside changed had occurred and the amount was possibly changed.
      */
-    public void refershNumWords() {
+    public void refreshNumWords() {
         // First, refresh the number of words in the children.
         for (TrieNode<T> child : children.values()) {
-            child.refershNumWords();
+            child.refreshNumWords();
         }
 
         this.numWords = calcNumWords();
@@ -95,13 +87,6 @@ public class TrieNode<T> {
         }
 
         return words;
-    }
-
-    /**
-     * @return True if this node is not a word and does not have any children.
-     */
-    public boolean isEmpty() {
-        return numWords == 0;
     }
 
     /**
@@ -145,18 +130,11 @@ public class TrieNode<T> {
     }
 
     /**
-     * @param c Character to get or create child node for.
-     * @return An existing child node for the given character if one existed, or a new one otherwise.
+     * Sets the given node as a child of this node. Will overwrite any existing child for the child's character.
+     * @param child TrieNode to set as a child of this node.
      */
-    public TrieNode<T> getOrCreateChild(char c) {
-        final Optional<TrieNode<T>> child = getChild(c);
-        if (child.isPresent()) {
-            return child.get();
-        }
-
-        final TrieNode<T> newChild = new TrieNode<>(c);
-        children.put(c, newChild);
-        return newChild;
+    void setChild(TrieNode<T> child) {
+        children.put(child.c, child);
     }
 
     /**
@@ -164,6 +142,53 @@ public class TrieNode<T> {
      */
     public Collection<TrieNode<T>> getChildren() {
         return Collections.unmodifiableCollection(children.values());
+    }
+
+    /**
+     * Returns a TrieNode in which all other children except the given one have been removed.<br>
+     * Does not alter this TrieNode.
+     *
+     * @param c Character to keep, will remove all other child characters.
+     * @return A TrieNode that only contains a child for 'c', if one existed in the first place.
+     */
+    public Optional<TrieNode<T>> subTrieNode(char c) {
+        final Optional<TrieNode<T>> childOptional = getChild(c);
+        if (!childOptional.isPresent()) {
+            return Optional.absent();
+        }
+
+        // Return a new TrieNode with the 'c' child as the only child.
+        final TrieNode<T> child = childOptional.get();
+        final Map<Character, TrieNode<T>> newChildren = new HashMap<>(1);
+        newChildren.put(child.c, child);
+        return Optional.of(new TrieNode<>(this.c, newChildren));
+    }
+
+    public Optional<TrieNode<T>> subTrie(String prefix) {
+        return doSubTrie(prefix, 0, this);
+    }
+
+    private Optional<TrieNode<T>> doSubTrie(String prefix, int index, TrieNode<T> currentNode) {
+        final char c = prefix.charAt(index);
+        if (index == prefix.length() - 1) {
+            return currentNode.subTrieNode(c);
+        }
+
+        final Optional<TrieNode<T>> newCurrentNodeOptional = currentNode.subTrieNode(c);
+        if (!newCurrentNodeOptional.isPresent()) {
+            return Optional.absent();
+        }
+
+        final TrieNode<T> newCurrentNode = newCurrentNodeOptional.get();
+        final TrieNode<T> child = newCurrentNode.getChild(c).get();
+        final Optional<TrieNode<T>> newChildNodeOptional = doSubTrie(prefix, index + 1, child);
+        if (!newChildNodeOptional.isPresent()) {
+            return Optional.absent();
+        }
+
+        final TrieNode<T> newChildNode = newChildNodeOptional.get();
+        newCurrentNode.setChild(newChildNode);
+        return newCurrentNodeOptional;
     }
 
     /**
@@ -191,7 +216,8 @@ public class TrieNode<T> {
         }
 
         // Create a new node.
-        final TrieNode<A> newNode = new TrieNode<>(c, newValue, newChildren);
+        final TrieNode<A> newNode = new TrieNode<>(c, newChildren);
+        newNode.value = newValue;
         return Optional.of(newNode);
     }
 
@@ -224,9 +250,10 @@ public class TrieNode<T> {
             throw new IllegalArgumentException("Trying to create a union between incompatible nodes: " + c + " and " + otherCharacter);
         }
 
-        final Optional<T> unionValue = value.or(other.getValue());
         final Map<Character, TrieNode<T>> unionChildren = createUnionChildren(other);
-        return new TrieNode<>(c, unionValue, unionChildren);
+        final TrieNode<T> unionNode = new TrieNode<>(c, unionChildren);
+        unionNode.value = value.or(other.getValue());
+        return unionNode;
     }
 
     private Map<Character, TrieNode<T>> createUnionChildren(TrieNode<T> other) {
