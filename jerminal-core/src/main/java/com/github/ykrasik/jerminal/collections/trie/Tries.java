@@ -25,8 +25,6 @@ import java.util.List;
  * @author Yevgeny Krasik
  */
 public final class Tries {
-    private static final Trie<?> EMPTY_TRIE = new TrieImpl<>(new TrieNode<>((char) 0));
-
     private Tries() {
     }
 
@@ -34,9 +32,8 @@ public final class Tries {
      * @param <T> Type of {@link Trie}.
      * @return An empty {@link Trie}.
      */
-    @SuppressWarnings("unchecked")
     public static <T> Trie<T> emptyTrie() {
-        return (Trie<T>) EMPTY_TRIE;
+        return TrieNode.emptyTrie();
     }
 
     /**

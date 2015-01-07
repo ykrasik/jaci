@@ -112,11 +112,11 @@ public class TrieBuilder<T> {
      * @return A {@link Trie} created from the word-value mappings in this {@link TrieBuilder}.
      */
     public Trie<T> build() {
-        final TrieNode<T> root = new TrieNode<>((char) 0);
+        final TrieNode<T> root = TrieNode.createRoot();
         for (Entry<String, T> entry : map.entrySet()) {
             createTrieBranch(root, entry.getKey(), entry.getValue());
         }
-        return new TrieImpl<>(root);
+        return TrieNode.createTrie(root);
     }
 
     private void createTrieBranch(TrieNode<T> root, String word, T value) {
