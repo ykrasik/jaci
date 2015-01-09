@@ -181,14 +181,14 @@ public class TrieNode<T> implements Trie<T> {
         return map(new Function<T, T>() {
             @Override
             public T apply(T input) {
-                return filter.apply(input) ? input : null;
+                return filter.apply(input) ? null : input;
             }
         });
     }
 
     @Override
     public Trie<T> union(Trie<T> other) {
-        if (isEmpty()) {
+        if (this == other || this.isEmpty()) {
             return other;
         }
         if (other.isEmpty()) {
@@ -209,8 +209,8 @@ public class TrieNode<T> implements Trie<T> {
 
     public TrieNode<T> trieNodeUnion(TrieNode<T> other) {
         final char otherCharacter = other.c;
-        if (c != otherCharacter) {
-            // FIXME: What if this is the same char, but different case? Will not work.
+        if (Character.toLowerCase(c) != Character.toLowerCase(otherCharacter)) {
+            // TODO: Is this the correct way of handling this?
             throw new IllegalArgumentException("Trying to create a union between incompatible nodes: " + c + " and " + otherCharacter);
         }
 

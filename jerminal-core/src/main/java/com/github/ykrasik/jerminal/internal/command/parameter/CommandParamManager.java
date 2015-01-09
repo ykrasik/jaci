@@ -244,7 +244,7 @@ public class CommandParamManager {
             @Override
             public boolean apply(CommandParam value) {
                 // Filter all bound params.
-                return !boundParamValues.containsKey(value.getName());
+                return boundParamValues.containsKey(value.getName());
             }
         });
         return filteredParams.map(AUTO_COMPLETE_TYPE_MAPPER);

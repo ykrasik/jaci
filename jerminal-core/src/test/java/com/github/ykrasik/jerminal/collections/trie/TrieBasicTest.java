@@ -16,9 +16,13 @@
 
 package com.github.ykrasik.jerminal.collections.trie;
 
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import org.junit.Test;
 
-import java.util.List;
+import java.util.*;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Yevgeny Krasik
@@ -28,85 +32,149 @@ public class TrieBasicTest extends AbstractTrieTest {
     public void emptyTrieTest() {
         buildAndAssertTrie();
 
-        assertLongestPrefix("");
+        assertInvalidEmptyWords();
+        assertInvalidWords("", " ");
+        assertInvalidWords(generateWords(1));
     }
 
     @Test
     public void singleLetterTrieTest() {
-        buildAndAssertTrie("a", "b", "c", "d");
+        buildAndAssertTrie(generateWords(1));
 
-        assertInvalidWords(
-            "", " ",
-            "e", "f",
-            "ab", "ba", "cd", "de"
-        );
+        assertInvalidEmptyWords();
+        assertInvalidWords("e", "f");
+        assertInvalidWords(generateWords(2));
     }
 
     @Test
     public void doubleLetterTrieTest() {
-        buildAndAssertTrie("aa", "ab", "bb", "ba", "cd", "de");
+        final List<String> words = generateWords(2);
+        final List<String> removedWords = removeRandomWords(words, 3);
+        buildAndAssertTrie(words);
 
-        assertInvalidWords(
-            "", " ",
-            "a", "b", "c", "d", "e", "f",
-            "ac", "ad", "bc", "bd", "ca", "cb", "cc", "da", "db", "dc", "dd",
-            "aaa", "abc", "abb", "aba", "acd",
-            "aabb"
-        );
+        assertInvalidWords(removedWords);
+        assertInvalidEmptyWords();
+        assertInvalidWords("ae", "be", "ce", "de", "ee");
+        assertInvalidWords(generateWords(1));
+        assertInvalidWords(generateWords(3));
     }
 
     @Test
     public void tripleLetterTrieTest() {
-        buildAndAssertTrie("aaa", "aab", "aac", "aba", "abb", "abc", "aca", "bbb", "baa", "cac", "ccc");
+        final List<String> words = generateWords(3);
+        final List<String> removedWords = removeRandomWords(words, 15);
+        buildAndAssertTrie(words);
 
-        assertInvalidWords(
-            "", " ",
-            "a", "b", "c", "d", "e", "f",
-            "aa", "ab", "ac", "ba", "bb", "bc", "ca", "cb", "cd", "dd",
-            "bab", "bac", "bbc", "bcc", "caa", "cab", "cba", "cbb", "cbc", "cca", "ccb", "ddd",
-            "aaaa", "bbbb", "aabb", "aaca",
-            "aaabbb"
-        );
+        assertInvalidWords(removedWords);
+        assertInvalidEmptyWords();
+        assertInvalidWords("aae", "bbe", "cce", "dde", "eee");
+        assertInvalidWords(generateWords(1));
+        assertInvalidWords(generateWords(2));
+        assertInvalidWords(generateWords(4));
     }
 
     @Test
     public void quadrupleLetterTrieTest() {
-        buildAndAssertTrie(
-            "aaaa", "aaab", "aaac",
-            "aaba", "aabb", "aabc",
-            "aaca", "aacb", "aacc",
-            "abaa", "abab", "abac",
-            "abba", "abbb", "abbc",
-            "abca", "abcb", "abcc",
-            "acaa", "acab", "acac",
-            "acba", "acbb", "acbc",
-            "acca", "accb", "accc",
-            "bbbb", "bbbc", "bbcc", "bccc", "cccc", "abcd"
-        );
+        final List<String> words = generateWords(4);
+        final List<String> removedWords = removeRandomWords(words, 50);
+        buildAndAssertTrie(words);
 
-        assertInvalidWords(
-            "", " ",
-            "a", "b", "c", "d", "e", "f",
-            "aa", "ab", "ac", "ba", "bb", "bc", "ca", "cb", "cc", "dd",
-            "aaa", "aab", "aac", "aba", "abb", "abc", "aca", "acb", "acc",
-            "baa", "bab", "bac", "bba", "bbb", "bbc", "bca", "bcb", "bcc",
-            "ccc", "ddd", "bcd",
-            "aaad", "bbbd", "cccd", "bbba", "bbaa", "baaa"
-        );
+        assertInvalidWords(removedWords);
+        assertInvalidEmptyWords();
+        assertInvalidWords("aaae", "bbbe", "ccce", "ddde", "eeee");
+        assertInvalidWords(generateWords(1));
+        assertInvalidWords(generateWords(2));
+        assertInvalidWords(generateWords(3));
+        assertInvalidWords(generateWords(5));
     }
 
     @Test
-    public void test() {
-        long start = System.currentTimeMillis();
-        final List<String> strings = new StringGenerator(3).generateAllFixedLengthStringPermutations(4);
-        long elapsed = System.currentTimeMillis() - start;
-        System.out.println("Generated " + strings.size() + " entries. TimeTaken = " + elapsed + "ms");
+    public void testMap() {
+        buildAndAssertTrie("1", "2", "3");
 
-        final String[] array = new String[strings.size()];
-        strings.toArray(array);
+        // A function that adds 1 to it's input.
+        map(new Function<String, String>() {
+            @Override
+            public String apply(String input) {
+                return String.valueOf(Integer.parseInt(input) + 1);
+            }
+        });
 
-        buildAndAssertTrie(array);
+        assertNotEmpty();
+        assertTrieSize(3);
+        assertEquals("2", trie.get("1").get());
+        assertEquals("3", trie.get("2").get());
+        assertEquals("4", trie.get("3").get());
     }
 
-    // TODO: Add more tests.
+    @Test
+    public void testFilter() {
+        buildAndAssertTrie("invalid1", "a", "invalid2", "b", "cd", "invalidity");
+
+        // Filter all values starting with "invalid"
+        filter(new Predicate<String>() {
+            @Override
+            public boolean apply(String input) {
+                return input.startsWith("invalid");
+            }
+        });
+
+        assertWords("a", "b", "cd");
+    }
+
+    @Test
+    public void testVisitWords() {
+        buildAndAssertTrie("a", "b", "c");
+
+        final Map<String, String> visited = new HashMap<>();
+        trie.visitWords(new TrieVisitor<String>() {
+            @Override
+            public void visit(String word, String value) {
+                visited.put(word, value);
+            }
+        });
+
+        assertEquals("a", visited.get("a"));
+        assertEquals("b", visited.get("b"));
+        assertEquals("c", visited.get("c"));
+    }
+
+    @Test
+    public void testToMap() {
+        buildAndAssertTrie("a", "b", "c");
+
+        final Map<String, String> map = trie.toMap();
+
+        assertEquals("a", map.get("a"));
+        assertEquals("b", map.get("b"));
+        assertEquals("c", map.get("c"));
+    }
+
+    private List<String> generateWords(int length) {
+        return generateWords(4, length);
+    }
+
+    private List<String> generateWords(int numChars, int length) {
+        return new LinkedList<>(new StringGenerator(numChars).generateAllFixedLengthStringPermutations(length));
+    }
+
+    private List<String> removeRandomWords(List<String> words, int numWords) {
+        final Random random = new Random(System.currentTimeMillis());
+        final List<String> removedWords = new ArrayList<>(numWords);
+        final int max = words.size();
+        for (int i = 0; i < numWords; i++) {
+            final int index = random.nextInt(max - i);
+            removedWords.add(words.remove(index));
+        }
+        return removedWords;
+    }
+
+    private void buildAndAssertTrie(String... words) {
+        buildAndAssertTrie(Arrays.asList(words));
+    }
+
+    private void buildAndAssertTrie(List<String> words) {
+        buildTrie(words);
+        assertWords(words);
+    }
 }

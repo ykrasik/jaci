@@ -16,10 +16,14 @@
 
 package com.github.ykrasik.jerminal.collections.trie;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import org.junit.Before;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.*;
@@ -28,7 +32,7 @@ import static org.junit.Assert.*;
  * @author Yevgeny Krasik
  */
 public class AbstractTrieTest {
-    private Map<String, String> valueMap;
+    protected Map<String, String> valueMap;
     protected TrieBuilder<String> builder;
     protected Trie<String> trie;
 
@@ -39,13 +43,11 @@ public class AbstractTrieTest {
         this.trie = null;
     }
 
-
-    protected void buildAndAssertTrie(String... words) {
-        buildTrie(words);
-        assertWords(words);
+    protected void buildTrie(String... words) {
+        buildTrie(Arrays.asList(words));
     }
 
-    protected void buildTrie(String... words) {
+    protected void buildTrie(List<String> words) {
         for (String word : words) {
             addWord(word, word);
         }
@@ -70,6 +72,14 @@ public class AbstractTrieTest {
         assertTrue("Unexpected subTrie for prefix: " + prefix, trie.subTrie(prefix).isEmpty());
     }
 
+    protected void map(Function<String, String> function) {
+        trie = trie.map(function);
+    }
+
+    protected void filter(Predicate<String> filter) {
+        trie = trie.filter(filter);
+    }
+
     protected void assertEmpty() {
         assertTrue("Trie isn't empty!", trie.isEmpty());
     }
@@ -83,13 +93,21 @@ public class AbstractTrieTest {
     }
 
     protected void assertWords(String... expectedWords) {
-        if (expectedWords.length == 0) {
+        assertWords(Arrays.asList(expectedWords));
+    }
+
+    protected void assertWords(List<String> expectedWords) {
+        if (expectedWords.isEmpty()) {
             assertEmpty();
         } else {
             assertNotEmpty();
         }
-        assertTrieSize(expectedWords.length);
+        assertTrieSize(expectedWords.size());
 
+        doAssertWords(expectedWords);
+    }
+
+    protected void doAssertWords(List<String> expectedWords) {
         for (String word : expectedWords) {
             final String expectedValue = valueMap.get(word);
             assertNotNull("No expected value set for word: " + word, expectedValue);
@@ -102,9 +120,17 @@ public class AbstractTrieTest {
     }
 
     protected void assertInvalidWords(String... invalidWords) {
+        assertInvalidWords(Arrays.asList(invalidWords));
+    }
+
+    protected void assertInvalidWords(List<String> invalidWords) {
         for (String word : invalidWords) {
             assertFalse("Trie contains an invalid value!", trie.get(word).isPresent());
         }
+    }
+
+    protected void assertInvalidEmptyWords() {
+        assertInvalidWords("", " ", "  ", "   ", "\t");
     }
 
     protected void assertLongestPrefix(String expectedPrefix) {

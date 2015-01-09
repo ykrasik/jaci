@@ -1,18 +1,18 @@
-/*
- * Copyright (C) 2014 Yevgeny Krasik
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+/******************************************************************************
+ * Copyright (C) 2014 Yevgeny Krasik                                          *
+ *                                                                            *
+ * Licensed under the Apache License, Version 2.0 (the "License");            *
+ * you may not use this file except in compliance with the License.           *
+ * You may obtain a copy of the License at                                    *
+ *                                                                            *
+ * http://www.apache.org/licenses/LICENSE-2.0                                 *
+ *                                                                            *
+ * Unless required by applicable law or agreed to in writing, software        *
+ * distributed under the License is distributed on an "AS IS" BASIS,          *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   *
+ * See the License for the specific language governing permissions and        *
+ * limitations under the License.                                             *
+ ******************************************************************************/
 
 package com.github.ykrasik.jerminal.collections.trie;
 
@@ -28,21 +28,13 @@ public class TriePrefixTest extends AbstractTrieTest {
     public void setUp() {
         super.setUp();
 
-        addWord("p", "prefix1");
-        addWord("pr", "prefix2");
-        addWord("pre", "prefix3");
-        addWord("pre1fix", "prefix4");
-        addWord("pre2", "prefix5");
-        addWord("prefix", "prefix6");
-        addWord("prefiz", "prefix7");
-        addWord("other", "other");
+        buildTrie("p", "pr", "pre", "pre1fix", "pre2", "prefix", "prefixprefix1", "prefixprefix2", "prefiz", "other");
     }
 
     @Test
     public void testPrefix1() {
         // Root
-        assertNotEmpty();
-        assertWords("p", "pr", "pre", "pre1fix", "pre2", "prefix", "prefiz", "other");
+        assertWords("p", "pr", "pre", "pre1fix", "pre2", "prefix", "prefixprefix1", "prefixprefix2", "prefiz", "other");
         assertLongestPrefix("");
     }
 
@@ -50,8 +42,7 @@ public class TriePrefixTest extends AbstractTrieTest {
     public void testPrefix2() {
         // "p"
         successfulSubTrie("p");
-        assertNotEmpty();
-        assertWords("p", "pr", "pre", "pre1fix", "pre2", "prefix", "prefiz");
+        assertWords("p", "pr", "pre", "pre1fix", "pre2", "prefix", "prefixprefix1", "prefixprefix2", "prefiz");
         assertLongestPrefix("p");
     }
 
@@ -59,8 +50,7 @@ public class TriePrefixTest extends AbstractTrieTest {
     public void testPrefix3() {
         // "pr"
         successfulSubTrie("pr");
-        assertNotEmpty();
-        assertWords("pr", "pre", "pre1fix", "pre2", "prefix", "prefiz");
+        assertWords("pr", "pre", "pre1fix", "pre2", "prefix", "prefixprefix1", "prefixprefix2", "prefiz");
         assertLongestPrefix("pr");
     }
 
@@ -68,8 +58,7 @@ public class TriePrefixTest extends AbstractTrieTest {
     public void testPrefix4() {
         // "pre"
         successfulSubTrie("pre");
-        assertNotEmpty();
-        assertWords("pre", "pre1fix", "pre2", "prefix", "prefiz");
+        assertWords("pre", "pre1fix", "pre2", "prefix", "prefixprefix1", "prefixprefix2", "prefiz");
         assertLongestPrefix("pre");
     }
 
@@ -77,7 +66,6 @@ public class TriePrefixTest extends AbstractTrieTest {
     public void testPrefix5() {
         // "pre1" - only "pre1fix" is possible from here.
         successfulSubTrie("pre1");
-        assertNotEmpty();
         assertWords("pre1fix");
         assertLongestPrefix("pre1fix");
     }
@@ -86,52 +74,46 @@ public class TriePrefixTest extends AbstractTrieTest {
     public void testPrefix6() {
         // "pre2" - only "pre2" is possible from here.
         successfulSubTrie("pre2");
-        assertNotEmpty();
         assertWords("pre2");
         assertLongestPrefix("pre2");
     }
 
     @Test
     public void testPrefix7() {
-        // "pre2" - only "pre2" is possible from here.
-        successfulSubTrie("pre2");
-        assertNotEmpty();
-        assertWords("pre2");
-        assertLongestPrefix("pre2");
+        // "pref"
+        successfulSubTrie("pref");
+        assertWords("prefix", "prefixprefix1", "prefixprefix2", "prefiz");
+        assertLongestPrefix("prefi");
     }
 
     @Test
     public void testPrefix8() {
-        // "pref"
-        successfulSubTrie("pref");
-        assertNotEmpty();
-        assertWords("prefix", "prefiz");
+        // "prefi"
+        successfulSubTrie("prefi");
+        assertWords("prefix", "prefixprefix1", "prefixprefix2", "prefiz");
         assertLongestPrefix("prefi");
     }
 
     @Test
     public void testPrefix9() {
-        // "prefi"
-        successfulSubTrie("prefi");
-        assertNotEmpty();
-        assertWords("prefix", "prefiz");
-        assertLongestPrefix("prefi");
+        // "prefix"
+        successfulSubTrie("prefix");
+        assertWords("prefix", "prefixprefix1", "prefixprefix2");
+        assertLongestPrefix("prefix");
     }
 
     @Test
     public void testPrefix10() {
-        // "prefix"
-        successfulSubTrie("prefix");
-        assertNotEmpty();
-        assertWords("prefix");
-        assertLongestPrefix("prefix");
+        // "prefixp"
+        successfulSubTrie("prefixp");
+        assertWords("prefixprefix1", "prefixprefix2");
+        assertLongestPrefix("prefixprefix");
     }
 
     @Test
     public void testPrefix11() {
         // "prefiz"
         successfulSubTrie("prefiz");
-        assertNotEmpty();
         assertWords("prefiz");
         assertLongestPrefix("prefiz");
     }
@@ -140,6 +122,7 @@ public class TriePrefixTest extends AbstractTrieTest {
     public void testFailedPrefix() {
         // Invalid prefixes
         failedSubTrie("prefix1");
+        failedSubTrie("prefixprex");
         failedSubTrie("pred");
         failedSubTrie("predix");
         failedSubTrie("ob");

@@ -77,13 +77,14 @@ public interface Trie<T> {
      *         If the result of the transformation returned 'null', that word and value will not appear in the returned Trie.<br>
      *         Does not alter this Trie.
      */
+    // TODO: I don't like that fact that function can return null.
     <A> Trie<A> map(Function<T, A> function);
 
     // TODO: Add a lazy map that saves the function and only applies it when traversed.
 
     /**
-     * @param filter Predicate that determines which values will remain in the Trie.
-     * @return A Trie in which all values for which {@link Predicate#apply(T)} returned false are removed.<br>
+     * @param filter Predicate that determines which values to filter from the Trie.
+     * @return A Trie in which all values for which {@link Predicate#apply(T)} returned true are removed.<br>
      *         Does not alter this Trie.
      */
     Trie<T> filter(Predicate<T> filter);
