@@ -1,18 +1,18 @@
-/*
- * Copyright (C) 2014 Yevgeny Krasik
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+/******************************************************************************
+ * Copyright (C) 2014 Yevgeny Krasik                                          *
+ *                                                                            *
+ * Licensed under the Apache License, Version 2.0 (the "License");            *
+ * you may not use this file except in compliance with the License.           *
+ * You may obtain a copy of the License at                                    *
+ *                                                                            *
+ * http://www.apache.org/licenses/LICENSE-2.0                                 *
+ *                                                                            *
+ * Unless required by applicable law or agreed to in writing, software        *
+ * distributed under the License is distributed on an "AS IS" BASIS,          *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   *
+ * See the License for the specific language governing permissions and        *
+ * limitations under the License.                                             *
+ ******************************************************************************/
 
 package com.github.ykrasik.jerminal.api.display;
 
@@ -56,6 +56,14 @@ public interface DisplayDriver {
     void displayEmptyLine();
 
     /**
+     * Displays the command line being operated.
+     *
+     * @param commandLine Command line being operated.
+     * @param isExecute Whether the commandLine is being displayed before execution or before assistance.
+     */
+    void displayCommandLine(String commandLine, boolean isExecute);
+
+    /**
      * Display text. Usually generated as output from commands.
      *
      * @param text Text to display.
@@ -95,6 +103,7 @@ public interface DisplayDriver {
     void displayCommand(Command command);
 
     // TODO: Does this 100% belong here? This is the only call that assumes state.
+    // TODO: Maybe this should be polled instead... after calling a command, check current working directory.
     /**
      * Set the path to the current working directory. Only called when when the working directory changes.
      * The path will always be non-empty and the first element will always be the name of the root directory.

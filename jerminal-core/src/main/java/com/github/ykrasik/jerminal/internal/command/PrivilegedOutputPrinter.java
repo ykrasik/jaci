@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2014 Yevgeny Krasik                                          *
+ * Copyright (C) 2015 Yevgeny Krasik                                          *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -17,45 +17,28 @@
 package com.github.ykrasik.jerminal.internal.command;
 
 import com.github.ykrasik.jerminal.api.command.OutputPrinter;
-import com.github.ykrasik.jerminal.api.display.DisplayDriver;
 
 /**
- * An implementation for an {@link OutputPrinter}.
+ * An {@link OutputPrinter} that provides additional methods.
+ * For internal use, should never be used externally.
  *
  * @author Yevgeny Krasik
  */
-public class OutputPrinterImpl implements PrivilegedOutputPrinter {
-    private final DisplayDriver displayDriver;
-    private boolean hasInteractions;
-    private boolean suppressDefaultExecutionMessage;
+public interface PrivilegedOutputPrinter extends OutputPrinter {
+    /**
+     * @return Whether any of the {@link OutputPrinter}'s API methods were invoked.
+     */
+    boolean hasInteractions();
 
-    public OutputPrinterImpl(DisplayDriver displayDriver) {
-        this.displayDriver = displayDriver;
-    }
+    /**
+     * Suppresses the default 'command executed successfully' message that appears if no other interactions are
+     * detected by {@link #hasInteractions()}.
+     */
+    void suppressDefaultExecutionMessage();
 
-    @Override
-    public void println(String text) {
-        displayDriver.displayText(text);
-        hasInteractions = true;
-    }
-
-    @Override
-    public void println(String format, Object... args) {
-        println(String.format(format, args));
-    }
-
-    @Override
-    public boolean hasInteractions() {
-        return hasInteractions;
-    }
-
-    @Override
-    public void suppressDefaultExecutionMessage() {
-        suppressDefaultExecutionMessage = true;
-    }
-
-    @Override
-    public boolean isSuppressDefaultExecutionMessage() {
-        return suppressDefaultExecutionMessage;
-    }
+    /**
+     * @return Whether the command requested to suppress the default 'command executed successfully' message that appears
+     * if no other interactions are detected by {@link #hasInteractions()}.
+     */
+    boolean isSuppressDefaultExecutionMessage();
 }

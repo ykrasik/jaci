@@ -1,27 +1,25 @@
-/*
- * Copyright (C) 2014 Yevgeny Krasik
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+/******************************************************************************
+ * Copyright (C) 2014 Yevgeny Krasik                                          *
+ *                                                                            *
+ * Licensed under the Apache License, Version 2.0 (the "License");            *
+ * you may not use this file except in compliance with the License.           *
+ * You may obtain a copy of the License at                                    *
+ *                                                                            *
+ * http://www.apache.org/licenses/LICENSE-2.0                                 *
+ *                                                                            *
+ * Unless required by applicable law or agreed to in writing, software        *
+ * distributed under the License is distributed on an "AS IS" BASIS,          *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   *
+ * See the License for the specific language governing permissions and        *
+ * limitations under the License.                                             *
+ ******************************************************************************/
 
 package com.github.ykrasik.jerminal.api;
 
 import com.github.ykrasik.jerminal.api.assist.CommandInfo;
 import com.github.ykrasik.jerminal.api.assist.Suggestions;
 import com.github.ykrasik.jerminal.api.command.CommandArgs;
-import com.github.ykrasik.jerminal.api.command.OutputPrinter;
 import com.github.ykrasik.jerminal.api.display.DisplayDriver;
-import com.github.ykrasik.jerminal.api.display.InteractionCountingDisplayDriver;
 import com.github.ykrasik.jerminal.api.filesystem.ShellFileSystem;
 import com.github.ykrasik.jerminal.api.filesystem.command.Command;
 import com.github.ykrasik.jerminal.collections.trie.Trie;
@@ -31,6 +29,7 @@ import com.github.ykrasik.jerminal.internal.assist.AutoCompleteType;
 import com.github.ykrasik.jerminal.internal.assist.SuggestionsBuilder;
 import com.github.ykrasik.jerminal.internal.command.ControlCommandFactory;
 import com.github.ykrasik.jerminal.internal.command.OutputPrinterImpl;
+import com.github.ykrasik.jerminal.internal.command.PrivilegedOutputPrinter;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.internal.filesystem.InternalShellFileSystem;
 import com.github.ykrasik.jerminal.internal.filesystem.command.InternalCommand;
@@ -60,17 +59,15 @@ import java.util.regex.Pattern;
 // TODO: Create AssistReturnValue and ExecuteReturnValue instead of having a DisplayDriver with side effects?
 public class Shell {
     private final InternalShellFileSystem fileSystem;
-    private final InteractionCountingDisplayDriver displayDriver;
-    private final OutputPrinter outputPrinter;
+    private final DisplayDriver displayDriver;
 
     public Shell(ShellFileSystem fileSystem, DisplayDriver displayDriver) {
         this(fileSystem, displayDriver, "Welcome to Jerminal!\n");
     }
 
     public Shell(ShellFileSystem fileSystem, DisplayDriver displayDriver, String welcomeMessage) {
-        this.displayDriver = new InteractionCountingDisplayDriver(displayDriver);
+        this.displayDriver = Objects.requireNonNull(displayDriver);
         this.fileSystem = createFileSystem(Objects.requireNonNull(fileSystem), this.displayDriver);
-        this.outputPrinter = new OutputPrinterImpl(this.displayDriver);
 
         // Initial displayDriver stuff.
         displayDriver.begin();
@@ -94,15 +91,13 @@ public class Shell {
     public Optional<String> assist(String commandLine) {
         displayDriver.begin();
         try {
+            displayDriver.displayCommandLine(commandLine, false);
             return parseAndAssist(commandLine);
         } catch (ParseException e) {
             handleParseException(e);
         } catch (Exception e) {
             displayDriver.displayException(e);
         } finally {
-            if (displayDriver.getInteractions() > 0) {
-                displayDriver.displayEmptyLine();
-            }
             displayDriver.end();
         }
         return Optional.absent();
@@ -124,6 +119,7 @@ public class Shell {
     }
 
     // FIXME: I do still want the old errors - no more params, etc.
+    // TODO: AssistReturnValue never leaves this class... is it required? Just do it all in 1 command?
     private AssistReturnValue doAssist(List<String> commandLine) throws ParseException {
         // The first arg of the commandLine must be a path to a command(file).
         final String rawPath = commandLine.get(0);
@@ -208,6 +204,7 @@ public class Shell {
     public boolean execute(String commandLine) {
         displayDriver.begin();
         try {
+            displayDriver.displayCommandLine(commandLine, true);
             parseAndExecute(commandLine);
             return true;
         } catch (ParseException e) {
@@ -215,7 +212,6 @@ public class Shell {
         } catch (Exception e) {
             displayDriver.displayException(e);
         } finally {
-            displayDriver.displayEmptyLine();
             displayDriver.end();
         }
         return false;
@@ -241,9 +237,10 @@ public class Shell {
 
         // Execute the command.
         final Command command = internalCommand.getCommand();
+        final PrivilegedOutputPrinter outputPrinter = new OutputPrinterImpl(displayDriver);
         command.execute(args, outputPrinter);
 
-        if (displayDriver.getInteractions() == 0) {
+        if (!outputPrinter.hasInteractions() && !outputPrinter.isSuppressDefaultExecutionMessage()) {
             final String message = String.format("Command '%s' executed successfully.", command.getName());
             displayDriver.displayText(message);
         }
@@ -280,5 +277,7 @@ public class Shell {
     }
 
     // A pattern that matches spaces that aren't surrounded by single or double quotes.
+    // FIXME: This pattern doesn't support named parameter calling with strings with whitespace (param="long string")
+    // FIXME: Maybe the fix should not be in the pattern. Either way, calling long strings by name doesn't work.
     private static final Pattern ARGS_PATTERN = Pattern.compile("[^\\s\"']+|\"([^\"]*)\"|'([^']*)'");
 }
