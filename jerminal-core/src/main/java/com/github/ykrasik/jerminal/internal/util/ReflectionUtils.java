@@ -1,25 +1,25 @@
-/*
- * Copyright (C) 2014 Yevgeny Krasik
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+/******************************************************************************
+ * Copyright (C) 2014 Yevgeny Krasik                                          *
+ *                                                                            *
+ * Licensed under the Apache License, Version 2.0 (the "License");            *
+ * you may not use this file except in compliance with the License.           *
+ * You may obtain a copy of the License at                                    *
+ *                                                                            *
+ * http://www.apache.org/licenses/LICENSE-2.0                                 *
+ *                                                                            *
+ * Unless required by applicable law or agreed to in writing, software        *
+ * distributed under the License is distributed on an "AS IS" BASIS,          *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   *
+ * See the License for the specific language governing permissions and        *
+ * limitations under the License.                                             *
+ ******************************************************************************/
 
 package com.github.ykrasik.jerminal.internal.util;
 
-import com.github.ykrasik.jerminal.internal.exception.ShellException;
-
-import java.lang.reflect.Constructor;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Utilities for dealing with reflection.
@@ -39,17 +39,14 @@ public final class ReflectionUtils {
      *
      * @param clazz Class to instantiate.
      * @return An instance of the provided class.
-     * @throws java.lang.IllegalArgumentException If the class doesn't have a no-args constructor.
-     * @throws com.github.ykrasik.jerminal.internal.exception.ShellException If an error occurred trying to instantiate the class.
+     * @throws java.lang.IllegalArgumentException If an error occurred trying to instantiate the class, like
+     *                                            if the class doesn't have a no-args constructor.
      */
     public static Object createInstanceNoArgs(Class<?> clazz) {
         try {
-            final Constructor<?> constructor = clazz.getConstructor(NO_ARGS_TYPE);
-            return constructor.newInstance(NO_ARGS);
-        } catch (NoSuchMethodException e) {
-            throw new IllegalArgumentException("Class doesn't have a no-args constructor: " + clazz, e);
+            return clazz.newInstance();
         } catch (Exception e) {
-            throw new ShellException("Error instantiating new instance of type: " + clazz, e);
+            throw new IllegalArgumentException("Error instantiating new instance of type: " + clazz, e);
         }
     }
 
@@ -61,7 +58,8 @@ public final class ReflectionUtils {
      * @param methodName Method name.
      * @param returnType The method's expected return type.
      * @return A method with the provided name that takes no-args and returns the provided return type.
-     * @throws java.lang.IllegalArgumentException If the class doesn't contain a method with the provided name the method doesn't return the expected return type.
+     * @throws java.lang.IllegalArgumentException If the class doesn't contain a method with the provided name or
+     *                                            if the method doesn't return the expected return type.
      */
     public static Method findNoArgsMethod(Class<?> clazz, String methodName, Class<?> returnType) {
         try {
@@ -124,5 +122,24 @@ public final class ReflectionUtils {
             );
             throw new IllegalStateException(message, e);
         }
+    }
+
+    /**
+     * Returns basic information about a method's parameters obtained via reflection.
+     *
+     * @param method Method to reflect parameters for.
+     * @return The method's parameter information obtained via reflection.
+     */
+    public static List<ReflectionParameter> reflectMethodParameters(Method method) {
+        final Class<?>[] parameterTypes = method.getParameterTypes();
+        final Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+
+        final List<ReflectionParameter> params = new ArrayList<>(parameterTypes.length);
+        for (int i = 0; i < parameterTypes.length; i++) {
+            final Class<?> parameterType = parameterTypes[i];
+            final Annotation[] annotations = parameterAnnotations[i];
+            params.add(new ReflectionParameter(parameterType, annotations, i));
+        }
+        return params;
     }
 }

@@ -1,27 +1,23 @@
-/*
- * Copyright (C) 2014 Yevgeny Krasik
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+/******************************************************************************
+ * Copyright (C) 2014 Yevgeny Krasik                                          *
+ *                                                                            *
+ * Licensed under the Apache License, Version 2.0 (the "License");            *
+ * you may not use this file except in compliance with the License.           *
+ * You may obtain a copy of the License at                                    *
+ *                                                                            *
+ * http://www.apache.org/licenses/LICENSE-2.0                                 *
+ *                                                                            *
+ * Unless required by applicable law or agreed to in writing, software        *
+ * distributed under the License is distributed on an "AS IS" BASIS,          *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   *
+ * See the License for the specific language governing permissions and        *
+ * limitations under the License.                                             *
+ ******************************************************************************/
 
 package com.github.ykrasik.jerminal.api.command.toggle;
 
-import com.github.ykrasik.jerminal.api.command.CommandArgs;
 import com.github.ykrasik.jerminal.api.command.CommandBuilder;
-import com.github.ykrasik.jerminal.api.command.CommandExecutor;
-import com.github.ykrasik.jerminal.api.command.OutputPrinter;
 import com.github.ykrasik.jerminal.api.command.parameter.bool.BooleanParamBuilder;
-import com.github.ykrasik.jerminal.api.exception.ExecuteException;
 import com.github.ykrasik.jerminal.api.filesystem.command.Command;
 import com.google.common.base.Supplier;
 
@@ -38,51 +34,61 @@ import java.util.Objects;
  *
  * @author Yevgeny Krasik
  */
+// TODO: JavaDoc
 public class ToggleCommandBuilder {
-    private static final String PARAM_NAME = "state";
+    private final String commandName;
 
-    private final String name;
-    private final StateAccessor accessor;
-    private final CommandBuilder builder;
-
+    private StateAccessor accessor;
+    private String commandDescription = "Toggle command";
+    private String paramName = "state";
     private String paramDescription = "toggle";
 
-    public ToggleCommandBuilder(String name, StateAccessor accessor) {
-        this.name = Objects.requireNonNull(name);
-        this.accessor = Objects.requireNonNull(accessor);
-        this.builder = new CommandBuilder(name);
-        this.builder.setDescription("toggle command");
+    public ToggleCommandBuilder(String commandName) {
+        this.commandName = Objects.requireNonNull(commandName);
     }
 
-    // TODO: Multiple calls to this will produce weird results.
+    // TODO: JavaDoc
     public Command build() {
-        return builder
-            .addParam(new BooleanParamBuilder(PARAM_NAME)
+        Objects.requireNonNull(accessor, "StateAccessor wasn't defined!");
+        return new CommandBuilder(commandName)
+            .setDescription(commandDescription)
+            .addParam(
+                new BooleanParamBuilder(paramName)
                     .setDescription(paramDescription)
                     .setOptional(new AccessorDefaultValueProvider(accessor))
                     .build()
             )
-            .setExecutor(new CommandExecutor() {
-                @Override
-                public void execute(CommandArgs args, OutputPrinter outputPrinter) throws ExecuteException {
-                    final boolean toggle = args.popBool();
-                    accessor.set(toggle);
-                    outputPrinter.println("%s: %s", name, toggle);
-                }
-            })
+            .setExecutor(new ToggleExecutor(commandName, accessor))
             .build();
     }
 
-    public ToggleCommandBuilder setCommandDescription(String description) {
-        builder.setDescription(description);
+    // TODO: JavaDoc
+    public ToggleCommandBuilder setAccessor(StateAccessor accessor) {
+        this.accessor = accessor;
         return this;
     }
 
-    public ToggleCommandBuilder setParameterDescription(String description) {
+    // TODO: JavaDoc
+    public ToggleCommandBuilder setCommandDescription(String description) {
+        this.commandDescription = description;
+        return this;
+    }
+
+    // TODO: JavaDoc
+    public ToggleCommandBuilder setParamName(String paramName) {
+        this.paramName = paramName;
+        return this;
+    }
+
+    // TODO: JavaDoc
+    public ToggleCommandBuilder setParamDescription(String description) {
         this.paramDescription = description;
         return this;
     }
 
+    /**
+     * A {@link Supplier> that returns the inverse of the current {@link StateAccessor#get()}.
+     */
     private static class AccessorDefaultValueProvider implements Supplier<Boolean> {
         private final StateAccessor accessor;
 

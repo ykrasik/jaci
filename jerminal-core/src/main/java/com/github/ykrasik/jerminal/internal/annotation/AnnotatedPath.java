@@ -1,25 +1,23 @@
-/*
- * Copyright (C) 2014 Yevgeny Krasik
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+/******************************************************************************
+ * Copyright (C) 2014 Yevgeny Krasik                                          *
+ *                                                                            *
+ * Licensed under the Apache License, Version 2.0 (the "License");            *
+ * you may not use this file except in compliance with the License.           *
+ * You may obtain a copy of the License at                                    *
+ *                                                                            *
+ * http://www.apache.org/licenses/LICENSE-2.0                                 *
+ *                                                                            *
+ * Unless required by applicable law or agreed to in writing, software        *
+ * distributed under the License is distributed on an "AS IS" BASIS,          *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   *
+ * See the License for the specific language governing permissions and        *
+ * limitations under the License.                                             *
+ ******************************************************************************/
 
 package com.github.ykrasik.jerminal.internal.annotation;
 
 import com.github.ykrasik.jerminal.ShellConstants;
 import com.github.ykrasik.jerminal.api.annotation.ShellPath;
-
-import java.util.Objects;
 
 /**
  * Represents the path specified by an annotation.<br>
@@ -70,8 +68,8 @@ public class AnnotatedPath {
         }
 
         // Make sure the first path ends with a delimiter and the second path doesn't start with one.
-        final String path1 = endsWithDelimiter(this.path) ? this.path : this.path + ShellConstants.FILE_SYSTEM_DELIMITER;
-        final String path2 = startsWithDelimiter(other.path) ? other.path.substring(1) : other.path;
+        final String path1 = appendDelimiterIfNecessary(this.path);
+        final String path2 = removeLeadingDelimiter(other.path);
         return new AnnotatedPath(path1 + path2, false);
     }
 
@@ -81,8 +79,7 @@ public class AnnotatedPath {
      */
     public static AnnotatedPath fromAnnotation(ShellPath annotation) {
         // Make sure the path always ends with a delimiter - easier to work with.
-        final String path = Objects.requireNonNull(annotation.value());
-        final String pathToUse = path.endsWith(ShellConstants.FILE_SYSTEM_DELIMITER) ? path : path + ShellConstants.FILE_SYSTEM_DELIMITER;
+        final String pathToUse = appendDelimiterIfNecessary(annotation.value());
         return new AnnotatedPath(pathToUse, annotation.global());
     }
 
@@ -98,6 +95,14 @@ public class AnnotatedPath {
      */
     public static AnnotatedPath empty() {
         return EMPTY;
+    }
+
+    private static String appendDelimiterIfNecessary(String path) {
+        return endsWithDelimiter(path) ? path : path + ShellConstants.FILE_SYSTEM_DELIMITER;
+    }
+
+    private static String removeLeadingDelimiter(String path) {
+        return startsWithDelimiter(path) ? path.substring(1) : path;
     }
 
     private static boolean endsWithDelimiter(String path) {

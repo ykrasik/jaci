@@ -1,18 +1,18 @@
-/*
- * Copyright (C) 2014 Yevgeny Krasik
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+/******************************************************************************
+ * Copyright (C) 2014 Yevgeny Krasik                                          *
+ *                                                                            *
+ * Licensed under the Apache License, Version 2.0 (the "License");            *
+ * you may not use this file except in compliance with the License.           *
+ * You may obtain a copy of the License at                                    *
+ *                                                                            *
+ * http://www.apache.org/licenses/LICENSE-2.0                                 *
+ *                                                                            *
+ * Unless required by applicable law or agreed to in writing, software        *
+ * distributed under the License is distributed on an "AS IS" BASIS,          *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   *
+ * See the License for the specific language governing permissions and        *
+ * limitations under the License.                                             *
+ ******************************************************************************/
 
 package com.github.ykrasik.jerminal.internal.annotation;
 
@@ -23,35 +23,36 @@ import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
 import com.github.ykrasik.jerminal.api.command.toggle.StateAccessor;
 import com.github.ykrasik.jerminal.api.command.toggle.ToggleCommandBuilder;
 import com.github.ykrasik.jerminal.api.filesystem.command.Command;
+import com.github.ykrasik.jerminal.internal.annotation.param.AnnotationParamFactory;
+import com.github.ykrasik.jerminal.internal.util.ReflectionParameter;
 import com.github.ykrasik.jerminal.internal.util.ReflectionUtils;
 import com.google.common.base.Optional;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Objects;
+
+import static com.github.ykrasik.jerminal.internal.util.StringUtils.getOptionalString;
 
 /**
  * Creates {@link Command}s out of {@link Method}s if they are annotated.<br>
- * Empty names or descriptions aren't allowed.
- * @see com.github.ykrasik.jerminal.api.annotation.Command Command
- * @see com.github.ykrasik.jerminal.api.annotation.ToggleCommand
+ * Empty names will be replaced with a generated name, and empty descriptions will use default values.
+ * @see com.github.ykrasik.jerminal.api.annotation.Command
+ * @see ToggleCommand
  *
  * @author Yevgeny Krasik
  */
 public class AnnotationCommandFactory {
-    public static final String DEFAULT_DESCRIPTION = "command";
-    public static final String DEFAULT_TOGGLE_DESCRIPTION = "toggle";
-
-    private final AnnotationCommandParamFactory paramFactory;
+    private final AnnotationParamFactory paramFactory;
 
     public AnnotationCommandFactory() {
-        this(new AnnotationCommandParamFactory());
+        this(new AnnotationParamFactory());
     }
 
     /**
      * For testing.
      */
-    AnnotationCommandFactory(AnnotationCommandParamFactory paramFactory) {
+    AnnotationCommandFactory(AnnotationParamFactory paramFactory) {
         this.paramFactory = Objects.requireNonNull(paramFactory);
     }
 
@@ -64,23 +65,18 @@ public class AnnotationCommandFactory {
         // Check if method has the @Command annotation.
         final com.github.ykrasik.jerminal.api.annotation.Command commandAnnotation = method.getAnnotation(com.github.ykrasik.jerminal.api.annotation.Command.class);
         if (commandAnnotation != null) {
-            final String name = getOrGenerateCommandName(commandAnnotation.value(), method);
-            final String description = getOrGenerateCommandDescription(commandAnnotation.description(), DEFAULT_DESCRIPTION);
             try {
-                return Optional.of(createCommand(instance, method, name, description));
+                return Optional.of(createCommand(instance, method, commandAnnotation));
             } catch (Exception e) {
-                final String message = String.format("Error creating command: class=%s, method=%s", method.getDeclaringClass(), method.getName());
-                throw new IllegalArgumentException(message, e);
+                throw new IllegalArgumentException(String.format("Error creating command: class=%s, method=%s", method.getDeclaringClass(), method.getName()), e);
             }
         }
 
         // Check if method has the @ToggleCommand annotation.
         final ToggleCommand toggleCommandAnnotation = method.getAnnotation(ToggleCommand.class);
         if (toggleCommandAnnotation != null) {
-            final String name = getOrGenerateCommandName(toggleCommandAnnotation.value(), method);
-            final String description = getOrGenerateCommandDescription(toggleCommandAnnotation.description(), DEFAULT_TOGGLE_DESCRIPTION);
             try {
-                return Optional.of(createToggleCommand(instance, method, name, description));
+                return Optional.of(createToggleCommand(instance, method, toggleCommandAnnotation));
             } catch (Exception e){
                 final String message = String.format("Error creating toggle command: class=%s, method=%s", method.getDeclaringClass(), method.getName());
                 throw new IllegalArgumentException(message, e);
@@ -91,38 +87,25 @@ public class AnnotationCommandFactory {
         return Optional.absent();
     }
 
-    private String getOrGenerateCommandName(String name, Method method) {
-        final String trimmedName = name.trim();
-        if (!trimmedName.isEmpty()) {
-            return trimmedName;
-        } else {
-            return method.getName();
-        }
-    }
+    private Command createCommand(Object instance, Method method, com.github.ykrasik.jerminal.api.annotation.Command annotation) {
+        final String name = getOrGenerateCommandName(annotation.value(), method);
+        final CommandBuilder builder = new CommandBuilder(name);
 
-    private String getOrGenerateCommandDescription(String description, String defaultDescription) {
-        final String trimmedDescription = description.trim();
-        if (!trimmedDescription.isEmpty()) {
-            return trimmedDescription;
-        } else {
-            return defaultDescription;
+        final Optional<String> description = getOptionalString(annotation.description());
+        if (description.isPresent()) {
+            builder.setDescription(description.get());
         }
-    }
 
-    private Command createCommand(Object instance, Method method, String name, String description) {
-        final Class<?>[] parameterTypes = method.getParameterTypes();
-        final Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+        // Reflect method parameters.
+        final List<ReflectionParameter> parameters = ReflectionUtils.reflectMethodParameters(method);
 
         // If present, the outputPrinter must be the first arg.
-        final boolean hasOutputPrinter = parameterTypes.length > 0 && isOutputPrinter(parameterTypes[0]);
-
-        final CommandBuilder builder = new CommandBuilder(name);
-        builder.setDescription(description);
+        final boolean hasOutputPrinter = !parameters.isEmpty() && isOutputPrinter(parameters.get(0).getParameterType());
         builder.setExecutor(new ReflectionCommandExecutor(instance, method, hasOutputPrinter));
 
-        // Create command parameters from method parameters.
-        for (int i = hasOutputPrinter ? 1 : 0; i < parameterTypes.length; i++) {
-            final Class<?> parameterType = parameterTypes[i];
+        for (int i = hasOutputPrinter ? 1 : 0; i < parameters.size(); i++) {
+            final ReflectionParameter param = parameters.get(i);
+            final Class<?> parameterType = param.getParameterType();
             if (isOutputPrinter(parameterType)) {
                 final String message = String.format(
                     "OutputPrinters must either be the first argument of a method or not be present at all: class=%s, method=%s",
@@ -130,9 +113,8 @@ public class AnnotationCommandFactory {
                 );
                 throw new IllegalArgumentException(message);
             }
-            final Annotation[] annotations = parameterAnnotations[i];
-            final CommandParam param = paramFactory.createCommandParam(instance, parameterType, annotations, i);
-            builder.addParam(param);
+            final CommandParam commandParam = paramFactory.createParam(instance, param);
+            builder.addParam(commandParam);
         }
 
         return builder.build();
@@ -142,14 +124,41 @@ public class AnnotationCommandFactory {
         return OutputPrinter.class.isAssignableFrom(clazz);
     }
 
-    private Command createToggleCommand(Object instance, Method method, String name, String description) {
+    private Command createToggleCommand(Object instance, Method method, ToggleCommand annotation) {
         assertReturnValue(method, StateAccessor.class, ToggleCommand.class);
         assertNoParameters(method, ToggleCommand.class);
 
+        final String name = getOrGenerateCommandName(annotation.value(), method);
+        final ToggleCommandBuilder builder = new ToggleCommandBuilder(name);
+
+        final Optional<String> commandDescription = getOptionalString(annotation.description());
+        if (commandDescription.isPresent()) {
+            builder.setCommandDescription(commandDescription.get());
+        }
+
+        final Optional<String> paramName = getOptionalString(annotation.paraName());
+        if (paramName.isPresent()) {
+            builder.setParamName(paramName.get());
+        }
+
+        final Optional<String> paramDescription = getOptionalString(annotation.paramDescription());
+        if (paramDescription.isPresent()) {
+            builder.setParamDescription(paramDescription.get());
+        }
+
         final StateAccessor accessor = ReflectionUtils.invokeNoArgs(instance, method, StateAccessor.class);
-        final ToggleCommandBuilder builder = new ToggleCommandBuilder(name, accessor);
-        builder.setCommandDescription(description);
+        builder.setAccessor(accessor);
+
         return builder.build();
+    }
+
+    private String getOrGenerateCommandName(String name, Method method) {
+        final String trimmedName = name.trim();
+        if (!trimmedName.isEmpty()) {
+            return trimmedName;
+        } else {
+            return method.getName();
+        }
     }
 
     private void assertReturnValue(Method method, Class<?> expectedReturnValue, Class<?> annotation) {

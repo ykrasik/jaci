@@ -20,7 +20,9 @@ import com.github.ykrasik.jerminal.api.annotation.*;
 import com.github.ykrasik.jerminal.api.command.OutputPrinter;
 import com.github.ykrasik.jerminal.api.command.toggle.StateAccessor;
 import com.github.ykrasik.jerminal.api.filesystem.command.Command;
+import com.github.ykrasik.jerminal.internal.annotation.param.AnnotationParamFactory;
 import com.github.ykrasik.jerminal.internal.command.PrivilegedCommandArgs;
+import com.github.ykrasik.jerminal.internal.util.ReflectionParameter;
 import com.github.ykrasik.jerminal.internal.util.ReflectionUtils;
 import com.google.common.base.Optional;
 import org.junit.Before;
@@ -51,7 +53,7 @@ public class AnnotationCommandFactoryTest {
     private Command command;
 
     @Mock
-    private AnnotationCommandParamFactory paramFactory;
+    private AnnotationParamFactory paramFactory;
 
     @Before
     public void setUp() {
@@ -81,7 +83,7 @@ public class AnnotationCommandFactoryTest {
     public void testCustomName() {
         command = createCommand("commandCustomName").get();
         assertEquals("customName", command.getName());
-        assertEquals("command", command.getDescription());
+        assertEquals("Command", command.getDescription());
         assertNoParams();
 
         execute();
@@ -171,7 +173,7 @@ public class AnnotationCommandFactoryTest {
 
     @Test
     public void testToggleCommand() {
-        assertCommand("toggleCommand", AnnotationCommandFactory.DEFAULT_TOGGLE_DESCRIPTION);
+        assertCommand("toggleCommand", "Toggle command");
         assertNoParams();
 
         execute(true);
@@ -194,7 +196,8 @@ public class AnnotationCommandFactoryTest {
     }
 
     private void assertCommand(String name) {
-        assertCommand(name, AnnotationCommandFactory.DEFAULT_DESCRIPTION);
+        // Use default description
+        assertCommand(name, "Command");
     }
 
     private void assertCommand(String name, String description) {
@@ -209,16 +212,17 @@ public class AnnotationCommandFactoryTest {
     }
 
     private void assertNoParams() {
-        verify(paramFactory, never()).createCommandParam(anyObject(), any(Class.class), any(Annotation[].class), any(Integer.class));
+        verify(paramFactory, never()).createParam(anyObject(), any(ReflectionParameter.class));
     }
 
-    private void assertParams(Class<?>... params) {
+    private void assertParams(Class<?>... paramTypes) {
         final Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-        for (int i = 0; i < params.length; i++) {
+        for (int i = 0; i < paramTypes.length; i++) {
             final Annotation[] annotations = parameterAnnotations[i];
-            final Class<?> param = params[i];
-            if (param != OutputPrinter.class) {
-                verify(paramFactory).createCommandParam(instance, param, annotations, i);
+            final Class<?> paramType = paramTypes[i];
+            if (paramType != OutputPrinter.class) {
+                final ReflectionParameter param = new ReflectionParameter(paramType, annotations, i);
+                verify(paramFactory).createParam(instance, param);
             }
         }
     }

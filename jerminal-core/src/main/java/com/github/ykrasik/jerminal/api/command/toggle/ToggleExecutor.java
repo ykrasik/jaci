@@ -14,30 +14,30 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jerminal.api.annotation;
+package com.github.ykrasik.jerminal.api.command.toggle;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import com.github.ykrasik.jerminal.api.command.CommandArgs;
+import com.github.ykrasik.jerminal.api.command.CommandExecutor;
+import com.github.ykrasik.jerminal.api.command.OutputPrinter;
+
+import java.util.Objects;
 
 /**
- * Indicates that this method is a command.<br>
- * Will generate all the required wiring so this command is part of the {@link com.github.ykrasik.jerminal.api.filesystem.ShellFileSystem}.<br>
- * If the command name isn't used or is empty, the command will receive the name of the method.
- *
- * @author Yevgeny Krasik
+ * A {@link CommandExecutor} that sets the value of it's {@link StateAccessor} according to input.
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-public @interface Command {
-    /**
-     * @return Command name. If empty, the method name will be used.
-     */
-    String value() default "";
+public class ToggleExecutor implements CommandExecutor {
+    private final String name;
+    private final StateAccessor accessor;
 
-    /**
-     * @return Command description.
-     */
-    String description() default "";
+    public ToggleExecutor(String name, StateAccessor accessor) {
+        this.name = Objects.requireNonNull(name);
+        this.accessor = Objects.requireNonNull(accessor);
+    }
+
+    @Override
+    public void execute(CommandArgs args, OutputPrinter outputPrinter) throws Exception {
+        final boolean toggle = args.popBool();
+        accessor.set(toggle);
+        outputPrinter.println("%s: %s", name, toggle);
+    }
 }

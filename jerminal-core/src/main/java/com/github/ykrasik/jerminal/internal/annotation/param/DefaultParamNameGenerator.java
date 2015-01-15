@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2014 Yevgeny Krasik                                          *
+ * Copyright (C) 2015 Yevgeny Krasik                                          *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -14,30 +14,19 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jerminal.api.annotation;
+package com.github.ykrasik.jerminal.internal.annotation.param;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import com.github.ykrasik.jerminal.internal.util.ReflectionParameter;
 
 /**
- * Indicates that this method is a command.<br>
- * Will generate all the required wiring so this command is part of the {@link com.github.ykrasik.jerminal.api.filesystem.ShellFileSystem}.<br>
- * If the command name isn't used or is empty, the command will receive the name of the method.
- *
  * @author Yevgeny Krasik
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-public @interface Command {
-    /**
-     * @return Command name. If empty, the method name will be used.
-     */
-    String value() default "";
-
-    /**
-     * @return Command description.
-     */
-    String description() default "";
+// TODO: JavaDoc
+public class DefaultParamNameGenerator implements ParamNameGenerator {
+    @Override
+    public String generateName(ReflectionParameter param) {
+        final String type = param.getParameterType().getSimpleName().toLowerCase();
+        final int index = param.getIndex();
+        return type + "Param" + index;
+    }
 }

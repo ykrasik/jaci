@@ -1,18 +1,18 @@
-/*
- * Copyright (C) 2014 Yevgeny Krasik
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+/******************************************************************************
+ * Copyright (C) 2014 Yevgeny Krasik                                          *
+ *                                                                            *
+ * Licensed under the Apache License, Version 2.0 (the "License");            *
+ * you may not use this file except in compliance with the License.           *
+ * You may obtain a copy of the License at                                    *
+ *                                                                            *
+ * http://www.apache.org/licenses/LICENSE-2.0                                 *
+ *                                                                            *
+ * Unless required by applicable law or agreed to in writing, software        *
+ * distributed under the License is distributed on an "AS IS" BASIS,          *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   *
+ * See the License for the specific language governing permissions and        *
+ * limitations under the License.                                             *
+ ******************************************************************************/
 
 package com.github.ykrasik.jerminal.internal.annotation;
 
@@ -26,8 +26,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 /**
- * Processes a class and creates {@link com.github.ykrasik.jerminal.api.filesystem.command.Command}s based on annotations.<br>
- * In order to be eligible for annotation processing, the class being processed <b>must</b> provide a no-args constructor.<br>
+ * Processes a class and creates {@link Command command}s based on annotations.<br>
  *
  * @author Yevgeny Krasik
  */
@@ -48,11 +47,10 @@ public class AnnotationProcessor {
     /**
      * Process a class and return the commands and global commands that were defined in this class
      * with annotations.<br>
-     * Never returns null.
+     * Class must provide a no-args constructor.<br>
      *
      * @param clazz Class to process.
-     * @return A {@link AnnotationProcessorReturnValue} with the commands and global commands that were
-     *         defined in this class through annotations.
+     * @return The commands and global commands that were defined in the class through annotations.
      * @throws IllegalArgumentException If the class doesn't have a no-args constructor.
      * @throws ShellException If an error occurs while instantiating the class.
      */
@@ -69,8 +67,7 @@ public class AnnotationProcessor {
      * Never returns null.
      *
      * @param instance Object to process.
-     * @return A {@link AnnotationProcessorReturnValue} with the commands and global commands that were
-     *         defined in the object's class through annotations.
+     * @return The commands and global commands that were defined in the object's class through annotations.
      */
     public AnnotationProcessorReturnValue processObject(Object instance) {
         final Class<?> clazz = instance.getClass();
