@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2014 Yevgeny Krasik                                          *
+ * Copyright (C) 2015 Yevgeny Krasik                                          *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -14,45 +14,22 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jerminal.javafx.impl;
-
-import com.github.ykrasik.jerminal.api.display.terminal.Terminal;
-import com.github.ykrasik.jerminal.api.display.terminal.TerminalColor;
-import javafx.scene.control.TextArea;
-
-import java.util.Objects;
+package com.github.ykrasik.jerminal.api.display.terminal;
 
 /**
- * A {@link Terminal} implemented as as a JavaFx {@link TextArea}.
+ * The colors a {@link Terminal} should be able to print text with.
  *
  * @author Yevgeny Krasik
  */
-public class JavaFxTerminal implements Terminal {
-    private final TextArea textArea;
+public enum TerminalColor {
+    BLACK,
+    WHITE,
+    GRAY,
 
-    public JavaFxTerminal(TextArea textArea) {
-        this.textArea = Objects.requireNonNull(textArea);
-    }
-
-    @Override
-    public String getTab() {
-        return "\t";
-    }
-
-    @Override
-    public void begin() {
-        // Nothing to do here.
-    }
-
-    @Override
-    public void end() {
-        // Nothing to do here.
-    }
-
-    @Override
-    public void println(String text, TerminalColor color) {
-        // Color printing is unsupported at this point.
-        textArea.appendText(text);
-        textArea.appendText("\n");
-    }
+    RED,
+    ORANGE,
+    YELLOW,
+    GREEN,
+    BLUE,
+    VIOLET
 }

@@ -47,10 +47,12 @@ public class TerminalDisplayDriver implements DisplayDriver {
 
     private final Terminal terminal;
     private final TerminalGuiController guiController;
+    private final TerminalConfiguration configuration;
 
-    public TerminalDisplayDriver(Terminal terminal, TerminalGuiController guiController) {
+    public TerminalDisplayDriver(Terminal terminal, TerminalGuiController guiController, TerminalConfiguration configuration) {
         this.terminal = Objects.requireNonNull(terminal);
         this.guiController = Objects.requireNonNull(guiController);
+        this.configuration = Objects.requireNonNull(configuration);
     }
 
     public Terminal getTerminal() {
@@ -103,7 +105,7 @@ public class TerminalDisplayDriver implements DisplayDriver {
 
     @Override
     public void displaySuggestions(Suggestions suggestions) {
-        println("Suggestions:");
+        suggestionsPrintln("Suggestions:");
         printSuggestions(suggestions.getDirectorySuggestions(), "Directories");
         printSuggestions(suggestions.getCommandSuggestions(), "Commands");
         printSuggestions(suggestions.getParamNameSuggestions(), "Parameter names");
@@ -117,7 +119,7 @@ public class TerminalDisplayDriver implements DisplayDriver {
             sb.append(": [");
             sb.append(JOINER.join(suggestions));
             sb.append(']');
-            println(sb.toString());
+            suggestionsPrintln(sb.toString());
         }
     }
 
@@ -133,7 +135,7 @@ public class TerminalDisplayDriver implements DisplayDriver {
         sb.append('[');
         sb.append(directory.getName());
         sb.append(']');
-        println(sb.toString());
+        directoryPrintln(sb.toString());
 
         // Print child commands.
         final List<Command> commands = new ArrayList<>(directory.getCommands());
@@ -164,7 +166,7 @@ public class TerminalDisplayDriver implements DisplayDriver {
             sb.append(" : ");
             sb.append(command.getDescription());
         }
-        println(sb.toString());
+        commandPrintln(sb.toString());
 
         // Print params.
         if (withParams) {
@@ -210,7 +212,7 @@ public class TerminalDisplayDriver implements DisplayDriver {
             sb.append(" <-");
         }
 
-        println(sb.toString());
+        paramPrintln(sb.toString());
     }
 
     @Override
@@ -225,14 +227,14 @@ public class TerminalDisplayDriver implements DisplayDriver {
 
     @Override
     public void displayParseError(ParseError error, String errorMessage) {
-        println(errorMessage);
+        errorPrintln(errorMessage);
     }
 
     @Override
     public void displayException(Exception e) {
-        println(e.toString());
+        errorPrintln(e.toString());
         for (StackTraceElement stackTraceElement : e.getStackTrace()) {
-            println(getTab() + stackTraceElement.toString());
+            errorPrintln(getTab() + stackTraceElement.toString());
         }
     }
 
@@ -249,7 +251,31 @@ public class TerminalDisplayDriver implements DisplayDriver {
         return terminal.getTab();
     }
 
-    private void println(String message) {
-        terminal.println(message);
+    private void println(String text) {
+        terminal.println(text, configuration.getTextColor());
+    }
+
+    private void errorPrintln(String text) {
+        terminal.println(text, defaultIfNull(configuration.getErrorColor()));
+    }
+
+    private void suggestionsPrintln(String text) {
+        terminal.println(text, defaultIfNull(configuration.getSuggestionsColor()));
+    }
+
+    private void directoryPrintln(String text) {
+        terminal.println(text, defaultIfNull(configuration.getDirectoryColor()));
+    }
+
+    private void commandPrintln(String text) {
+        terminal.println(text, defaultIfNull(configuration.getCommandColor()));
+    }
+
+    private void paramPrintln(String text) {
+        terminal.println(text, defaultIfNull(configuration.getParamColor()));
+    }
+
+    private TerminalColor defaultIfNull(TerminalColor color) {
+        return color != null ? color : configuration.getTextColor();
     }
 }

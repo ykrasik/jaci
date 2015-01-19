@@ -27,6 +27,7 @@ import com.github.ykrasik.jerminal.api.Console;
 import com.github.ykrasik.jerminal.api.ConsoleImpl;
 import com.github.ykrasik.jerminal.api.Shell;
 import com.github.ykrasik.jerminal.api.display.DisplayDriver;
+import com.github.ykrasik.jerminal.api.display.terminal.TerminalConfiguration;
 import com.github.ykrasik.jerminal.api.display.terminal.TerminalDisplayDriver;
 import com.github.ykrasik.jerminal.api.display.terminal.TerminalGuiController;
 import com.github.ykrasik.jerminal.api.filesystem.ShellFileSystem;
@@ -66,6 +67,7 @@ public class ConsoleBuilder {
     private final ShellFileSystem fileSystem;
     private final Skin skin;
 
+    private TerminalConfiguration configuration = TerminalConfiguration.DEFAULT_WHITE;
     private int maxTerminalEntries = 100;
     private int maxCommandHistory = 30;
     private String welcomeMessage = "Welcome to Jerminal!\n";
@@ -109,7 +111,7 @@ public class ConsoleBuilder {
         final TerminalGuiController guiController = new LibGdxTerminalGuiController(currentPath);
 
         // Create the shell.
-        final DisplayDriver displayDriver = new TerminalDisplayDriver(terminal, guiController);
+        final DisplayDriver displayDriver = new TerminalDisplayDriver(terminal, guiController, configuration);
         final Shell shell = new Shell(fileSystem, displayDriver, welcomeMessage);
 
         // Create the command line.
@@ -179,8 +181,16 @@ public class ConsoleBuilder {
     }
 
     /**
-     * Sets the maximum amount of terminal entries to keep.
-     * Generally, the result of each command execution or assistance is considered as 1 entry.
+     * @param configuration Configuration to use.
+     * @return this, for chained execution.
+     */
+    public ConsoleBuilder setConfiguration(TerminalConfiguration configuration) {
+        this.configuration = Objects.requireNonNull(configuration);
+        return this;
+    }
+
+    /**
+     * Sets the maximum amount of terminal lines to keep.
      *
      * @param maxTerminalEntries Max terminal entries to set.
      * @return this, for chained execution.

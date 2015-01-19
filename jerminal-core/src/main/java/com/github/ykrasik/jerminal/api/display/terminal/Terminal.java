@@ -40,9 +40,10 @@ public interface Terminal {
     void end();
 
     /**
-     * Print the text and move to the next line.
+     * Print the text with the specified color and move to the next line.
      *
      * @param text Text to print.
+     * @param color Color to print the text with.
      */
-    void println(String text);
+    void println(String text, TerminalColor color);
 }

@@ -22,6 +22,7 @@ import com.github.ykrasik.jerminal.api.ConsoleImpl;
 import com.github.ykrasik.jerminal.api.Shell;
 import com.github.ykrasik.jerminal.api.display.DisplayDriver;
 import com.github.ykrasik.jerminal.api.display.terminal.Terminal;
+import com.github.ykrasik.jerminal.api.display.terminal.TerminalConfiguration;
 import com.github.ykrasik.jerminal.api.display.terminal.TerminalDisplayDriver;
 import com.github.ykrasik.jerminal.api.display.terminal.TerminalGuiController;
 import com.github.ykrasik.jerminal.api.filesystem.ShellFileSystem;
@@ -61,6 +62,7 @@ public class ConsoleBuilder {
     private final ShellFileSystem fileSystem;
     private final FXMLLoader loader;
 
+    private TerminalConfiguration configuration = TerminalConfiguration.DEFAULT_BLACK;
     private String welcomeMessage = "Welcome to Jerminal!\n";
     private int maxCommandHistory = 30;
 
@@ -115,7 +117,7 @@ public class ConsoleBuilder {
         final TerminalGuiController guiController = new JavaFxGuiController(currentPath);
 
         // Create the shell.
-        final DisplayDriver displayDriver = new TerminalDisplayDriver(terminal, guiController);
+        final DisplayDriver displayDriver = new TerminalDisplayDriver(terminal, guiController, configuration);
         final Shell shell = new Shell(fileSystem, displayDriver, welcomeMessage);
 
         // Create the command line.
@@ -130,6 +132,15 @@ public class ConsoleBuilder {
         commandLine.addEventFilter(KeyEvent.KEY_PRESSED, new JavaFxConsoleDriver(console));
 
         return consoleNode;
+    }
+
+    /**
+     * @param configuration Configuration to use.
+     * @return this, for chained execution.
+     */
+    public ConsoleBuilder setConfiguration(TerminalConfiguration configuration) {
+        this.configuration = configuration;
+        return this;
     }
 
     /**
@@ -183,6 +194,9 @@ public class ConsoleBuilder {
                 case DOWN:
                     console.setNextCommandLineFromHistory();
                     keyEvent.consume();
+                    break;
+
+                default:
                     break;
             }
         }

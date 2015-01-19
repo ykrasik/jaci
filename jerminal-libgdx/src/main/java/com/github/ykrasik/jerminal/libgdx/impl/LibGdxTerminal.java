@@ -22,6 +22,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.github.ykrasik.jerminal.api.display.terminal.Terminal;
+import com.github.ykrasik.jerminal.api.display.terminal.TerminalColor;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -34,6 +35,8 @@ import java.util.Objects;
  * @author Yevgeny Krasik
  */
 public class LibGdxTerminal extends Table implements Terminal {
+    private static final Color BLUE = new Color(Color.BLUE).add(0, 0.6f, 0, 0);
+
     private final Skin skin;
     private final int maxTerminalEntries;
 
@@ -83,12 +86,27 @@ public class LibGdxTerminal extends Table implements Terminal {
     }
 
     @Override
-    public void println(String text) {
-        println(text, Color.WHITE);
+    public void println(String text, TerminalColor color) {
+        colorPrintln(text, translateColor(color));
     }
 
-    public void println(String text, Color color) {
-        final Label label = new Label(text + '\n', skin, "terminalEntry");
+    private Color translateColor(TerminalColor color) {
+        switch (color) {
+            case BLACK: return Color.BLACK;
+            case WHITE: return Color.WHITE;
+            case GRAY: return Color.DARK_GRAY;
+            case RED: return Color.PINK;
+            case ORANGE: return Color.ORANGE;
+            case YELLOW: return Color.YELLOW;
+            case GREEN: return Color.GREEN;
+            case BLUE: return BLUE;
+            case VIOLET: return Color.MAGENTA;
+            default: throw new IllegalArgumentException("Invalid color: " + color);
+        }
+    }
+
+    private void colorPrintln(String text, Color color) {
+        final Label label = new Label(text, skin, "terminalEntry");
         label.setColor(color);
         label.setWrap(true);
         addLabel(label);
