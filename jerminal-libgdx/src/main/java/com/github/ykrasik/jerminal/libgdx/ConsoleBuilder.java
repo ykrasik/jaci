@@ -1,18 +1,18 @@
-/*
- * Copyright (C) 2014 Yevgeny Krasik
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+/******************************************************************************
+ * Copyright (C) 2014 Yevgeny Krasik                                          *
+ *                                                                            *
+ * Licensed under the Apache License, Version 2.0 (the "License");            *
+ * you may not use this file except in compliance with the License.           *
+ * You may obtain a copy of the License at                                    *
+ *                                                                            *
+ * http://www.apache.org/licenses/LICENSE-2.0                                 *
+ *                                                                            *
+ * Unless required by applicable law or agreed to in writing, software        *
+ * distributed under the License is distributed on an "AS IS" BASIS,          *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   *
+ * See the License for the specific language governing permissions and        *
+ * limitations under the License.                                             *
+ ******************************************************************************/
 
 package com.github.ykrasik.jerminal.libgdx;
 
@@ -27,9 +27,12 @@ import com.github.ykrasik.jerminal.api.Console;
 import com.github.ykrasik.jerminal.api.ConsoleImpl;
 import com.github.ykrasik.jerminal.api.Shell;
 import com.github.ykrasik.jerminal.api.display.DisplayDriver;
+import com.github.ykrasik.jerminal.api.display.terminal.TerminalDisplayDriver;
 import com.github.ykrasik.jerminal.api.display.terminal.TerminalGuiController;
 import com.github.ykrasik.jerminal.api.filesystem.ShellFileSystem;
-import com.github.ykrasik.jerminal.libgdx.impl.*;
+import com.github.ykrasik.jerminal.libgdx.impl.LibGdxCommandLineDriver;
+import com.github.ykrasik.jerminal.libgdx.impl.LibGdxTerminal;
+import com.github.ykrasik.jerminal.libgdx.impl.LibGdxTerminalGuiController;
 
 import java.util.Objects;
 
@@ -63,7 +66,7 @@ public class ConsoleBuilder {
     private final ShellFileSystem fileSystem;
     private final Skin skin;
 
-    private int maxTerminalEntries = 30;
+    private int maxTerminalEntries = 100;
     private int maxCommandHistory = 30;
     private String welcomeMessage = "Welcome to Jerminal!\n";
 
@@ -106,7 +109,7 @@ public class ConsoleBuilder {
         final TerminalGuiController guiController = new LibGdxTerminalGuiController(currentPath);
 
         // Create the shell.
-        final DisplayDriver displayDriver = new LibGdxTerminalDisplayDriver(terminal, guiController, new LibGdxTerminalSerializer());
+        final DisplayDriver displayDriver = new TerminalDisplayDriver(terminal, guiController);
         final Shell shell = new Shell(fileSystem, displayDriver, welcomeMessage);
 
         // Create the command line.

@@ -18,11 +18,17 @@ package com.github.ykrasik.jerminal.api.display.terminal;
 
 import com.github.ykrasik.jerminal.api.assist.CommandInfo;
 import com.github.ykrasik.jerminal.api.assist.Suggestions;
+import com.github.ykrasik.jerminal.api.command.parameter.CommandParam;
 import com.github.ykrasik.jerminal.api.display.DisplayDriver;
 import com.github.ykrasik.jerminal.api.exception.ParseError;
 import com.github.ykrasik.jerminal.api.filesystem.command.Command;
 import com.github.ykrasik.jerminal.api.filesystem.directory.ShellDirectory;
+import com.github.ykrasik.jerminal.internal.DescribableNameComparator;
+import com.google.common.base.Joiner;
+import com.google.common.base.Optional;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -34,19 +40,17 @@ import java.util.Objects;
  *
  * @author Yevgeny Krasik
  */
+// TODO: JavaDoc is incorrect
 public class TerminalDisplayDriver implements DisplayDriver {
+    private static final Joiner JOINER = Joiner.on(", ").skipNulls();
+    private static final DescribableNameComparator NAME_COMPARATOR = new DescribableNameComparator();
+
     private final Terminal terminal;
     private final TerminalGuiController guiController;
-    private final TerminalSerializer serializer;
 
     public TerminalDisplayDriver(Terminal terminal, TerminalGuiController guiController) {
-        this(terminal, guiController, new DefaultTerminalSerializer());
-    }
-
-    public TerminalDisplayDriver(Terminal terminal, TerminalGuiController guiController, TerminalSerializer serializer) {
         this.terminal = Objects.requireNonNull(terminal);
         this.guiController = Objects.requireNonNull(guiController);
-        this.serializer = Objects.requireNonNull(serializer);
     }
 
     public Terminal getTerminal() {
@@ -55,10 +59,6 @@ public class TerminalDisplayDriver implements DisplayDriver {
 
     public TerminalGuiController getGuiController() {
         return guiController;
-    }
-
-    public TerminalSerializer getSerializer() {
-        return serializer;
     }
 
     @Override
@@ -95,26 +95,127 @@ public class TerminalDisplayDriver implements DisplayDriver {
 
     @Override
     public void displayCommandInfo(CommandInfo commandInfo) {
-        final String assistInfoStr = serializer.serializeCommandInfo(commandInfo);
-        println(assistInfoStr);
+        final Command command = commandInfo.getCommand();
+        final List<Optional<String>> paramValues = commandInfo.getParamValues();
+        final Optional<CommandParam> currentParam = commandInfo.getCurrentParam();
+        printCommand(command, 0, false, true, paramValues, currentParam);
     }
 
     @Override
     public void displaySuggestions(Suggestions suggestions) {
-        final String suggestionsStr = serializer.serializeSuggestions(suggestions);
-        println(suggestionsStr);
+        println("Suggestions:");
+        printSuggestions(suggestions.getDirectorySuggestions(), "Directories");
+        printSuggestions(suggestions.getCommandSuggestions(), "Commands");
+        printSuggestions(suggestions.getParamNameSuggestions(), "Parameter names");
+        printSuggestions(suggestions.getParamValueSuggestions(), "Parameter values");
+    }
+
+    private void printSuggestions(List<String> suggestions, String suggestionsTitle) {
+        if (!suggestions.isEmpty()) {
+            final StringBuilder sb = stringBuilderWithTabs(1);
+            sb.append(suggestionsTitle);
+            sb.append(": [");
+            sb.append(JOINER.join(suggestions));
+            sb.append(']');
+            println(sb.toString());
+        }
     }
 
     @Override
     public void displayDirectory(ShellDirectory directory) {
-        final String directoryStr = serializer.serializeDirectory(directory);
-        println(directoryStr);
+        printDirectory(directory, 0);
+    }
+
+    private void printDirectory(ShellDirectory directory, int depth) {
+        final StringBuilder sb = stringBuilderWithTabs(depth);
+
+        // Print root directory name.
+        sb.append('[');
+        sb.append(directory.getName());
+        sb.append(']');
+        println(sb.toString());
+
+        // Print child commands.
+        final List<Command> commands = new ArrayList<>(directory.getCommands());
+        Collections.sort(commands, NAME_COMPARATOR);
+        for (Command command : commands) {
+            printCommand(command, depth + 1, true, false, Collections.<Optional<String>>emptyList(), Optional.<CommandParam>absent());
+        }
+
+        // Print child directories.
+        final List<ShellDirectory> directories = new ArrayList<>(directory.getDirectories());
+        Collections.sort(directories, NAME_COMPARATOR);
+        for (ShellDirectory childDirectory : directories) {
+            printDirectory(childDirectory, depth + 1);
+        }
+    }
+
+    private void printCommand(Command command,
+                              int depth,
+                              boolean withDescription,
+                              boolean withParams,
+                              List<Optional<String>> paramValues,
+                              Optional<CommandParam> currentParam) {
+        final StringBuilder sb = stringBuilderWithTabs(depth);
+
+        // Print name : description
+        sb.append(command.getName());
+        if (withDescription) {
+            sb.append(" : ");
+            sb.append(command.getDescription());
+        }
+        println(sb.toString());
+
+        // Print params.
+        if (withParams) {
+            final List<CommandParam> params = command.getParams();
+            for (int i = 0; i < params.size(); i++) {
+                final CommandParam param = params.get(i);
+                final Optional<String> value = !paramValues.isEmpty() ? paramValues.get(i) : Optional.<String>absent();
+                final boolean isCurrent = currentParam.isPresent() && currentParam.get() == param;
+                printParam(param, depth + 1, withDescription, value, isCurrent);
+            }
+        }
+    }
+
+    private void printParam(CommandParam param,
+                            int depth,
+                            boolean withDescription,
+                            Optional<String> value,
+                            boolean isCurrent) {
+        final StringBuilder sb = stringBuilderWithTabs(depth);
+
+        // Surround the current param being parsed with -> <-
+        if (isCurrent) {
+            sb.append("-> ");
+            sb.append(getTab());
+        } else {
+            sb.append(getTab());
+        }
+
+        sb.append(param.getExternalForm());
+        if (withDescription) {
+            sb.append(" : ");
+            sb.append(param.getDescription());
+        }
+
+        if (value.isPresent()) {
+            sb.append(" = ");
+            sb.append(value.get());
+        }
+
+        // Actually, value.isPresent and isCurrent cannot both be true at the same time.
+        if (isCurrent) {
+            sb.append(getTab());
+            sb.append(" <-");
+        }
+
+        println(sb.toString());
     }
 
     @Override
     public void displayCommand(Command command) {
-        final String commandStr = serializer.serializeCommand(command);
-        println(commandStr);
+        printCommand(command, 0, true, true, Collections.<Optional<String>>emptyList(), Optional.<CommandParam>absent());
     }
 
     @Override
@@ -124,20 +225,31 @@ public class TerminalDisplayDriver implements DisplayDriver {
 
     @Override
     public void displayParseError(ParseError error, String errorMessage) {
-        errorPrintln(errorMessage);
+        println(errorMessage);
     }
 
     @Override
     public void displayException(Exception e) {
-        final String exceptionStr = serializer.serializeException(e);
-        errorPrintln(exceptionStr);
+        println(e.toString());
+        for (StackTraceElement stackTraceElement : e.getStackTrace()) {
+            println(getTab() + stackTraceElement.toString());
+        }
+    }
+
+    private StringBuilder stringBuilderWithTabs(int tabs) {
+        final String tab = getTab();
+        final StringBuilder sb = new StringBuilder(tab.length() * tabs);
+        for (int i = 0; i < tabs; i++) {
+            sb.append(tab);
+        }
+        return sb;
+    }
+
+    private String getTab() {
+        return terminal.getTab();
     }
 
     private void println(String message) {
         terminal.println(message);
-    }
-
-    private void errorPrintln(String message) {
-        terminal.errorPrintln(message);
     }
 }

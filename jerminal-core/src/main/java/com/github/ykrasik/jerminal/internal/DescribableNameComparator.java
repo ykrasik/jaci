@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2014 Yevgeny Krasik                                          *
+ * Copyright (C) 2015 Yevgeny Krasik                                          *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -14,23 +14,18 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jerminal.api.display.terminal;
+package com.github.ykrasik.jerminal.internal;
 
-import java.util.List;
+import java.util.Comparator;
 
 /**
- * In charge of manipulating the GUI surrounding the terminal (where text is printed).
+ * A {@link Comparator} that compares {@link Describable} according to {@link Describable#getName()}.
  *
  * @author Yevgeny Krasik
  */
-// FIXME: This sucks.
-public interface TerminalGuiController {
-    /**
-     * Set the path to the current working directory. Only called when when the working directory changes.
-     * The path will always be non-empty and the first element will always be the name of the root directory.
-     *
-     * @param path New working path.
-     */
-    // TODO: Provide a more general List<Directory> ?
-    void setWorkingDirectory(List<String> path);
+public class DescribableNameComparator implements Comparator<Describable> {
+    @Override
+    public int compare(Describable o1, Describable o2) {
+        return o1.getName().compareTo(o2.getName());
+    }
 }

@@ -1,18 +1,18 @@
-/*
- * Copyright (C) 2014 Yevgeny Krasik
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+/******************************************************************************
+ * Copyright (C) 2014 Yevgeny Krasik                                          *
+ *                                                                            *
+ * Licensed under the Apache License, Version 2.0 (the "License");            *
+ * you may not use this file except in compliance with the License.           *
+ * You may obtain a copy of the License at                                    *
+ *                                                                            *
+ * http://www.apache.org/licenses/LICENSE-2.0                                 *
+ *                                                                            *
+ * Unless required by applicable law or agreed to in writing, software        *
+ * distributed under the License is distributed on an "AS IS" BASIS,          *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   *
+ * See the License for the specific language governing permissions and        *
+ * limitations under the License.                                             *
+ ******************************************************************************/
 
 package com.github.ykrasik.jerminal.javafx.impl;
 
@@ -34,6 +34,11 @@ public class JavaFxTerminal implements Terminal {
     }
 
     @Override
+    public String getTab() {
+        return "\t";
+    }
+
+    @Override
     public void begin() {
         // Nothing to do here.
     }
@@ -47,11 +52,5 @@ public class JavaFxTerminal implements Terminal {
     public void println(String text) {
         textArea.appendText(text);
         textArea.appendText("\n");
-    }
-
-    @Override
-    public void errorPrintln(String text) {
-        // TODO: Make this red.
-        println(text);
     }
 }
