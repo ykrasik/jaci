@@ -29,7 +29,7 @@ import java.util.List;
  *
  * @author Yevgeny Krasik
  */
-// FIXME: Should this be renamed to Output?
+// FIXME: Should this be renamed to ShellOutput?
 public interface DisplayDriver {
     /**
      * Called before any other events are called, to allow the driver to prepare itself.<br>
@@ -51,11 +51,6 @@ public interface DisplayDriver {
     void displayWelcomeMessage(String welcomeMessage);
 
     /**
-     * Display an empty line. Usually called when an empty command line was executed.
-     */
-    void displayEmptyLine();
-
-    /**
      * Displays the command line being operated.
      *
      * @param commandLine Command line being operated.
@@ -73,8 +68,6 @@ public interface DisplayDriver {
     /**
      * Display command info along with it's parsed args.<br>
      * Called when assistance was requested or if a parsing error occurred.<br>
-     * Differs from {@link #displayCommand(Command)} in that {@link #displayCommand(Command)} is called when
-     * the user requests to display information about a command without executing it.
      *
      * @param commandInfo Command info to display.
      */
@@ -87,6 +80,7 @@ public interface DisplayDriver {
      */
     void displaySuggestions(Suggestions suggestions);
 
+    // FIXME: Doesn't belong here. Commands should just print it as text.
     /**
      * Display the directory structure.
      *
@@ -94,6 +88,7 @@ public interface DisplayDriver {
      */
     void displayDirectory(ShellDirectory directory);
 
+    // FIXME: Doesn't belong here. Commands should just print it as text.
     /**
      * Display command info.<br>
      * Called when information about a specific command was requested.<br>

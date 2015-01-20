@@ -79,12 +79,6 @@ public class TerminalDisplayDriver implements DisplayDriver {
     }
 
     @Override
-    public void displayEmptyLine() {
-        // The terminal is expected to add a new line after any text.
-        println("");
-    }
-
-    @Override
     public void displayCommandLine(String commandLine, boolean isExecute) {
         // Don't really care about isExecute.
         println("> " + commandLine);
