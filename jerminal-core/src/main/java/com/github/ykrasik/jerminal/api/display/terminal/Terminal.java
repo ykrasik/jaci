@@ -23,7 +23,7 @@ package com.github.ykrasik.jerminal.api.display.terminal;
  */
 public interface Terminal {
     /**
-     * @return String that should be used as a tab character.
+     * @return String that this terminal accepts as a 'tab' character.
      */
     String getTab();
 

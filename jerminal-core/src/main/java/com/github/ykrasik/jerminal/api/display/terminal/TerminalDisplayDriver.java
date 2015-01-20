@@ -33,14 +33,14 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * A {@link DisplayDriver} that translates all received events into text through a {@link TerminalSerializer}
- * and sends them to a {@link Terminal} to be printed.<br>
+ * A {@link DisplayDriver} that translates all received events into text and sends them to a {@link Terminal}
+ * to be printed.<br>
+ * Text colors for different events can be customized via the {@link TerminalConfiguration}.<br>
  * Any events that aren't directly printable, but rather affect the GUI surrounding the terminal
  * (e.g. {@link #setWorkingDirectory(java.util.List)}) are handled by the {@link TerminalGuiController}.
  *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc is incorrect
 public class TerminalDisplayDriver implements DisplayDriver {
     private static final Joiner JOINER = Joiner.on(", ").skipNulls();
     private static final DescribableNameComparator NAME_COMPARATOR = new DescribableNameComparator();
