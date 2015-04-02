@@ -56,11 +56,13 @@ public class InternalShellFileSystem {
     private final InternalShellDirectory root;
     private Trie<InternalCommand> globalCommands;
 
+    private final List<WorkingDirectoryListener> workingDirectoryListeners;
     private InternalShellDirectory workingDirectory;
 
     public InternalShellFileSystem(ShellFileSystem fileSystem) {
         this.root = new InternalShellDirectory(Objects.requireNonNull(fileSystem.getRoot()));
         this.globalCommands = Tries.emptyTrie();
+        this.workingDirectoryListeners = new ArrayList<>();
         this.workingDirectory = root;
 
         addGlobalCommands(fileSystem.getGlobalCommands());
@@ -109,6 +111,15 @@ public class InternalShellFileSystem {
      */
     public void setWorkingDirectory(InternalShellDirectory directory) {
         this.workingDirectory = Objects.requireNonNull(directory);
+        for (WorkingDirectoryListener listener : workingDirectoryListeners) {
+            listener.onWorkingDirectoryChanged(getPath(directory));
+        }
+    }
+
+    // FIXME: JavaDoc
+    public void registerWorkingDirectoryListener(WorkingDirectoryListener listener) {
+        workingDirectoryListeners.add(listener);
+        listener.onWorkingDirectoryChanged(getPath(workingDirectory));
     }
 
     /**

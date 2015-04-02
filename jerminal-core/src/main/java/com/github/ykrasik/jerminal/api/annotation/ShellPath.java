@@ -23,8 +23,8 @@ import java.lang.annotation.Target;
 
 /**
  * Indicates the path under which commands should be added.<br>
- * If a class is annotated with this, all it's methods that are annotated with {@link Command}, {@link ToggleCommand} or
- * {@link CommandFactory} will inherit the path of this class. This is referred to as the 'top level path'.<br>
+ * If a class is annotated with this, all it's methods that are annotated with {@link Command} or {@link ToggleCommand}
+ * will inherit the path of this class. This is called the 'top level path'.<br>
  * Each method annotated with the above mentioned annotations can also specify it's own path, with the following conditions:<br>
  *   If the top level path is global, any method annotation overrides it.<br>
  *   If the top level path is not global but the method annotation is, the method annotation overrides it.<br>

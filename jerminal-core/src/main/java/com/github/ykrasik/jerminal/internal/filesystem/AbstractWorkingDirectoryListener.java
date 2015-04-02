@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2014 Yevgeny Krasik                                          *
+ * Copyright (C) 2015 Yevgeny Krasik                                          *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -14,28 +14,32 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jerminal.javafx.impl;
+package com.github.ykrasik.jerminal.internal.filesystem;
 
-import com.github.ykrasik.jerminal.api.display.terminal.DefaultTerminalGuiController;
-import javafx.scene.control.Label;
+import com.github.ykrasik.jerminal.ShellConstants;
+import com.github.ykrasik.jerminal.internal.filesystem.directory.InternalShellDirectory;
 
-import java.util.Objects;
+import java.util.List;
 
 /**
- * A specialized version of a {@link DefaultTerminalGuiController} for JavaFx.
- * Wraps the 'current path' {@link Label}.
- *
  * @author Yevgeny Krasik
  */
-public class JavaFxGuiController extends DefaultTerminalGuiController {
-    private final Label currentPathLabel;
-
-    public JavaFxGuiController(Label currentPathLabel) {
-        this.currentPathLabel = Objects.requireNonNull(currentPathLabel);
-    }
-
+// TODO: JavaDoc
+public abstract class AbstractWorkingDirectoryListener implements WorkingDirectoryListener {
     @Override
-    protected void doSetWorkingDirectory(String path) {
-        currentPathLabel.setText(path);
+    public void onWorkingDirectoryChanged(List<InternalShellDirectory> path) {
+        // All paths should start with '/'.
+        final StringBuilder sb = new StringBuilder();
+        sb.append(ShellConstants.FILE_SYSTEM_DELIMITER);
+
+        // The first element is always the root, skip it.
+        for (int i = 1; i < path.size(); i++) {
+            final InternalShellDirectory directory = path.get(i);
+            sb.append(directory.getName());
+            sb.append(ShellConstants.FILE_SYSTEM_DELIMITER);
+        }
+        setCurrentPath(sb.toString());
     }
+
+    protected abstract void setCurrentPath(String currentPathStr);
 }

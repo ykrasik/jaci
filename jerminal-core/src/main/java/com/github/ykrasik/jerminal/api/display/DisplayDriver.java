@@ -22,8 +22,6 @@ import com.github.ykrasik.jerminal.api.exception.ParseError;
 import com.github.ykrasik.jerminal.api.filesystem.command.Command;
 import com.github.ykrasik.jerminal.api.filesystem.directory.ShellDirectory;
 
-import java.util.List;
-
 /**
  * Displays information to the user.
  *
@@ -96,16 +94,6 @@ public interface DisplayDriver {
      * @param command Command to display.
      */
     void displayCommand(Command command);
-
-    // TODO: Does this 100% belong here? This is the only call that assumes state.
-    // TODO: Maybe this should be polled instead... after calling a command, check current working directory.
-    /**
-     * Set the path to the current working directory. Only called when when the working directory changes.
-     * The path will always be non-empty and the first element will always be the name of the root directory.
-     *
-     * @param path New working path.
-     */
-    void setWorkingDirectory(List<String> path);
 
     /**
      * Display the parse error that occurred while parsing the command line.

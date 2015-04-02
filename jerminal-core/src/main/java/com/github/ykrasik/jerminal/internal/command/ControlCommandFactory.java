@@ -32,7 +32,6 @@ import com.github.ykrasik.jerminal.internal.filesystem.command.InternalCommand;
 import com.github.ykrasik.jerminal.internal.filesystem.directory.InternalShellDirectory;
 import com.google.common.base.Supplier;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -89,15 +88,6 @@ public class ControlCommandFactory {
                 public void execute(CommandArgs args, OutputPrinter outputPrinter) throws ExecuteException {
                     final InternalShellDirectory directory = ((PrivilegedCommandArgs) args).popDirectory();
                     fileSystem.setWorkingDirectory(directory);
-
-                    // Notify the display that the working directory changed.
-                    final List<InternalShellDirectory> internalPath = fileSystem.getPath(directory);
-                    final List<String> path = new ArrayList<>(internalPath.size());
-                    for (InternalShellDirectory pathDirectory : internalPath) {
-                        path.add(pathDirectory.getName());
-                    }
-                    displayDriver.setWorkingDirectory(path);
-                    suppressDefaultExecutionMessage(outputPrinter);
                 }
             })
             .build();

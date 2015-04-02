@@ -32,11 +32,11 @@ import com.github.ykrasik.jerminal.internal.command.OutputPrinterImpl;
 import com.github.ykrasik.jerminal.internal.command.PrivilegedOutputPrinter;
 import com.github.ykrasik.jerminal.internal.exception.ParseException;
 import com.github.ykrasik.jerminal.internal.filesystem.InternalShellFileSystem;
+import com.github.ykrasik.jerminal.internal.filesystem.WorkingDirectoryListener;
 import com.github.ykrasik.jerminal.internal.filesystem.command.InternalCommand;
 import com.google.common.base.Optional;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -71,7 +71,6 @@ public class Shell {
 
         // Initial displayDriver stuff.
         displayDriver.begin();
-        displayDriver.setWorkingDirectory(Collections.singletonList(fileSystem.getRoot().getName()));
         displayDriver.displayWelcomeMessage(welcomeMessage);
         displayDriver.end();
     }
@@ -80,6 +79,11 @@ public class Shell {
         final InternalShellFileSystem internalShellFileSystem = new InternalShellFileSystem(fileSystem);
         new ControlCommandFactory(internalShellFileSystem, displayDriver).installControlCommands();
         return internalShellFileSystem;
+    }
+
+    // FIXME: JavaDoc
+    public void registerWorkingDirectoryListener(WorkingDirectoryListener listener) {
+        fileSystem.registerWorkingDirectoryListener(listener);
     }
 
     /**

@@ -73,7 +73,7 @@ public interface Trie<T> {
     /**
      * @param function Function to apply to each value in this Trie.
      * @param <A> Type to transform values to.
-     * @return A Trie in which the value of each word was transformed by calling {@link Function#apply(T)}.<br>
+     * @return A Trie in which the value of each word was transformed by calling {@link Function#apply}.<br>
      *         If the result of the transformation returned 'null', that word and value will not appear in the returned Trie.<br>
      *         Does not alter this Trie.
      */
@@ -84,7 +84,7 @@ public interface Trie<T> {
 
     /**
      * @param filter Predicate that determines which values to filter from the Trie.
-     * @return A Trie in which all values for which {@link Predicate#apply(T)} returned true are removed.<br>
+     * @return A Trie in which all values for which {@link Predicate#apply} returned true are removed.<br>
      *         Does not alter this Trie.
      */
     Trie<T> filter(Predicate<T> filter);
@@ -99,7 +99,7 @@ public interface Trie<T> {
     Trie<T> union(Trie<T> other);
 
     /**
-     * Calls {@link TrieVisitor#visit(String, T)} for each word-value pair in this Trie.
+     * Calls {@link TrieVisitor#visit} for each word-value pair in this Trie.
      *
      * @param visitor The visitor that will visit each word-value pair.
      */

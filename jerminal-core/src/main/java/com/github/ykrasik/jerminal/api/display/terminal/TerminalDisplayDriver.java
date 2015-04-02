@@ -36,8 +36,6 @@ import java.util.Objects;
  * A {@link DisplayDriver} that translates all received events into text and sends them to a {@link Terminal}
  * to be printed.<br>
  * Text colors for different events can be customized via the {@link TerminalConfiguration}.<br>
- * Any events that aren't directly printable, but rather affect the GUI surrounding the terminal
- * (e.g. {@link #setWorkingDirectory(java.util.List)}) are handled by the {@link TerminalGuiController}.
  *
  * @author Yevgeny Krasik
  */
@@ -46,21 +44,15 @@ public class TerminalDisplayDriver implements DisplayDriver {
     private static final DescribableNameComparator NAME_COMPARATOR = new DescribableNameComparator();
 
     private final Terminal terminal;
-    private final TerminalGuiController guiController;
     private final TerminalConfiguration configuration;
 
-    public TerminalDisplayDriver(Terminal terminal, TerminalGuiController guiController, TerminalConfiguration configuration) {
+    public TerminalDisplayDriver(Terminal terminal, TerminalConfiguration configuration) {
         this.terminal = Objects.requireNonNull(terminal);
-        this.guiController = Objects.requireNonNull(guiController);
         this.configuration = Objects.requireNonNull(configuration);
     }
 
     public Terminal getTerminal() {
         return terminal;
-    }
-
-    public TerminalGuiController getGuiController() {
-        return guiController;
     }
 
     @Override
@@ -215,11 +207,6 @@ public class TerminalDisplayDriver implements DisplayDriver {
     }
 
     @Override
-    public void setWorkingDirectory(List<String> path) {
-        guiController.setWorkingDirectory(path);
-    }
-
-    @Override
     public void displayParseError(ParseError error, String errorMessage) {
         errorPrintln(errorMessage);
     }
@@ -250,26 +237,26 @@ public class TerminalDisplayDriver implements DisplayDriver {
     }
 
     private void errorPrintln(String text) {
-        terminal.println(text, defaultIfNull(configuration.getErrorColor()));
+        terminal.println(text, defaultColorIfNull(configuration.getErrorColor()));
     }
 
     private void suggestionsPrintln(String text) {
-        terminal.println(text, defaultIfNull(configuration.getSuggestionsColor()));
+        terminal.println(text, defaultColorIfNull(configuration.getSuggestionsColor()));
     }
 
     private void directoryPrintln(String text) {
-        terminal.println(text, defaultIfNull(configuration.getDirectoryColor()));
+        terminal.println(text, defaultColorIfNull(configuration.getDirectoryColor()));
     }
 
     private void commandPrintln(String text) {
-        terminal.println(text, defaultIfNull(configuration.getCommandColor()));
+        terminal.println(text, defaultColorIfNull(configuration.getCommandColor()));
     }
 
     private void paramPrintln(String text) {
-        terminal.println(text, defaultIfNull(configuration.getParamColor()));
+        terminal.println(text, defaultColorIfNull(configuration.getParamColor()));
     }
 
-    private TerminalColor defaultIfNull(TerminalColor color) {
+    private TerminalColor defaultColorIfNull(TerminalColor color) {
         return color != null ? color : configuration.getTextColor();
     }
 }

@@ -34,6 +34,8 @@ public class TrieNode<T> implements Trie<T> {
     private final Map<Character, TrieNode<T>> children;
 
     private Optional<T> value = Optional.absent();
+
+    private volatile boolean numWordsCalculated;
     private int numWords;
 
     public TrieNode(char c) {
@@ -47,7 +49,38 @@ public class TrieNode<T> implements Trie<T> {
 
     @Override
     public int size() {
+        if (!numWordsCalculated) {
+            synchronized (this) {
+                calcNumWords();
+            }
+        }
         return numWords;
+    }
+
+    /**
+     * The amount of words reachable from this node is cached.<br>
+     * This should be called after an outside changed had occurred and the amount was possibly changed.
+     */
+    private void calcNumWords() {
+        if (numWordsCalculated) {
+            return;
+        }
+
+        int words = 0;
+
+        // The number of words reachable from this node is considered to be the number of words
+        // reachable from it's children, and +1 if the node itself is a word.
+        if (value.isPresent()) {
+            words++;
+        }
+
+        for (TrieNode<T> child : children.values()) {
+            child.calcNumWords();
+            words += child.numWords;
+        }
+
+        numWords = words;
+        numWordsCalculated = true;
     }
 
     @Override
@@ -123,7 +156,7 @@ public class TrieNode<T> implements Trie<T> {
             currentCreationNode = newChild;
         }
 
-        return createTrie(prefixTrie);
+        return prefixTrie;
     }
 
     @Override
@@ -134,7 +167,7 @@ public class TrieNode<T> implements Trie<T> {
 
         final Optional<TrieNode<A>> newTrie = doMap(function);
         if (newTrie.isPresent()) {
-            return createTrie(newTrie.get());
+            return newTrie.get();
         } else {
             return emptyTrie();
         }
@@ -197,7 +230,7 @@ public class TrieNode<T> implements Trie<T> {
 
         if (other instanceof TrieNode) {
             // Other Trie is of the same implementation, we can have an efficient union.
-            return createTrie(this.trieNodeUnion((TrieNode<T>) other));
+            return trieNodeUnion((TrieNode<T>) other);
         }
 
         // Other Trie is of a different implementation, create a naive union trie.
@@ -207,7 +240,7 @@ public class TrieNode<T> implements Trie<T> {
         return builder.build();
     }
 
-    public TrieNode<T> trieNodeUnion(TrieNode<T> other) {
+    private TrieNode<T> trieNodeUnion(TrieNode<T> other) {
         final char otherCharacter = other.c;
         if (Character.toLowerCase(c) != Character.toLowerCase(otherCharacter)) {
             // TODO: Is this the correct way of handling this?
@@ -312,34 +345,6 @@ public class TrieNode<T> implements Trie<T> {
         return value.isPresent();
     }
 
-    /**
-     * The amount of words reachable from this node is cached.<br>
-     * This should be called after an outside changed had occurred and the amount was possibly changed.
-     */
-    private void calcNumWords() {
-        // First, refresh the number of words in the children.
-        for (TrieNode<T> child : children.values()) {
-            child.calcNumWords();
-        }
-
-        this.numWords = doCalcNumWords();
-    }
-
-    private int doCalcNumWords() {
-        // The number of words reachable from this node is considered to be the number of words
-        // reachable from it's children, and +1 if the node itself is a word.
-        int words = 0;
-        if (value.isPresent()) {
-            words++;
-        }
-
-        for (TrieNode<T> child : children.values()) {
-            words += child.numWords;
-        }
-
-        return words;
-    }
-
     private Optional<TrieNode<T>> getNode(String prefix) {
         // Navigate the tree by the letters of the prefix, starting from the root.
         TrieNode<T> currentNode = this;
@@ -357,7 +362,7 @@ public class TrieNode<T> implements Trie<T> {
     /**
      * @return Child node for character 'c', if one exists. <b>Case insensitive</b>
      */
-    public Optional<TrieNode<T>> getChild(char c) {
+    Optional<TrieNode<T>> getChild(char c) {
         if (children.isEmpty()) {
             return Optional.absent();
         }
@@ -383,7 +388,7 @@ public class TrieNode<T> implements Trie<T> {
      *
      * @param value The value to set. may be null.
      */
-    public void setValue(T value) {
+    void setValue(T value) {
         this.value = Optional.fromNullable(value);
     }
 
@@ -396,11 +401,6 @@ public class TrieNode<T> implements Trie<T> {
     @SuppressWarnings("unchecked")
     public static <T> TrieNode<T> emptyTrie() {
         return (TrieNode<T>) EMPTY_TRIE;
-    }
-
-    public static <T> TrieNode<T> createTrie(TrieNode<T> root) {
-        root.calcNumWords();
-        return root;
     }
 
     @Override

@@ -117,6 +117,7 @@ public class AbstractTrieTest {
 
             assertEquals("Value mismatch!", expectedValue, value.get());
         }
+        assertEquals(expectedWords.size(), trie.size());
     }
 
     protected void assertInvalidWords(String... invalidWords) {

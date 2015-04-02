@@ -14,23 +14,28 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jerminal.api.display.terminal;
+package com.github.ykrasik.jerminal.javafx.impl;
 
-import java.util.List;
+import com.github.ykrasik.jerminal.internal.filesystem.AbstractWorkingDirectoryListener;
+import javafx.scene.control.Label;
+
+import java.util.Objects;
 
 /**
- * In charge of manipulating the GUI surrounding the terminal (where text is printed).
+ * A specialized version of a {@link com.github.ykrasik.jerminal.internal.filesystem.WorkingDirectoryListener} for JavaFx.
+ * Wraps the 'current path' {@link Label}.
  *
  * @author Yevgeny Krasik
  */
-// FIXME: This sucks.
-public interface TerminalGuiController {
-    /**
-     * Set the path to the current working directory. Only called when when the working directory changes.
-     * The path will always be non-empty and the first element will always be the name of the root directory.
-     *
-     * @param path New working path.
-     */
-    // TODO: Provide a more general List<Directory> ?
-    void setWorkingDirectory(List<String> path);
+public class JavaFxWorkingDirectoryListener extends AbstractWorkingDirectoryListener {
+    private final Label currentPathLabel;
+
+    public JavaFxWorkingDirectoryListener(Label currentPathLabel) {
+        this.currentPathLabel = Objects.requireNonNull(currentPathLabel);
+    }
+
+    @Override
+    protected void setCurrentPath(String currentPathStr) {
+        currentPathLabel.setText(currentPathStr);
+    }
 }

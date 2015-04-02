@@ -24,11 +24,10 @@ import com.github.ykrasik.jerminal.api.display.DisplayDriver;
 import com.github.ykrasik.jerminal.api.display.terminal.Terminal;
 import com.github.ykrasik.jerminal.api.display.terminal.TerminalConfiguration;
 import com.github.ykrasik.jerminal.api.display.terminal.TerminalDisplayDriver;
-import com.github.ykrasik.jerminal.api.display.terminal.TerminalGuiController;
 import com.github.ykrasik.jerminal.api.filesystem.ShellFileSystem;
 import com.github.ykrasik.jerminal.javafx.impl.JavaFxCommandLineDriver;
-import com.github.ykrasik.jerminal.javafx.impl.JavaFxGuiController;
 import com.github.ykrasik.jerminal.javafx.impl.JavaFxTerminal;
+import com.github.ykrasik.jerminal.javafx.impl.JavaFxWorkingDirectoryListener;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -112,13 +111,13 @@ public class ConsoleBuilder {
         textArea.setFocusTraversable(false);
         final Terminal terminal = new JavaFxTerminal(textArea);
 
+        // Create the shell.
+        final DisplayDriver displayDriver = new TerminalDisplayDriver(terminal, configuration);
+        final Shell shell = new Shell(fileSystem, displayDriver, welcomeMessage);
+
         // Create the current path label.
         final Label currentPath = (Label) consoleNode.lookup("#currentPath");
-        final TerminalGuiController guiController = new JavaFxGuiController(currentPath);
-
-        // Create the shell.
-        final DisplayDriver displayDriver = new TerminalDisplayDriver(terminal, guiController, configuration);
-        final Shell shell = new Shell(fileSystem, displayDriver, welcomeMessage);
+        shell.registerWorkingDirectoryListener(new JavaFxWorkingDirectoryListener(currentPath));
 
         // Create the command line.
         final TextField commandLine = (TextField) consoleNode.lookup("#commandLine");

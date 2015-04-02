@@ -29,11 +29,10 @@ import com.github.ykrasik.jerminal.api.Shell;
 import com.github.ykrasik.jerminal.api.display.DisplayDriver;
 import com.github.ykrasik.jerminal.api.display.terminal.TerminalConfiguration;
 import com.github.ykrasik.jerminal.api.display.terminal.TerminalDisplayDriver;
-import com.github.ykrasik.jerminal.api.display.terminal.TerminalGuiController;
 import com.github.ykrasik.jerminal.api.filesystem.ShellFileSystem;
 import com.github.ykrasik.jerminal.libgdx.impl.LibGdxCommandLineDriver;
 import com.github.ykrasik.jerminal.libgdx.impl.LibGdxTerminal;
-import com.github.ykrasik.jerminal.libgdx.impl.LibGdxTerminalGuiController;
+import com.github.ykrasik.jerminal.libgdx.impl.LibGdxWorkingDirectoryListener;
 
 import java.util.Objects;
 
@@ -105,14 +104,14 @@ public class ConsoleBuilder {
         terminal.setName("terminal");
         terminal.bottom().left();
 
+        // Create the shell.
+        final DisplayDriver displayDriver = new TerminalDisplayDriver(terminal, configuration);
+        final Shell shell = new Shell(fileSystem, displayDriver, welcomeMessage);
+
         // Create the current path label.
         final Label currentPath = new Label("", skin, "currentPath");
         currentPath.setName("currentPath");
-        final TerminalGuiController guiController = new LibGdxTerminalGuiController(currentPath);
-
-        // Create the shell.
-        final DisplayDriver displayDriver = new TerminalDisplayDriver(terminal, guiController, configuration);
-        final Shell shell = new Shell(fileSystem, displayDriver, welcomeMessage);
+        shell.registerWorkingDirectoryListener(new LibGdxWorkingDirectoryListener(currentPath));
 
         // Create the command line.
         final TextField commandLine = new TextField("", skin, "commandLine");

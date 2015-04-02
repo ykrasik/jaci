@@ -116,7 +116,7 @@ public class TrieBuilder<T> {
         for (Entry<String, T> entry : map.entrySet()) {
             createTrieBranch(root, entry.getKey(), entry.getValue());
         }
-        return TrieNode.createTrie(root);
+        return root;
     }
 
     private void createTrieBranch(TrieNode<T> root, String word, T value) {

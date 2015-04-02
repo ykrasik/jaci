@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2014 Yevgeny Krasik                                          *
+ * Copyright (C) 2015 Yevgeny Krasik                                          *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -14,28 +14,23 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jerminal.libgdx.impl;
+package com.github.ykrasik.jerminal.internal.filesystem;
 
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.github.ykrasik.jerminal.api.display.terminal.DefaultTerminalGuiController;
+import com.github.ykrasik.jerminal.internal.filesystem.directory.InternalShellDirectory;
 
-import java.util.Objects;
+import java.util.List;
 
 /**
- * A specialized version of a {@link DefaultTerminalGuiController} for LibGdx.
- * Wraps the 'current path' {@link Label}.
- *
  * @author Yevgeny Krasik
  */
-public class LibGdxTerminalGuiController extends DefaultTerminalGuiController {
-    private final Label currentPathLabel;
-
-    public LibGdxTerminalGuiController(Label currentPathLabel) {
-        this.currentPathLabel = Objects.requireNonNull(currentPathLabel);
-    }
-
-    @Override
-    protected void doSetWorkingDirectory(String path) {
-        currentPathLabel.setText(path);
-    }
+// TODO: JavaDoc
+public interface WorkingDirectoryListener {
+    /**
+     * Called when when the working directory changes.
+     * The path will always be non-empty and the first element will always be the name of the root directory.
+     *
+     * @param path Path from root to current working directory.
+     */
+    // TODO: JavaDoc
+    void onWorkingDirectoryChanged(List<InternalShellDirectory> path);
 }

@@ -55,7 +55,7 @@ public class AnnotationParamFactory {
     }
 
     /**
-     * Create a {@link CommandParam out of a method parameter with optional annotations, through reflection.
+     * Create a {@link CommandParam} out of a method parameter with optional annotations, through reflection.
      * Since parameter names aren't always available to be reflected, parameter names can only be set through
      * the annotation. If absent, a name will be generated for the parameter.
      *
