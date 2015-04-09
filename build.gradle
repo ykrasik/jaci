@@ -1,14 +1,16 @@
 buildscript {
     ext {
-        guavaVersion = '17.0'
+        lombokVersion = '1.16.2'
         gdxVersion = '0.9.9'
+
         junitVersion = '4.11'
         mockitoVersion = '1.9.5'
     }
 }
 
-allprojects {
+subprojects {
     apply plugin: "java"
+    apply from: "../publish.gradle"
 
     sourceCompatibility = 1.7
     targetCompatibility = 1.7
@@ -16,43 +18,56 @@ allprojects {
     repositories {
         mavenCentral()
     }
-}
-
-project("jerminal-core") {
-    description "Jerminal core module"
-
-    apply from: "../publish.gradle"
 
     dependencies {
-        compile "com.google.guava:guava:$guavaVersion"
+        compile "org.projectlombok:lombok:$lombokVersion"
 
         testCompile "junit:junit:$junitVersion"
         testCompile "org.mockito:mockito-all:$mockitoVersion"
     }
 }
 
-project("jerminal-javafx") {
-    description "Jerminal JavaFX frontend"
+project("jerminal-api") {
+    description "Jerminal API"
+}
 
-    apply from: "../publish.gradle"
+project("jerminal-utils") {
+    description "Jerminal utils"
+}
+
+project("jerminal-core") {
+    description "Jerminal API consumer"
+
+    dependencies {
+        compile project(":jerminal-api")
+        compile project(":jerminal-utils")
+    }
+}
+
+project("jerminal-cli-core") {
+    description "Jerminal command line interface core"
 
     dependencies {
         compile project(":jerminal-core")
     }
 }
 
-project("jerminal-libgdx") {
-    description "Jerminal libGdx integration"
-
-    apply from: "../publish.gradle"
+project("jerminal-javafx-cli") {
+    description "Jerminal JavaFX command line interface"
 
     dependencies {
-        compile project(":jerminal-core")
+        compile project(":jerminal-cli-core")
+    }
+}
+
+project("jerminal-libgdx-cli") {
+    description "Jerminal libGdx command line interface"
+
+    dependencies {
+        compile project(":jerminal-cli-core")
 
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
-
-        testCompile "junit:junit:$junitVersion"
     }
 }

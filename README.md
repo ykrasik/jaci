@@ -9,8 +9,8 @@ Here are some of Jerminal's prominent features:
    ```
    public class AnnotationExample {
        @Command(description = "Does nothing, really.")
-       public void testCommand(OutputPrinter outputPrinter) {
-           outputPrinter.println("Hello, world!");
+       public void testCommand(OutputPrinter commandOutput) {
+           commandOutput.println("Hello, world!");
        }
    }
    ```
@@ -18,7 +18,7 @@ Here are some of Jerminal's prominent features:
    The above code creates a command called 'testCommand' that takes no parameters.
    When executed from the command line, the command will print "Hello, world!" to the element defined as it's output
    in the host application.<br>
-   The 'outputPrinter' parameter is an optional parameter that the command should declare if it wishes to print anything.
+   The 'commandOutput' parameter is an optional parameter that the command should declare if it wishes to print anything.
 
 * It is easy to integrate into your application. For example, with JavaFx:
     ```
@@ -55,13 +55,13 @@ Here are some of Jerminal's prominent features:
 * Command parameters can be mandatory, or optional with default values or flags.<br>
     ```
     @Command(description = "Parameters example")
-    public void paramExample(OutputPrinter outputPrinter,
+    public void paramExample(OutputPrinter commandOutput,
                              @IntParam(value = "mandatoryInt", description = "Mandatory int param") int intParam,
                              @StringParam(value = "optionalString", description = "Optional string param", optional = true, defaultValue = "default") String stringParam,
                              @FlagParam("flagParam") boolean flag) {
-        outputPrinter.println("mandatoryInt=%d", intParam);
-        outputPrinter.println("optionalString=%s", stringParam);
-        outputPrinter.println("flagParam=%s", flag);
+        commandOutput.println("mandatoryInt=%d", intParam);
+        commandOutput.println("optionalString=%s", stringParam);
+        commandOutput.println("flagParam=%s", flag);
     }
     ```
     The above code declares a command called 'paramExample' that receives 3 parameters: int, string and boolean.<br>
