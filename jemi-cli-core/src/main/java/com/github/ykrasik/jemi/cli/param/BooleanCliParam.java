@@ -19,8 +19,8 @@ package com.github.ykrasik.jemi.cli.param;
 import com.github.ykrasik.jemi.cli.exception.ParseException;
 import com.github.ykrasik.jemi.core.Identifier;
 import com.github.ykrasik.jemi.core.param.BooleanParamDef;
-import com.github.ykrasik.jerminal.old.assist.AutoCompleteReturnValue;
-import com.github.ykrasik.jerminal.old.assist.CliValueType;
+import com.github.ykrasik.jemi.cli.assist.AutoComplete;
+import com.github.ykrasik.jemi.cli.assist.CliValueType;
 import com.github.ykrasik.jemi.util.function.Supplier;
 import com.github.ykrasik.jemi.util.function.Suppliers;
 import com.github.ykrasik.jemi.util.opt.Opt;
@@ -66,9 +66,9 @@ public class BooleanCliParam extends AbstractCliParam<Boolean> {
     }
 
     @Override
-    public AutoCompleteReturnValue autoComplete(@NonNull String prefix) throws ParseException {
+    public AutoComplete autoComplete(@NonNull String prefix) throws ParseException {
         final Trie<CliValueType> possibilities = VALUES.subTrie(prefix.toLowerCase());
-        return new AutoCompleteReturnValue(prefix, possibilities);
+        return new AutoComplete(prefix, possibilities);
     }
 
     // TODO: JavaDoc

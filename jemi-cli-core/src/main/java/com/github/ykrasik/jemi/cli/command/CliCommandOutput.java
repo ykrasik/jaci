@@ -24,6 +24,24 @@ import com.github.ykrasik.jemi.cli.directory.CliDirectory;
  */
 // TODO: JavaDoc
 public interface CliCommandOutput extends CommandOutput {
+    // TODO: Find a different way to suppress the 'command executed successfully' message
+    /**
+     * @return Whether any of the {@link CommandOutput}'s API methods were invoked.
+     */
+    boolean hasInteractions();
+
+    /**
+     * Suppresses the default 'command executed successfully' message that appears if no other interactions are
+     * detected by {@link #hasInteractions()}.
+     */
+    void suppressDefaultExecutionMessage();
+
+    /**
+     * @return Whether the command requested to suppress the default 'command executed successfully' message that appears
+     *         if no other interactions are detected by {@link #hasInteractions()}.
+     */
+    boolean isSuppressDefaultExecutionMessage();
+
     void setWorkingDirectory(CliDirectory directory);
 
     void printDirectory(CliDirectory directory, boolean recursive);

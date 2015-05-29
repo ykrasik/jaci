@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jerminal.internal;
+package com.github.ykrasik.jemi.cli.commandline;
 
-import com.google.common.base.Optional;
+import com.github.ykrasik.jemi.util.opt.Opt;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -31,23 +31,21 @@ import java.util.List;
  */
 public class CommandLineHistory {
     private final int maxHistory;
-    private final List<String> history;
+    private final List<String> history = new LinkedList<>();
 
     private int currentIndex;
 
     public CommandLineHistory(int maxHistory) {
         this.maxHistory = maxHistory;
-        this.history = new LinkedList<>();
-
         resetCurrentIndex();
     }
 
     /**
      * @return Previous command line from history.
      */
-    public Optional<String> getPrevCommandLine() {
+    public Opt<String> getPrevCommandLine() {
         if (history.isEmpty()) {
-            return Optional.absent();
+            return Opt.absent();
         }
 
         // Don't let currentIndex go below 0.
@@ -61,9 +59,9 @@ public class CommandLineHistory {
     /**
      * @return Next command line in history.
      */
-    public Optional<String> getNextCommandLine() {
+    public Opt<String> getNextCommandLine() {
         if (history.isEmpty()) {
-            return Optional.absent();
+            return Opt.absent();
         }
 
         // Don't let currentIndex go above the length of 'history'.
@@ -73,9 +71,8 @@ public class CommandLineHistory {
         return getElementAtCurrentIndex();
     }
 
-    private Optional<String> getElementAtCurrentIndex() {
-        final String element = history.get(currentIndex);
-        return Optional.of(element);
+    private Opt<String> getElementAtCurrentIndex() {
+        return Opt.of(history.get(currentIndex));
     }
 
     /**

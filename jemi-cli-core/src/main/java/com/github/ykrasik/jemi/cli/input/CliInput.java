@@ -14,25 +14,24 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jemi.cli.arg;
-
-import com.github.ykrasik.jemi.cli.param.CliParam;
-import com.github.ykrasik.jemi.util.opt.Opt;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-
-import java.util.Map;
+package com.github.ykrasik.jemi.cli.input;
 
 /**
  * @author Yevgeny Krasik
  */
 // TODO: JavaDoc
-@RequiredArgsConstructor
-public class BoundParams {
-    @NonNull private final Map<CliParam, String> boundValues;
+public interface CliInput {
+    /**
+     * Read the command line value.
+     *
+     * @return The command line.
+     */
+    String read();
 
-    // TODO: JavaDoc
-    public Opt<String> getBoundValue(CliParam param) {
-        return Opt.ofNullable(boundValues.get(param));
-    }
+    /**
+     * Read the command line value until the caret position.
+     *
+     * @return The command line until the cursor.
+     */
+    String readUntilCaret();
 }

@@ -16,16 +16,19 @@
 
 package com.github.ykrasik.jemi.cli.command;
 
+import com.github.ykrasik.jemi.cli.exception.ParseException;
 import com.github.ykrasik.jemi.cli.param.CliParam;
+import com.github.ykrasik.jemi.cli.param.CliParamManager;
+import com.github.ykrasik.jemi.cli.param.CliParamManagerImpl;
 import com.github.ykrasik.jemi.cli.param.CliParamResolver;
 import com.github.ykrasik.jemi.core.Identifiable;
 import com.github.ykrasik.jemi.core.Identifier;
 import com.github.ykrasik.jemi.core.command.CommandDef;
 import com.github.ykrasik.jemi.core.param.ParamDef;
-import lombok.Getter;
+import com.github.ykrasik.jemi.cli.assist.AssistInfo;
+import lombok.AccessLevel;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.Delegate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,27 +37,41 @@ import java.util.List;
  * @author Yevgeny Krasik
  */
 // TODO: JavaDoc
-@RequiredArgsConstructor
-public class CliCommand implements Identifiable {
-    @Getter
-    @NonNull private final Identifier identifier;
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+public class CliCommand implements Identifiable, CliParamManager, CliCommandExecutor {
+    private final Identifier identifier;
+    private final CliParamManager paramManager;
+    private final CliCommandExecutor executor;
 
-    @Getter
-    @NonNull private final List<CliParam> params;
-
-    @Delegate
-    @NonNull private final CliCommandExecutor executor;
+    @Override
+    public Identifier getIdentifier() {
+        return identifier;
+    }
 
     // TODO: JavaDoc
     public String getName() {
-        // Implemented manually due to bugs with IntelliJ compatibility.
         return identifier.getName();
     }
 
     // TODO: JavaDoc
     public String getDescription() {
-        // Implemented manually due to bugs with IntelliJ compatibility.
         return identifier.getName();
+    }
+
+    // TODO: JavaDoc
+    @Override
+    public CliCommandArgs parse(List<String> args) throws ParseException {
+        return paramManager.parse(args);
+    }
+
+    @Override
+    public AssistInfo assist(List<String> args) throws ParseException {
+        return paramManager.assist(args);
+    }
+
+    @Override
+    public void execute(CliCommandOutput output, CliCommandArgs args) throws Exception {
+        executor.execute(output, args);
     }
 
     @Override
@@ -64,8 +81,11 @@ public class CliCommand implements Identifiable {
 
     public static CliCommand fromDef(@NonNull CommandDef def) {
         final List<CliParam> params = createParams(def.getParamDefs());
-        return new CliCommand(def.getIdentifier(), params, new CliCommandExecutorWrapper(def.getExecutor()));
+        final CliParamManagerImpl paramManager = new CliParamManagerImpl(params);
+        return new CliCommand(def.getIdentifier(), paramManager, new CliCommandExecutorWrapper(def.getExecutor()));
     }
+
+    private static final CliParamResolver RESOLVER = new CliParamResolver();
 
     private static List<CliParam> createParams(List<ParamDef<?>> paramDefs) {
         final List<CliParam> params = new ArrayList<>(paramDefs.size());
@@ -74,6 +94,4 @@ public class CliCommand implements Identifiable {
         }
         return params;
     }
-
-    private static final CliParamResolver RESOLVER = new CliParamResolver();
 }

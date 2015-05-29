@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2015 Yevgeny Krasik                                          *
+ * Copyright (C) 2014 Yevgeny Krasik                                          *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -14,32 +14,38 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jemi.cli.param;
+package com.github.ykrasik.jemi.cli.assist;
 
-import com.github.ykrasik.jemi.core.param.*;
+import com.github.ykrasik.jemi.util.opt.Opt;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 /**
+ * The return value of an assist operation.<br>
+ * Contains info about the command and auto complete suggestions.
+ *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
-public class CliParamResolver implements ParamDefResolver<CliParam> {
-    @Override
-    public StringCliParam stringParam(StringParamDef def) {
-        return StringCliParam.fromDef(def);
+@RequiredArgsConstructor
+public class AssistInfo {
+    @NonNull private final Opt<CommandInfo> commandInfo;
+    @NonNull private final AutoComplete autoComplete;
+
+    /**
+     * @return The command info.
+     */
+    public Opt<CommandInfo> getCommandInfo() {
+        return commandInfo;
     }
 
-    @Override
-    public BooleanCliParam booleanParam(BooleanParamDef def) {
-        return BooleanCliParam.fromDef(def);
+    /**
+     * @return The auto-complete suggestions.
+     */
+    public AutoComplete getAutoComplete() {
+        return autoComplete;
     }
 
-    @Override
-    public IntCliParam intParam(IntParamDef def) {
-        return IntCliParam.fromDef(def);
-    }
-
-    @Override
-    public DoubleCliParam doubleParam(DoubleParamDef def) {
-        return DoubleCliParam.fromDef(def);
+    public static AssistInfo noCommandInfo(AutoComplete autoComplete) {
+        return new AssistInfo(Opt.<CommandInfo>absent(), autoComplete);
     }
 }

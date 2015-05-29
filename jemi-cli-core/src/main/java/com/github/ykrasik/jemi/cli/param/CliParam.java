@@ -18,7 +18,7 @@ package com.github.ykrasik.jemi.cli.param;
 
 import com.github.ykrasik.jemi.cli.exception.ParseException;
 import com.github.ykrasik.jemi.core.Identifiable;
-import com.github.ykrasik.jerminal.old.assist.AutoCompleteReturnValue;
+import com.github.ykrasik.jemi.cli.assist.AutoComplete;
 
 /**
  * @author Yevgeny Krasik
@@ -61,5 +61,5 @@ public interface CliParam extends Identifiable {
      * @return Auto complete possibilities for values this parameter can accept that start with the given prefix.
      * @throws ParseException If the given prefix is invalid or the parameter cannot be auto completed.
      */
-    AutoCompleteReturnValue autoComplete(String prefix) throws ParseException;
+    AutoComplete autoComplete(String prefix) throws ParseException;
 }

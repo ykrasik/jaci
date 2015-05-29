@@ -19,8 +19,8 @@ package com.github.ykrasik.jemi.cli.param;
 import com.github.ykrasik.jemi.cli.exception.ParseException;
 import com.github.ykrasik.jemi.core.Identifier;
 import com.github.ykrasik.jemi.core.param.StringParamDef;
-import com.github.ykrasik.jerminal.old.assist.AutoCompleteReturnValue;
-import com.github.ykrasik.jerminal.old.assist.CliValueType;
+import com.github.ykrasik.jemi.cli.assist.AutoComplete;
+import com.github.ykrasik.jemi.cli.assist.CliValueType;
 import com.github.ykrasik.jemi.util.function.Supplier;
 import com.github.ykrasik.jemi.util.function.Suppliers;
 import com.github.ykrasik.jemi.util.opt.Opt;
@@ -99,9 +99,9 @@ public class StringCliParam extends AbstractCliParam<String> {
     }
 
     @Override
-    public AutoCompleteReturnValue autoComplete(@NonNull String prefix) throws ParseException {
+    public AutoComplete autoComplete(@NonNull String prefix) throws ParseException {
         final Trie<CliValueType> possibilities = getValues().subTrie(prefix);
-        return new AutoCompleteReturnValue(prefix, possibilities);
+        return new AutoComplete(prefix, possibilities);
     }
 
     private Trie<CliValueType> getValues() {

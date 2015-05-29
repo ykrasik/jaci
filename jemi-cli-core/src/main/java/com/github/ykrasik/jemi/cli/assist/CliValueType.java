@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2015 Yevgeny Krasik                                          *
+ * Copyright (C) 2014 Yevgeny Krasik                                          *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -14,32 +14,29 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jemi.cli.param;
+package com.github.ykrasik.jemi.cli.assist;
 
-import com.github.ykrasik.jemi.core.param.*;
+import com.github.ykrasik.jerminal.ShellConstants;
 
 /**
+ * For an auto complete operation, this is the type of the value being auto completed.
+ *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
-public class CliParamResolver implements ParamDefResolver<CliParam> {
-    @Override
-    public StringCliParam stringParam(StringParamDef def) {
-        return StringCliParam.fromDef(def);
+public enum CliValueType {
+    // FIXME: Doesn't belong here.
+    DIRECTORY(ShellConstants.FILE_SYSTEM_DELIMITER.charAt(0)),
+    COMMAND(' '),
+    COMMAND_PARAM_NAME(ShellConstants.ARG_VALUE_DELIMITER.charAt(0)),
+    COMMAND_PARAM_VALUE(' ');
+
+    private final char suffix;
+
+    CliValueType(char suffix) {
+        this.suffix = suffix;
     }
 
-    @Override
-    public BooleanCliParam booleanParam(BooleanParamDef def) {
-        return BooleanCliParam.fromDef(def);
-    }
-
-    @Override
-    public IntCliParam intParam(IntParamDef def) {
-        return IntCliParam.fromDef(def);
-    }
-
-    @Override
-    public DoubleCliParam doubleParam(DoubleParamDef def) {
-        return DoubleCliParam.fromDef(def);
+    public char getSuffix() {
+        return suffix;
     }
 }

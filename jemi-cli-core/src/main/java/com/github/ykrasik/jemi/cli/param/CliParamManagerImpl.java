@@ -17,8 +17,13 @@
 package com.github.ykrasik.jemi.cli.param;
 
 import com.github.ykrasik.jemi.cli.CliConstants;
+import com.github.ykrasik.jemi.cli.assist.AutoComplete;
+import com.github.ykrasik.jemi.cli.assist.CliValueType;
+import com.github.ykrasik.jemi.cli.assist.CliValueTypeMapper;
+import com.github.ykrasik.jemi.cli.command.CliCommand;
 import com.github.ykrasik.jemi.cli.command.CliCommandArgs;
 import com.github.ykrasik.jemi.cli.command.CliCommandArgsImpl;
+import com.github.ykrasik.jemi.cli.directory.CliDirectory;
 import com.github.ykrasik.jemi.cli.exception.ParseError;
 import com.github.ykrasik.jemi.cli.exception.ParseException;
 import com.github.ykrasik.jemi.util.function.Function;
@@ -27,8 +32,6 @@ import com.github.ykrasik.jemi.util.opt.Opt;
 import com.github.ykrasik.jemi.util.trie.Trie;
 import com.github.ykrasik.jemi.util.trie.TrieBuilder;
 import com.github.ykrasik.jemi.util.trie.Tries;
-import com.github.ykrasik.jerminal.old.assist.AutoCompleteReturnValue;
-import com.github.ykrasik.jerminal.old.assist.CliValueType;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
@@ -40,11 +43,11 @@ import java.util.*;
  */
 // TODO: JavaDoc
 @ToString(of = "params")
-public class CliParamsManager {
+public class CliParamManagerImpl implements CliParamManager {
     private final List<CliParam> params;
     private final Trie<CliParam> paramsTrie;
 
-    public CliParamsManager(@NonNull List<CliParam> params) {
+    public CliParamManagerImpl(@NonNull List<CliParam> params) {
         this.params = params;
         this.paramsTrie = createParamsTrie(params);
     }
@@ -57,11 +60,7 @@ public class CliParamsManager {
         return builder.build();
     }
 
-    /**
-     * @param args Args to be parsed.
-     * @return Parsed args.
-     * @throws ParseException If an invalid value was supplied for a param, or if a param wasn't bound.
-     */
+    @Override
     public CliCommandArgs parse(List<String> args) throws ParseException {
         // Parse all args.
         final ParseContext context = doParse(args);
@@ -147,12 +146,8 @@ public class CliParamsManager {
         }
     }
 
-    /**
-     * @param args Args to be auto-completed. Will only auto-complete the last arg.
-     * @return Auto complete suggestions for the last arg. Every preceding arg is expected to be a valid param value.
-     * @throws ParseException If any of the args except the last one can't be validly parsed.
-     */
-    public AutoCompleteReturnValue autoCompleteLastArg(List<String> args) throws ParseException {
+    @Override
+    public AutoComplete assist(List<String> args) throws ParseException {
         // Only the last arg is up for autoCompletion, the rest are expected to be valid args.
         // Parse all params that have been bound.
         final List<String> argsToBeParsed = args.subList(0, args.size() - 1);
@@ -177,7 +172,7 @@ public class CliParamsManager {
         }
     }
 
-    private AutoCompleteReturnValue autoCompleteParamNameOrValue(ParseContext context, String prefix) throws ParseException {
+    private AutoComplete autoCompleteParamNameOrValue(ParseContext context, String prefix) throws ParseException {
         // Prefix can either be the value of the next positional param or the name of any unbound param.
         // However, there are 2 things that we don't want to do:
         //  1. Offer to autoComplete the name of the last unbound param (just go straight to it's value).
@@ -185,13 +180,13 @@ public class CliParamsManager {
 
         // Try to autoComplete prefix as the name of any unbound param.
         // TODO: Do offer to autoComplete the name of the last unbound parameter, but only if no other choice.
-        final AutoCompleteReturnValue paramNameAutoComplete = autoCompleteParamName(context, prefix);
+        final AutoComplete paramNameAutoComplete = autoCompleteParamName(context, prefix);
 
         // AutoCompleting the param value could throw an exception, which we don't want to mask
         // if we don't have any other autoComplete possibilities available.
         try {
             final CliParam nextPositionalParam = context.getNextUnboundParam(prefix);
-            final AutoCompleteReturnValue paramValueAutoComplete = nextPositionalParam.autoComplete(prefix);
+            final AutoComplete paramValueAutoComplete = nextPositionalParam.autoComplete(prefix);
             if (paramNameAutoComplete.isEmpty()) {
                 return paramValueAutoComplete;
             } else {
@@ -206,7 +201,7 @@ public class CliParamsManager {
         }
     }
 
-    private AutoCompleteReturnValue autoCompleteParamName(ParseContext context, String prefix) {
+    private AutoComplete autoCompleteParamName(ParseContext context, String prefix) {
         final Trie<CliValueType> paramNamePossibilities;
         if (context.unboundParams.size() == 1) {
             // Don't suggest param names if there is only 1 option available.
@@ -216,7 +211,7 @@ public class CliParamsManager {
             final Trie<CliParam> unboundParams = prefixParams.filter(context.unboundParamPredicate());
             paramNamePossibilities = unboundParams.mapValues(PARAM_NAME_MAPPER);
         }
-        return new AutoCompleteReturnValue(prefix, paramNamePossibilities);
+        return new AutoComplete(prefix, paramNamePossibilities);
     }
 
     private class ParseContext {
@@ -289,16 +284,6 @@ public class CliParamsManager {
         }
     }
 
-    private static final ParamMapper PARAM_NAME_MAPPER = new ParamMapper(CliValueType.COMMAND_PARAM_NAME);
-    private static final ParamMapper PARAM_VALUE_MAPPER = new ParamMapper(CliValueType.COMMAND_PARAM_VALUE);
-
-    @RequiredArgsConstructor
-    private static class ParamMapper implements Function<CliParam, CliValueType> {
-        @NonNull private final CliValueType type;
-
-        @Override
-        public CliValueType apply(CliParam cliParam) {
-            return type;
-        }
-    }
+    private static final CliValueTypeMapper<CliParam> PARAM_NAME_MAPPER = new CliValueTypeMapper<>(CliValueType.COMMAND_PARAM_NAME);
+    private static final CliValueTypeMapper<CliParam> PARAM_VALUE_MAPPER = new CliValueTypeMapper<>(CliValueType.COMMAND_PARAM_VALUE);
 }

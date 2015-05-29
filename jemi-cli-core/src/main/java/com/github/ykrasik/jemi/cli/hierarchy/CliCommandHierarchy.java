@@ -19,7 +19,7 @@ package com.github.ykrasik.jemi.cli.hierarchy;
 import com.github.ykrasik.jemi.cli.command.CliCommand;
 import com.github.ykrasik.jemi.cli.directory.CliDirectory;
 import com.github.ykrasik.jemi.cli.exception.ParseException;
-import com.github.ykrasik.jerminal.old.assist.AutoCompleteReturnValue;
+import com.github.ykrasik.jemi.cli.assist.AutoComplete;
 
 /**
  * A container for a hierarchy of {@link CliDirectory} and {@link CliCommand}.<br>
@@ -72,7 +72,7 @@ public interface CliCommandHierarchy {
      * @return Auto complete suggestions for the next {@link CliDirectory} in this path.
      * @throws ParseException If the path is invalid.
      */
-    AutoCompleteReturnValue autoCompletePathToDirectory(String rawPath) throws ParseException;
+    AutoComplete autoCompletePathToDirectory(String rawPath) throws ParseException;
 
     /**
      * Provide auto complete suggestions for the path either to a {@link CliDirectory} or to a {@link CliCommand}.<br>
@@ -82,5 +82,5 @@ public interface CliCommandHierarchy {
      * @return Auto complete suggestions for the next {@link CliDirectory} or {@link CliCommand} in this path.
      * @throws ParseException If the path is invalid.
      */
-    AutoCompleteReturnValue autoCompletePath(String rawPath) throws ParseException;
+    AutoComplete autoCompletePath(String rawPath) throws ParseException;
 }

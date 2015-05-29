@@ -23,8 +23,8 @@ import com.github.ykrasik.jemi.cli.directory.CliDirectory;
 import com.github.ykrasik.jemi.cli.exception.ParseError;
 import com.github.ykrasik.jemi.cli.exception.ParseException;
 import com.github.ykrasik.jemi.core.directory.CommandDirectoryDef;
-import com.github.ykrasik.jerminal.old.assist.AutoCompleteReturnValue;
-import com.github.ykrasik.jerminal.old.assist.CliValueType;
+import com.github.ykrasik.jemi.cli.assist.AutoComplete;
+import com.github.ykrasik.jemi.cli.assist.CliValueType;
 import com.github.ykrasik.jemi.util.opt.Opt;
 import com.github.ykrasik.jemi.util.string.StringUtils;
 import com.github.ykrasik.jemi.util.trie.Trie;
@@ -169,13 +169,13 @@ public class CliCommandHierarchyImpl implements CliCommandHierarchy {
     }
 
     @Override
-    public AutoCompleteReturnValue autoCompletePathToDirectory(String rawPath) throws ParseException {
+    public AutoComplete autoCompletePathToDirectory(String rawPath) throws ParseException {
         // Parse the path until the last delimiter, after which we autoComplete the remaining arg.
         final int delimiterIndex = rawPath.lastIndexOf(Constants.PATH_DELIMITER_STRING);
         if (delimiterIndex == -1) {
             // rawPath did not contain a delimiter, just autoComplete it from the workingDirectory.
             final Trie<CliValueType> possibilities = workingDirectory.autoCompleteDirectory(rawPath);
-            return new AutoCompleteReturnValue(rawPath, possibilities);
+            return new AutoComplete(rawPath, possibilities);
         }
 
         // rawPath contains a delimiter.
@@ -186,11 +186,11 @@ public class CliCommandHierarchyImpl implements CliCommandHierarchy {
 
         final String directoryPrefix = rawPath.substring(delimiterIndex + 1);
         final Trie<CliValueType> possibilities = lastDirectory.autoCompleteDirectory(directoryPrefix);
-        return new AutoCompleteReturnValue(directoryPrefix, possibilities);
+        return new AutoComplete(directoryPrefix, possibilities);
     }
 
     @Override
-    public AutoCompleteReturnValue autoCompletePath(String rawPath) throws ParseException {
+    public AutoComplete autoCompletePath(String rawPath) throws ParseException {
         // Parse the path until the last delimiter, after which we autoComplete the remaining arg.
         final int delimiterIndex = rawPath.lastIndexOf(Constants.PATH_DELIMITER_STRING);
         if (delimiterIndex == -1) {
@@ -199,7 +199,7 @@ public class CliCommandHierarchyImpl implements CliCommandHierarchy {
             final Trie<CliValueType> systemCommandPossibilities = systemCommands.autoCompleteCommand(rawPath);
             final Trie<CliValueType> entryPossibilities = workingDirectory.autoCompleteEntry(rawPath);
             final Trie<CliValueType> possibilities = entryPossibilities.union(systemCommandPossibilities);
-            return new AutoCompleteReturnValue(rawPath, possibilities);
+            return new AutoComplete(rawPath, possibilities);
         }
 
         // rawPath contains a delimiter.
@@ -210,7 +210,7 @@ public class CliCommandHierarchyImpl implements CliCommandHierarchy {
 
         final String entryPrefix = rawPath.substring(delimiterIndex + 1);
         final Trie<CliValueType> possibilities = lastDirectory.autoCompleteEntry(entryPrefix);
-        return new AutoCompleteReturnValue(entryPrefix, possibilities);
+        return new AutoComplete(entryPrefix, possibilities);
     }
 
     public static CliCommandHierarchyImpl from(CommandDirectoryDef rootDef) {

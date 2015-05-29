@@ -17,17 +17,16 @@
 package com.github.ykrasik.jemi.cli.directory;
 
 import com.github.ykrasik.jemi.api.Constants;
+import com.github.ykrasik.jemi.cli.assist.CliValueType;
+import com.github.ykrasik.jemi.cli.assist.CliValueTypeMapper;
 import com.github.ykrasik.jemi.cli.command.CliCommand;
-import com.github.ykrasik.jemi.core.Identifiable;
 import com.github.ykrasik.jemi.core.Identifier;
 import com.github.ykrasik.jemi.core.command.CommandDef;
 import com.github.ykrasik.jemi.core.directory.CommandDirectoryDef;
-import com.github.ykrasik.jemi.util.function.Function;
 import com.github.ykrasik.jemi.util.opt.Opt;
 import com.github.ykrasik.jemi.util.trie.Trie;
 import com.github.ykrasik.jemi.util.trie.TrieBuilder;
 import com.github.ykrasik.jemi.util.trie.Tries;
-import com.github.ykrasik.jerminal.old.assist.CliValueType;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
@@ -43,11 +42,7 @@ import java.util.Collection;
  * @author Yevgeny Krasik
  */
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)  // Package-visible for testing
-public class CliDirectory implements Identifiable {
-    /**
-     * This directory's name and description.
-     */
-    @Getter
+public class CliDirectory {
     @NonNull private final Identifier identifier;
 
     @NonNull private final Trie<CliDirectory> childDirectories;
@@ -181,17 +176,6 @@ public class CliDirectory implements Identifiable {
         return builder.build();
     }
 
-    private static final Function<CliDirectory, CliValueType> DIRECTORY_VALUE_MAPPER = new Function<CliDirectory, CliValueType>() {
-        @Override
-        public CliValueType apply(CliDirectory input) {
-            return CliValueType.DIRECTORY;
-        }
-    };
-
-    private static final Function<CliCommand, CliValueType> COMMAND_VALUE_MAPPER = new Function<CliCommand, CliValueType>() {
-        @Override
-        public CliValueType apply(CliCommand input) {
-            return CliValueType.COMMAND;
-        }
-    };
+    private static final CliValueTypeMapper<CliDirectory> DIRECTORY_VALUE_MAPPER = new CliValueTypeMapper<>(CliValueType.DIRECTORY);
+    private static final CliValueTypeMapper<CliCommand> COMMAND_VALUE_MAPPER = new CliValueTypeMapper<>(CliValueType.COMMAND);
 }

@@ -38,4 +38,8 @@ public interface CliOutput {
     void println(String text);
 
     void errorPrintln(String text);
+
+    void setCommandLine(String commandLine);
+
+    // TODO: Should change working directory should be through here ?
 }

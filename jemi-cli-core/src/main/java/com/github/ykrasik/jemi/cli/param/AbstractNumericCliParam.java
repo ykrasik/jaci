@@ -19,7 +19,7 @@ package com.github.ykrasik.jemi.cli.param;
 import com.github.ykrasik.jemi.cli.exception.ParseError;
 import com.github.ykrasik.jemi.cli.exception.ParseException;
 import com.github.ykrasik.jemi.core.Identifier;
-import com.github.ykrasik.jerminal.old.assist.AutoCompleteReturnValue;
+import com.github.ykrasik.jemi.cli.assist.AutoComplete;
 import com.github.ykrasik.jemi.util.function.Supplier;
 import com.github.ykrasik.jemi.util.opt.Opt;
 import lombok.NonNull;
@@ -45,7 +45,7 @@ public abstract class AbstractNumericCliParam<T> extends AbstractCliParam<T> {
     protected abstract T parseNumber(String rawValue);
 
     @Override
-    public AutoCompleteReturnValue autoComplete(@NonNull String prefix) throws ParseException {
+    public AutoComplete autoComplete(@NonNull String prefix) throws ParseException {
         throw new ParseException(ParseError.INVALID_PARAM_VALUE, "Cannot autoComplete %s parameter: '%s'!'", getParamTypeName(), getIdentifier().getName());
     }
 }

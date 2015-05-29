@@ -14,32 +14,22 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jemi.cli.param;
+package com.github.ykrasik.jemi.cli.assist;
 
-import com.github.ykrasik.jemi.core.param.*;
+import com.github.ykrasik.jemi.util.function.Function;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 /**
  * @author Yevgeny Krasik
  */
 // TODO: JavaDoc
-public class CliParamResolver implements ParamDefResolver<CliParam> {
-    @Override
-    public StringCliParam stringParam(StringParamDef def) {
-        return StringCliParam.fromDef(def);
-    }
+@RequiredArgsConstructor
+public class CliValueTypeMapper<T> implements Function<T, CliValueType> {
+    @NonNull private final CliValueType type;
 
     @Override
-    public BooleanCliParam booleanParam(BooleanParamDef def) {
-        return BooleanCliParam.fromDef(def);
-    }
-
-    @Override
-    public IntCliParam intParam(IntParamDef def) {
-        return IntCliParam.fromDef(def);
-    }
-
-    @Override
-    public DoubleCliParam doubleParam(DoubleParamDef def) {
-        return DoubleCliParam.fromDef(def);
+    public CliValueType apply(T t) {
+        return type;
     }
 }

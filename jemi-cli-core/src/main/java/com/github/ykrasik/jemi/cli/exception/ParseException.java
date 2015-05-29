@@ -16,7 +16,8 @@
 
 package com.github.ykrasik.jemi.cli.exception;
 
-import com.github.ykrasik.jerminal.old.assist.CommandInfo;
+import com.github.ykrasik.jemi.util.opt.Opt;
+import com.github.ykrasik.jemi.cli.assist.CommandInfo;
 import com.google.common.base.Optional;
 
 import java.util.Objects;
@@ -65,7 +66,7 @@ public class ParseException extends Exception {
     /**
      * @return The command info.
      */
-    public Optional<CommandInfo> getCommandInfo() {
+    public Opt<CommandInfo> getCommandInfo() {
         return commandInfo;
     }
 

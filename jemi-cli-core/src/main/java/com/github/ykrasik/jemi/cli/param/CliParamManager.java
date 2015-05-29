@@ -16,30 +16,29 @@
 
 package com.github.ykrasik.jemi.cli.param;
 
-import com.github.ykrasik.jemi.core.param.*;
+import com.github.ykrasik.jemi.cli.command.CliCommandArgs;
+import com.github.ykrasik.jemi.cli.exception.ParseException;
+import com.github.ykrasik.jemi.cli.assist.AssistInfo;
+
+import java.util.List;
 
 /**
  * @author Yevgeny Krasik
  */
 // TODO: JavaDoc
-public class CliParamResolver implements ParamDefResolver<CliParam> {
-    @Override
-    public StringCliParam stringParam(StringParamDef def) {
-        return StringCliParam.fromDef(def);
-    }
+public interface CliParamManager {
+    /**
+     * @param args Args to be parsed.
+     * @return Parsed args.
+     * @throws ParseException If an invalid value was supplied for a param, or if a param wasn't bound.
+     */
+    CliCommandArgs parse(List<String> args) throws ParseException;
 
-    @Override
-    public BooleanCliParam booleanParam(BooleanParamDef def) {
-        return BooleanCliParam.fromDef(def);
-    }
-
-    @Override
-    public IntCliParam intParam(IntParamDef def) {
-        return IntCliParam.fromDef(def);
-    }
-
-    @Override
-    public DoubleCliParam doubleParam(DoubleParamDef def) {
-        return DoubleCliParam.fromDef(def);
-    }
+    /**
+     * @param args Args to be auto-completed. Will only auto-complete the last arg.
+     * @return Auto complete suggestions for the last arg. Every preceding arg is expected to be a valid param value.
+     * @throws ParseException If any of the args except the last one can't be validly parsed.
+     */
+    // TODO: JavaDoc
+    AssistInfo assist(List<String> args) throws ParseException;
 }

@@ -20,7 +20,7 @@ import com.github.ykrasik.jemi.cli.command.CliCommand;
 import com.github.ykrasik.jemi.cli.exception.ParseException;
 import com.github.ykrasik.jemi.cli.hierarchy.CliCommandHierarchy;
 import com.github.ykrasik.jemi.core.Identifier;
-import com.github.ykrasik.jerminal.old.assist.AutoCompleteReturnValue;
+import com.github.ykrasik.jemi.cli.assist.AutoComplete;
 import com.github.ykrasik.jemi.util.function.Supplier;
 import com.github.ykrasik.jemi.util.function.Suppliers;
 import com.github.ykrasik.jemi.util.opt.Opt;
@@ -57,7 +57,7 @@ public class CommandCliParam extends AbstractCliParam<CliCommand> {
     }
 
     @Override
-    public AutoCompleteReturnValue autoComplete(@NonNull String prefix) throws ParseException {
+    public AutoComplete autoComplete(@NonNull String prefix) throws ParseException {
         return hierarchy.autoCompletePath(prefix);
     }
 
