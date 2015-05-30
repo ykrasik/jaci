@@ -16,10 +16,15 @@
 
 package com.github.ykrasik.jemi.cli.output;
 
+import com.github.ykrasik.jemi.cli.assist.BoundParams;
+import com.github.ykrasik.jemi.cli.assist.CommandInfo;
+import com.github.ykrasik.jemi.cli.assist.Suggestions;
 import com.github.ykrasik.jemi.cli.command.CliCommand;
 import com.github.ykrasik.jemi.cli.directory.CliDirectory;
 import com.github.ykrasik.jemi.cli.param.CliParam;
+import com.github.ykrasik.jemi.core.Identifiable;
 import com.github.ykrasik.jemi.core.IdentifiableComparators;
+import com.github.ykrasik.jemi.core.Identifier;
 import com.github.ykrasik.jemi.util.opt.Opt;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -34,128 +39,222 @@ import java.util.List;
 // TODO: JavaDoc
 @RequiredArgsConstructor
 public class DefaultCliSerializer implements CliSerializer {
-    @NonNull private final CliOutput output;
+    @NonNull private final String tab;
 
-    @Override
-    public void serializeDirectory(CliDirectory directory, boolean recursive) {
-        printDirectory(directory, recursive, 0);
+    public DefaultCliSerializer() {
+        this("\t");
     }
 
-    private void printDirectory(CliDirectory directory, boolean recursive, int depth) {
-        final StringBuilder sb = appendTabs(depth);
+    @Override
+    public String serializePathToDirectory(@NonNull CliDirectory directory) {
+        return directory.toPath();
+    }
 
-        // Print root directory name.
-        sb.append('[');
-        sb.append(directory.getName());
-        sb.append(']');
-        output.println(sb.toString());
+    @Override
+    public String serializeCommandLine(@NonNull String commandLine) {
+        return "> " + commandLine;
+    }
 
-        // Print child commands.
+    @Override
+    public List<String> serializeDirectory(@NonNull CliDirectory directory, boolean recursive) {
+        final Serializer serializer = new Serializer();
+        serializeDirectory(serializer, directory, recursive);
+        return serializer.serialization;
+    }
+
+    private void serializeDirectory(Serializer serializer, CliDirectory directory, boolean recursive) {
+        // Serialize root directory name.
+        serializer.appendDepth();
+        serializer.append('[');
+        serializer.append(directory.getName());
+        serializer.append(']');
+        serializer.newLine();
+
+        // Serialize child commands.
         final List<CliCommand> commands = new ArrayList<>(directory.getChildCommands());
         Collections.sort(commands, IdentifiableComparators.nameComparator());
+
         for (CliCommand command : commands) {
-            printCommand(command, depth + 1, Opt.<CliBoundParams>absent());
+            serializer.incDepth();
+            serializeIdentifiable(serializer, command);
+            serializer.decDepth();
         }
 
         if (recursive) {
-            // Print child directories.
+            // Serialize child directories.
             final List<CliDirectory> directories = new ArrayList<>(directory.getChildDirectories());
             Collections.sort(directories, IdentifiableComparators.nameComparator());
+
             for (CliDirectory childDirectory : directories) {
-                printDirectory(childDirectory, true, depth + 1);
+                serializer.incDepth();
+                serializeDirectory(serializer, childDirectory, true);
+                serializer.decDepth();
             }
         }
     }
 
-    // TODO: JavaDoc
     @Override
-    public void serializeCommand(CliCommand command) {
-        printCommand(command, true, 0);
-    }
+    public List<String> serializeCommand(CliCommand command) {
+        final Serializer serializer = new Serializer();
 
-    private void printCommand(CliCommand command, boolean withParams, int depth) {
-        asd
-    }
+        // Serialize command name : description
+        serializeIdentifiable(serializer, command);
 
-    private void printCommand(CliCommand command, int depth, Opt<CliBoundParams> boundParams) {
-        final StringBuilder sb = appendTabs(depth);
-
-        // Print name : description
-        sb.append(command.getName());
-        sb.append(" : ");
-        sb.append(command.getDescription());
-        output.println(sb.toString());
-
-        // Print params.
-        if (boundParams.isPresent()) {
-            printBoundParams(command, boundParams.get(), depth + 1);
-        }
-    }
-
-    private void printBoundParams(CliCommand command, CliBoundParams boundParams, int depth) {
-        final Opt<CliParam> currentParam = boundParams.getCurrentParam();
+        // Serialize each param name : description
         for (CliParam param : command.getParams()) {
-            final Opt<String> value = boundParams.getBoundValue(param);
-            final boolean isCurrent = currentParam.isPresent() && currentParam.get() == param;
-            printParam(param, depth + 1, value, false, isCurrent);
+            serializeIdentifiable(serializer, param);
         }
+        return serializer.serialization;
     }
 
-    // TODO: This is ugly, find a better way.
-    private void printParam(CliParam param,
-                            int depth,
-                            Opt<String> value,
-                            boolean withDescription,
-                            boolean isCurrent) {
-        final StringBuilder sb = appendTabs(depth);
-
-        // Surround the current param being parsed with -> <-
-        if (isCurrent) {
-            sb.append("-> ");
-            sb.append(getTab());
-        } else {
-            sb.append(getTab());
-        }
-
-        sb.append(param.toExternalForm());
-        if (value.isPresent()) {
-            sb.append(" = ");
-            sb.append(value.get());
-        }
-
-        if (withDescription) {
-            sb.append(" : ");
-            sb.append(param.getIdentifier().getDescription());
-        }
-
-        // Actually, value.isPresent and isCurrent cannot both be true at the same time.
-        if (isCurrent) {
-            sb.append(getTab());
-            sb.append(" <-");
-        }
-
-        output.println(sb.toString());
+    private void serializeIdentifiable(Serializer serializer, Identifiable identifiable) {
+        final Identifier identifier = identifiable.getIdentifier();
+        serializer.appendDepth();
+        serializer.append(identifier.getName());
+        serializer.append(" : ");
+        serializer.append(identifier.getDescription());
+        serializer.newLine();
     }
 
-    // TODO: JavaDoc
     @Override
-    public void serializeException(Exception e) {
-        this.output.errorPrintln(e.toString());
+    public List<String> serializeException(Exception e) {
+        final Serializer serializer = new Serializer();
+
+        serializer.append(e.toString());
+        serializer.newLine();
+
         for (StackTraceElement stackTraceElement : e.getStackTrace()) {
-            this.output.errorPrintln(getTab() + stackTraceElement.toString());
+            serializer.incDepth();
+            serializer.append(stackTraceElement.toString());
+            serializer.newLine();
+        }
+        return serializer.serialization;
+    }
+
+    @Override
+    public List<String> serializeCommandInfo(CommandInfo info) {
+        final Serializer serializer = new Serializer();
+
+        // Serialize command name : description
+        final CliCommand command = info.getCommand();
+        serializeIdentifiable(serializer, command);
+
+        // Serialize bound params.
+        final BoundParams boundParams = info.getBoundParams();
+        serializeBoundParams(serializer, command, boundParams);
+
+        return serializer.serialization;
+    }
+
+    private void serializeBoundParams(Serializer serializer, CliCommand command, BoundParams boundParams) {
+        final Opt<CliParam> nextParam = boundParams.getNextParam();
+        for (CliParam param : command.getParams()) {
+            serializer.appendDepth();
+
+            final Opt<Object> value = boundParams.getBoundValue(param);
+            final boolean isCurrent = nextParam.isPresent() && nextParam.get() == param;
+
+            // Surround the current param being parsed with -> <-
+            if (isCurrent) {
+                serializer.append("-> ");
+                serializer.append(tab);
+            } else {
+                serializer.append(tab);
+            }
+
+            serializer.append(param.toExternalForm());
+            if (value.isPresent()) {
+                serializer.append(" = ");
+                serializer.append(value.get().toString());
+            }
+
+            // Actually, value.isPresent and isCurrent cannot both be true at the same time.
+            if (isCurrent) {
+                serializer.append(tab);
+                serializer.append(" <-");
+            }
+
+            serializer.newLine();
         }
     }
 
-    private StringBuilder appendTabs(int tabs) {
-        final String tab = getTab();
-        final StringBuilder sb = new StringBuilder(tab.length() * tabs);
-        for (int i = 0; i < tabs; i++) {
-            sb.append(tab);
-        }
-        return sb;
+    @Override
+    public List<String> serializeSuggestions(Suggestions suggestions) {
+        final Serializer serializer = new Serializer();
+
+        serializer.append("Suggestions:");
+        serializer.newLine();
+
+        printSuggestions(serializer, suggestions.getDirectorySuggestions(), "Directories");
+        printSuggestions(serializer, suggestions.getCommandSuggestions(), "Commands");
+        printSuggestions(serializer, suggestions.getParamNameSuggestions(), "Parameter names");
+        printSuggestions(serializer, suggestions.getParamValueSuggestions(), "Parameter values");
+
+        return serializer.serialization;
     }
 
-    private String getTab() {
-        return output.getConfig().getTab();
+    private void printSuggestions(Serializer serializer, List<String> suggestions, String suggestionsTitle) {
+        if (!suggestions.isEmpty()) {
+            serializer.append(suggestionsTitle);
+            serializer.append(": [");
+            serializer.append(join(suggestions));
+            serializer.append(']');
+            serializer.newLine();
+        }
+    }
+
+    private String join(List<String> list) {
+        final StringBuilder sb = new StringBuilder();
+        for (String str : list) {
+            sb.append(str);
+            sb.append(", ");
+        }
+        if (sb.length() > 2) {
+            sb.delete(sb.length() - 2, sb.length());
+        }
+        return sb.toString();
+    }
+
+    private class Serializer {
+        private final List<String> serialization = new ArrayList<>();
+
+        private StringBuilder sb = new StringBuilder();
+        private int depth;
+
+        public Serializer incDepth() {
+            depth++;
+            return this;
+        }
+
+        public Serializer decDepth() {
+            depth--;
+            if (depth < 0) {
+                throw new IllegalArgumentException("Invalid depth: " + depth);
+            }
+            return this;
+        }
+
+        public Serializer appendDepth() {
+            for (int i = 0; i < depth; i++) {
+                sb.append(tab);
+            }
+            return this;
+        }
+
+        public Serializer append(String str) {
+            sb.append(str);
+            return this;
+        }
+
+        public Serializer append(char ch) {
+            sb.append(ch);
+            return this;
+        }
+
+        public Serializer newLine() {
+            serialization.add(sb.toString());
+            sb = new StringBuilder();
+            return this;
+        }
     }
 }

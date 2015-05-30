@@ -19,6 +19,7 @@ package com.github.ykrasik.jemi.cli.directory;
 import com.github.ykrasik.jemi.api.Constants;
 import com.github.ykrasik.jemi.cli.assist.CliValueType;
 import com.github.ykrasik.jemi.cli.command.CliCommand;
+import com.github.ykrasik.jemi.core.Identifiable;
 import com.github.ykrasik.jemi.core.Identifier;
 import com.github.ykrasik.jemi.core.command.CommandDef;
 import com.github.ykrasik.jemi.core.directory.CommandDirectoryDef;
@@ -40,7 +41,7 @@ import java.util.Collection;
  * @author Yevgeny Krasik
  */
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)  // Package-visible for testing
-public class CliDirectory {
+public class CliDirectory implements Identifiable {
     @NonNull private final Identifier identifier;
 
     @NonNull private final Trie<CliDirectory> childDirectories;
@@ -61,6 +62,11 @@ public class CliDirectory {
     // TODO: JavaDoc
     public Opt<CliDirectory> getParent() {
         return parent;
+    }
+
+    @Override
+    public Identifier getIdentifier() {
+        return identifier;
     }
 
     // TODO: JavaDoc

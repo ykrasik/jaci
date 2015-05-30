@@ -58,7 +58,7 @@ public class CliCommand implements Identifiable, CliParamManager, CommandExecuto
 
     // TODO: JavaDoc
     public String getDescription() {
-        return identifier.getName();
+        return identifier.getDescription();
     }
 
     @Override

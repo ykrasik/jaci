@@ -10,7 +10,7 @@ buildscript {
 
 subprojects {
     apply plugin: "java"
-    apply from: "../publish.gradle"
+    apply from: 'https://raw.githubusercontent.com/ykrasik/gradle-publish-script/master/publish.gradle'
 
     sourceCompatibility = 1.7
     targetCompatibility = 1.7
@@ -27,44 +27,39 @@ subprojects {
     }
 }
 
-project("jerminal-api") {
-    description "Jerminal API"
+project("jemi-utils") {
+    description "Jemi utils"
 }
 
-project("jerminal-utils") {
-    description "Jerminal utils"
-}
-
-project("jerminal-core") {
-    description "Jerminal API consumer"
+project("jemi-core") {
+    description "Jemi API & API Consumer"
 
     dependencies {
-        compile project(":jerminal-api")
-        compile project(":jerminal-utils")
+        compile project(":jemi-utils")
     }
 }
 
-project("jerminal-cli-core") {
-    description "Jerminal command line interface core"
+project("jemi-cli-core") {
+    description "Jemi command line interface core"
 
     dependencies {
-        compile project(":jerminal-core")
+        compile project(":jemi-core")
     }
 }
 
-project("jerminal-javafx-cli") {
-    description "Jerminal JavaFX command line interface"
+project("jemi-javafx-cli") {
+    description "Jemi JavaFX command line interface"
 
     dependencies {
-        compile project(":jerminal-cli-core")
+        compile project(":jemi-cli-core")
     }
 }
 
-project("jerminal-libgdx-cli") {
-    description "Jerminal libGdx command line interface"
+project("jemi-libgdx-cli") {
+    description "Jemi libGdx command line interface"
 
     dependencies {
-        compile project(":jerminal-cli-core")
+        compile project(":jemi-cli-core")
 
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
