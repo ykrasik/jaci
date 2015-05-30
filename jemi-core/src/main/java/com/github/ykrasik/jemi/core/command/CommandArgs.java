@@ -39,67 +39,44 @@ import java.util.List;
 // TODO: JavaDoc is wrong
 public interface CommandArgs {
     /**
-     * @param name The parameter name.
-     * @return The {@link String} value parsed by the parameter specified by 'name'.
-     * @throws IllegalArgumentException If no value was parsed by the parameter specified by 'name'
-     *                                  or if the value parsed by the parameter isn't a {@link String}.
+     * @return All parameter values that were parsed.
      */
-    String getString(String name);
+    List<Object> getArgs();
 
     /**
-     * @return The next positional {@link String} value.
-     * @throws IllegalArgumentException If there are no more positional values
-     *                                  or if the next positional value isn't a {@link String}.
+     * @param clazz Class that the next positional argument is expected to be.
+     * @param <T> Type of argument to pop.
+     * @return The next positional argument of type {@code T}.
+     * @throws IllegalArgumentException If there are no more positional arguments
+     *                                  or if the next positional argument isn't of type {@code T}.
+     */
+    <T> T popArg(Class<T> clazz);
+
+    /**
+     * @return The next positional {@link String} argument.
+     * @throws IllegalArgumentException If there are no more positional arguments
+     *                                  or if the next positional argument isn't a {@link String}.
      */
     String popString();
 
     /**
-     * @param name The parameter name.
-     * @return The int value parsed by the parameter specified by 'name'.
-     * @throws IllegalArgumentException If no value was parsed by the parameter specified by 'name'
-     *                                  or if the value parsed by the parameter isn't an int.
-     */
-    int getInt(String name);
-
-    /**
-     * @return The next positional int value.
-     * @throws IllegalArgumentException If there are no more positional values
-     *                                  or if the next positional value isn't an int.
+     * @return The next positional int argument.
+     * @throws IllegalArgumentException If there are no more positional arguments
+     *                                  or if the next positional argument isn't an int.
      */
     int popInt();
 
     /**
-     * @param name The parameter name.
-     * @return The double value parsed by the parameter specified by 'name'.
-     * @throws IllegalArgumentException If no value was parsed by the parameter specified by 'name'
-     *                                  or if the value parsed by the parameter isn't a double.
-     */
-    double getDouble(String name);
-
-    /**
-     * @return The next positional double value.
-     * @throws IllegalArgumentException If there are no more positional values
-     *                                  or if the next positional value isn't a double.
+     * @return The next positional double argument.
+     * @throws IllegalArgumentException If there are no more positional arguments
+     *                                  or if the next positional argument isn't a double.
      */
     double popDouble();
 
     /**
-     * @param name The parameter name.
-     * @return The boolean value parsed by the parameter specified by 'name'.
-     * @throws IllegalArgumentException If no value was parsed by the parameter specified by 'name' or
-     *                                  if the value parsed by the parameter isn't a boolean.
-     */
-    boolean getBool(String name);
-
-    /**
-     * @return The next positional boolean value.
-     * @throws IllegalArgumentException If there are no more positional values or
-     *                                  if the next positional value isn't a boolean.
+     * @return The next positional boolean argument.
+     * @throws IllegalArgumentException If there are no more positional arguments
+     *                                  or if the next positional argument isn't a boolean.
      */
     boolean popBool();
-
-    /**
-     * @return All parameter values that were parsed.
-     */
-    List<Object> getAllValues();
 }

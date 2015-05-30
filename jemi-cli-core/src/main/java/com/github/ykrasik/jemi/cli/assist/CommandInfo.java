@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2014 Yevgeny Krasik                                          *
+ * Copyright (C) 2015 Yevgeny Krasik                                          *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -16,60 +16,16 @@
 
 package com.github.ykrasik.jemi.cli.assist;
 
-import com.github.ykrasik.jerminal.old.parameter.CommandParam;
-import com.github.ykrasik.jerminal.old.command.Command;
-import com.google.common.base.Optional;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import com.github.ykrasik.jemi.cli.command.CliCommand;
+import lombok.Data;
+import lombok.NonNull;
 
 /**
- * Information about a command.
- *
  * @author Yevgeny Krasik
  */
+// TODO: JavaDoc
+@Data
 public class CommandInfo {
-    private final Command command;
-    private final List<Optional<String>> paramValues;
-    private final Optional<CommandParam> currentParam;
-
-    public CommandInfo(Command command, List<Optional<String>> paramValues, Optional<CommandParam> currentParam) {
-        this.command = Objects.requireNonNull(command);
-        this.paramValues = Collections.unmodifiableList(Objects.requireNonNull(paramValues));
-        this.currentParam = Objects.requireNonNull(currentParam);
-    }
-
-    /**
-     * @return The {@link Command}.
-     */
-    public Command getCommand() {
-        return command;
-    }
-
-    /**
-     * @return A list of values bound to the command's {@link CommandParam}s, if any.<br>
-     *         The values appear in the same order as the {@link CommandParam}s returned by {@link Command#getParams()}.
-     */
-    public List<Optional<String>> getParamValues() {
-        return paramValues;
-    }
-
-    /**
-     * @return The current {@link CommandParam} being parsed. Will be absent if not parsing a command, or if all the params have been parsed.<br>
-     *         If present, will be == to one of the {@link CommandParam}s returned by {@link Command#getParams()}.
-     */
-    public Optional<CommandParam> getCurrentParam() {
-        return currentParam;
-    }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("CommandInfo{");
-        sb.append("command=").append(command);
-        sb.append(", paramValues=").append(paramValues);
-        sb.append(", currentParam=").append(currentParam);
-        sb.append('}');
-        return sb.toString();
-    }
+    @NonNull private final CliCommand command;
+    @NonNull private final BoundParams boundParams;
 }

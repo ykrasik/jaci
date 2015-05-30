@@ -26,7 +26,7 @@ public final class CliConstants {
 
     public static final String PATH_THIS = ".";
 
-    public static final String PATH_PARENT = "src/main";
+    public static final String PATH_PARENT = "..";
 
     public static final String NAMED_PARAM_PREFIX = "-";
 }

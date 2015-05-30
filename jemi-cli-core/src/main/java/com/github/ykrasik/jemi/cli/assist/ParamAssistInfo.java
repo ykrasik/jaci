@@ -14,27 +14,17 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jemi.cli.command;
+package com.github.ykrasik.jemi.cli.assist;
 
-import com.github.ykrasik.jemi.api.CommandOutput;
-import com.github.ykrasik.jemi.cli.directory.CliDirectory;
+import lombok.Data;
+import lombok.NonNull;
 
 /**
  * @author Yevgeny Krasik
  */
 // TODO: JavaDoc
-public interface CliCommandOutput extends CommandOutput {
-    /**
-     * A default 'command executed successfully' message will be printed after the command is executed,
-     * but only if no other interactions were detected with the output.
-     *
-     * @return Whether the default 'command executed successfully' message should be printed after this command.
-     */
-    boolean isPrintDefaultExecutionMessage();
-
-    void setWorkingDirectory(CliDirectory directory);
-
-    void printDirectory(CliDirectory directory, boolean recursive);
-
-    void printCommand(CliCommand command);
+@Data
+public class ParamAssistInfo {
+    @NonNull private final BoundParams boundParams;
+    @NonNull private final AutoComplete autoComplete;
 }

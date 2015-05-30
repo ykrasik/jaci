@@ -25,32 +25,16 @@ import com.github.ykrasik.jemi.core.command.CommandArgs;
 // TODO: JavaDoc
 public interface CliCommandArgs extends CommandArgs {
     /**
-     * @param name The parameter name.
-     * @return The {@link CliDirectory} value parsed by the parameter specified by 'name'.
-     * @throws IllegalArgumentException If no value was parsed by the parameter specified by 'name'
-     *                                  or if the value parsed by the parameter isn't a {@link CliDirectory}.
-     */
-    CliDirectory getDirectory(String name) throws IllegalArgumentException;
-
-    /**
-     * @return The next positional {@link CliDirectory} value.
-     * @throws IllegalArgumentException If there are no more positional values
-     *                                  or if the next positional value isn't a {@link CliDirectory}.
+     * @return The next positional {@link CliDirectory} argument.
+     * @throws IllegalArgumentException If there are no more positional arguments
+     *                                  or if the next positional argument isn't a {@link CliDirectory}.
      */
     CliDirectory popDirectory() throws IllegalArgumentException;
 
     /**
-     * @param name The parameter name.
-     * @return The {@link CliCommand} value parsed by the parameter specified by 'name'.
-     * @throws IllegalArgumentException If no value was parsed by the parameter specified by 'name'
-     *                                  or of the value parsed by the parameter isn't a {@link CliCommand}.
-     */
-    CliCommand getCommand(String name) throws IllegalArgumentException;
-
-    /**
-     * @return The next positional {@link CliCommand} value.
-     * @throws IllegalArgumentException If there are no more positional values
-     *                                  or if the next positional value isn't a {@link CliCommand}.
+     * @return The next positional {@link CliCommand} argument.
+     * @throws IllegalArgumentException If there are no more positional arguments
+     *                                  or if the next positional argument isn't a {@link CliCommand}.
      */
     CliCommand popCommand() throws IllegalArgumentException;
 }

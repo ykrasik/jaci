@@ -26,15 +26,30 @@ import java.util.*;
  */
 @RequiredArgsConstructor
 public class CommandArgsImpl implements CommandArgs {
-    // FIXME: There is actually no need for named access any more.
-    @NonNull private final List<Object> positionalArgs;
-    @NonNull private final Map<String, Object> namedArgs;
+    @NonNull private final List<Object> args;
 
     private int index = 0;
 
     @Override
-    public String getString(String name) {
-        return getArg(name, String.class);
+    public List<Object> getArgs() {
+        return Collections.unmodifiableList(args);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> T popArg(Class<T> clazz) {
+        if (index >= args.size()) {
+            throw new IllegalArgumentException("No more arguments!");
+        }
+
+        final Object value = args.get(index);
+        if (!clazz.isInstance(value)) {
+            final String message = String.format("Invalid argument type: expected=%s, actual=%s", clazz, value.getClass());
+            throw new IllegalArgumentException(message);
+        }
+
+        index++;
+        return (T) value;
     }
 
     @Override
@@ -43,18 +58,8 @@ public class CommandArgsImpl implements CommandArgs {
     }
 
     @Override
-    public int getInt(String name) {
-        return getArg(name, Integer.class);
-    }
-
-    @Override
     public int popInt() {
         return popArg(Integer.class);
-    }
-
-    @Override
-    public double getDouble(String name) {
-        return getArg(name, Double.class);
     }
 
     @Override
@@ -63,47 +68,7 @@ public class CommandArgsImpl implements CommandArgs {
     }
 
     @Override
-    public boolean getBool(String name) {
-        return getArg(name, Boolean.class);
-    }
-
-    @Override
     public boolean popBool() {
         return popArg(Boolean.class);
-    }
-
-    @Override
-    public List<Object> getAllValues() {
-        return Collections.unmodifiableList(positionalArgs);
-    }
-
-    // TODO: Bah, protected API :/
-    protected <T> T getArg(String name, Class<T> clazz) throws IllegalArgumentException {
-        final Object value = namedArgs.get(name);
-        if (value == null) {
-            final String message = String.format("No value found for param '%s'!", name);
-            throw new IllegalArgumentException(message);
-        }
-        if (value.getClass() != clazz) {
-            final String message = String.format("Value for param '%s' is of invalid type: expected=%s, actual=%s", name, clazz, value.getClass());
-            throw new IllegalArgumentException(message);
-        }
-        return clazz.cast(value);
-    }
-
-    // TODO: Bah, protected API :/
-    protected <T> T popArg(Class<T> clazz) throws IllegalArgumentException {
-        if (index >= positionalArgs.size()) {
-            throw new IllegalArgumentException("No more arguments!");
-        }
-
-        final Object value = positionalArgs.get(index);
-        if (value.getClass() != clazz) {
-            final String message = String.format("Value for next positional param is of invalid type: expected=%s, actual=%s", clazz, value.getClass());
-            throw new IllegalArgumentException(message);
-        }
-
-        index++;
-        return clazz.cast(value);
     }
 }

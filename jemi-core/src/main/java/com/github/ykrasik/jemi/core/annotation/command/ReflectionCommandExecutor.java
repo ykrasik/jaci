@@ -19,11 +19,11 @@ package com.github.ykrasik.jemi.core.annotation.command;
 import com.github.ykrasik.jemi.api.CommandOutput;
 import com.github.ykrasik.jemi.core.command.CommandArgs;
 import com.github.ykrasik.jemi.core.command.CommandExecutor;
-import com.github.ykrasik.jerminal.old.command.PrivilegedCommandArgs;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -38,8 +38,7 @@ public class ReflectionCommandExecutor implements CommandExecutor {
 
     @Override
     public void execute(CommandOutput output, CommandArgs args) throws Exception {
-        // Fetch all params.
-        final List<Object> reflectionArgs = ((PrivilegedCommandArgs) args).getArgValues();
+        final List<Object> reflectionArgs = new ArrayList<>(args.getArgs());
 
         // Add output as first arg.
         reflectionArgs.add(0, output);

@@ -14,22 +14,11 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jemi.cli.exception;
+package com.github.ykrasik.jerminal.old.parameter.entry;
 
 /**
- * Possible parse errors.
- *
  * @author Yevgeny Krasik
  */
-public enum ParseError {
-    // File system related
-    INVALID_COMMAND,
-    INVALID_DIRECTORY,
-
-    // Param related
-    INVALID_PARAM,
-    INVALID_PARAM_VALUE,
-    PARAM_NOT_BOUND,
-    PARAM_ALREADY_BOUND,
-    NO_MORE_PARAMS
+public class DirectoryParamTest {
+    // FIXME: Implement
 }

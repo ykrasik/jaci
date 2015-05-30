@@ -54,6 +54,7 @@ public class CliCommandHierarchyImpl implements CliCommandHierarchy {
      */
     private final CliDirectory systemCommands;
 
+    // TODO: Don't use lombok generated methods.
     @Getter @Setter
     @NonNull private CliDirectory workingDirectory;
 

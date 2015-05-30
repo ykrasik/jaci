@@ -18,7 +18,6 @@ package com.github.ykrasik.jemi.cli.directory;
 
 import com.github.ykrasik.jemi.api.Constants;
 import com.github.ykrasik.jemi.cli.assist.CliValueType;
-import com.github.ykrasik.jemi.cli.assist.CliValueTypeMapper;
 import com.github.ykrasik.jemi.cli.command.CliCommand;
 import com.github.ykrasik.jemi.core.Identifier;
 import com.github.ykrasik.jemi.core.command.CommandDef;
@@ -28,7 +27,6 @@ import com.github.ykrasik.jemi.util.trie.Trie;
 import com.github.ykrasik.jemi.util.trie.TrieBuilder;
 import com.github.ykrasik.jemi.util.trie.Tries;
 import lombok.AccessLevel;
-import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
@@ -51,7 +49,6 @@ public class CliDirectory {
     /**
      * The parent {@link CliDirectory}.
      */
-    @Getter
     private Opt<CliDirectory> parent = Opt.absent();
 
     private void setParent(CliDirectory parent) {
@@ -59,6 +56,11 @@ public class CliDirectory {
             throw new IllegalStateException("Trying to set the parent for a CliDirectory that already has one: " + identifier);
         }
         this.parent = Opt.of(parent);
+    }
+
+    // TODO: JavaDoc
+    public Opt<CliDirectory> getParent() {
+        return parent;
     }
 
     // TODO: JavaDoc
@@ -131,6 +133,11 @@ public class CliDirectory {
         return parent.get().toPath() + identifier.getName() + Constants.PATH_DELIMITER_STRING;
     }
 
+    @Override
+    public String toString() {
+        return toPath();
+    }
+
     // TODO: JavaDoc
     public static CliDirectory fromDef(@NonNull CommandDirectoryDef def) {
         final Trie<CliDirectory> childDirectories = createChildDirectories(def);
@@ -176,6 +183,6 @@ public class CliDirectory {
         return builder.build();
     }
 
-    private static final CliValueTypeMapper<CliDirectory> DIRECTORY_VALUE_MAPPER = new CliValueTypeMapper<>(CliValueType.DIRECTORY);
-    private static final CliValueTypeMapper<CliCommand> COMMAND_VALUE_MAPPER = new CliValueTypeMapper<>(CliValueType.COMMAND);
+    private static final CliValueType.Mapper<CliDirectory> DIRECTORY_VALUE_MAPPER = new CliValueType.Mapper<>(CliValueType.DIRECTORY);
+    private static final CliValueType.Mapper<CliCommand> COMMAND_VALUE_MAPPER = new CliValueType.Mapper<>(CliValueType.COMMAND);
 }

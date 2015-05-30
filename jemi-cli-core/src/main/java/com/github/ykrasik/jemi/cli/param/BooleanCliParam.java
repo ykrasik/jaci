@@ -34,6 +34,7 @@ import lombok.NonNull;
  *
  * @author Yevgeny Krasik
  */
+// TODO: Mention special use case of optional boolean param being a flag.
 public class BooleanCliParam extends AbstractCliParam<Boolean> {
     private static final Trie<CliValueType> VALUES = new TrieBuilder<CliValueType>()
         .add("true", CliValueType.COMMAND_PARAM_VALUE)

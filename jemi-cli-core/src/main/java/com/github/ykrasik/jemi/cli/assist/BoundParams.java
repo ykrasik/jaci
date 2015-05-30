@@ -14,27 +14,31 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jemi.cli.command;
+package com.github.ykrasik.jemi.cli.assist;
 
-import com.github.ykrasik.jemi.api.CommandOutput;
-import com.github.ykrasik.jemi.cli.directory.CliDirectory;
+import com.github.ykrasik.jemi.cli.param.CliParam;
+import com.github.ykrasik.jemi.util.opt.Opt;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+
+import java.util.Map;
 
 /**
  * @author Yevgeny Krasik
  */
 // TODO: JavaDoc
-public interface CliCommandOutput extends CommandOutput {
-    /**
-     * A default 'command executed successfully' message will be printed after the command is executed,
-     * but only if no other interactions were detected with the output.
-     *
-     * @return Whether the default 'command executed successfully' message should be printed after this command.
-     */
-    boolean isPrintDefaultExecutionMessage();
+@RequiredArgsConstructor
+public class BoundParams {
+    @NonNull private final Map<CliParam, Object> values;
+    @NonNull private final Opt<CliParam> nextParam;
 
-    void setWorkingDirectory(CliDirectory directory);
+    // TODO: JavaDoc
+    public Opt<Object> getBoundValue(CliParam param) {
+        return Opt.ofNullable(values.get(param));
+    }
 
-    void printDirectory(CliDirectory directory, boolean recursive);
-
-    void printCommand(CliCommand command);
+    // TODO: JavaDoc
+    public Opt<CliParam> getNextParam() {
+        return nextParam;
+    }
 }

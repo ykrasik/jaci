@@ -20,14 +20,15 @@ import com.github.ykrasik.jemi.cli.assist.*;
 import com.github.ykrasik.jemi.cli.command.CliCommand;
 import com.github.ykrasik.jemi.cli.command.CliCommandArgs;
 import com.github.ykrasik.jemi.cli.command.CliCommandOutput;
+import com.github.ykrasik.jemi.cli.command.CliCommandOutputImpl;
 import com.github.ykrasik.jemi.cli.commandline.CommandLine;
 import com.github.ykrasik.jemi.cli.commandline.CommandLineHistory;
 import com.github.ykrasik.jemi.cli.exception.ParseException;
 import com.github.ykrasik.jemi.cli.hierarchy.CliCommandHierarchy;
 import com.github.ykrasik.jemi.cli.output.CliOutput;
+import com.github.ykrasik.jemi.cli.output.CliPrinter;
+import com.github.ykrasik.jemi.cli.output.CliSerializer;
 import com.github.ykrasik.jemi.util.opt.Opt;
-import com.github.ykrasik.jerminal.old.ShellFileSystem;
-import com.github.ykrasik.jerminal.old.command.CommandOutputImpl;
 import lombok.NonNull;
 
 import java.util.List;
@@ -49,39 +50,48 @@ import java.util.List;
 // TODO: Create AssistInfo and ExecuteReturnValue instead of having a DisplayDriver with side effects?
 public class CliShell {
     private final CliCommandHierarchy hierarchy;
-    private final CliOutput output;
+    private final CliPrinter printer;
     private final CommandLineHistory history;
 
-    public CliShell(@NonNull CliCommandHierarchy hierarchy, @NonNull CliOutput output, int maxHistory) {
+    public CliShell(CliCommandHierarchy hierarchy, CliOutput output, CliSerializer serializer, int maxHistory) {
+        this(hierarchy, new CliPrinter(output, serializer), new CommandLineHistory(maxHistory));
+    }
+
+    /**
+     * Package-protected for testing.
+     */
+    CliShell(@NonNull CliCommandHierarchy hierarchy,
+             @NonNull CliPrinter printer,
+             @NonNull CommandLineHistory history) {
         this.hierarchy = hierarchy;
-        this.output = output;
-        this.history = new CommandLineHistory(maxHistory);
+        this.printer = printer;
+        this.history = history;
 
         // Welcome message.
-        output.begin();
-        output.println("Welcome to Jemi!");
-        output.println("");
-        output.end();
+        printer.begin();
+        printer.println("Welcome to Jemi!");
+        printer.println("");
+        printer.end();
     }
 
     /**
      * Provide assistance for the given command line.
      *
      * @param commandLine Command line to provide assistance for.
-     * @return True if the command line was assisted successfully.
+     * @return {@code true} if the command line was assisted successfully.
      */
     // FIXME: JavaDoc - everything is a side effect.
     public boolean assist(String commandLine) {
-        output.begin();
+        printer.begin();
         try {
             doAssist(commandLine);
             return true;
         } catch (ParseException e) {
             handleParseException(e);
         } catch (Exception e) {
-            output.displayException(e);
+            printer.printException(e);
         } finally {
-            output.end();
+            printer.end();
         }
         return false;
     }
@@ -91,47 +101,39 @@ public class CliShell {
         // 1. Display command info, if there is any.
         // 2. Determine the suggestions for auto complete.
         // 3. Set the new command line accordingly.
-        printCommandLine(rawCommandLine);
+        printer.printCommandLine(rawCommandLine);
         final CommandLine commandLine = CommandLine.forAssist(rawCommandLine);
+        final String pathToCommand = commandLine.getPathToCommand();
 
-        final AssistInfo assistInfo = getAssistInfo(commandLine);
+        final AutoComplete autoComplete;
+        // If we only have 1 arg, we are trying to auto-complete a path to a command.
+        if (commandLine.hasCommandArgs()) {
+            // The first arg is not the only arg on the commandLine, it is expected to be a valid path to a command,
+            // and we are auto-completing the command's parameters.
+            final CliCommand command = hierarchy.parsePathToCommand(pathToCommand);
 
-        final Opt<CommandInfo> commandInfo = assistInfo.getCommandInfo();
-        if (commandInfo.isPresent()) {
-            output.displayCommandInfo(commandInfo.get());
+            // Print param assistance info.
+            final List<String> args = commandLine.getCommandArgs();
+            final ParamAssistInfo assistInfo = command.assist(args);
+            final CommandInfo commandInfo = new CommandInfo(command, assistInfo.getBoundParams());
+            printer.printCommandInfo(commandInfo);
+
+            autoComplete = assistInfo.getAutoComplete();
+        } else {
+            // The first arg is the only arg on the commandLine, auto-complete path.
+            autoComplete = hierarchy.autoCompletePath(pathToCommand);
         }
-
-        final AutoComplete autoComplete = assistInfo.getAutoComplete();
 
         final Opt<Suggestions> suggestions = autoComplete.getSuggestions();
         if (suggestions.isPresent()) {
-            output.displaySuggestions(suggestions.get());
+            printer.printSuggestions(suggestions.get());
         }
 
         // TODO: Print an error if no suggestions are available?
-        final Opt<String> autoCompletedSuffix = autoComplete.getAutoCompletedSuffix();
+        final Opt<String> autoCompletedSuffix = autoComplete.getAutoCompleteSuffix();
         if (autoCompletedSuffix.isPresent()) {
-            output.setCommandLine(rawCommandLine + autoCompletedSuffix.get());
+            printer.setCommandLine(rawCommandLine + autoCompletedSuffix.get());
         }
-    }
-
-    private AssistInfo getAssistInfo(CommandLine commandLine) throws ParseException {
-        final String pathToCommand = commandLine.getPathToCommand();
-
-        // If we only have 1 arg, we are trying to auto-complete a path to a command.
-        if (!commandLine.hasCommandArgs()) {
-            // The first arg is the only arg on the commandLine, auto-complete path.
-            final AutoComplete autoComplete = hierarchy.autoCompletePath(pathToCommand);
-            return AssistInfo.noCommandInfo(autoComplete);
-        }
-
-        // The first arg is not the only arg on the commandLine, it is expected to be a valid path to a command,
-        // and we are auto-completing the command's parameters.
-        final CliCommand command = hierarchy.parsePathToCommand(pathToCommand);
-
-        // Provide assistance with the command parameters.
-        final List<String> args = commandLine.getCommandArgs();
-        return command.assist(args);
     }
 
     /**
@@ -141,27 +143,28 @@ public class CliShell {
      * @return True if the command line was executed successfully.
      */
     public boolean execute(String commandLine) {
-        output.begin();
+        printer.begin();
         try {
             doExecute(commandLine);
             return true;
         } catch (ParseException e) {
             handleParseException(e);
         } catch (Exception e) {
-            output.displayException(e);
+            printer.printException(e);
         } finally {
-            output.end();
+            printer.end();
         }
         return false;
     }
 
     private void doExecute(String rawCommandLine) throws Exception {
-        printCommandLine(rawCommandLine);
+        printer.printCommandLine(rawCommandLine);
+        printer.setCommandLine("");
 
         final CommandLine commandLine = CommandLine.forAssist(rawCommandLine);
         if (commandLine.isEmpty()) {
             // Print an empty line.
-            output.println("");
+            printer.println("");
             return;
         }
 
@@ -177,40 +180,47 @@ public class CliShell {
         final CliCommandArgs args = command.parse(rawArgs);
 
         // Execute the command.
-        final CliCommandOutput commandOutput = new CommandOutputImpl(output);
+        final CliCommandOutput commandOutput = new CliCommandOutputImpl(printer);
         command.execute(commandOutput, args);
 
-        if (!commandOutput.hasInteractions() && !commandOutput.isSuppressDefaultExecutionMessage()) {
+        if (commandOutput.isPrintDefaultExecutionMessage()) {
             final String message = String.format("Command '%s' executed successfully.", command.getName());
-            output.println(message);
+            printer.println(message);
         }
     }
 
     /**
-     * @return Previous command line from history.
+     * Set the command line to the previous one from history.
+     *
+     * @return @{code true} if there was a previous command line in history.
      */
-    public Opt<String> getPrevCommandLineFromHistory() {
-        return history.getPrevCommandLine();
+    public boolean setPrevCommandLineFromHistory() {
+        return setCommandLineIfPresent(history.getPrevCommandLine());
     }
 
     /**
-     * @return Next command line in history.
+     * Set the command line to the next one from history.
+     *
+     * @return true if there was a next command line in history.
      */
-    public Opt<String> getNextCommandLineFromHistory() {
-        return history.getNextCommandLine();
+    public boolean setNextCommandLineFromHistory() {
+        return setCommandLineIfPresent(history.getNextCommandLine());
     }
 
-    private void printCommandLine(String commandLine) {
-        output.println("> " + commandLine);
+    private boolean setCommandLineIfPresent(Opt<String> commandLine) {
+        if (commandLine.isPresent()) {
+            printer.setCommandLine(commandLine.get());
+        }
+        return commandLine.isPresent();
     }
 
     private void handleParseException(ParseException e) {
         final Opt<CommandInfo> commandInfo = e.getCommandInfo();
         if (commandInfo.isPresent()) {
-            output.displayCommandInfo(commandInfo.get());
+            printer.printCommandInfo(commandInfo.get());
         }
 
         final String errorMessage = String.format("Parse Error: %s", e.getMessage());
-        output.errorPrintln(errorMessage);
+        printer.errorPrintln(errorMessage);
     }
 }

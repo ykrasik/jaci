@@ -47,6 +47,11 @@ public class CommandDef implements Identifiable {
     // TODO: Javadoc
     @NonNull private final CommandExecutor executor;
 
+    // TODO: JavaDoc
+    public String getName() {
+        return identifier.getName();
+    }
+
     @Override
     public String toString() {
         return identifier.toString();

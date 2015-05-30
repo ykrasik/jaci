@@ -16,7 +16,10 @@
 
 package com.github.ykrasik.jemi.cli.assist;
 
-import com.github.ykrasik.jerminal.ShellConstants;
+import com.github.ykrasik.jemi.api.Constants;
+import com.github.ykrasik.jemi.util.function.Function;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 /**
  * For an auto complete operation, this is the type of the value being auto completed.
@@ -25,9 +28,9 @@ import com.github.ykrasik.jerminal.ShellConstants;
  */
 public enum CliValueType {
     // FIXME: Doesn't belong here.
-    DIRECTORY(ShellConstants.FILE_SYSTEM_DELIMITER.charAt(0)),
+    DIRECTORY(Constants.PATH_DELIMITER),
     COMMAND(' '),
-    COMMAND_PARAM_NAME(ShellConstants.ARG_VALUE_DELIMITER.charAt(0)),
+    COMMAND_PARAM_NAME(' '),
     COMMAND_PARAM_VALUE(' ');
 
     private final char suffix;
@@ -38,5 +41,15 @@ public enum CliValueType {
 
     public char getSuffix() {
         return suffix;
+    }
+
+    @RequiredArgsConstructor
+    public static class Mapper<T> implements Function<T, CliValueType> {
+        @NonNull private final CliValueType type;
+
+        @Override
+        public CliValueType apply(T t) {
+            return type;
+        }
     }
 }

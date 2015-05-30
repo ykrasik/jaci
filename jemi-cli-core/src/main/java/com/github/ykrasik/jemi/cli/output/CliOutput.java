@@ -33,13 +33,11 @@ public interface CliOutput {
      */
     void end();
 
-    CliConfig getConfig();
-
     void println(String text);
 
     void errorPrintln(String text);
 
     void setCommandLine(String commandLine);
 
-    // TODO: Should change working directory should be through here ?
+    void setWorkingDirectory(String workingDirectory);
 }

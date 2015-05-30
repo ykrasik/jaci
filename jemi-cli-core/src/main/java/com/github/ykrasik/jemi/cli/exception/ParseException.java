@@ -16,11 +16,10 @@
 
 package com.github.ykrasik.jemi.cli.exception;
 
-import com.github.ykrasik.jemi.util.opt.Opt;
 import com.github.ykrasik.jemi.cli.assist.CommandInfo;
-import com.google.common.base.Optional;
-
-import java.util.Objects;
+import com.github.ykrasik.jemi.util.opt.Opt;
+import lombok.NonNull;
+import lombok.ToString;
 
 /**
  * An exception that signals an error while parsing the command line.
@@ -28,21 +27,24 @@ import java.util.Objects;
  * @author Yevgeny Krasik
  */
 // TODO: Split this into 2 exceptions: CommandParseException, ParamParseException? will save the optional<commandInfo>.
+@ToString
 public class ParseException extends Exception {
     private final ParseError error;
-    private final Optional<CommandInfo> commandInfo;
+    private final Opt<CommandInfo> commandInfo;
 
     public ParseException(ParseError error, String message) {
-        this(message, error, Optional.<CommandInfo>absent());
+        this(message, error, Opt.<CommandInfo>absent());
     }
 
     public ParseException(ParseError error, String format, Object... args) {
-        this(String.format(format, args), error, Optional.<CommandInfo>absent());
+        this(String.format(format, args), error, Opt.<CommandInfo>absent());
     }
 
-    private ParseException(String message, ParseError error, Optional<CommandInfo> commandInfo) {
+    private ParseException(@NonNull String message,
+                           @NonNull ParseError error,
+                           @NonNull Opt<CommandInfo> commandInfo) {
         super(message);
-        this.error = Objects.requireNonNull(error);
+        this.error = error;
         this.commandInfo = commandInfo;
     }
 
@@ -53,7 +55,7 @@ public class ParseException extends Exception {
      * @return A copy of this exception with command info added.
      */
     public ParseException withCommandInfo(CommandInfo commandInfo) {
-        return new ParseException(getMessage(), error, Optional.of(commandInfo));
+        return new ParseException(getMessage(), error, Opt.of(commandInfo));
     }
 
     /**
@@ -68,14 +70,5 @@ public class ParseException extends Exception {
      */
     public Opt<CommandInfo> getCommandInfo() {
         return commandInfo;
-    }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("ParseException{");
-        sb.append("error=").append(error);
-        sb.append(", commandInfo=").append(commandInfo);
-        sb.append('}');
-        return sb.toString();
     }
 }

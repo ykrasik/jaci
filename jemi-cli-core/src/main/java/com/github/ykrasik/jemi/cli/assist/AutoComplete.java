@@ -18,8 +18,8 @@ package com.github.ykrasik.jemi.cli.assist;
 
 import com.github.ykrasik.jemi.util.opt.Opt;
 import com.github.ykrasik.jemi.util.trie.Trie;
-import lombok.Data;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 import java.util.Map.Entry;
 
@@ -32,7 +32,7 @@ import java.util.Map.Entry;
  */
 // TODO: Find a way to get rid of CliValueType and replace it with a char.
 // TODO: Find a way to get rid of prefix.
-@Data
+@RequiredArgsConstructor
 public class AutoComplete {
     /**
      * The prefix that was auto completed.
@@ -68,7 +68,7 @@ public class AutoComplete {
     }
 
     // TODO: JavaDoc
-    public Opt<String> getAutoCompletedSuffix() {
+    public Opt<String> getAutoCompleteSuffix() {
         if (possibilities.isEmpty()) {
             // There are no auto-complete possibilities.
             return Opt.absent();
@@ -78,7 +78,7 @@ public class AutoComplete {
             // Multiple auto complete results are possible.
             // AutoComplete as much as is possible - until the longest common prefix.
             final String longestPrefix = possibilities.getLongestPrefix();
-            return Opt.of(calcAutoCompletedSuffix(longestPrefix));
+            return Opt.of(calcAutoCompleteSuffix(longestPrefix));
         }
 
         // TODO: Only 1 possibility, assistInfo should be updated to show it...
@@ -88,10 +88,10 @@ public class AutoComplete {
         final String singlePossibility = entry.getKey();
         final CliValueType type = entry.getValue();
         final char suffix = type.getSuffix();
-        return Opt.of(calcAutoCompletedSuffix(singlePossibility) + suffix);
+        return Opt.of(calcAutoCompleteSuffix(singlePossibility) + suffix);
     }
 
-    private String calcAutoCompletedSuffix(String autoCompletedPrefix) {
+    private String calcAutoCompleteSuffix(String autoCompletedPrefix) {
         return autoCompletedPrefix.substring(prefix.length());
     }
 

@@ -16,9 +16,9 @@
 
 package com.github.ykrasik.jemi.cli.param;
 
+import com.github.ykrasik.jemi.cli.assist.ParamAssistInfo;
 import com.github.ykrasik.jemi.cli.command.CliCommandArgs;
 import com.github.ykrasik.jemi.cli.exception.ParseException;
-import com.github.ykrasik.jemi.cli.assist.AssistInfo;
 
 import java.util.List;
 
@@ -27,6 +27,9 @@ import java.util.List;
  */
 // TODO: JavaDoc
 public interface CliParamManager {
+    // TODO: JavaDoc
+    List<CliParam> getParams();
+
     /**
      * @param args Args to be parsed.
      * @return Parsed args.
@@ -40,5 +43,5 @@ public interface CliParamManager {
      * @throws ParseException If any of the args except the last one can't be validly parsed.
      */
     // TODO: JavaDoc
-    AssistInfo assist(List<String> args) throws ParseException;
+    ParamAssistInfo assist(List<String> args) throws ParseException;
 }

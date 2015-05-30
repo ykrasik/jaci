@@ -18,33 +18,21 @@ package com.github.ykrasik.jemi.cli.command;
 
 import com.github.ykrasik.jemi.cli.directory.CliDirectory;
 import com.github.ykrasik.jemi.core.command.CommandArgsImpl;
-import lombok.NonNull;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Yevgeny Krasik
  */
 // TODO: JavaDoc
 public class CliCommandArgsImpl extends CommandArgsImpl implements CliCommandArgs {
-    public CliCommandArgsImpl(@NonNull List<Object> positionalArgs, @NonNull Map<String, Object> namedArgs) {
-        super(positionalArgs, namedArgs);
-    }
-
-    @Override
-    public CliDirectory getDirectory(String name) throws IllegalArgumentException {
-        return getArg(name, CliDirectory.class);
+    public CliCommandArgsImpl(List<Object> args) {
+        super(args);
     }
 
     @Override
     public CliDirectory popDirectory() throws IllegalArgumentException {
         return popArg(CliDirectory.class);
-    }
-
-    @Override
-    public CliCommand getCommand(String name) throws IllegalArgumentException {
-        return getArg(name, CliCommand.class);
     }
 
     @Override

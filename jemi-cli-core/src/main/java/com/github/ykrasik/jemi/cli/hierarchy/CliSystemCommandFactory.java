@@ -16,9 +16,9 @@
 
 package com.github.ykrasik.jemi.cli.hierarchy;
 
+import com.github.ykrasik.jemi.api.CommandOutput;
 import com.github.ykrasik.jemi.cli.command.CliCommand;
 import com.github.ykrasik.jemi.cli.command.CliCommandArgs;
-import com.github.ykrasik.jemi.cli.command.CliCommandExecutor;
 import com.github.ykrasik.jemi.cli.command.CliCommandOutput;
 import com.github.ykrasik.jemi.cli.directory.CliDirectory;
 import com.github.ykrasik.jemi.cli.param.BooleanCliParam;
@@ -26,6 +26,8 @@ import com.github.ykrasik.jemi.cli.param.CliParam;
 import com.github.ykrasik.jemi.cli.param.CommandCliParam;
 import com.github.ykrasik.jemi.cli.param.DirectoryCliParam;
 import com.github.ykrasik.jemi.core.Identifier;
+import com.github.ykrasik.jemi.core.command.CommandArgs;
+import com.github.ykrasik.jemi.core.command.CommandExecutor;
 import com.github.ykrasik.jemi.util.function.Supplier;
 import lombok.AccessLevel;
 import lombok.NonNull;
@@ -41,7 +43,7 @@ import java.util.List;
 // TODO: JavaDoc
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)  // Package-visible for testing
 public class CliSystemCommandFactory {
-    @NonNull private final CliCommandHierarchy hierarchy;
+    private final CliCommandHierarchy hierarchy;
 
     // TODO: Add the following commands: list all commands
 
@@ -53,12 +55,12 @@ public class CliSystemCommandFactory {
         final List<CliParam> params = Collections.<CliParam>singletonList(
             new DirectoryCliParam.Builder("dir", hierarchy).setDescription("Directory to change to").build()
         );
-        return new CliCommand(identifier, params, new CliCommandExecutor() {
+        return CliCommand.from(identifier, params, new CommandExecutor() {
             @Override
-            public void execute(CliCommandOutput output, CliCommandArgs args) throws Exception {
-                final CliDirectory directory = args.popDirectory();
+            public void execute(CommandOutput output, CommandArgs args) throws Exception {
+                final CliDirectory directory = ((CliCommandArgs) args).popDirectory();
                 hierarchy.setWorkingDirectory(directory);
-                output.setWorkingDirectory(directory);
+                ((CliCommandOutput) output).setWorkingDirectory(directory);
             }
         });
     }
@@ -80,12 +82,12 @@ public class CliSystemCommandFactory {
                 .build(),
             BooleanCliParam.optional(new Identifier("r", "Whether to recurse into sub-directories"), false)
         );
-        return new CliCommand(identifier, params, new CliCommandExecutor() {
+        return CliCommand.from(identifier, params, new CommandExecutor() {
             @Override
-            public void execute(CliCommandOutput output, CliCommandArgs args) throws Exception {
-                final CliDirectory directory = args.popDirectory();
+            public void execute(CommandOutput output, CommandArgs args) throws Exception {
+                final CliDirectory directory = ((CliCommandArgs) args).popDirectory();
                 final boolean recursive = args.popBool();
-                output.printDirectory(directory, recursive);
+                ((CliCommandOutput) output).printDirectory(directory, recursive);
             }
         });
     }
@@ -98,11 +100,11 @@ public class CliSystemCommandFactory {
         final List<CliParam> params = Collections.<CliParam>singletonList(
             new CommandCliParam.Builder("cmd", hierarchy).setDescription("Command to describe").build()
         );
-        return new CliCommand(identifier, params, new CliCommandExecutor() {
+        return CliCommand.from(identifier, params, new CommandExecutor() {
             @Override
-            public void execute(CliCommandOutput output, CliCommandArgs args) throws Exception {
-                final CliCommand command = args.popCommand();
-                output.printCommand(command);
+            public void execute(CommandOutput output, CommandArgs args) throws Exception {
+                final CliCommand command = ((CliCommandArgs) args).popCommand();
+                ((CliCommandOutput) output).printCommand(command);
             }
         });
     }

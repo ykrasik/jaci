@@ -16,6 +16,8 @@
 
 package com.github.ykrasik.jemi.cli.command;
 
+import com.github.ykrasik.jemi.api.CommandOutput;
+import com.github.ykrasik.jemi.cli.assist.ParamAssistInfo;
 import com.github.ykrasik.jemi.cli.exception.ParseException;
 import com.github.ykrasik.jemi.cli.param.CliParam;
 import com.github.ykrasik.jemi.cli.param.CliParamManager;
@@ -23,9 +25,10 @@ import com.github.ykrasik.jemi.cli.param.CliParamManagerImpl;
 import com.github.ykrasik.jemi.cli.param.CliParamResolver;
 import com.github.ykrasik.jemi.core.Identifiable;
 import com.github.ykrasik.jemi.core.Identifier;
+import com.github.ykrasik.jemi.core.command.CommandArgs;
 import com.github.ykrasik.jemi.core.command.CommandDef;
+import com.github.ykrasik.jemi.core.command.CommandExecutor;
 import com.github.ykrasik.jemi.core.param.ParamDef;
-import com.github.ykrasik.jemi.cli.assist.AssistInfo;
 import lombok.AccessLevel;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -38,10 +41,10 @@ import java.util.List;
  */
 // TODO: JavaDoc
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class CliCommand implements Identifiable, CliParamManager, CliCommandExecutor {
+public class CliCommand implements Identifiable, CliParamManager, CommandExecutor {
     private final Identifier identifier;
     private final CliParamManager paramManager;
-    private final CliCommandExecutor executor;
+    private final CommandExecutor executor;
 
     @Override
     public Identifier getIdentifier() {
@@ -58,6 +61,11 @@ public class CliCommand implements Identifiable, CliParamManager, CliCommandExec
         return identifier.getName();
     }
 
+    @Override
+    public List<CliParam> getParams() {
+        return paramManager.getParams();
+    }
+
     // TODO: JavaDoc
     @Override
     public CliCommandArgs parse(List<String> args) throws ParseException {
@@ -65,12 +73,12 @@ public class CliCommand implements Identifiable, CliParamManager, CliCommandExec
     }
 
     @Override
-    public AssistInfo assist(List<String> args) throws ParseException {
+    public ParamAssistInfo assist(List<String> args) throws ParseException {
         return paramManager.assist(args);
     }
 
     @Override
-    public void execute(CliCommandOutput output, CliCommandArgs args) throws Exception {
+    public void execute(CommandOutput output, CommandArgs args) throws Exception {
         executor.execute(output, args);
     }
 
@@ -80,9 +88,15 @@ public class CliCommand implements Identifiable, CliParamManager, CliCommandExec
     }
 
     public static CliCommand fromDef(@NonNull CommandDef def) {
+        final Identifier identifier = def.getIdentifier();
         final List<CliParam> params = createParams(def.getParamDefs());
+        final CommandExecutor executor = def.getExecutor();
+        return from(identifier, params, executor);
+    }
+
+    public static CliCommand from(@NonNull Identifier identifier, @NonNull List<CliParam> params, @NonNull CommandExecutor executor) {
         final CliParamManagerImpl paramManager = new CliParamManagerImpl(params);
-        return new CliCommand(def.getIdentifier(), paramManager, new CliCommandExecutorWrapper(def.getExecutor()));
+        return new CliCommand(identifier, paramManager, executor);
     }
 
     private static final CliParamResolver RESOLVER = new CliParamResolver();

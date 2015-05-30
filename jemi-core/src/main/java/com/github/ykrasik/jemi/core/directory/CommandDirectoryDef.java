@@ -23,7 +23,6 @@ import lombok.AccessLevel;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
-import lombok.experimental.Delegate;
 
 import java.util.*;
 
@@ -38,7 +37,6 @@ public class CommandDirectoryDef implements Identifiable {
     /**
      * This directory's {@link Identifier}.
      */
-    @Delegate
     @NonNull private final Identifier identifier;
 
     /**
@@ -50,6 +48,11 @@ public class CommandDirectoryDef implements Identifiable {
      * Child {@link CommandDef}s.
      */
     @NonNull private final List<CommandDef> commandDefs;
+
+    // TODO: JavaDoc
+    public String getName() {
+        return identifier.getName();
+    }
 
     @Override
     public String toString() {
