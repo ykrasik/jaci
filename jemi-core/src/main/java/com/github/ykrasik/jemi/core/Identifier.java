@@ -18,7 +18,6 @@ package com.github.ykrasik.jemi.core;
 
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.Value;
 import lombok.experimental.Accessors;
 
 import java.util.Comparator;
@@ -30,27 +29,34 @@ import java.util.regex.Pattern;
  *
  * @author Yevgeny Krasik
  */
-@Value
+// FIXME: Remove all non-obvious lombok annotations.
 public class Identifier {
     /**
      * A pattern that matches any strings that start with a letter and are alphanumeric.
      */
     private static final Pattern LEGAL_NAME_PATTERN = Pattern.compile("[a-zA-Z][\\w]*");
 
-    /**
-     * The name of this entity.
-     */
     private final String name;
-
-    /**
-     * The description of this entity.
-     */
     private final String description;
 
     public Identifier(@NonNull String name, @NonNull String description) {
         this.name = name;
         this.description = description;
         assertValidName();
+    }
+
+    /**
+     * @return The name of this entity.
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * @return  The description of this entity.
+     */
+    public String getDescription() {
+        return description;
     }
 
     private void assertValidName() {

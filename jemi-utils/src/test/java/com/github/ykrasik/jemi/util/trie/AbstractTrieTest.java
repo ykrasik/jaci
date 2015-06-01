@@ -16,9 +16,9 @@
 
 package com.github.ykrasik.jemi.util.trie;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
+import com.github.ykrasik.jemi.util.function.Function;
+import com.github.ykrasik.jemi.util.function.Predicate;
+import com.github.ykrasik.jemi.util.opt.Opt;
 import org.junit.Before;
 
 import java.util.Arrays;
@@ -112,7 +112,7 @@ public class AbstractTrieTest {
             final String expectedValue = valueMap.get(word);
             assertNotNull("No expected value set for word: " + word, expectedValue);
 
-            final Optional<String> value = trie.get(word);
+            final Opt<String> value = trie.get(word);
             assertTrue("No value set for word: " + value, value.isPresent());
 
             assertEquals("Value mismatch!", expectedValue, value.get());

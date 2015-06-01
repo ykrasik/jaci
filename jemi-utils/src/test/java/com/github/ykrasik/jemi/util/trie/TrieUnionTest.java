@@ -16,7 +16,6 @@
 
 package com.github.ykrasik.jemi.util.trie;
 
-import com.google.common.collect.Sets;
 import org.junit.Test;
 
 import java.util.HashSet;
@@ -134,6 +133,6 @@ public class TrieUnionTest extends AbstractTrieTest {
 
     @Override
     protected void doAssertWords(List<String> expectedWords) {
-        assertEquals("Words mismatch!", Sets.newHashSet(expectedWords), new HashSet<>(trie.words()));
+        assertEquals("Words mismatch!", new HashSet<>(expectedWords), new HashSet<>(trie.words()));
     }
 }

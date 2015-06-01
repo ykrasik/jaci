@@ -64,31 +64,30 @@ public class DefaultCliSerializer implements CliSerializer {
 
     private void serializeDirectory(Serializer serializer, CliDirectory directory, boolean recursive) {
         // Serialize root directory name.
-        serializer.appendDepth();
-        serializer.append('[');
-        serializer.append(directory.getName());
-        serializer.append(']');
-        serializer.newLine();
+        serializer
+            .append('[')
+            .append(directory.getName())
+            .append(']')
+            .newLine();
 
         // Serialize child commands.
         final List<CliCommand> commands = new ArrayList<>(directory.getChildCommands());
         Collections.sort(commands, IdentifiableComparators.nameComparator());
 
-        for (CliCommand command : commands) {
-            serializer.incDepth();
-            serializeIdentifiable(serializer, command);
-            serializer.decDepth();
-        }
+        serializeIdentifiables(serializer, commands);
 
-        if (recursive) {
-            // Serialize child directories.
-            final List<CliDirectory> directories = new ArrayList<>(directory.getChildDirectories());
-            Collections.sort(directories, IdentifiableComparators.nameComparator());
+        // Serialize child directories.
+        final List<CliDirectory> directories = new ArrayList<>(directory.getChildDirectories());
+        Collections.sort(directories, IdentifiableComparators.nameComparator());
 
+        if (!recursive) {
+            serializeIdentifiables(serializer, directories);
+        } else {
+            // Recursively serialize child directories.
             for (CliDirectory childDirectory : directories) {
-                serializer.incDepth();
+                serializer.incIndent();
                 serializeDirectory(serializer, childDirectory, true);
-                serializer.decDepth();
+                serializer.decIndent();
             }
         }
     }
@@ -101,32 +100,39 @@ public class DefaultCliSerializer implements CliSerializer {
         serializeIdentifiable(serializer, command);
 
         // Serialize each param name : description
-        for (CliParam param : command.getParams()) {
-            serializeIdentifiable(serializer, param);
-        }
+        serializeIdentifiables(serializer, command.getParams());
+
         return serializer.serialization;
+    }
+
+    private void serializeIdentifiables(Serializer serializer, List<? extends Identifiable> identifiables) {
+        serializer.incIndent();
+        for (Identifiable identifiable : identifiables) {
+            serializeIdentifiable(serializer, identifiable);
+        }
+        serializer.decIndent();
     }
 
     private void serializeIdentifiable(Serializer serializer, Identifiable identifiable) {
         final Identifier identifier = identifiable.getIdentifier();
-        serializer.appendDepth();
-        serializer.append(identifier.getName());
-        serializer.append(" : ");
-        serializer.append(identifier.getDescription());
-        serializer.newLine();
+        serializer
+            .append(identifier.getName())
+            .append(" : ")
+            .append(identifier.getDescription())
+            .newLine();
     }
 
     @Override
     public List<String> serializeException(Exception e) {
         final Serializer serializer = new Serializer();
 
-        serializer.append(e.toString());
-        serializer.newLine();
+        serializer.append(e.toString())
+            .newLine();
 
+        serializer.incIndent();
         for (StackTraceElement stackTraceElement : e.getStackTrace()) {
-            serializer.incDepth();
-            serializer.append(stackTraceElement.toString());
-            serializer.newLine();
+            serializer.append(stackTraceElement.toString())
+                .newLine();
         }
         return serializer.serialization;
     }
@@ -149,29 +155,24 @@ public class DefaultCliSerializer implements CliSerializer {
     private void serializeBoundParams(Serializer serializer, CliCommand command, BoundParams boundParams) {
         final Opt<CliParam> nextParam = boundParams.getNextParam();
         for (CliParam param : command.getParams()) {
-            serializer.appendDepth();
-
             final Opt<Object> value = boundParams.getBoundValue(param);
             final boolean isCurrent = nextParam.isPresent() && nextParam.get() == param;
 
             // Surround the current param being parsed with -> <-
             if (isCurrent) {
-                serializer.append("-> ");
-                serializer.append(tab);
+                serializer.append("-> ").append(tab);
             } else {
                 serializer.append(tab);
             }
 
             serializer.append(param.toExternalForm());
             if (value.isPresent()) {
-                serializer.append(" = ");
-                serializer.append(value.get().toString());
+                serializer.append(" = ").append(value.get().toString());
             }
 
             // Actually, value.isPresent and isCurrent cannot both be true at the same time.
             if (isCurrent) {
-                serializer.append(tab);
-                serializer.append(" <-");
+                serializer.append(tab).append(" <-");
             }
 
             serializer.newLine();
@@ -182,24 +183,27 @@ public class DefaultCliSerializer implements CliSerializer {
     public List<String> serializeSuggestions(Suggestions suggestions) {
         final Serializer serializer = new Serializer();
 
-        serializer.append("Suggestions:");
-        serializer.newLine();
+        serializer.append("Suggestions:")
+            .newLine();
 
+        serializer.incIndent();
         printSuggestions(serializer, suggestions.getDirectorySuggestions(), "Directories");
         printSuggestions(serializer, suggestions.getCommandSuggestions(), "Commands");
         printSuggestions(serializer, suggestions.getParamNameSuggestions(), "Parameter names");
         printSuggestions(serializer, suggestions.getParamValueSuggestions(), "Parameter values");
+        serializer.decIndent();
 
         return serializer.serialization;
     }
 
     private void printSuggestions(Serializer serializer, List<String> suggestions, String suggestionsTitle) {
         if (!suggestions.isEmpty()) {
-            serializer.append(suggestionsTitle);
-            serializer.append(": [");
-            serializer.append(join(suggestions));
-            serializer.append(']');
-            serializer.newLine();
+            serializer
+                .append(suggestionsTitle)
+                .append(": [")
+                .append(join(suggestions))
+                .append(']')
+                .newLine();
         }
     }
 
@@ -219,34 +223,32 @@ public class DefaultCliSerializer implements CliSerializer {
         private final List<String> serialization = new ArrayList<>();
 
         private StringBuilder sb = new StringBuilder();
-        private int depth;
+        private int indent;
 
-        public Serializer incDepth() {
-            depth++;
-            return this;
+        /**
+         * Whether indent was appended to this line. Reset every time a new line is opened.
+         */
+        private boolean indentAppended;
+
+        public void incIndent() {
+            indent++;
         }
 
-        public Serializer decDepth() {
-            depth--;
-            if (depth < 0) {
-                throw new IllegalArgumentException("Invalid depth: " + depth);
+        public void decIndent() {
+            indent--;
+            if (indent < 0) {
+                throw new IllegalArgumentException("Invalid indent: " + indent);
             }
-            return this;
-        }
-
-        public Serializer appendDepth() {
-            for (int i = 0; i < depth; i++) {
-                sb.append(tab);
-            }
-            return this;
         }
 
         public Serializer append(String str) {
+            indentIfNecessary();
             sb.append(str);
             return this;
         }
 
         public Serializer append(char ch) {
+            indentIfNecessary();
             sb.append(ch);
             return this;
         }
@@ -254,7 +256,26 @@ public class DefaultCliSerializer implements CliSerializer {
         public Serializer newLine() {
             serialization.add(sb.toString());
             sb = new StringBuilder();
+            indentAppended = false;
             return this;
+        }
+
+        private void indentIfNecessary() {
+            if (!indentAppended) {
+                appendIndent();
+                indentAppended = true;
+            }
+        }
+
+        private void appendIndent() {
+            for (int i = 0; i < indent; i++) {
+                sb.append(tab);
+            }
+        }
+
+        @Override
+        public String toString() {
+            return serialization.toString();
         }
     }
 }

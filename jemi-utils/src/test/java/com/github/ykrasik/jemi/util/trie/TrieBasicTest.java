@@ -16,8 +16,8 @@
 
 package com.github.ykrasik.jemi.util.trie;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
+import com.github.ykrasik.jemi.util.function.Function;
+import com.github.ykrasik.jemi.util.function.Predicate;
 import org.junit.Test;
 
 import java.util.*;
@@ -114,7 +114,7 @@ public class TrieBasicTest extends AbstractTrieTest {
         // Filter all values starting with "invalid"
         filter(new Predicate<String>() {
             @Override
-            public boolean apply(String input) {
+            public boolean test(String input) {
                 return input.startsWith("invalid");
             }
         });

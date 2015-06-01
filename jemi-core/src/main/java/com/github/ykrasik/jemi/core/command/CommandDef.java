@@ -19,8 +19,10 @@ package com.github.ykrasik.jemi.core.command;
 import com.github.ykrasik.jemi.core.Identifiable;
 import com.github.ykrasik.jemi.core.Identifier;
 import com.github.ykrasik.jemi.core.param.ParamDef;
-import lombok.*;
-import lombok.experimental.Accessors;
+import lombok.AccessLevel;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.Value;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -52,21 +54,22 @@ public class CommandDef implements Identifiable {
         return identifier.getName();
     }
 
+    // TODO: JavaDoc
+    public String getDescription() {
+        return identifier.getDescription();
+    }
+
     @Override
     public String toString() {
         return identifier.toString();
     }
 
     // TODO: JavaDoc
-    @Accessors(chain = true)
     public static class Builder {
         private final String name;
 
-        @Setter
-        @NonNull private String description = "command";
-
-        @Setter
-        @NonNull private CommandExecutor executor;
+        private String description = "command";
+        private CommandExecutor executor;
 
         private final List<ParamDef<?>> paramDefs = new ArrayList<>(4);
 
@@ -74,14 +77,24 @@ public class CommandDef implements Identifiable {
             this.name = name;
         }
 
-        public Builder addParam(@NonNull ParamDef<?> param) {
-            this.paramDefs.add(param);
-            return this;
-        }
-
         public CommandDef build() {
             final Identifier identifier = new Identifier(name, description);
             return new CommandDef(identifier, Collections.unmodifiableList(new ArrayList<>(paramDefs)), executor);
+        }
+
+        public Builder setDescription(@NonNull String description) {
+            this.description = description;
+            return this;
+        }
+
+        public Builder setExecutor(@NonNull CommandExecutor executor) {
+            this.executor = executor;
+            return this;
+        }
+
+        public Builder addParam(@NonNull ParamDef<?> param) {
+            this.paramDefs.add(param);
+            return this;
         }
     }
 }

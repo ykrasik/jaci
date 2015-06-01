@@ -18,13 +18,14 @@ package com.github.ykrasik.jemi.cli.hierarchy;
 
 import com.github.ykrasik.jemi.api.Constants;
 import com.github.ykrasik.jemi.cli.CliConstants;
+import com.github.ykrasik.jemi.cli.assist.AutoComplete;
+import com.github.ykrasik.jemi.cli.assist.CliValueType;
 import com.github.ykrasik.jemi.cli.command.CliCommand;
 import com.github.ykrasik.jemi.cli.directory.CliDirectory;
 import com.github.ykrasik.jemi.cli.exception.ParseError;
 import com.github.ykrasik.jemi.cli.exception.ParseException;
 import com.github.ykrasik.jemi.core.directory.CommandDirectoryDef;
-import com.github.ykrasik.jemi.cli.assist.AutoComplete;
-import com.github.ykrasik.jemi.cli.assist.CliValueType;
+import com.github.ykrasik.jemi.core.hierarchy.CommandHierarchy;
 import com.github.ykrasik.jemi.util.opt.Opt;
 import com.github.ykrasik.jemi.util.string.StringUtils;
 import com.github.ykrasik.jemi.util.trie.Trie;
@@ -214,8 +215,9 @@ public class CliCommandHierarchyImpl implements CliCommandHierarchy {
         return new AutoComplete(entryPrefix, possibilities);
     }
 
-    public static CliCommandHierarchyImpl from(CommandDirectoryDef rootDef) {
+    public static CliCommandHierarchyImpl from(CommandHierarchy hierarchy) {
         // Create hierarchy with the parameter as the root.
+        final CommandDirectoryDef rootDef = hierarchy.getRoot();
         final CliDirectory root = CliDirectory.fromDef(rootDef);
 
         // Create system commands 'virtual' directory.
@@ -227,9 +229,9 @@ public class CliCommandHierarchyImpl implements CliCommandHierarchy {
         final CliDirectory systemCommands = CliSystemCommandFactory.from(hierarchyPromise);
 
         // Update the 'promise' hierarchy with the concrete implementation.
-        final CliCommandHierarchyImpl hierarchy = new CliCommandHierarchyImpl(root, systemCommands);
-        hierarchyPromise.setHierarchy(hierarchy);
-        return hierarchy;
+        final CliCommandHierarchyImpl cliHierarchy = new CliCommandHierarchyImpl(root, systemCommands);
+        hierarchyPromise.setHierarchy(cliHierarchy);
+        return cliHierarchy;
     }
 
     /**

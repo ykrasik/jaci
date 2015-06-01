@@ -161,10 +161,8 @@ public class CliShell {
         printer.printCommandLine(rawCommandLine);
         printer.setCommandLine("");
 
-        final CommandLine commandLine = CommandLine.forAssist(rawCommandLine);
+        final CommandLine commandLine = CommandLine.forExecute(rawCommandLine);
         if (commandLine.isEmpty()) {
-            // Print an empty line.
-            printer.println("");
             return;
         }
 
