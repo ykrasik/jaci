@@ -19,6 +19,7 @@ package com.github.ykrasik.jemi.core.reflection;
 import com.github.ykrasik.jemi.api.CommandPath;
 import com.github.ykrasik.jemi.core.reflection.command.ReflectionMethodProcessor;
 import com.github.ykrasik.jemi.core.command.CommandDef;
+import com.github.ykrasik.jemi.core.path.ParsedPath;
 import com.github.ykrasik.jemi.util.opt.Opt;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -59,7 +60,7 @@ public class ReflectionClassProcessor {
         final Class<?> clazz = instance.getClass();
 
         // All method paths will be appended to the class's top level path.
-        final AnnotatedCommandPath topLevelPath = getTopLevelPath(clazz);
+        final ParsedPath topLevelPath = getTopLevelPath(clazz);
 
         final ClassContext context = new ClassContext(topLevelPath);
 
@@ -79,11 +80,11 @@ public class ReflectionClassProcessor {
             return;
         }
 
-        final AnnotatedCommandPath commandPath = getCommandPath(method);
+        final ParsedPath commandPath = getCommandPath(method);
         context.addCommandDef(commandPath, commandDef.get());
     }
 
-    private AnnotatedCommandPath getTopLevelPath(Class<?> clazz) {
+    private ParsedPath getTopLevelPath(Class<?> clazz) {
         final CommandPath annotation = clazz.getAnnotation(CommandPath.class);
         if (annotation != null) {
             if (annotation.override()) {
@@ -92,33 +93,33 @@ public class ReflectionClassProcessor {
             return fromAnnotation(annotation);
         } else {
             // Class does not declare a top level path, set it to root.
-            return AnnotatedCommandPath.root();
+            return ParsedPath.root();
         }
     }
 
-    private AnnotatedCommandPath getCommandPath(Method method) {
+    private ParsedPath getCommandPath(Method method) {
         final CommandPath annotation = method.getAnnotation(CommandPath.class);
         if (annotation != null) {
             return fromAnnotation(annotation);
         } else {
             // Method does not declare a path, set it to an empty path.
-            return AnnotatedCommandPath.empty();
+            return ParsedPath.empty();
         }
     }
 
-    private AnnotatedCommandPath fromAnnotation(CommandPath annotation) {
-        return new AnnotatedCommandPath(annotation.value(), annotation.override());
+    private ParsedPath fromAnnotation(CommandPath annotation) {
+        return new ParsedPath(annotation.value(), annotation.override());
     }
 
     @RequiredArgsConstructor
     private static class ClassContext {
-        private final AnnotatedCommandPath topLevelPath;
+        private final ParsedPath topLevelPath;
 
         private final Map<String, List<CommandDef>> commandPaths = new HashMap<>();
 
-        public void addCommandDef(AnnotatedCommandPath commandPath, CommandDef commandDef) {
+        public void addCommandDef(ParsedPath commandPath, CommandDef commandDef) {
             // Compose the top level path of the declaring class with the command path.
-            final AnnotatedCommandPath composedPath = topLevelPath.compose(commandPath);
+            final ParsedPath composedPath = topLevelPath.compose(commandPath);
 
             final String path = composedPath.getPath();
             List<CommandDef> commands = commandPaths.get(path);

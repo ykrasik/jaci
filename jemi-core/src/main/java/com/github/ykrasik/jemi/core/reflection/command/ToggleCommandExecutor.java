@@ -33,7 +33,7 @@ public class ToggleCommandExecutor implements CommandExecutor {
 
     @Override
     public void execute(CommandOutput output, CommandArgs args) throws Exception {
-        final boolean toggle = args.popBool();
+        final boolean toggle = args.popArg();
         accessor.set(toggle);
         output.message("%s: %s", name, toggle);
     }

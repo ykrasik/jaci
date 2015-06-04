@@ -17,8 +17,8 @@
 package com.github.ykrasik.jemi.cli.param;
 
 import com.github.ykrasik.jemi.cli.assist.ParamAssistInfo;
-import com.github.ykrasik.jemi.cli.command.CliCommandArgs;
 import com.github.ykrasik.jemi.cli.exception.ParseException;
+import com.github.ykrasik.jemi.core.command.CommandArgs;
 
 import java.util.List;
 
@@ -35,7 +35,7 @@ public interface CliParamManager {
      * @return Parsed args.
      * @throws ParseException If an invalid value was supplied for a param, or if a param wasn't bound.
      */
-    CliCommandArgs parse(List<String> args) throws ParseException;
+    CommandArgs parse(List<String> args) throws ParseException;
 
     /**
      * @param args Args to be auto-completed. Will only auto-complete the last arg.

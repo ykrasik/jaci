@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
  * @author Yevgeny Krasik
  */
 @EqualsAndHashCode
-public class Identifier {
+public final class Identifier {
     /**
      * A pattern that matches any strings that start with a letter and are alphanumeric.
      */

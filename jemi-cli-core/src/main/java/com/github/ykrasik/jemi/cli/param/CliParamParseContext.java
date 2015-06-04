@@ -21,10 +21,10 @@ import com.github.ykrasik.jemi.cli.assist.AutoComplete;
 import com.github.ykrasik.jemi.cli.assist.BoundParams;
 import com.github.ykrasik.jemi.cli.assist.CliValueType;
 import com.github.ykrasik.jemi.cli.assist.ParamAssistInfo;
-import com.github.ykrasik.jemi.cli.command.CliCommandArgs;
-import com.github.ykrasik.jemi.cli.command.CliCommandArgsImpl;
 import com.github.ykrasik.jemi.cli.exception.ParseError;
 import com.github.ykrasik.jemi.cli.exception.ParseException;
+import com.github.ykrasik.jemi.core.command.CommandArgs;
+import com.github.ykrasik.jemi.core.command.CommandArgsImpl;
 import com.github.ykrasik.jemi.util.function.Predicate;
 import com.github.ykrasik.jemi.util.opt.Opt;
 import com.github.ykrasik.jemi.util.trie.Trie;
@@ -143,7 +143,7 @@ public class CliParamParseContext {
     }
 
     // TODO: JavaDoc
-    public CliCommandArgs createCommandArgs() throws ParseException {
+    public CommandArgs createCommandArgs() throws ParseException {
         // In case the last parsed arg ended with '-{paramName}', have that parameter parse a 'no-value' value.
         // Can only succeed in certain cases with certain parameters.
         if (nextNamedParam.isPresent()) {
@@ -164,7 +164,7 @@ public class CliParamParseContext {
             }
             commandArgs.add(arg);
         }
-        return new CliCommandArgsImpl(commandArgs);
+        return new CommandArgsImpl(commandArgs);
     }
 
     private void resolveUnboundParams() throws ParseException {

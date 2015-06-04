@@ -18,7 +18,6 @@ package com.github.ykrasik.jemi.cli.hierarchy;
 
 import com.github.ykrasik.jemi.api.CommandOutput;
 import com.github.ykrasik.jemi.cli.command.CliCommand;
-import com.github.ykrasik.jemi.cli.command.CliCommandArgs;
 import com.github.ykrasik.jemi.cli.command.CliCommandOutput;
 import com.github.ykrasik.jemi.cli.directory.CliDirectory;
 import com.github.ykrasik.jemi.cli.param.BooleanCliParam;
@@ -58,7 +57,7 @@ public class CliSystemCommandFactory {
         return CliCommand.from(identifier, params, new CommandExecutor() {
             @Override
             public void execute(CommandOutput output, CommandArgs args) throws Exception {
-                final CliDirectory directory = ((CliCommandArgs) args).popDirectory();
+                final CliDirectory directory = args.popArg();
                 hierarchy.setWorkingDirectory(directory);
                 ((CliCommandOutput) output).setWorkingDirectory(directory);
             }
@@ -85,8 +84,8 @@ public class CliSystemCommandFactory {
         return CliCommand.from(identifier, params, new CommandExecutor() {
             @Override
             public void execute(CommandOutput output, CommandArgs args) throws Exception {
-                final CliDirectory directory = ((CliCommandArgs) args).popDirectory();
-                final boolean recursive = args.popBool();
+                final CliDirectory directory = args.popArg();
+                final boolean recursive = args.popArg();
                 ((CliCommandOutput) output).printDirectory(directory, recursive);
             }
         });
@@ -103,7 +102,7 @@ public class CliSystemCommandFactory {
         return CliCommand.from(identifier, params, new CommandExecutor() {
             @Override
             public void execute(CommandOutput output, CommandArgs args) throws Exception {
-                final CliCommand command = ((CliCommandArgs) args).popCommand();
+                final CliCommand command = args.popArg();
                 ((CliCommandOutput) output).printCommand(command);
             }
         });

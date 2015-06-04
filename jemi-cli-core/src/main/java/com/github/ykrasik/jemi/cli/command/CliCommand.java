@@ -68,7 +68,7 @@ public class CliCommand implements Identifiable, CliParamManager, CommandExecuto
 
     // TODO: JavaDoc
     @Override
-    public CliCommandArgs parse(List<String> args) throws ParseException {
+    public CommandArgs parse(List<String> args) throws ParseException {
         return paramManager.parse(args);
     }
 

@@ -1,57 +1,62 @@
-/*
- * Copyright (C) 2014 Yevgeny Krasik
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+/******************************************************************************
+ * Copyright (C) 2014 Yevgeny Krasik                                          *
+ *                                                                            *
+ * Licensed under the Apache License, Version 2.0 (the "License");            *
+ * you may not use this file except in compliance with the License.           *
+ * You may obtain a copy of the License at                                    *
+ *                                                                            *
+ * http://www.apache.org/licenses/LICENSE-2.0                                 *
+ *                                                                            *
+ * Unless required by applicable law or agreed to in writing, software        *
+ * distributed under the License is distributed on an "AS IS" BASIS,          *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   *
+ * See the License for the specific language governing permissions and        *
+ * limitations under the License.                                             *
+ ******************************************************************************/
 
 package com.github.ykrasik.jemi.core.directory;
 
 import com.github.ykrasik.jemi.core.Identifiable;
 import com.github.ykrasik.jemi.core.Identifier;
 import com.github.ykrasik.jemi.core.command.CommandDef;
+import com.github.ykrasik.jemi.util.opt.Opt;
+import com.github.ykrasik.jemi.util.string.StringUtils;
 import lombok.AccessLevel;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
 
 import java.util.*;
 
 /**
- * A container for child {@link CommandDirectoryDef}s and {@link CommandDef}s.
+ * A definition for a command directory.
+ * Contains the directory's name, description, child {@link CommandDirectoryDef}s and child {@link CommandDef}s.
+ * Built through the {@link CommandDirectoryDef.Builder} builder.
  *
  * @author Yevgeny Krasik
  */
-@Value
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class CommandDirectoryDef implements Identifiable {
-    /**
-     * This directory's {@link Identifier}.
-     */
-    @NonNull private final Identifier identifier;
+    private final Identifier identifier;
+    private final List<CommandDirectoryDef> directoryDefs;
+    private final List<CommandDef> commandDefs;
+
+    @Override
+    public Identifier getIdentifier() {
+        return identifier;
+    }
 
     /**
-     * Child {@link CommandDirectoryDef}s.
+     * @return Child {@link CommandDirectoryDef}s.
      */
-    @NonNull private final List<CommandDirectoryDef> directoryDefs;
+    public List<CommandDirectoryDef> getDirectoryDefs() {
+        return directoryDefs;
+    }
 
     /**
-     * Child {@link CommandDef}s.
+     * @return Child {@link CommandDef}s.
      */
-    @NonNull private final List<CommandDef> commandDefs;
-
-    // TODO: JavaDoc
-    public String getName() {
-        return identifier.getName();
+    public List<CommandDef> getCommandDefs() {
+        return commandDefs;
     }
 
     @Override
@@ -60,49 +65,58 @@ public class CommandDirectoryDef implements Identifiable {
     }
 
     /**
-     * @author Yevgeny Krasik
+     * A builder for a {@link CommandDirectoryDef}.
      */
-    // TODO: JavaDoc
     public static class Builder {
         private final Map<String, Builder> childDirectories = new HashMap<>();
         private final Map<String, CommandDef> childCommands = new HashMap<>();
 
-        private final Identifier identifier;
+        private final String name;
 
-        public Builder() {
-            this("root", "root");
-        }
+        private String description = "directory";
 
-        private Builder(String name, String description) {
-            this.identifier = new Identifier(name, description);
+        public Builder(@NonNull String name) {
+            this.name = name;
         }
 
         /**
-         * If a directory with the requested name is already a child directory of this directory, will return
+         * Set the directory's description.
+         *
+         * @param description Description to set.
+         * @return this, for chaining.
+         */
+        public Builder setDescription(@NonNull String description) {
+            this.description = description;
+            return this;
+        }
+
+        /**
+         * If a directory with the given name is already a child directory of this directory, will return
          * the existing child. Otherwise, will create a new child directory with that name and return it.
          *
          * @param name Directory name.
          * @return An existing or newly created child {@link Builder}.
          */
         public Builder getOrCreateDirectory(@NonNull String name) {
-            final String trimmedName = name.trim();
-            if (trimmedName.isEmpty()) {
+            final Opt<String> nonEmptyName = StringUtils.getNonEmptyString(name);
+            if (!nonEmptyName.isPresent()) {
                 throw new IllegalArgumentException("Empty or all-whitespace name is invalid!");
             }
+            final String dirName = nonEmptyName.get();
 
-            final Builder existingDirectory = childDirectories.get(trimmedName);
+            final Builder existingDirectory = childDirectories.get(dirName);
             if (existingDirectory != null) {
                 return existingDirectory;
             }
 
-            assertLegalName(trimmedName);
-            final Builder newDirectory = new Builder(trimmedName, "directory");
-            childDirectories.put(trimmedName, newDirectory);
+            assertLegalName(dirName);
+            final Builder newDirectory = new Builder(dirName);
+            childDirectories.put(dirName, newDirectory);
             return newDirectory;
         }
 
         /**
-         * Add the commandDefs to this directory.
+         * Add child {@link CommandDef}s to this directory.
          *
          * @param commandDefs CommandDefs to add.
          * @throws IllegalArgumentException If any of the commandDefs' names clash with existing commandDefs under this directory.
@@ -112,14 +126,14 @@ public class CommandDirectoryDef implements Identifiable {
         }
 
         /**
-         * Add the commandDefs to this directory.
+         * Add child {@link CommandDef}s to this directory.
          *
          * @param commandDefs CommandDefs to add.
          * @throws IllegalArgumentException If any of the commandDefs' names clash with existing commandDefs under this directory.
          */
         public Builder addCommandDefs(List<CommandDef> commandDefs) {
             for (CommandDef commandDef : commandDefs) {
-                final String name = commandDef.getName();
+                final String name = commandDef.getIdentifier().getName();
                 assertLegalName(name);
                 childCommands.put(name, commandDef);
             }
@@ -128,12 +142,15 @@ public class CommandDirectoryDef implements Identifiable {
 
         private void assertLegalName(String name) {
             if (childDirectories.containsKey(name) || childCommands.containsKey(name)) {
-                throw new IllegalArgumentException(String.format("Directory '%s' already contains child entry: '%s'", identifier.getName(), name));
+                throw new IllegalArgumentException(String.format("Directory '%s' already contains child entry: '%s'", this.name, name));
             }
         }
 
-        // TODO: JavaDoc
+        /**
+         * @return A {@link CommandDirectoryDef} built out of this builder's parameters.
+         */
         public CommandDirectoryDef build() {
+            final Identifier identifier = new Identifier(name, description);
             final List<CommandDirectoryDef> directories = buildDirectories();
             final List<CommandDef> commandDefs = buildCommandDefs();
             return new CommandDirectoryDef(identifier, directories, commandDefs);

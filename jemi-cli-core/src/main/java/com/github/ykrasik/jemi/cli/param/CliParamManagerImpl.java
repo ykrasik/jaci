@@ -17,8 +17,8 @@
 package com.github.ykrasik.jemi.cli.param;
 
 import com.github.ykrasik.jemi.cli.assist.ParamAssistInfo;
-import com.github.ykrasik.jemi.cli.command.CliCommandArgs;
 import com.github.ykrasik.jemi.cli.exception.ParseException;
+import com.github.ykrasik.jemi.core.command.CommandArgs;
 import com.github.ykrasik.jemi.util.trie.Trie;
 import com.github.ykrasik.jemi.util.trie.TrieBuilder;
 import lombok.NonNull;
@@ -55,7 +55,7 @@ public class CliParamManagerImpl implements CliParamManager {
     }
 
     @Override
-    public CliCommandArgs parse(List<String> args) throws ParseException {
+    public CommandArgs parse(List<String> args) throws ParseException {
         // Parse all args.
         final CliParamParseContext context = doParse(args);
         return context.createCommandArgs();

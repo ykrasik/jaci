@@ -22,37 +22,33 @@ import com.github.ykrasik.jemi.core.command.CommandDef;
 import com.github.ykrasik.jemi.core.directory.CommandDirectoryDef;
 import com.github.ykrasik.jemi.util.reflection.ReflectionUtils;
 import com.github.ykrasik.jemi.util.string.StringUtils;
+import lombok.AccessLevel;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 /**
+ * A hierarchy of {@link CommandDirectoryDef}s and {@link CommandDef}s.
+ * Essentially, this is a file system starting from a single 'root' directory.
+ *
  * @author Yevgeny Krasik
  */
 // TODO: JavaDoc
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class CommandHierarchy {
     private final CommandDirectoryDef root;
-
-    public CommandHierarchy(@NonNull CommandDirectoryDef root) {
-        this.root = root;
-    }
 
     public CommandDirectoryDef getRoot() {
         return root;
     }
 
     public static class Builder {
-        // FIXME: Constructor for unit tests.
-        private final ReflectionClassProcessor reflectionClassProcessor = new ReflectionClassProcessor();
-        private final CommandDirectoryDef.Builder root = new CommandDirectoryDef.Builder();
+        private static final ReflectionClassProcessor PROCESSOR = new ReflectionClassProcessor();
 
-        // TODO: JavaDoc
-        public CommandHierarchy build() {
-            final CommandDirectoryDef rootDef = root.build();
-            return new CommandHierarchy(rootDef);
-        }
+        private final CommandDirectoryDef.Builder root = new CommandDirectoryDef.Builder("root").setDescription("root");
 
         /**
          * Process a class and return the commands that were defined in this class with annotations.<br>
@@ -77,7 +73,7 @@ public class CommandHierarchy {
          */
         // TODO: Wrong JavaDoc
         public Builder processObject(@NonNull Object instance) {
-            final Map<String, List<CommandDef>> pathToCommandDefsMap = reflectionClassProcessor.processObject(instance);
+            final Map<String, List<CommandDef>> pathToCommandDefsMap = PROCESSOR.processObject(instance);
 
             // Add the returned commands to the hierarchy.
             for (Entry<String, List<CommandDef>> entry : pathToCommandDefsMap.entrySet()) {
@@ -88,14 +84,13 @@ public class CommandHierarchy {
 
         private void addCommandDefs(String path, List<CommandDef> commandDefs) {
             final String trimmedPath = path.trim();
-            // TODO: Use this as a const?
             if ("//".equals(trimmedPath)) {
                 throw new IllegalArgumentException(String.format("Invalid path: '%s'", path));
             }
 
             // Ignore any leading and trailing '/', paths always start from root.
             // TODO: Make sure this doesn't mask '//' or '///' as an error.
-            final String pathWithoutDelimiters = StringUtils.removeLeadingAndTrailingDelimiter(path, Constants.PATH_DELIMITER_STRING);
+            final String pathWithoutDelimiters = StringUtils.removeLeadingAndTrailingDelimiter(trimmedPath, Constants.PATH_DELIMITER_STRING);
             final List<String> splitPath = Constants.splitByPathDelimiter(pathWithoutDelimiters);
 
             final CommandDirectoryDef.Builder builder = getOrCreatePathToDirectory(splitPath);
@@ -115,6 +110,13 @@ public class CommandHierarchy {
                 dir = dir.getOrCreateDirectory(name);
             }
             return dir;
+        }
+
+
+        // TODO: JavaDoc
+        public CommandHierarchy build() {
+            final CommandDirectoryDef rootDef = root.build();
+            return new CommandHierarchy(rootDef);
         }
     }
 }

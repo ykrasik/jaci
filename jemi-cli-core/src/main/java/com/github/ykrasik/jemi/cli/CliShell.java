@@ -16,9 +16,11 @@
 
 package com.github.ykrasik.jemi.cli;
 
-import com.github.ykrasik.jemi.cli.assist.*;
+import com.github.ykrasik.jemi.cli.assist.AutoComplete;
+import com.github.ykrasik.jemi.cli.assist.CommandInfo;
+import com.github.ykrasik.jemi.cli.assist.ParamAssistInfo;
+import com.github.ykrasik.jemi.cli.assist.Suggestions;
 import com.github.ykrasik.jemi.cli.command.CliCommand;
-import com.github.ykrasik.jemi.cli.command.CliCommandArgs;
 import com.github.ykrasik.jemi.cli.command.CliCommandOutput;
 import com.github.ykrasik.jemi.cli.command.CliCommandOutputImpl;
 import com.github.ykrasik.jemi.cli.commandline.CommandLine;
@@ -28,6 +30,7 @@ import com.github.ykrasik.jemi.cli.hierarchy.CliCommandHierarchy;
 import com.github.ykrasik.jemi.cli.output.CliOutput;
 import com.github.ykrasik.jemi.cli.output.CliPrinter;
 import com.github.ykrasik.jemi.cli.output.CliSerializer;
+import com.github.ykrasik.jemi.core.command.CommandArgs;
 import com.github.ykrasik.jemi.util.opt.Opt;
 import lombok.NonNull;
 
@@ -175,7 +178,7 @@ public class CliShell {
 
         // Parse command args.
         final List<String> rawArgs = commandLine.getCommandArgs();
-        final CliCommandArgs args = command.parse(rawArgs);
+        final CommandArgs args = command.parse(rawArgs);
 
         // Execute the command.
         final CliCommandOutput commandOutput = new CliCommandOutputImpl(printer);

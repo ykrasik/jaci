@@ -65,7 +65,7 @@ public class DefaultAnnotationMethodCommandFactory extends AbstractAnnotationMet
         }
 
         final String name = getNonEmptyStringOrDefault(annotation.value(), method.getName());
-        final CommandDef.Builder builder = new CommandDef.Builder(name);
+        final CommandDef.Builder builder = new CommandDef.Builder(name, new ReflectionCommandExecutor(instance, method));
 
         final Opt<String> description = getNonEmptyString(annotation.description());
         if (description.isPresent()) {
@@ -77,8 +77,6 @@ public class DefaultAnnotationMethodCommandFactory extends AbstractAnnotationMet
             final ParamDef<?> paramDef = paramProcessor.createParam(instance, param);
             builder.addParam(paramDef);
         }
-
-        builder.setExecutor(new ReflectionCommandExecutor(instance, method));
 
         return builder.build();
     }

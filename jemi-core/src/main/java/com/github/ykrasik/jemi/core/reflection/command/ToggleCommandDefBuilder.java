@@ -54,10 +54,9 @@ public class ToggleCommandDefBuilder {
             .setOptional(new ToggleCommandAccessorDefaultValueSupplier(accessor))
             .build();
 
-        return new CommandDef.Builder(name)
+        return new CommandDef.Builder(name, new ToggleCommandExecutor(name, accessor))
             .setDescription(description)
             .addParam(param)
-            .setExecutor(new ToggleCommandExecutor(name, accessor))
             .build();
     }
 

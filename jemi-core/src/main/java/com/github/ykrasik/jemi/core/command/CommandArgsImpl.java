@@ -22,6 +22,9 @@ import lombok.RequiredArgsConstructor;
 import java.util.*;
 
 /**
+ * An implementation of a {@link CommandArgs}.
+ * Popping args is implemented by maintaining an index that can only be increased.
+ *
  * @author Yevgeny Krasik
  */
 @RequiredArgsConstructor
@@ -37,38 +40,13 @@ public class CommandArgsImpl implements CommandArgs {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> T popArg(Class<T> clazz) {
+    public <T> T popArg() {
         if (index >= args.size()) {
             throw new IllegalArgumentException("No more arguments!");
         }
 
         final Object value = args.get(index);
-        if (!clazz.isInstance(value)) {
-            final String message = String.format("Invalid argument type: expected=%s, actual=%s", clazz, value.getClass());
-            throw new IllegalArgumentException(message);
-        }
-
         index++;
         return (T) value;
-    }
-
-    @Override
-    public String popString() {
-        return popArg(String.class);
-    }
-
-    @Override
-    public int popInt() {
-        return popArg(Integer.class);
-    }
-
-    @Override
-    public double popDouble() {
-        return popArg(Double.class);
-    }
-
-    @Override
-    public boolean popBool() {
-        return popArg(Boolean.class);
     }
 }

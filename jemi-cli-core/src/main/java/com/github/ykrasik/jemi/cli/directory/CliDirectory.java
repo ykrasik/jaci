@@ -161,7 +161,7 @@ public class CliDirectory implements Identifiable {
         final TrieBuilder<CliDirectory> builder = new TrieBuilder<>();
         for (CommandDirectoryDef childDirectoryDef : def.getDirectoryDefs()) {
             final CliDirectory childDirectory = fromDef(childDirectoryDef);
-            builder.add(childDirectoryDef.getName(), childDirectory);
+            builder.add(childDirectoryDef.getIdentifier().getName(), childDirectory);
         }
         return builder.build();
     }
