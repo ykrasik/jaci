@@ -16,9 +16,8 @@
 
 package com.github.ykrasik.jemi.core;
 
-import lombok.Getter;
+import lombok.EqualsAndHashCode;
 import lombok.NonNull;
-import lombok.experimental.Accessors;
 
 import java.util.Comparator;
 import java.util.regex.Matcher;
@@ -29,7 +28,7 @@ import java.util.regex.Pattern;
  *
  * @author Yevgeny Krasik
  */
-// FIXME: Remove all non-obvious lombok annotations.
+@EqualsAndHashCode
 public class Identifier {
     /**
      * A pattern that matches any strings that start with a letter and are alphanumeric.
@@ -43,6 +42,14 @@ public class Identifier {
         this.name = name;
         this.description = description;
         assertValidName();
+    }
+
+    private void assertValidName() {
+        final Matcher matcher = LEGAL_NAME_PATTERN.matcher(name);
+        if (!matcher.matches()) {
+            final int index = matcher.regionStart();
+            throw new IllegalArgumentException(String.format("Names must be alphanumeric and start with a letter: name='%s', index=%d", name, index));
+        }
     }
 
     /**
@@ -59,29 +66,23 @@ public class Identifier {
         return description;
     }
 
-    private void assertValidName() {
-        final Matcher matcher = LEGAL_NAME_PATTERN.matcher(name);
-        if (!matcher.matches()) {
-            final int index = matcher.regionStart();
-            final String message = String.format("Names must be alphanumeric and start with a letter: name='%s', index=%d", name, index);
-            throw new IllegalArgumentException(message);
-        }
-    }
-
     @Override
     public String toString() {
         return name + " : " + description;
     }
 
-    /**
-     * A {@link Comparator} that compares {@link Identifier}s according to {@link Identifier#getName()}.
-     */
-    @Accessors(fluent = true)
-    @Getter
-    private static Comparator<Identifier> nameComparator = new Comparator<Identifier>() {
+
+    private static Comparator<Identifier> NAME_COMPARATOR = new Comparator<Identifier>() {
         @Override
         public int compare(Identifier o1, Identifier o2) {
             return o1.getName().compareTo(o2.getName());
         }
     };
+
+    /**
+     * @return A {@link Comparator} that compares {@link Identifier}s according to {@link Identifier#getName()}.
+     */
+    public static Comparator<Identifier> nameComparator() {
+        return NAME_COMPARATOR;
+    }
 }

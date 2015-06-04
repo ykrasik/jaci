@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2014 Yevgeny Krasik                                          *
+ * Copyright (C) 2015 Yevgeny Krasik                                          *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -14,36 +14,16 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jemi.core.annotation.command;
+package com.github.ykrasik.jemi.core.reflection.param.factory;
 
-import com.github.ykrasik.jemi.api.CommandOutput;
-import com.github.ykrasik.jemi.core.command.CommandArgs;
-import com.github.ykrasik.jemi.core.command.CommandExecutor;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
+import com.github.ykrasik.jemi.core.param.ParamDef;
+import com.github.ykrasik.jemi.util.opt.Opt;
+import com.github.ykrasik.jemi.util.reflection.ReflectionParameter;
 
 /**
- * A {@link CommandExecutor} that calls the underlying method via reflection.
- *
  * @author Yevgeny Krasik
  */
-@RequiredArgsConstructor
-public class ReflectionCommandExecutor implements CommandExecutor {
-    @NonNull private final Object instance;
-    @NonNull private final Method method;
-
-    @Override
-    public void execute(CommandOutput output, CommandArgs args) throws Exception {
-        final List<Object> reflectionArgs = new ArrayList<>(args.getArgs());
-
-        // Add output as first arg.
-        reflectionArgs.add(0, output);
-
-        // Invoke method.
-        method.invoke(instance, reflectionArgs.toArray());
-    }
+// TODO: JavaDoc
+public interface MethodParamFactory<T extends ParamDef<?>> {
+    Opt<T> create(Object instance, ReflectionParameter param) throws Exception;
 }

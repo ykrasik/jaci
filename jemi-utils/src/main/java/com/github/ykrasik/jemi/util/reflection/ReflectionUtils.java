@@ -46,16 +46,17 @@ public final class ReflectionUtils {
     }
 
     /**
-     * Find a method with the provided name that takes no-args.
-     * If the method is private, it will be made invokable outside of it's class.
+     * Returns a method with the provided name that takes no-args.
+     * If the method is private, it will be made accessible outside of it's class.
      *
      * @param clazz Class to search.
      * @param methodName Method name.
      * @return A method with the provided name that takes no-args.
-     * @throws IllegalArgumentException If the class doesn't contain a method with the provided name and args.
+     * @throws RuntimeException If the class doesn't contain a method with the provided name and args.
      */
     @SneakyThrows
-    public static Method findNoArgsMethod(Class<?> clazz, String methodName) {
+    public static Method getNoArgsMethod(Class<?> clazz, String methodName) {
+        // TODO: Support inheritance.
         final Method method = clazz.getDeclaredMethod(methodName, NO_ARGS_TYPE);
         if (!method.isAccessible()) {
             method.setAccessible(true);
@@ -73,6 +74,7 @@ public final class ReflectionUtils {
      * @throws IllegalArgumentException If the class doesn't contain a method with the provided name.
      */
     public static Method lookupMethod(Class<?> clazz, String methodName) {
+        // TODO: Support inheritance.
         for (Method method : clazz.getMethods()) {
             if (method.getName().equals(methodName)) {
                 return method;
@@ -82,14 +84,14 @@ public final class ReflectionUtils {
     }
 
     /**
-     * Invokes the method, using the provided instance as 'this', and casts the return value to the provided return type.
+     * Invokes the method, using the provided instance as 'this'.
      * Method must be no-args and return the correct type.
      *
      * @param instance Instance to use as 'this' for invocation.
      * @param method Method to invoke.
      * @param <T> Return type.
-     * @return The result of invoking the no-args method, cast to the provided type.
-     * @throws IllegalStateException If an error occurred invoking the method.
+     * @return The result of invoking the no-args method.
+     * @throws RuntimeException If an error occurred invoking the method.
      */
     @SuppressWarnings("unchecked")
     @SneakyThrows
@@ -98,6 +100,24 @@ public final class ReflectionUtils {
             method.setAccessible(true);
         }
         return (T) method.invoke(instance, NO_ARGS);
+    }
+
+    // TODO: JavaDoc
+    public static void assertReturnValue(Method method, Class<?> expectedReturnType) {
+        final Class<?> returnType = method.getReturnType();
+        if (returnType != expectedReturnType) {
+            final String message = String.format("Class='%s', method='%s': Must return a value of type '%s'!", method.getDeclaringClass(), method.getName(), expectedReturnType);
+            throw new IllegalArgumentException(message);
+        }
+    }
+
+    // TODO: JavaDoc
+    public static void assertNoParameters(Method method) {
+        final Class<?>[] parameterTypes = method.getParameterTypes();
+        if (parameterTypes.length > 0) {
+            final String message = String.format("Class='%s', method='%s': Must take no parameters!", method.getDeclaringClass(), method.getName());
+            throw new IllegalArgumentException(message);
+        }
     }
 
     /**

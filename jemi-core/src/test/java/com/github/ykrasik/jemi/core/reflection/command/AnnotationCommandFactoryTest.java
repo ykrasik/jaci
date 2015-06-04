@@ -17,7 +17,7 @@
 //package com.github.ykrasik.jemi.core.annotation.command;
 //
 //import com.github.ykrasik.jemi.api.*;
-//import com.github.ykrasik.jemi.core.annotation.param.AnnotationParamFactory;
+//import com.github.ykrasik.jemi.core.annotation.param.MethodParamFactory;
 //import com.github.ykrasik.jemi.core.command.CommandArgs;
 //import com.github.ykrasik.jemi.core.command.CommandDef;
 //import com.github.ykrasik.jemi.util.opt.Opt;
@@ -50,7 +50,7 @@
 //    private Method method;
 //    private CommandDef command;
 //
-//    @Mock private AnnotationParamFactory paramFactory;
+//    @Mock private MethodParamFactory paramFactory;
 //
 //    @Before
 //    public void setUp() {

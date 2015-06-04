@@ -14,47 +14,40 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jemi.util.reflection;
+package com.github.ykrasik.jemi.core.reflection.param.factory;
 
+import com.github.ykrasik.jemi.core.param.ParamDef;
 import com.github.ykrasik.jemi.util.opt.Opt;
-import lombok.Data;
+import com.github.ykrasik.jemi.util.reflection.ReflectionParameter;
 import lombok.NonNull;
 
-import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.List;
 
 /**
- * Provides reflection information about a parameter. Used due to lack in Java 7.
- *
  * @author Yevgeny Krasik
  */
-@Data
-public class ReflectionParameter {
-    @NonNull private final Class<?> parameterType;
-    @NonNull private final Annotation[] annotations;
+// TODO: JavaDoc
+public abstract class AbstractMethodParamFactory<T extends ParamDef<?>> implements MethodParamFactory<T> {
+    private final List<Class<?>> acceptedParameterTypes;
 
-    /**
-     * The parameter's index in the list of parameters, starting from 0.
-     */
-    private final int index;
-
-    /**
-     * @param annotationClass Type of annotation to find.
-     * @param <T> Type of annotation to find.
-     * @return Annotation of the requested type, if exists.
-     */
-    @SuppressWarnings("unchecked")
-    public <T extends Annotation> Opt<T> getAnnotation(Class<T> annotationClass) {
-        for (Annotation annotation : annotations) {
-            if (annotation.annotationType() == annotationClass) {
-                return Opt.of((T) annotation);
-            }
+    protected AbstractMethodParamFactory(@NonNull Class<?>... acceptedParameterTypes) {
+        if (acceptedParameterTypes.length == 0) {
+            throw new IllegalArgumentException("AbstractMethodParamFactory must process at least 1 parameter type!");
         }
-        return Opt.absent();
+        this.acceptedParameterTypes = Arrays.asList(acceptedParameterTypes);
     }
 
-    // TODO: JavaDoc
-    public String getDefaultName() {
-        final String type = parameterType.getSimpleName().toLowerCase();
-        return type + "Param" + index;
+    @Override
+    public Opt<T> create(Object instance, ReflectionParameter param) throws Exception {
+        final Class<?> parameterType = param.getParameterType();
+        if (!acceptedParameterTypes.contains(parameterType)) {
+            // This factory doesn't accept parameter type.
+            return Opt.absent();
+        }
+
+        return Opt.of(doCreate(instance, param));
     }
+
+    protected abstract T doCreate(Object instance, ReflectionParameter param) throws Exception;
 }

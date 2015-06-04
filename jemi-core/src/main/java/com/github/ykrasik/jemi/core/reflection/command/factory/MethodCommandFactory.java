@@ -14,16 +14,26 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jemi.core;
+package com.github.ykrasik.jemi.core.reflection.command.factory;
+
+import com.github.ykrasik.jemi.core.command.CommandDef;
+import com.github.ykrasik.jemi.util.opt.Opt;
+
+import java.lang.reflect.Method;
 
 /**
- * An entity that has an {@link Identifier} - A name and description.
+ * Creates {@link CommandDef}s out of {@link Method}s. Is not required to support all methods, may signal that a method
+ * is not supported by returning an {@code absent} value from {@link #create(Object, Method)}.
  *
  * @author Yevgeny Krasik
  */
-public interface Identifiable {
+public interface MethodCommandFactory {
     /**
-     * @return The entity's {@link Identifier}.
+     * Process the method and create a {@link CommandDef} out of it, if this factory can accept this method.
+     *
+     * @param instance Instance of a class to which this method belongs.
+     * @param method Method to be processed.
+     * @return A {@code present} {@link CommandDef} if the method is accepted by this factory.
      */
-    Identifier getIdentifier();
+    Opt<CommandDef> create(Object instance, Method method) throws Exception;
 }

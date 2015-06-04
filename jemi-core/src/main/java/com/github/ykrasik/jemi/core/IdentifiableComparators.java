@@ -16,27 +16,27 @@
 
 package com.github.ykrasik.jemi.core;
 
-import lombok.Getter;
-import lombok.experimental.Accessors;
-
 import java.util.Comparator;
 
 /**
+ * {@link Comparator}s for {@link Identifiable} entities.
+ *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
-@Accessors(fluent = true)
 public final class IdentifiableComparators {
     private IdentifiableComparators() { }
 
-    /**
-     * A {@link Comparator} that compares 2 {@link Identifiable}s according to {@link Identifier#getName()}.
-     */
-    @Getter
-    private static Comparator<Identifiable> nameComparator = new Comparator<Identifiable>() {
+    private static Comparator<Identifiable> NAME_COMPARATOR = new Comparator<Identifiable>() {
         @Override
         public int compare(Identifiable o1, Identifiable o2) {
             return Identifier.nameComparator().compare(o1.getIdentifier(), o2.getIdentifier());
         }
     };
+
+    /**
+     * @return A {@link Comparator} that compares 2 {@link Identifiable}s according to {@link Identifier#getName()}.
+     */
+    public static Comparator<Identifiable> nameComparator() {
+        return NAME_COMPARATOR;
+    }
 }

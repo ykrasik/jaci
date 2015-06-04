@@ -14,14 +14,12 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jemi.core.annotation.command;
+package com.github.ykrasik.jemi.core.reflection.command;
 
 import com.github.ykrasik.jemi.api.ToggleCommandStateAccessor;
 import com.github.ykrasik.jemi.core.command.CommandDef;
 import com.github.ykrasik.jemi.core.param.BooleanParamDef;
 import lombok.NonNull;
-import lombok.Setter;
-import lombok.experimental.Accessors;
 
 /**
  * Creates toggle {@link CommandDef}s.<br>
@@ -29,32 +27,27 @@ import lombok.experimental.Accessors;
  * the boolean state of some component on or off. The state of the component is accessed via a {@link ToggleCommandStateAccessor}.<br>
  * If the optional boolean parameter is passed, the toggle command will set the {@link ToggleCommandStateAccessor}'s
  * state to whatever value the parameter had. If boolean parameter is not passed, the toggle command
- * will toggle the state of the {@link ToggleCommandStateAccessor} - If it was previously 'false', it will now be 'true'
+ * will toggle the state of the {@link ToggleCommandStateAccessor} - If it was previously {@code false}, it will now be {@code true}
  * and vice versa.
  *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
-@Accessors(chain = true)
 public class ToggleCommandDefBuilder {
     private final String name;
+    private final ToggleCommandStateAccessor accessor;
 
-    @Setter
-    @NonNull private String description = "toggle command";
+    private String description = "toggle command";
+    private String paramName = "state";
+    private String paramDescription = "toggle";
 
-    @Setter
-    @NonNull private String paramName = "state";
-
-    @Setter
-    @NonNull private String paramDescription = "toggle";
-
-    @Setter
-    @NonNull private ToggleCommandStateAccessor accessor;
-
-    public ToggleCommandDefBuilder(@NonNull String name) {
+    public ToggleCommandDefBuilder(@NonNull String name, @NonNull ToggleCommandStateAccessor accessor) {
         this.name = name;
+        this.accessor = accessor;
     }
 
+    /**
+     * @return A toggle {@link CommandDef} built from the supplied parameters.
+     */
     public CommandDef build() {
         final BooleanParamDef param = new BooleanParamDef.Builder(paramName)
             .setDescription(paramDescription)
@@ -66,5 +59,32 @@ public class ToggleCommandDefBuilder {
             .addParam(param)
             .setExecutor(new ToggleCommandExecutor(name, accessor))
             .build();
+    }
+
+    /**
+     * Set the description of the command.
+     *
+     * @param description Description to set.
+     */
+    public void setDescription(@NonNull String description) {
+        this.description = description;
+    }
+
+    /**
+     * Set the single optional boolean parameter name.
+     *
+     * @param paramName Name to set.
+     */
+    public void setParamName(@NonNull String paramName) {
+        this.paramName = paramName;
+    }
+
+    /**
+     * Set the single optional boolean parameter description.
+     *
+     * @param paramDescription Description to set.
+     */
+    public void setParamDescription(@NonNull String paramDescription) {
+        this.paramDescription = paramDescription;
     }
 }

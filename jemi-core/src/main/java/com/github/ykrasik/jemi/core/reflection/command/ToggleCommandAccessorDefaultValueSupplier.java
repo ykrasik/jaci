@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2014 Yevgeny Krasik                                          *
+ * Copyright (C) 2015 Yevgeny Krasik                                          *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -14,27 +14,22 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jemi.core.annotation.command;
+package com.github.ykrasik.jemi.core.reflection.command;
 
-import com.github.ykrasik.jemi.api.CommandOutput;
 import com.github.ykrasik.jemi.api.ToggleCommandStateAccessor;
-import com.github.ykrasik.jemi.core.command.CommandArgs;
-import com.github.ykrasik.jemi.core.command.CommandExecutor;
+import com.github.ykrasik.jemi.util.function.Supplier;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 /**
- * A {@link CommandExecutor} that sets the value of it's {@link ToggleCommandStateAccessor} according to input.
+ * A {@link Supplier} that returns the inverse of the current {@link ToggleCommandStateAccessor#get()}.
  */
 @RequiredArgsConstructor
-public class ToggleCommandExecutor implements CommandExecutor {
-    @NonNull private final String name;
+public class ToggleCommandAccessorDefaultValueSupplier implements Supplier<Boolean> {
     @NonNull private final ToggleCommandStateAccessor accessor;
 
     @Override
-    public void execute(CommandOutput output, CommandArgs args) throws Exception {
-        final boolean toggle = args.popBool();
-        accessor.set(toggle);
-        output.message("%s: %s", name, toggle);
+    public Boolean get() {
+        return !accessor.get();
     }
 }

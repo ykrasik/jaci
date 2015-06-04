@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.ykrasik.jemi.core.annotation;
+package com.github.ykrasik.jemi.core.reflection;
 
 /**
  * @author Yevgeny Krasik

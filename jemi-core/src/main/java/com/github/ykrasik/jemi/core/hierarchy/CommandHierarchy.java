@@ -17,7 +17,7 @@
 package com.github.ykrasik.jemi.core.hierarchy;
 
 import com.github.ykrasik.jemi.api.Constants;
-import com.github.ykrasik.jemi.core.annotation.AnnotationProcessor;
+import com.github.ykrasik.jemi.core.reflection.ReflectionClassProcessor;
 import com.github.ykrasik.jemi.core.command.CommandDef;
 import com.github.ykrasik.jemi.core.directory.CommandDirectoryDef;
 import com.github.ykrasik.jemi.util.reflection.ReflectionUtils;
@@ -45,7 +45,7 @@ public class CommandHierarchy {
 
     public static class Builder {
         // FIXME: Constructor for unit tests.
-        private final AnnotationProcessor annotationProcessor = new AnnotationProcessor();
+        private final ReflectionClassProcessor reflectionClassProcessor = new ReflectionClassProcessor();
         private final CommandDirectoryDef.Builder root = new CommandDirectoryDef.Builder();
 
         // TODO: JavaDoc
@@ -77,7 +77,7 @@ public class CommandHierarchy {
          */
         // TODO: Wrong JavaDoc
         public Builder processObject(@NonNull Object instance) {
-            final Map<String, List<CommandDef>> pathToCommandDefsMap = annotationProcessor.processObject(instance);
+            final Map<String, List<CommandDef>> pathToCommandDefsMap = reflectionClassProcessor.processObject(instance);
 
             // Add the returned commands to the hierarchy.
             for (Entry<String, List<CommandDef>> entry : pathToCommandDefsMap.entrySet()) {

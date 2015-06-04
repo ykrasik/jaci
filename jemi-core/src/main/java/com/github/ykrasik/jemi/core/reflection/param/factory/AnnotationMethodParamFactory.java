@@ -14,47 +14,37 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jemi.util.reflection;
+package com.github.ykrasik.jemi.core.reflection.param.factory;
 
+import com.github.ykrasik.jemi.core.param.ParamDef;
 import com.github.ykrasik.jemi.util.opt.Opt;
-import lombok.Data;
-import lombok.NonNull;
+import com.github.ykrasik.jemi.util.reflection.ReflectionParameter;
 
 import java.lang.annotation.Annotation;
 
 /**
- * Provides reflection information about a parameter. Used due to lack in Java 7.
- *
  * @author Yevgeny Krasik
  */
-@Data
-public class ReflectionParameter {
-    @NonNull private final Class<?> parameterType;
-    @NonNull private final Annotation[] annotations;
+// TODO: JavaDoc
+public abstract class AnnotationMethodParamFactory<T extends ParamDef<?>, A extends Annotation> extends AbstractMethodParamFactory<T> {
+    private final Class<A> annotationClass;
 
-    /**
-     * The parameter's index in the list of parameters, starting from 0.
-     */
-    private final int index;
+    protected AnnotationMethodParamFactory(Class<A> annotationClass, Class<?>... acceptedParameterTypes) {
+        super(acceptedParameterTypes);
+        this.annotationClass = annotationClass;
+    }
 
-    /**
-     * @param annotationClass Type of annotation to find.
-     * @param <T> Type of annotation to find.
-     * @return Annotation of the requested type, if exists.
-     */
     @SuppressWarnings("unchecked")
-    public <T extends Annotation> Opt<T> getAnnotation(Class<T> annotationClass) {
-        for (Annotation annotation : annotations) {
-            if (annotation.annotationType() == annotationClass) {
-                return Opt.of((T) annotation);
-            }
+    @Override
+    protected T doCreate(Object instance, ReflectionParameter param) throws Exception {
+        final Opt<A> annotation = param.getAnnotation(annotationClass);
+        if (annotation.isPresent()) {
+            return createWithAnnotation(instance, param, annotation.get());
+        } else {
+            return createWithoutAnnotation(instance, param);
         }
-        return Opt.absent();
     }
 
-    // TODO: JavaDoc
-    public String getDefaultName() {
-        final String type = parameterType.getSimpleName().toLowerCase();
-        return type + "Param" + index;
-    }
+    protected abstract T createWithAnnotation(Object instance, ReflectionParameter param, A annotation) throws Exception;
+    protected abstract T createWithoutAnnotation(Object instance, ReflectionParameter param) throws Exception;
 }

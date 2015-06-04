@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2015 Yevgeny Krasik                                          *
+ * Copyright (C) 2014 Yevgeny Krasik                                          *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -14,22 +14,36 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jemi.core.annotation.command;
+package com.github.ykrasik.jemi.core.reflection.command;
 
-import com.github.ykrasik.jemi.api.ToggleCommandStateAccessor;
-import com.github.ykrasik.jemi.util.function.Supplier;
+import com.github.ykrasik.jemi.api.CommandOutput;
+import com.github.ykrasik.jemi.core.command.CommandArgs;
+import com.github.ykrasik.jemi.core.command.CommandExecutor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * A {@link Supplier > that returns the inverse of the current {@link ToggleCommandStateAccessor#get()}.
+ * A {@link CommandExecutor} that calls the underlying {@link Method} via reflection.
+ *
+ * @author Yevgeny Krasik
  */
 @RequiredArgsConstructor
-public class ToggleCommandAccessorDefaultValueSupplier implements Supplier<Boolean> {
-    @NonNull private final ToggleCommandStateAccessor accessor;
+public class ReflectionCommandExecutor implements CommandExecutor {
+    @NonNull private final Object instance;
+    @NonNull private final Method method;
 
     @Override
-    public Boolean get() {
-        return !accessor.get();
+    public void execute(CommandOutput output, CommandArgs args) throws Exception {
+        final List<Object> reflectionArgs = new ArrayList<>(args.getArgs());
+
+        // Add output as first arg.
+        reflectionArgs.add(0, output);
+
+        // Invoke method.
+        method.invoke(instance, reflectionArgs.toArray());
     }
 }

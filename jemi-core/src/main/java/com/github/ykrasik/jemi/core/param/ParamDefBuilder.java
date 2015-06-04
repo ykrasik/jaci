@@ -14,19 +14,17 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jemi.core.annotation.param;
+package com.github.ykrasik.jemi.core.param;
 
-import com.github.ykrasik.jemi.util.reflection.ReflectionParameter;
+import com.github.ykrasik.jemi.util.function.Supplier;
 
 /**
  * @author Yevgeny Krasik
  */
 // TODO: JavaDoc
-public class DefaultParamNameGenerator implements ParamNameGenerator {
-    @Override
-    public String generateName(ReflectionParameter param) {
-        final String type = param.getParameterType().getSimpleName().toLowerCase();
-        final int index = param.getIndex();
-        return type + "Param" + index;
-    }
+public interface ParamDefBuilder<T extends ParamDef<E>, E> {
+    ParamDefBuilder<T, E> setDescription(String description);
+
+    ParamDefBuilder<T, E> setOptional(E defaultValue);
+    ParamDefBuilder<T, E> setOptional(Supplier<E> defaultValueSupplier);
 }

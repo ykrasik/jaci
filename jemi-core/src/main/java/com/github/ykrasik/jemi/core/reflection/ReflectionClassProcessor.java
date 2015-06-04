@@ -14,13 +14,14 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jemi.core.annotation;
+package com.github.ykrasik.jemi.core.reflection;
 
 import com.github.ykrasik.jemi.api.CommandPath;
-import com.github.ykrasik.jemi.core.annotation.command.AnnotationCommandFactory;
+import com.github.ykrasik.jemi.core.reflection.command.ReflectionMethodProcessor;
 import com.github.ykrasik.jemi.core.command.CommandDef;
 import com.github.ykrasik.jemi.util.opt.Opt;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -29,30 +30,30 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Processes a class and creates {@link CommandDef commandDef}s from methods annotated with qualifying annotations.<br>
+ * Processes a class and creates {@link CommandDef}s from qualifying methods.<br>
  *
  * @author Yevgeny Krasik
  */
-public class AnnotationProcessor {
-    private final AnnotationCommandFactory commandFactory;
+public class ReflectionClassProcessor {
+    private final ReflectionMethodProcessor methodProcessor;
 
-    public AnnotationProcessor() {
-        this(new AnnotationCommandFactory());
+    public ReflectionClassProcessor() {
+        this(new ReflectionMethodProcessor());
     }
 
     /**
-     * For testing.
+     * Package-visible for testing.
      */
-    AnnotationProcessor(@NonNull AnnotationCommandFactory commandFactory) {
-        this.commandFactory = commandFactory;
+    ReflectionClassProcessor(@NonNull ReflectionMethodProcessor methodProcessor) {
+        this.methodProcessor = methodProcessor;
     }
 
     /**
-     * Process the object and return the commands that were defined in the object's class with annotations.<br>
-     * Never returns null.
+     * Process the object and return a {@link Map} from a {@code path} to a {@link List} of {@link CommandDef}s
+     * that were defined for that path.
      *
      * @param instance Object to process.
-     * @return The commands and global commands that were defined in the object's class through annotations.
+     * @return The {@link CommandDef}s that were extracted out of the object.
      */
     public Map<String, List<CommandDef>> processObject(@NonNull Object instance) {
         final Class<?> clazz = instance.getClass();
@@ -60,38 +61,33 @@ public class AnnotationProcessor {
         // All method paths will be appended to the class's top level path.
         final AnnotatedCommandPath topLevelPath = getTopLevelPath(clazz);
 
-        final Map<String, List<CommandDef>> commandPaths = new HashMap<>();
+        final ClassContext context = new ClassContext(topLevelPath);
 
-        // Create commands from all methods that are annotated with qualifying annotations.
+        // Create commands from all qualifying methods..
         final Method[] methods = clazz.getMethods();
         for (Method method : methods) {
-            // If the method wasn't annotated, a command won't be created.
-            final Opt<CommandDef> commandDef = commandFactory.createCommand(instance, method);
-            if (!commandDef.isPresent()) {
-                continue;
-            }
-
-            // Compose the top level path of the declaring class with the method's path.
-            final AnnotatedCommandPath localPath = getLocalPath(method);
-            final AnnotatedCommandPath composedPath = topLevelPath.compose(localPath);
-
-            final String path = composedPath.path();
-            List<CommandDef> commands = commandPaths.get(path);
-            if (commands == null) {
-                commands = new ArrayList<>();
-                commandPaths.put(path, commands);
-            }
-            commands.add(commandDef.get());
+            processMethod(context, instance, method);
         }
 
-        return commandPaths;
+        return context.commandPaths;
+    }
+
+    private void processMethod(ClassContext context, Object instance, Method method) {
+        // Commands can only be created from qualifying methods.
+        final Opt<CommandDef> commandDef = methodProcessor.process(instance, method);
+        if (!commandDef.isPresent()) {
+            return;
+        }
+
+        final AnnotatedCommandPath commandPath = getCommandPath(method);
+        context.addCommandDef(commandPath, commandDef.get());
     }
 
     private AnnotatedCommandPath getTopLevelPath(Class<?> clazz) {
         final CommandPath annotation = clazz.getAnnotation(CommandPath.class);
         if (annotation != null) {
             if (annotation.override()) {
-                throw new IllegalArgumentException("Top level paths cannot be override=true! class=" + clazz);
+                throw new IllegalArgumentException("Top level paths cannot have override=true! class=" + clazz);
             }
             return fromAnnotation(annotation);
         } else {
@@ -100,7 +96,7 @@ public class AnnotationProcessor {
         }
     }
 
-    private AnnotatedCommandPath getLocalPath(Method method) {
+    private AnnotatedCommandPath getCommandPath(Method method) {
         final CommandPath annotation = method.getAnnotation(CommandPath.class);
         if (annotation != null) {
             return fromAnnotation(annotation);
@@ -111,6 +107,26 @@ public class AnnotationProcessor {
     }
 
     private AnnotatedCommandPath fromAnnotation(CommandPath annotation) {
-        return AnnotatedCommandPath.from(annotation.value(), annotation.override());
+        return new AnnotatedCommandPath(annotation.value(), annotation.override());
+    }
+
+    @RequiredArgsConstructor
+    private static class ClassContext {
+        private final AnnotatedCommandPath topLevelPath;
+
+        private final Map<String, List<CommandDef>> commandPaths = new HashMap<>();
+
+        public void addCommandDef(AnnotatedCommandPath commandPath, CommandDef commandDef) {
+            // Compose the top level path of the declaring class with the command path.
+            final AnnotatedCommandPath composedPath = topLevelPath.compose(commandPath);
+
+            final String path = composedPath.getPath();
+            List<CommandDef> commands = commandPaths.get(path);
+            if (commands == null) {
+                commands = new ArrayList<>();
+                commandPaths.put(path, commands);
+            }
+            commands.add(commandDef);
+        }
     }
 }
