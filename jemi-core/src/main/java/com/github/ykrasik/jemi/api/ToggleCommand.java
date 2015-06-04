@@ -27,10 +27,11 @@ import java.lang.annotation.Target;
  * the boolean state of some component on or off. The state of the component is accessed via a {@link ToggleCommandStateAccessor}.<br>
  * <br>
  * Annotated methods must be no-args and return a {@link ToggleCommandStateAccessor}.<br>
+ * Toggle commands can't have access to a {@link CommandOutput},
+ * because toggle commands aren't meant to be general purpose commands.
  *
  * @author Yevgeny Krasik
  */
-// FIXME: Consider instead to have the annotation specify the implementation class. More type safe.
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface ToggleCommand {
@@ -45,12 +46,12 @@ public @interface ToggleCommand {
     String description() default "";
 
     /**
-     * @return The command's single parameter name.
+     * @return The command's single, optional boolean parameter name.
      */
     String paramName() default "";
 
     /**
-     * @return The command's single parameter description.
+     * @return The command's single, optional boolean parameter description.
      */
     String paramDescription() default "";
 }

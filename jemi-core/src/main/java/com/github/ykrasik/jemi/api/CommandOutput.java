@@ -18,7 +18,7 @@ package com.github.ykrasik.jemi.api;
 
 /**
  * Output source of a Command.<br>
- * Methods annotated with {@link Command}(referred to as 'commands') MUST receive a {@link CommandOutput} as the first parameter.
+ * Methods annotated with {@link Command}(referred to as 'commands') <b>MUST</b> receive a {@link CommandOutput} as the first parameter.
  * Commands that do not have a {@link CommandOutput} as their first parameter will not be accepted.
  * This essentially means that commands must always be at least 1-arity.<br>
  * Methods annotated with {@link ToggleCommand}(referred to as 'toggle commands') aren't bound by this, and in fact
@@ -30,7 +30,7 @@ public interface CommandOutput {
     /**
      * Display a message.
      *
-     * @param text Text to print.
+     * @param text Message to display.
      */
     void message(String text);
 
@@ -42,9 +42,18 @@ public interface CommandOutput {
      */
     void message(String format, Object... args);
 
-    // TODO: JavaDoc
+    /**
+     * Display an error message.
+     *
+     * @param text Error message to display.
+     */
     void error(String text);
 
-    // TODO: JavaDoc
+    /**
+     * Display an error message. Message will be formatted with {@link String#format(String, Object...)}.
+     *
+     * @param format String format.
+     * @param args Args for the format.
+     */
     void error(String format, Object... args);
 }

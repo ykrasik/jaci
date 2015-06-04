@@ -25,7 +25,29 @@ import java.lang.annotation.Target;
  * Indicates that the annotated parameter is a string parameter.<br>
  * Optional annotation - any parameter not annotated will be considered a mandatory parameter that accepts
  * all strings, and will have a name and description generated for it.
- * However, if a bit more control over the parameter is required, annotate it.
+ * <br>
+ * Parameters may be optional - indicating that they do not need an explicit value to be passed and will use a default
+ * value if not assigned to a value. This can be set via {@link #optional()}.<br>
+ * There are 2 ways of obtaining a default value for an optional parameter:
+ * <ol>
+ *     <li>Constant value - Return a constant default value. Can be set via {@link #defaultValue()}.</li>
+ *     <li>Dynamic value - Return a default value that is computed at runtime, by invoking a method that takes no args
+ *                         and returns a {@link String} (called the 'supplier').
+ *                         The supplier must be a method in the same class, and may be private.
+ *                         Can be set via {@link #defaultValueSupplier()}.</li>
+ * </ol>
+ * If {@link #defaultValueSupplier()} returns a non-empty {@code String}, it overrides the value returned by {@link #defaultValue()}
+ * and the parameter will have its default value computed dynamically at runtime.<br>
+ * <br>
+ * String parameters can be constrained to only accept certain values. There are 3 types of constraints:
+ * <ol>
+ *     <li>None - All values are accepted.</li>
+ *     <li>Static - Only pre-defined values are accepted. Can be set through {@link #accepts()}.</li>
+ *     <li>Dynamic - The acceptable values are calculated at runtime, by invoking a method that takes no args and returns
+ *                   an array of {@link String} (called the 'supplier').
+ *                   The supplier must be a method in the same class and may be private.
+ *                   Can be set through {@link #supplier()}.</li>
+ * </ol>
  *
  * @author Yevgeny Krasik
  */
@@ -43,40 +65,56 @@ public @interface StringParam {
     String description() default "";
 
     /**
+     * Static constraint - Constrain the parameter to only accept a pre-defined set of Strings.
+     * By default accepts all Strings.
+     * Only taken into consideration if {@link #supplier()} returns an empty {@code String}.
+     *
      * @return An array of constant String values that this parameter can accept. If this is an empty
      *         array, the parameter will accept any String value. If not, the parameter will only accept
-     *         values that are contained in the array.
+     *         values that are contained in the array. Only has effect if {@link #supplier()} returns an empty {@code String}.
      */
     String[] accepts() default {};
 
-    // TODO: Mention that if supplier is not empty, it overrides accepts.
     /**
-     * Indicates that the annotated parameter is a dynamic string parameter.<br>
-     * Dynamic string parameters have their range of possible values computed at runtime (as opposed to
-     * static strings which have their possible values pre-computed).<br>
-     * Optional annotation - any parameter not annotated will be considered a mandatory parameter that accepts
-     * all strings, and will have a name and description generated for it.<br>
-     * However, if a bit more control over the parameter is required, annotate it.
-     */
-
-    /**
-     * @return The name of a method that takes no args and returns an array of {@link String} defined in the same object
+     * Dynamic constraint - Constrain the parameter to only accept values returned by invoking the supplier method.
+     * The supplier method must be in the same class as the command for which this is a parameter, take no args and
+     * return an array of {@code String}s. If the supplier returns an empty array, all values will be permitted.<br>
+     * <br>
+     * If the value of this property is not an empty {@code String}, it will override {@link #accepts()}
+     * and this parameter will be dynamically constrained.
+     *
+     * @return The name of a method that takes no args and returns an array of {@link String} defined in the same class
      *         (may be private). This method will be invoked at runtime to determine the possible values for this parameter.
-     *         If the supplier returns an empty list, all values will be permitted.
+     *         If the supplier returns an empty array, all values will be permitted.
      */
     String supplier() default "";
 
     /**
+     * If this returns {@code true}, the annotated parameter will be considered optional.<br>
+     * The default value will be either the value returned by {@link #defaultValue()} or {@link #defaultValueSupplier()}.
+     * If {@link #defaultValueSupplier()} returns a non-empty {@code String}, it overrides the value returned by {@link #defaultValue()}
+     * and the parameter will have its default value computed dynamically at runtime.
+     *
      * @return True if this parameter is optional.
-     *         Optional parameters will use the value returned by {@link #defaultValue()} if they weren't bound.
      */
     boolean optional() default false;
 
     /**
-     * @return The default value acceptable by this parameter if a value isn't explicitly passed.
-     *         Only used if {@link #optional()} is true.
+     * Constant default value - If this parameter isn't explicitly bound, this will be the default value.
+     * Only taken into consideration if {@link #optional()} returns {@code true} and {@link #defaultValueSupplier()}
+     * returns an empty {@code String}.
+     *
+     * @return The default value the parameter should use if a value isn't explicitly passed.
      */
     String defaultValue() default "";
 
-    // TODO: Add a defaultValueSupplier?
+    /**
+     * Dynamic default value - If this parameter isn't explicitly bound, the parameter's default value will be the
+     * value returned by invoking a method with the given name (called the 'supplier').
+     * The supplier must be in the same class, take no args and return a {@link String}. May be private.<br>
+     * Only taken into consideration if {@link #optional()} returns {@code true}.
+     *
+     * @return The default value supplier method the parameter should invoke if a value isn't explicitly passed.
+     */
+    String defaultValueSupplier() default "";
 }

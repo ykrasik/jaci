@@ -22,26 +22,30 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates the path under which commands should be added. The path should be delimited with {@link Constants#PATH_DELIMITER}.
+ * Optional annotation, applicable to both Classes and Methods.<br>
+ * <br>
+ * Indicates the path under which commands should be added.
+ * The path should be delimited with {@link Constants#PATH_DELIMITER}.<br>
  * The initial delimiter is unnecessary, as paths always start from the root.<br>
  * <br>
- * If a class is annotated with this, all it's methods annotated with {@link Command}
- * will inherit the path of this class. This is called the 'top level path'.<br>
+ * When a class is annotated, the path is referred to as the 'top level path'.
+ * All the class's methods annotated with {@link Command} will inherit its 'top level path'.
+ * {@link #override()} will be ignored in this case, as a 'top level path' always starts a new path.<br>
  * <br>
  * Each method annotated with {@link Command} can also specify it's own path, with the following conditions:<br>
- *   If the annotation is set to override (via {@link #override()},
- *     this annotation's {@link #value()} will replace the class's 'top level path'.<br>
- *   If the annotation is set not set to override (via {@link #override()},
- *     this annotation's {@link #value()} will be appended to the class's 'top level path'.<br>
- * <br>
- * Optional annotation, classes not annotated will be considered as though they are under root and methods not annotated
- * will inherit the class's annotation.
+ * <ul>
+ *     <li>If the annotation is set to override (via {@link #override()},
+ *         this annotation's {@link #value()} will replace the class's 'top level path'.</li>
+ *     <li>If the annotation is not set to override (via {@link #override()},
+ *         this annotation's {@link #value()} will be appended to the class's 'top level path'.</li>
+ * </ul>
+ * Classes not annotated will be considered as though they are under root and methods not annotated
+ * will inherit the class's 'top level path'.
  *
  * @author Yevgeny Krasik
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})
-// FIXME: Separate into 2 annotations: CommandHierarchyPath & CommandPath, as override=true doesn't make sense on a class.
 public @interface CommandPath {
     /**
      * @return The path. Must be a valid path and use '/' as delimiters.<br>

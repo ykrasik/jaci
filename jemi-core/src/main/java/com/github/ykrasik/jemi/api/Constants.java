@@ -18,12 +18,12 @@ package com.github.ykrasik.jemi.api;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Pattern;
 
 /**
+ * API constants.
+ *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
 public final class Constants {
     private Constants() { }
 
@@ -37,11 +37,13 @@ public final class Constants {
      */
     public static final String PATH_DELIMITER_STRING = String.valueOf(PATH_DELIMITER);
 
-    // TODO: does this belong here?
-    private static final Pattern PATH_PATTERN = Pattern.compile(PATH_DELIMITER_STRING);
-
-    // TODO: JavaDoc
+    /**
+     * Split a string into a list, using {@link #PATH_DELIMITER_STRING} as a delimiter.
+     *
+     * @param str String to split.
+     * @return A {@link List} of {@link String}s computed by splitting the input {@code String} according to the delimiter.
+     */
     public static List<String> splitByPathDelimiter(String str) {
-        return Arrays.asList(PATH_PATTERN.split(str));
+        return Arrays.asList(str.split(PATH_DELIMITER_STRING));
     }
 }
