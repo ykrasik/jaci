@@ -17,9 +17,9 @@
 package com.github.ykrasik.jemi.command;
 
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * An implementation of a {@link CommandArgs}.
@@ -27,11 +27,16 @@ import java.util.*;
  *
  * @author Yevgeny Krasik
  */
-@RequiredArgsConstructor
 public class CommandArgsImpl implements CommandArgs {
-    @NonNull private final List<Object> args;
-
+    private final List<Object> args;
     private int index = 0;
+
+    /**
+     * @param args Parsed command args.
+     */
+    public CommandArgsImpl(@NonNull List<Object> args) {
+        this.args = args;
+    }
 
     @Override
     public List<Object> getArgs() {

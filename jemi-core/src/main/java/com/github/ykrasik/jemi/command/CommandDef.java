@@ -77,6 +77,10 @@ public class CommandDef implements Identifiable {
         private String description = "command";
         private final List<ParamDef<?>> paramDefs = new ArrayList<>(4);
 
+        /**
+         * @param name Command name.
+         * @param executor Command executor.
+         */
         public Builder(@NonNull String name, @NonNull CommandExecutor executor) {
             this.name = name;
             this.executor = executor;
@@ -86,7 +90,7 @@ public class CommandDef implements Identifiable {
          * Set the command's description.
          *
          * @param description Description to set.
-         * @return this, for chaining.
+         * @return {@code this}, for chaining.
          */
         public Builder setDescription(@NonNull String description) {
             this.description = description;
@@ -97,7 +101,7 @@ public class CommandDef implements Identifiable {
          * Add a parameter definition to this command.
          *
          * @param paramDef Parameter definition to add.
-         * @return this, for chaining.
+         * @return {@code this}, for chaining.
          */
         public Builder addParam(@NonNull ParamDef<?> paramDef) {
             this.paramDefs.add(paramDef);

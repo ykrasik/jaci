@@ -16,6 +16,7 @@
 
 package com.github.ykrasik.jemi.cli.commandline;
 
+import com.github.ykrasik.jemi.util.string.StringUtils;
 import lombok.AccessLevel;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +32,6 @@ import java.util.regex.Pattern;
 // TODO: JavaDoc
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class CommandLine {
-    private final String rawCommandLine;
     private final List<String> elements;
 
     public boolean isEmpty() {
@@ -54,9 +54,10 @@ public class CommandLine {
 
     @Override
     public String toString() {
-        return rawCommandLine;
+        return StringUtils.join(elements, " ");
     }
 
+    // TODO: JavaDoc
     public static CommandLine forAssist(@NonNull String rawCommandLine) {
         final List<String> splitCommandLine = splitCommandLine(rawCommandLine);
 
@@ -66,12 +67,13 @@ public class CommandLine {
             splitCommandLine.add("");
         }
 
-        return new CommandLine(rawCommandLine, splitCommandLine);
+        return new CommandLine(splitCommandLine);
     }
 
+    // TODO: JavaDoc
     public static CommandLine forExecute(@NonNull String rawCommandLine) {
         final List<String> elements = splitCommandLine(rawCommandLine);
-        return new CommandLine(rawCommandLine, elements);
+        return new CommandLine(elements);
     }
 
     // A pattern that matches spaces that aren't surrounded by single or double quotes.

@@ -20,17 +20,15 @@ import com.github.ykrasik.jemi.Identifier;
 import com.github.ykrasik.jemi.util.function.Supplier;
 import com.github.ykrasik.jemi.util.function.Suppliers;
 import com.github.ykrasik.jemi.util.opt.Opt;
-import lombok.EqualsAndHashCode;
 import lombok.NonNull;
-import lombok.Setter;
 import lombok.ToString;
-import lombok.experimental.Accessors;
 
 /**
+ * A double parameter definition.
+ * Built through the {@link DoubleParamDef.Builder} builder.
+ *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
-@EqualsAndHashCode(callSuper = true)
 public class DoubleParamDef extends AbstractParamDef<Double> {
     private DoubleParamDef(Identifier identifier, Opt<Supplier<Double>> defaultValueSupplier) {
         super(identifier, defaultValueSupplier);
@@ -41,30 +39,55 @@ public class DoubleParamDef extends AbstractParamDef<Double> {
         return resolver.doubleParam(this);
     }
 
-    // TODO: JavaDoc
+    /**
+     * A builder for a {@link DoubleParamDef}.
+     */
     @ToString
-    @Accessors(chain = true)
     public static class Builder {
         private final String name;
-
-        @Setter
-        @NonNull private String description = "double";
-
+        private String description = "double";
         private Opt<Supplier<Double>> defaultValueSupplier = Opt.absent();
 
+        /**
+         * @param name Parameter name.
+         */
         public Builder(@NonNull String name) {
             this.name = name;
         }
 
+        /**
+         * @param description Parameter description.
+         * @return {@code this}, for chaining.
+         */
+        public Builder setDescription(@NonNull String description) {
+            this.description = description;
+            return this;
+        }
+
+        /**
+         * Set this parameter to be optional, and return the given constant value if it is not passed.
+         *
+         * @param defaultValue Constant value to return if the parameter isn't passed.
+         * @return {@code this}, for chaining.
+         */
         public Builder setOptional(double defaultValue) {
             return setOptional(Suppliers.of(defaultValue));
         }
 
+        /**
+         * Set this parameter to be optional, and invoke the given {@link Supplier} for a default value if it is not passed.
+         *
+         * @param defaultValueSupplier Supplier to invoke if the parameter isn't passed.
+         * @return {@code this}, for chaining.
+         */
         public Builder setOptional(@NonNull Supplier<Double> defaultValueSupplier) {
             this.defaultValueSupplier = Opt.of(defaultValueSupplier);
             return this;
         }
 
+        /**
+         * @return A {@link DoubleParamDef} built out of this builder's parameters.
+         */
         public DoubleParamDef build() {
             final Identifier identifier = new Identifier(name, description);
             return new DoubleParamDef(identifier, defaultValueSupplier);

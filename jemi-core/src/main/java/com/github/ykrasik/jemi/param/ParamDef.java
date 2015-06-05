@@ -21,12 +21,37 @@ import com.github.ykrasik.jemi.util.function.Supplier;
 import com.github.ykrasik.jemi.util.opt.Opt;
 
 /**
+ * A definition for a parameter.<br>
+ * The parameter definition is basically it's interface. It is not a concrete implementation, and any system that wishes
+ * to use this definition will need to construct it's own concrete implementation according to this definition.
+ * This can be achieved by calling a {@link #resolve(ParamDefResolver)},
+ * which will translate the definition to a concrete implementation.
+ * <br>
+ * Contains the parameter's name, description, whether the parameter is optional and any other parameter-type-specific information.
+ * <br/>
+ * Any parameter can be optional. A parameter will be considered optional if {@link #getDefaultValueSupplier()} returns
+ * a {@code present} value.<br>
+ *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
 public interface ParamDef<T> extends Identifiable {
-    // TODO: JavaDoc - if this is present, the param is optional. Is this good design?
+    /**
+     * If this returns a {@code present} value, this paramDef will be considered optional and the returned {@link Supplier}
+     * will be invoked when a value isn't explicitly passed to this parameter.
+     * Otherwise, the parameter will be considered mandatory and not passing this value will be considered a parse error.
+     *
+     * @return A {@code present} {@link Supplier} if this parameter should be optional, or an {@code absent} one otherwise.
+     */
     Opt<Supplier<T>> getDefaultValueSupplier();
 
+    /**
+     * Resolve this paramDef into a concrete implementation using double-dispatch.
+     * ParamDefs are implementation-independent, and usually come as a {@link java.util.List}, so the resolver can be
+     * used to help get the actual paramDef type and translate it into the implementation-specific type.
+     *
+     * @param resolver Resolver to resolve this paramDef.
+     * @param <E> Concrete parameter implementation type.
+     * @return A concrete implementation of the paramDef.
+     */
     <E> E resolve(ParamDefResolver<E> resolver);
 }

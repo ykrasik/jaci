@@ -22,14 +22,29 @@ import com.github.ykrasik.jemi.util.opt.Opt;
 import lombok.*;
 
 /**
+ * An abstract implementation of a {@link ParamDef}
+ *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
-@Data
-@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
+@EqualsAndHashCode
 public abstract class AbstractParamDef<T> implements ParamDef<T> {
-    @NonNull private final Identifier identifier;
-    @NonNull private final Opt<Supplier<T>> defaultValueSupplier;
+    private final Identifier identifier;
+    private final Opt<Supplier<T>> defaultValueSupplier;
+
+    protected AbstractParamDef(@NonNull Identifier identifier, @NonNull Opt<Supplier<T>> defaultValueSupplier) {
+        this.identifier = identifier;
+        this.defaultValueSupplier = defaultValueSupplier;
+    }
+
+    @Override
+    public Identifier getIdentifier() {
+        return identifier;
+    }
+
+    @Override
+    public Opt<Supplier<T>> getDefaultValueSupplier() {
+        return defaultValueSupplier;
+    }
 
     @Override
     public String toString() {

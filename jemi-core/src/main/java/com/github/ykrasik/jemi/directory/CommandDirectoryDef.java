@@ -77,6 +77,9 @@ public class CommandDirectoryDef implements Identifiable {
 
         private String description = "directory";
 
+        /**
+         * @param name directory name.
+         */
         public Builder(@NonNull String name) {
             this.name = name;
         }
@@ -85,7 +88,7 @@ public class CommandDirectoryDef implements Identifiable {
          * Set the directory's description.
          *
          * @param description Description to set.
-         * @return this, for chaining.
+         * @return {@code this}, for chaining.
          */
         public Builder setDescription(@NonNull String description) {
             this.description = description;
@@ -98,6 +101,7 @@ public class CommandDirectoryDef implements Identifiable {
          *
          * @param name Directory name.
          * @return An existing or newly created child {@link Builder}.
+         * @throws IllegalArgumentException If the name is empty or clashes with an existing child commandDef.
          */
         public Builder getOrCreateDirectory(@NonNull String name) {
             final Opt<String> nonEmptyName = StringUtils.getNonEmptyString(name);
@@ -121,6 +125,7 @@ public class CommandDirectoryDef implements Identifiable {
          * Add child {@link CommandDef}s to this directory.
          *
          * @param commandDefs CommandDefs to add.
+         * @return {@code this}, for chaining.
          * @throws IllegalArgumentException If any of the commandDefs' names clash with existing commandDefs under this directory.
          */
         public Builder addCommandDefs(CommandDef... commandDefs) {
@@ -131,6 +136,7 @@ public class CommandDirectoryDef implements Identifiable {
          * Add child {@link CommandDef}s to this directory.
          *
          * @param commandDefs CommandDefs to add.
+         * @return {@code this}, for chaining.
          * @throws IllegalArgumentException If any of the commandDefs' names clash with existing commandDefs under this directory.
          */
         public Builder addCommandDefs(List<CommandDef> commandDefs) {

@@ -60,7 +60,7 @@ public class DefaultCliSerializer implements CliSerializer {
     public List<String> serializeDirectory(@NonNull CliDirectory directory, boolean recursive) {
         final Serializer serializer = new Serializer();
         serializeDirectory(serializer, directory, recursive);
-        return serializer.serialization;
+        return serializer.lines;
     }
 
     private void serializeDirectory(Serializer serializer, CliDirectory directory, boolean recursive) {
@@ -103,7 +103,7 @@ public class DefaultCliSerializer implements CliSerializer {
         // Serialize each param name : description
         serializeIdentifiables(serializer, command.getParams());
 
-        return serializer.serialization;
+        return serializer.lines;
     }
 
     private void serializeIdentifiables(Serializer serializer, List<? extends Identifiable> identifiables) {
@@ -135,7 +135,7 @@ public class DefaultCliSerializer implements CliSerializer {
             serializer.append(stackTraceElement.toString())
                 .newLine();
         }
-        return serializer.serialization;
+        return serializer.lines;
     }
 
     @Override
@@ -150,7 +150,7 @@ public class DefaultCliSerializer implements CliSerializer {
         final BoundParams boundParams = info.getBoundParams();
         serializeBoundParams(serializer, command, boundParams);
 
-        return serializer.serialization;
+        return serializer.lines;
     }
 
     private void serializeBoundParams(Serializer serializer, CliCommand command, BoundParams boundParams) {
@@ -194,7 +194,7 @@ public class DefaultCliSerializer implements CliSerializer {
         printSuggestions(serializer, suggestions.getParamValueSuggestions(), "Parameter values");
         serializer.decIndent();
 
-        return serializer.serialization;
+        return serializer.lines;
     }
 
     private void printSuggestions(Serializer serializer, List<String> suggestions, String suggestionsTitle) {
@@ -209,7 +209,7 @@ public class DefaultCliSerializer implements CliSerializer {
     }
 
     private class Serializer {
-        private final List<String> serialization = new ArrayList<>();
+        private final List<String> lines = new ArrayList<>();
 
         private StringBuilder sb = new StringBuilder();
         private int indent;
@@ -217,7 +217,7 @@ public class DefaultCliSerializer implements CliSerializer {
         /**
          * Whether indent was appended to this line. Reset every time a new line is opened.
          */
-        private boolean indentAppended;
+        private boolean needIndent = true;
 
         public void incIndent() {
             indent++;
@@ -243,16 +243,16 @@ public class DefaultCliSerializer implements CliSerializer {
         }
 
         public Serializer newLine() {
-            serialization.add(sb.toString());
+            lines.add(sb.toString());
             sb = new StringBuilder();
-            indentAppended = false;
+            needIndent = true;
             return this;
         }
 
         private void indentIfNecessary() {
-            if (!indentAppended) {
+            if (needIndent) {
                 appendIndent();
-                indentAppended = true;
+                needIndent = false;
             }
         }
 
@@ -264,7 +264,7 @@ public class DefaultCliSerializer implements CliSerializer {
 
         @Override
         public String toString() {
-            return serialization.toString();
+            return lines.toString();
         }
     }
 }

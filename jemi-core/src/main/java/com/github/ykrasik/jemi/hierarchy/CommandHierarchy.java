@@ -24,6 +24,7 @@ import com.github.ykrasik.jemi.util.reflection.ReflectionUtils;
 import lombok.AccessLevel;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
 import java.util.List;
 import java.util.Map;
@@ -36,42 +37,44 @@ import java.util.Map.Entry;
  *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class CommandHierarchy {
     private final CommandDirectoryDef root;
 
+    /**
+     * @return Root {@link CommandDirectoryDef}.
+     */
     public CommandDirectoryDef getRoot() {
         return root;
     }
 
+    /**
+     * A builder for a {@link CommandHierarchy}.
+     */
+    @ToString
     public static class Builder {
         private static final ReflectionClassProcessor PROCESSOR = new ReflectionClassProcessor();
 
         private final CommandDirectoryDef.Builder root = new CommandDirectoryDef.Builder("root").setDescription("root");
 
         /**
-         * Process a class and return the commands that were defined in this class with annotations.<br>
-         * Class must provide a no-args constructor.<br>
-         * Never returns null.
+         * Process a class and add any commands defined through annotations to this builder.
+         * Class must have a no-args constructor.
          *
          * @param clazz Class to process.
-         * @return The commands and global commands that were defined in the class through annotations.
+         * @return {@code this}, for chaining.
          */
-        // TODO: Wrong JavaDoc
         public Builder processClass(@NonNull Class<?> clazz) {
             final Object instance = ReflectionUtils.createInstanceNoArgs(clazz);
             return processObject(instance);
         }
 
         /**
-         * Process the object and return the commands that were defined in the object's class with annotations.<br>
-         * Never returns null.
+         * Process the object's class and add any commands defined through annotations to this builder.
          *
-         * @param instance Object to process.
-         * @return The commands and global commands that were defined in the object's class through annotations.
+         * @param instance Object whose class to process.
+         * @return {@code this}, for chaining.
          */
-        // TODO: Wrong JavaDoc
         public Builder processObject(@NonNull Object instance) {
             final Map<ParsedPath, List<CommandDef>> pathToCommandDefsMap = PROCESSOR.processObject(instance);
 
@@ -91,7 +94,9 @@ public class CommandHierarchy {
             dir.addCommandDefs(commandDefs);
         }
 
-        // TODO: JavaDoc
+        /**
+         * @return A {@link CommandHierarchy} built out of this builder's parameters.
+         */
         public CommandHierarchy build() {
             final CommandDirectoryDef rootDef = root.build();
             return new CommandHierarchy(rootDef);

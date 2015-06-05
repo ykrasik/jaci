@@ -28,7 +28,6 @@ import com.github.ykrasik.jemi.command.CommandArgsImpl;
 import com.github.ykrasik.jemi.util.function.Predicate;
 import com.github.ykrasik.jemi.util.opt.Opt;
 import com.github.ykrasik.jemi.util.trie.Trie;
-import com.github.ykrasik.jemi.util.trie.Tries;
 import lombok.NonNull;
 
 import java.util.*;
@@ -134,6 +133,7 @@ public class CliParamParseContext {
             // Try recovering with a fallback by having the param parse a 'no value' value.
             // This can only succeed with very specific parameters and very specific cases.
             try {
+                // FIXME: When this happens, the rawValue should not be consumed, but delegated to the next param to parse.
                 return param.noValue();
             } catch (ParseException e2) {
                 // Throw the original exception if the fallback failed.
@@ -190,63 +190,35 @@ public class CliParamParseContext {
             return new ParamAssistInfo(boundParams, autoComplete);
         }
 
+        final CliParam nextParam = getNextUnboundParam(prefix);
+
         // Check if 'prefix' starts with the named parameter call prefix.
-        final Opt<CliParam> nextParam = Opt.of(getNextUnboundParam(prefix));
         final AutoComplete autoComplete;
         if (prefix.startsWith(CliConstants.NAMED_PARAM_PREFIX)) {
-            // If it does, prefix can only represent a param name.
-            // TODO: Or a negative number... which cannot be auto-completed.
+            // Prefix starts with the named parameter call prefix.
+            // Auto complete it with possible unbound parameter names.
+            // TODO: Can also be a negative number... which cannot be auto-completed.
             final String paramNamePrefix = prefix.substring(1);
             autoComplete = autoCompleteParamName(paramNamePrefix);
         } else {
-            // If it doesn't, prefix can be either the name of a param or the value of the next positional param.
-            autoComplete = autoCompleteParamNameOrValue(prefix);
+            // Prefix doesn't start with the named parameter call prefix.
+            // Have the next unbound parameter auto complete it's value.
+            autoComplete = nextParam.autoComplete(prefix);
         }
-        final BoundParams boundParams = new BoundParams(args, nextParam);
+        final BoundParams boundParams = new BoundParams(args, Opt.of(nextParam));
         return new ParamAssistInfo(boundParams, autoComplete);
     }
 
-    private AutoComplete autoCompleteParamNameOrValue(String prefix) throws ParseException {
-        // Prefix can either be the value of the next positional param or the name of any unbound param.
-        // However, there are 2 things that we don't want to do:
-        //  1. Offer to autoComplete the name of the last unbound param (just go straight to it's value).
-        //  2. Mask autoComplete errors in the absence of other autoComplete possibilities.
-
-        // Try to autoComplete prefix as the name of any unbound param.
-        // TODO: Do offer to autoComplete the name of the last unbound parameter, but only if no other choice.
-        final AutoComplete paramNameAutoComplete = autoCompleteParamName(prefix);
-
-        // AutoCompleting the param value could throw an exception, which we don't want to mask
-        // if we don't have any other autoComplete possibilities available.
-        try {
-            final CliParam nextPositionalParam = getNextUnboundParam(prefix);
-            final AutoComplete paramValueAutoComplete = nextPositionalParam.autoComplete(prefix);
-            return paramNameAutoComplete.union(paramValueAutoComplete);
-        } catch (ParseException e) {
-            if (!paramNameAutoComplete.isEmpty()) {
-                return paramNameAutoComplete;
-            } else {
-                throw e;
-            }
-        }
-    }
-
     private AutoComplete autoCompleteParamName(String prefix) {
-        final Trie<CliValueType> paramNamePossibilities;
-        if (unboundParams.size() == 1) {
-            // Don't suggest param names if there is only 1 option available.
-            paramNamePossibilities = Tries.emptyTrie();
-        } else {
-            final Trie<CliParam> prefixParams = paramsTrie.subTrie(prefix);
-            final Trie<CliParam> unboundPrefixParams = prefixParams.filter(new Predicate<CliParam>() {
-                @Override
-                public boolean test(CliParam value) {
-                    // Only keep unbound params.
-                    return !args.containsKey(value);
-                }
-            });
-            paramNamePossibilities = unboundPrefixParams.mapValues(PARAM_NAME_MAPPER);
-        }
+        final Trie<CliParam> prefixParams = paramsTrie.subTrie(prefix);
+        final Trie<CliParam> unboundPrefixParams = prefixParams.filter(new Predicate<CliParam>() {
+            @Override
+            public boolean test(CliParam value) {
+                // Only keep unbound params.
+                return !args.containsKey(value);
+            }
+        });
+        final Trie<CliValueType> paramNamePossibilities = unboundPrefixParams.mapValues(PARAM_NAME_MAPPER);
         return new AutoComplete(prefix, paramNamePossibilities);
     }
 
