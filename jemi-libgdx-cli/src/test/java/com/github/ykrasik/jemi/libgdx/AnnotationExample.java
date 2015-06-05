@@ -26,11 +26,11 @@ public class AnnotationExample {
 
     @CommandPath("new/path")
     @Command(description = "Does nothing, really.")
-    public void testCommand(CommandOutput commandOutput,
+    public void testCommand(CommandOutput output,
                             @StringParam(value = "str", optional = true, defaultValue = "lala") String str,
                             @BoolParam("bool") boolean bool,
                             int integer) {
-        commandOutput.message("Oh yeah, str=%s, bool=%s, integer=%d", str, bool, integer);
+        output.message("Oh yeah, str=%s, bool=%s, integer=%d", str, bool, integer);
     }
 
     @ToggleCommand(description = "toggles this and that")
@@ -51,14 +51,23 @@ public class AnnotationExample {
     }
 
     @Command(description = "some global command")
-    public void globalCommandSomething(CommandOutput commandOutput, String str) {
-        commandOutput.message("yes! str=%s", str);
+    public void globalCommandSomething(CommandOutput output, String str) {
+        output.message("yes! str=%s", str);
     }
 
     @Command(description = "test command")
-    public void nestCommand(CommandOutput commandOutput,
+    public void nestCommand(CommandOutput output,
                             @StringParam(value = "nested", accepts = {"test1", "value2", "param3", "long string"}) String str,
                             @BoolParam("booleany") boolean booleany) {
-        commandOutput.message("yay: string = %s, booleany = %s", str, booleany);
+        output.message("yay: string = %s, booleany = %s", str, booleany);
+    }
+
+    @Command
+    public void test(CommandOutput output, @StringParam(supplier = "supplier") String str) {
+        output.message("str = %s", str);
+    }
+
+    private String[] supplier() {
+        return new String[]{ "a", "b", "c" };
     }
 }

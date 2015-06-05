@@ -20,6 +20,6 @@ package com.github.ykrasik.jemi.util.function;
  * @author Yevgeny Krasik
  */
 // TODO: JavaDoc
-public interface Function<T, E> {
-    E apply(T t);
+public interface Function<T, R> {
+    R apply(T t);
 }

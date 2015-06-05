@@ -21,6 +21,7 @@ import com.github.ykrasik.jemi.Identifier;
 import com.github.ykrasik.jemi.param.StringParamDef;
 import com.github.ykrasik.jemi.cli.assist.AutoComplete;
 import com.github.ykrasik.jemi.cli.assist.CliValueType;
+import com.github.ykrasik.jemi.util.function.Function;
 import com.github.ykrasik.jemi.util.function.Supplier;
 import com.github.ykrasik.jemi.util.function.Suppliers;
 import com.github.ykrasik.jemi.util.opt.Opt;
@@ -43,30 +44,17 @@ public class StringCliParam extends AbstractCliParam<String> {
 
     public StringCliParam(Identifier identifier,
                           Opt<Supplier<String>> defaultValueSupplier,
-                          boolean staticValues,
                           @NonNull Supplier<List<String>> valuesSupplier) {
         super(identifier, defaultValueSupplier);
 
-        this.valuesSupplier = createValuesSupplier(staticValues, valuesSupplier);
-    }
-
-    private Supplier<Trie<CliValueType>> createValuesSupplier(boolean staticValues, final Supplier<List<String>> supplier) {
-        if (staticValues) {
-            // The supplier is static, meaning it always returns the same values.
-            // The values can be cached.
-            final List<String> values = supplier.get();
-            return Suppliers.of(createValuesTrie(values));
-        }
-
-        // A dynamic values supplier means the values cannot be cached, and the trie needs to be constructed
-        // on each call.
-        return new Supplier<Trie<CliValueType>>() {
+        // If the supplier is a const supplier type (supplies a constant or cached value), the returned supplier
+        // will also cache the result and not re-calculate it on every call.
+        this.valuesSupplier = Suppliers.transform(valuesSupplier, new Function<List<String>, Trie<CliValueType>>() {
             @Override
-            public Trie<CliValueType> get() {
-                final List<String> values = supplier.get();
+            public Trie<CliValueType> apply(List<String> values) {
                 return createValuesTrie(values);
             }
-        };
+        });
     }
 
     private Trie<CliValueType> createValuesTrie(List<String> values) {
@@ -110,6 +98,6 @@ public class StringCliParam extends AbstractCliParam<String> {
 
     // TODO: JavaDoc
     public static StringCliParam fromDef(@NonNull StringParamDef def) {
-        return new StringCliParam(def.getIdentifier(), def.getDefaultValueSupplier(), def.isStaticValues(), def.getValuesSupplier());
+        return new StringCliParam(def.getIdentifier(), def.getDefaultValueSupplier(), def.getValuesSupplier());
     }
 }

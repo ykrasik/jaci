@@ -48,6 +48,56 @@ public final class Suppliers {
         }
     }
 
+    // TODO: JavaDoc - Transforms the value returned by the supplier by invoking the function.
+    public static <T, R> Supplier<R> transform(@NonNull Supplier<T> supplier, @NonNull Function<T, R> function) {
+        // Not the cleanest solution...
+        if (supplier instanceof ConstSupplier || supplier instanceof CachingSupplier) {
+            return of(function.apply(supplier.get()));
+        }
+        return new TransformingSupplier<>(supplier, function);
+    }
+
+    @ToString(of = "supplier")
+    @RequiredArgsConstructor
+    private static class TransformingSupplier<T, R> implements Supplier<R> {
+        private final Supplier<T> supplier;
+        private final Function<T, R> function;
+
+        @Override
+        public R get() {
+            return function.apply(supplier.get());
+        }
+    }
+
+    // TODO: JavaDoc - Returns a supplier that only invokes the supplier once and then returns the cached result.
+    public static <T> Supplier<T> cache(@NonNull Supplier<T> supplier) {
+        return new CachingSupplier<>(supplier);
+    }
+
+    @ToString
+    private static class CachingSupplier<T> implements Supplier<T> {
+        private Supplier<T> supplier;
+        private volatile T value;
+
+        private CachingSupplier(Supplier<T> supplier) {
+            this.supplier = supplier;
+        }
+
+        @Override
+        public T get() {
+            if (value == null) {
+                // Double-checked locking.
+                synchronized (this) {
+                    if (value == null) {
+                        value = supplier.get();
+                        supplier = null;    // Release reference to gc.
+                    }
+                }
+            }
+            return value;
+        }
+    }
+
     // TODO: JavaDoc
     public static <T> Supplier<T> reflectionSupplier(@NonNull Object instance,
                                                      @NonNull String methodName,

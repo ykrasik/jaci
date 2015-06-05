@@ -62,14 +62,14 @@ public abstract class AbstractCliParam<T> implements CliParam {
 
     @Override
     public T unbound() throws ParseException {
-        if (!defaultValueSupplier.isPresent()) {
-            // If the paramDef doesn't have a defaultValueSupplier, it is not optional.
+        if (!isOptional()) {
             throw missingParamValue();
         }
         return defaultValueSupplier.get().get();
     }
 
     private boolean isOptional() {
+        // A parameter is considered optional if it has a defaultValueSupplier.
         return defaultValueSupplier.isPresent();
     }
 
