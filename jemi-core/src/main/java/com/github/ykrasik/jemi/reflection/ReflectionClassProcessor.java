@@ -92,7 +92,7 @@ public class ReflectionClassProcessor {
 
     private ParsedPath getPathFromAnnotation(CommandPath annotation) {
         if (annotation != null) {
-            return ParsedPath.from(annotation.value());
+            return ParsedPath.toDirectory(annotation.value());
         } else {
             // Annotation isn't present, set the default path to 'root'.
             // Composing any path with 'root' has no effect.
@@ -109,7 +109,7 @@ public class ReflectionClassProcessor {
         // TODO: JavaDoc?
         public void addCommandDef(ParsedPath commandPath, CommandDef commandDef) {
             // Compose the top level path of the declaring class with the command path.
-            final ParsedPath composedPath = topLevelPath.compose(commandPath);
+            final ParsedPath composedPath = topLevelPath.append(commandPath);
             List<CommandDef> commands = commandPaths.get(composedPath);
             if (commands == null) {
                 commands = new ArrayList<>();

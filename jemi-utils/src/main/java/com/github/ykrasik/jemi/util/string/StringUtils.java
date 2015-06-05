@@ -18,6 +18,8 @@ package com.github.ykrasik.jemi.util.string;
 
 import com.github.ykrasik.jemi.util.opt.Opt;
 
+import java.util.List;
+
 /**
  * Utilities for working with Strings.
  *
@@ -34,15 +36,35 @@ public final class StringUtils {
      * @return The string with the leading and trailing delimiter removed.
      */
     public static String removeLeadingAndTrailingDelimiter(String str, String delimiter) {
-        final int length = str.length();
+        final int strLength = str.length();
+        final int delimiterLength = delimiter.length();
+
         final boolean leadingDelimiter = str.startsWith(delimiter);
-        final boolean trailingDelimiter = length > 1 && str.endsWith(delimiter);
+        final boolean trailingDelimiter = strLength > delimiterLength && str.endsWith(delimiter);
         if (!leadingDelimiter && !trailingDelimiter) {
             return str;
         } else {
-            final int startingDelimiterIndex = leadingDelimiter ? 1 : 0;
-            final int endingDelimiterIndex = trailingDelimiter ? Math.max(length - 1, startingDelimiterIndex) : length;
+            final int startingDelimiterIndex = leadingDelimiter ? delimiterLength : 0;
+            final int endingDelimiterIndex = trailingDelimiter ? Math.max(strLength - delimiterLength, startingDelimiterIndex) : strLength;
             return str.substring(startingDelimiterIndex, endingDelimiterIndex);
+        }
+    }
+
+    // TODO: JavaDoc
+    public static String removeTrailingDelimiter(String str, String delimiter) {
+        if (!str.endsWith(delimiter)) {
+            return str;
+        } else {
+            return str.substring(0, str.length() - delimiter.length());
+        }
+    }
+
+    // TODO: JavaDoc
+    public static String removeLeadingDelimiter(String str, String delimiter) {
+        if (!str.startsWith(delimiter)) {
+            return str;
+        } else {
+            return str.substring(delimiter.length(), str.length());
         }
     }
 
@@ -59,5 +81,20 @@ public final class StringUtils {
     // TODO: JavaDoc
     public static String emptyToNull(String str) {
         return (str != null && !str.isEmpty()) ? str : null;
+    }
+
+    // TODO: JavaDoc
+    public static <T> String join(List<T> list, String delimiter) {
+        if (list.isEmpty()) {
+            return "";
+        }
+
+        final StringBuilder sb = new StringBuilder();
+        for (T element : list) {
+            sb.append(element);
+            sb.append(delimiter);
+        }
+        sb.delete(sb.length() - delimiter.length(), sb.length());
+        return sb.toString();
     }
 }

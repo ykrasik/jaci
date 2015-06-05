@@ -104,7 +104,6 @@ public class CliShell {
         // 1. Display command info, if there is any.
         // 2. Determine the suggestions for auto complete.
         // 3. Set the new command line accordingly.
-        printer.printCommandLine(rawCommandLine);
         final CommandLine commandLine = CommandLine.forAssist(rawCommandLine);
         final String pathToCommand = commandLine.getPathToCommand();
 

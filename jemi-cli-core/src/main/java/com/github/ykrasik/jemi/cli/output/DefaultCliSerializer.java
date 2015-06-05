@@ -26,6 +26,7 @@ import com.github.ykrasik.jemi.Identifiable;
 import com.github.ykrasik.jemi.IdentifiableComparators;
 import com.github.ykrasik.jemi.Identifier;
 import com.github.ykrasik.jemi.util.opt.Opt;
+import com.github.ykrasik.jemi.util.string.StringUtils;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
@@ -201,22 +202,10 @@ public class DefaultCliSerializer implements CliSerializer {
             serializer
                 .append(suggestionsTitle)
                 .append(": [")
-                .append(join(suggestions))
+                .append(StringUtils.join(suggestions, ", "))
                 .append(']')
                 .newLine();
         }
-    }
-
-    private String join(List<String> list) {
-        final StringBuilder sb = new StringBuilder();
-        for (String str : list) {
-            sb.append(str);
-            sb.append(", ");
-        }
-        if (sb.length() > 2) {
-            sb.delete(sb.length() - 2, sb.length());
-        }
-        return sb.toString();
     }
 
     private class Serializer {

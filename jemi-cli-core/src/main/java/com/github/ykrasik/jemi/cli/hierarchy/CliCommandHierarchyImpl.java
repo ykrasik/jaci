@@ -66,13 +66,13 @@ public class CliCommandHierarchyImpl implements CliCommandHierarchy {
     @Override
     public CliDirectory parsePathToDirectory(String rawPath) throws ParseException {
         // Parse all elements as directories.
-        final ParsedPath path = parsePath(rawPath);
+        final ParsedPath path = parsePath(rawPath, false);
         return parsePathToDirectory(path);
     }
 
     @Override
     public CliCommand parsePathToCommand(String rawPath) throws ParseException {
-        final ParsedPath path = parsePath(rawPath);
+        final ParsedPath path = parsePath(rawPath, true);
 
         // TODO: There has to be better way for testing eligibility for being a system command.
         if (!path.containsDelimiter()) {
@@ -87,8 +87,11 @@ public class CliCommandHierarchyImpl implements CliCommandHierarchy {
         // So in "path/to/command", parse "path/to" as path to directory "to", and let "to" parse "command".
         final CliDirectory lastDirectory = parsePathToLastDirectory(path);
 
-        // FIXME: This isn't going to work for paths that end with a delimiter. Solve this somehow in ParsedPath.
         final String commandName = path.getLastElement();
+        if (commandName.isEmpty()) {
+            throw new ParseException(ParseError.INVALID_COMMAND, "Path doesn't point to command: '%s'", rawPath);
+        }
+
         final Opt<CliCommand> command = lastDirectory.getCommand(commandName);
         if (!command.isPresent()) {
             throw new ParseException(ParseError.INVALID_COMMAND, "Directory '%s' doesn't contain command: '%s'", lastDirectory.getName(), commandName);
@@ -114,7 +117,7 @@ public class CliCommandHierarchyImpl implements CliCommandHierarchy {
 
     @Override
     public AutoComplete autoCompletePathToDirectory(String rawPath) throws ParseException {
-        final ParsedPath path = parsePath(rawPath);
+        final ParsedPath path = parsePath(rawPath, true);
 
         // Parse the path until the last element as a path to a directory,
         // and have the last directory auto complete the last element as a directory.
@@ -126,7 +129,7 @@ public class CliCommandHierarchyImpl implements CliCommandHierarchy {
 
     @Override
     public AutoComplete autoCompletePath(String rawPath) throws ParseException {
-        final ParsedPath path = parsePath(rawPath);
+        final ParsedPath path = parsePath(rawPath, true);
         final String prefix = path.getLastElement();
 
         // TODO: There has to be better way for testing eligibility for being a system command.
@@ -144,9 +147,13 @@ public class CliCommandHierarchyImpl implements CliCommandHierarchy {
         return lastDirectory.autoCompleteEntry(prefix);
     }
 
-    private ParsedPath parsePath(String path) throws ParseException {
+    private ParsedPath parsePath(String path, boolean entry) throws ParseException {
         try {
-            return ParsedPath.from(path);
+            if (entry) {
+                return ParsedPath.toEntry(path);
+            } else {
+                return ParsedPath.toDirectory(path);
+            }
         } catch (IllegalArgumentException e) {
             throw new ParseException(ParseError.INVALID_DIRECTORY, e.getMessage());
         }

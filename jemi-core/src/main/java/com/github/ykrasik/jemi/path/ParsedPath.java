@@ -16,7 +16,6 @@
 
 package com.github.ykrasik.jemi.path;
 
-import com.github.ykrasik.jemi.util.opt.Opt;
 import com.github.ykrasik.jemi.util.string.StringUtils;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -30,17 +29,17 @@ import java.util.List;
 
 /**
  * Represents the path in the system.<br>
- * Paths are delimited by '/', and support composition via {@link #compose(ParsedPath)}.
+ * Paths are delimited by '/', and support composition via {@link #append(ParsedPath)}.
  *
  * @author Yevgeny Krasik
  */
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class ParsedPath implements Iterable<String> {
-    private static final ParsedPath ROOT = new ParsedPath("/", Collections.<String>emptyList());
-    private static final ParsedPath EMPTY = new ParsedPath("", Collections.<String>emptyList());
+    private static final ParsedPath ROOT = new ParsedPath(true, Collections.<String>emptyList());
+    private static final ParsedPath EMPTY = new ParsedPath(false, Collections.<String>emptyList());
 
-    private final String rawPath;
+    private final boolean startsWithDelimiter;
     private final List<String> elements;
 
     // TODO: JavaDoc
@@ -53,21 +52,8 @@ public class ParsedPath implements Iterable<String> {
         }
 
         // FIXME: Something about this isn't quite right.. unit tests this!!!
-        final String newRawPath = getRawPathWithoutLastElement();
         final List<String> newElements = elements.subList(0, elements.size() - 1);
-        return new ParsedPath(newRawPath, newElements);
-    }
-
-    private String getRawPathWithoutLastElement() {
-        final int index = rawPath.lastIndexOf('/');
-        final String newRawPath = (index == -1) ? "" : rawPath.substring(0, index);
-
-        // If the original path started from root, this property must be preserved.
-        if (startsWithDelimiter()) {
-            return newRawPath.startsWith("/") ? newRawPath : '/' + newRawPath;
-        } else {
-            return newRawPath;
-        }
+        return new ParsedPath(startsWithDelimiter, newElements);
     }
 
     /**
@@ -85,43 +71,27 @@ public class ParsedPath implements Iterable<String> {
      * @return Whether the path starts from the delimiter '/'.
      */
     public boolean startsWithDelimiter() {
-        return rawPath.startsWith("/");
-    }
-
-    /**
-     * @return Whether the path ends with the delimiter '/'.
-     */
-    public boolean endsWithDelimiter() {
-        return rawPath.endsWith("/");
+        return startsWithDelimiter;
     }
 
     /**
      * @return Whether the path contains the delimiter '/';
      */
     public boolean containsDelimiter() {
-        return elements.size() > 1 || startsWithDelimiter() || endsWithDelimiter();
+        return startsWithDelimiter || elements.size() > 1;
     }
 
     /**
      * Append the received path to this path.
      *
-     * @param other Path to compose against.
+     * @param other Path to append to this path.
      * @return A {@link ParsedPath} resulting from appending the received path to this path.
      */
-    public ParsedPath compose(ParsedPath other) {
-        final String composedRawPath = appendDelimiterIfNecessary(rawPath) + removeLeadingDelimiter(other.rawPath);
+    public ParsedPath append(ParsedPath other) {
         final List<String> composedPath = new ArrayList<>(this.elements.size() + other.elements.size());
         composedPath.addAll(this.elements);
         composedPath.addAll(other.elements);
-        return new ParsedPath(composedRawPath, composedPath);
-    }
-
-    private String appendDelimiterIfNecessary(String path) {
-        return path.endsWith("/") ? path : path + '/';
-    }
-
-    private String removeLeadingDelimiter(String path) {
-        return path.startsWith("/") ? path.substring(1) : path;
+        return new ParsedPath(startsWithDelimiter, composedPath);
     }
 
     @Override
@@ -131,35 +101,72 @@ public class ParsedPath implements Iterable<String> {
 
     @Override
     public String toString() {
-        return rawPath;
+        return (startsWithDelimiter ? "/" : "") + StringUtils.join(elements, "/");
     }
 
     // TODO: JavaDoc
-    public static ParsedPath from(@NonNull String path) {
-        final String trimmedPath = path.trim();
-        if (trimmedPath.isEmpty()) {
+    public static ParsedPath toDirectory(@NonNull String rawPath) {
+        final String path = rawPath.trim();
+        if (path.isEmpty()) {
+            // TODO: Is This legal?
             return EMPTY;
         }
-        if ("/".equals(trimmedPath)) {
+        if ("/".equals(path)) {
+            // TODO: Is this special case needed?
             return ROOT;
         }
 
-        final String pathWithoutDelimiters = StringUtils.removeLeadingAndTrailingDelimiter(trimmedPath, "/");
-        final List<String> pathElements = splitPath(pathWithoutDelimiters);
-        return new ParsedPath(trimmedPath, pathElements);
+        final boolean startsWithDelimiter = path.startsWith("/");
+
+        // Remove the trailing delimiter.
+        // This allows us to treat paths that end with a delimiter as paths to the last directory on the path.
+        // i.e. path/to and path/to/ are the same - a path with 2 elements: 'path' and 'to'.
+        final List<String> pathElements = splitPath(path, false);
+        return new ParsedPath(startsWithDelimiter, pathElements);
     }
 
-    private static List<String> splitPath(String path) {
-        final String[] rawElements = path.split("/");
+    // TODO: JavaDoc
+    public static ParsedPath toEntry(@NonNull String rawPath) {
+        final String path = rawPath.trim();
+
+        final boolean startsWithDelimiter = path.startsWith("/");
+
+        // Keep the trailing delimiter.
+        // This allows us to treat paths that end with a delimiter differently from paths that don't.
+        // i.e. path/to would be a path with 2 elements: 'path' and 'to', but
+        // but  path/to/ would be a path with 3 elements: 'path', 'to' and an empty element ''.
+        final List<String> pathElements = splitPath(path, true);
+        return new ParsedPath(startsWithDelimiter, pathElements);
+    }
+
+    private static List<String> splitPath(String rawPath, boolean allowTrailingDelimiter) {
+        final String[] rawElements = doSplitPath(rawPath, allowTrailingDelimiter);
         final List<String> pathElements = new ArrayList<>(rawElements.length);
-        for (String element : rawElements) {
-            final Opt<String> nonEmptyElement = StringUtils.getNonEmptyString(element);
-            if (!nonEmptyElement.isPresent()) {
-                throw new IllegalArgumentException(String.format("Invalid path: '%s'", path));
+        for (int i = 0; i < rawElements.length; i++) {
+            final String element = rawElements[i];
+            final String trimmedElement = element.trim();
+            if (i < rawElements.length - 1) {
+                // Only the last element can be allowed to be empty.
+                if (trimmedElement.isEmpty()) {
+                    throw new IllegalArgumentException(String.format("Invalid path: '%s'", rawPath));
+                }
             }
-            pathElements.add(nonEmptyElement.get());
+            pathElements.add(trimmedElement);
         }
         return pathElements;
+    }
+
+    private static String[] doSplitPath(String rawPath, boolean allowTrailingDelimiter) {
+        final String pathWithoutDelimiters;
+        final int limit;
+        if (allowTrailingDelimiter) {
+            pathWithoutDelimiters = StringUtils.removeLeadingDelimiter(rawPath, "/");
+            limit = -1;
+        } else {
+            pathWithoutDelimiters = StringUtils.removeLeadingAndTrailingDelimiter(rawPath, "/");
+            limit = 0;
+        }
+        return pathWithoutDelimiters.split("/", limit);
     }
 
     // TODO: JavaDoc
