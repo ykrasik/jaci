@@ -28,10 +28,12 @@ import java.util.List;
  */
 public interface CommandArgs {
     /**
-     * @return All parsed argument values.
-     *         The order of the arg values is the same order that the parameters were declared in.
+     * Prepend the given arg to the start of the args list and return the new list.
+     *
+     * @param object Arg to prepend to the list of args.
+     * @return A new {@link List} of args in which the given arg is prepended to the start of the list.
      */
-    List<Object> getArgs();
+    List<Object> prependArg(Object object);
 
     /**
      * @param <T> Type that the next argument to pop is expected to have.

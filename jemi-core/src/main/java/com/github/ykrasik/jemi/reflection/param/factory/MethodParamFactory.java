@@ -21,9 +21,22 @@ import com.github.ykrasik.jemi.util.opt.Opt;
 import com.github.ykrasik.jemi.util.reflection.ReflectionParameter;
 
 /**
+ * Creates {@link ParamDef}s out of {@link ReflectionParameter}s.
+ * Is not required to support all methods,  may signal that a parameter is not supported
+ * by returning an {@code absent} value from {@link #create(Object, ReflectionParameter)}.
+ *
+ * @param <T> Type of ParamDef this factory can create.
+ *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
 public interface MethodParamFactory<T extends ParamDef<?>> {
+    /**
+     * Process the parameter and create a {@link ParamDef} out of it, if this factory can accept this parameter.
+     *
+     * @param instance Instance of a class which contains the method for which this parameter is being created.
+     * @param param Parameter to be processed.
+     * @return A {@code present} {@link ParamDef} if the parameter is accepted by this factory.
+     * @throws Exception If any error occurs.
+     */
     Opt<T> create(Object instance, ReflectionParameter param) throws Exception;
 }

@@ -20,15 +20,16 @@ import com.github.ykrasik.jemi.api.DoubleParam;
 import com.github.ykrasik.jemi.param.DoubleParamDef;
 import com.github.ykrasik.jemi.util.function.Suppliers;
 import com.github.ykrasik.jemi.util.opt.Opt;
-import com.github.ykrasik.jemi.util.reflection.ReflectionParameter;
 import lombok.ToString;
 
 import static com.github.ykrasik.jemi.util.string.StringUtils.getNonEmptyString;
 
 /**
+ * Creates {@link DoubleParamDef}s out of {@link Double} or {@code double} parameters annotated with {@link DoubleParam}.
+ * Empty names will be replaced with a generated name, and empty descriptions will use default values.
+ *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
 @ToString
 public class DoubleAnnotationParamFactory extends AnnotationMethodParamFactory<DoubleParamDef, DoubleParam> {
     public DoubleAnnotationParamFactory() {
@@ -36,8 +37,8 @@ public class DoubleAnnotationParamFactory extends AnnotationMethodParamFactory<D
     }
 
     @Override
-    protected DoubleParamDef createWithAnnotation(Object instance, ReflectionParameter param, DoubleParam annotation) throws Exception {
-        final DoubleParamDef.Builder builder = new DoubleParamDef.Builder(getNonEmptyString(annotation.value()).getOrElse(param.getDefaultName()));
+    protected DoubleParamDef createFromAnnotation(Object instance, String defaultParamName, DoubleParam annotation) throws Exception {
+        final DoubleParamDef.Builder builder = new DoubleParamDef.Builder(getNonEmptyString(annotation.value()).getOrElse(defaultParamName));
 
         final Opt<String> description = getNonEmptyString(annotation.description());
         if (description.isPresent()) {
@@ -50,7 +51,7 @@ public class DoubleAnnotationParamFactory extends AnnotationMethodParamFactory<D
             final Opt<String> defaultValueSupplierName = getNonEmptyString(annotation.defaultValueSupplier());
             if (defaultValueSupplierName.isPresent()) {
                 // FIXME: Test that this works when the supplier returns primitive (Double.TYPE)
-                builder.setOptional(Suppliers.reflectionSupplier(instance, defaultValueSupplierName.get(), Double.class));
+                builder.setOptional(Suppliers.reflectionSupplier(instance, defaultValueSupplierName.get(), Double.TYPE, Double.class));
             } else {
                 builder.setOptional(annotation.defaultValue());
             }
@@ -60,7 +61,7 @@ public class DoubleAnnotationParamFactory extends AnnotationMethodParamFactory<D
     }
 
     @Override
-    protected DoubleParamDef createWithoutAnnotation(Object instance, ReflectionParameter param) throws Exception {
-        return new DoubleParamDef.Builder(param.getDefaultName()).build();
+    protected DoubleParamDef createDefault(String defaultParamName) throws Exception {
+        return new DoubleParamDef.Builder(defaultParamName).build();
     }
 }

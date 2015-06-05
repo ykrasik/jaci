@@ -18,9 +18,7 @@ package com.github.ykrasik.jemi.reflection.command.factory;
 
 import com.github.ykrasik.jemi.command.CommandDef;
 import com.github.ykrasik.jemi.util.opt.Opt;
-import lombok.AccessLevel;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -31,9 +29,15 @@ import java.lang.reflect.Method;
  *
  * @author Yevgeny Krasik
  */
-@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class AbstractAnnotationMethodCommandFactory<T extends Annotation> implements MethodCommandFactory {
-    @NonNull private final Class<T> annotationClass;
+    private final Class<T> annotationClass;
+
+    /**
+     * @param annotationClass Type of annotation supported by this factory.
+     */
+    protected AbstractAnnotationMethodCommandFactory(@NonNull Class<T> annotationClass) {
+        this.annotationClass = annotationClass;
+    }
 
     @Override
     public Opt<CommandDef> create(@NonNull Object instance, @NonNull Method method) throws Exception {
@@ -53,6 +57,7 @@ public abstract class AbstractAnnotationMethodCommandFactory<T extends Annotatio
      * @param method Method to create a {@link CommandDef} out of.
      * @param annotation The method's annotation.
      * @return A {@link CommandDef} created out of the {@link Method} and its annotation.
+     * @throws Exception If any error occurs.
      */
-    protected abstract CommandDef doCreate(Object instance, Method method, T annotation);
+    protected abstract CommandDef doCreate(Object instance, Method method, T annotation) throws Exception;
 }

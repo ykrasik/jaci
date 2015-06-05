@@ -24,7 +24,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -40,10 +39,8 @@ public class ReflectionCommandExecutor implements CommandExecutor {
 
     @Override
     public void execute(CommandOutput output, CommandArgs args) throws Exception {
-        final List<Object> reflectionArgs = new ArrayList<>(args.getArgs());
-
         // Add output as first arg.
-        reflectionArgs.add(0, output);
+        final List<Object> reflectionArgs = args.prependArg(output);
 
         // Invoke method.
         method.invoke(instance, reflectionArgs.toArray());

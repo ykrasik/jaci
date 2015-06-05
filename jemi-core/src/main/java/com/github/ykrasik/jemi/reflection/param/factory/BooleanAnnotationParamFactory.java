@@ -20,15 +20,16 @@ import com.github.ykrasik.jemi.api.BoolParam;
 import com.github.ykrasik.jemi.param.BooleanParamDef;
 import com.github.ykrasik.jemi.util.function.Suppliers;
 import com.github.ykrasik.jemi.util.opt.Opt;
-import com.github.ykrasik.jemi.util.reflection.ReflectionParameter;
 import lombok.ToString;
 
 import static com.github.ykrasik.jemi.util.string.StringUtils.getNonEmptyString;
 
 /**
+ * Creates {@link BooleanParamDef}s out of {@link Boolean} or {@code boolean} parameters annotated with {@link BoolParam}.
+ * Empty names will be replaced with a generated name, and empty descriptions will use default values.
+ *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
 @ToString
 public class BooleanAnnotationParamFactory extends AnnotationMethodParamFactory<BooleanParamDef, BoolParam> {
     public BooleanAnnotationParamFactory() {
@@ -36,8 +37,8 @@ public class BooleanAnnotationParamFactory extends AnnotationMethodParamFactory<
     }
 
     @Override
-    protected BooleanParamDef createWithAnnotation(Object instance, ReflectionParameter param, BoolParam annotation) throws Exception {
-        final BooleanParamDef.Builder builder = new BooleanParamDef.Builder(getNonEmptyString(annotation.value()).getOrElse(param.getDefaultName()));
+    protected BooleanParamDef createFromAnnotation(Object instance, String defaultParamName, BoolParam annotation) throws Exception {
+        final BooleanParamDef.Builder builder = new BooleanParamDef.Builder(getNonEmptyString(annotation.value()).getOrElse(defaultParamName));
 
         final Opt<String> description = getNonEmptyString(annotation.description());
         if (description.isPresent()) {
@@ -50,7 +51,7 @@ public class BooleanAnnotationParamFactory extends AnnotationMethodParamFactory<
             final Opt<String> defaultValueSupplierName = getNonEmptyString(annotation.defaultValueSupplier());
             if (defaultValueSupplierName.isPresent()) {
                 // FIXME: Test that this works when the supplier returns primitive (Boolean.TYPE)
-                builder.setOptional(Suppliers.reflectionSupplier(instance, defaultValueSupplierName.get(), Boolean.class));
+                builder.setOptional(Suppliers.reflectionSupplier(instance, defaultValueSupplierName.get(), Boolean.TYPE, Boolean.class));
             } else {
                 builder.setOptional(annotation.defaultValue());
             }
@@ -60,7 +61,7 @@ public class BooleanAnnotationParamFactory extends AnnotationMethodParamFactory<
     }
 
     @Override
-    protected BooleanParamDef createWithoutAnnotation(Object instance, ReflectionParameter param) throws Exception {
-        return new BooleanParamDef.Builder(param.getDefaultName()).build();
+    protected BooleanParamDef createDefault(String defaultParamName) throws Exception {
+        return new BooleanParamDef.Builder(defaultParamName).build();
     }
 }

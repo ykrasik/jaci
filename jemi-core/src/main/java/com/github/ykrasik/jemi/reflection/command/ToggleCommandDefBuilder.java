@@ -27,8 +27,8 @@ import lombok.NonNull;
  * the boolean state of some component on or off. The state of the component is accessed via a {@link ToggleCommandStateAccessor}.<br>
  * If the optional boolean parameter is passed, the toggle command will set the {@link ToggleCommandStateAccessor}'s
  * state to whatever value the parameter had. If boolean parameter is not passed, the toggle command
- * will toggle the state of the {@link ToggleCommandStateAccessor} - If it was previously {@code false}, it will now be {@code true}
- * and vice versa.
+ * will toggle the state of the {@link ToggleCommandStateAccessor} -
+ * If it was previously {@code false}, it will now be {@code true} and vice versa.
  *
  * @author Yevgeny Krasik
  */
@@ -40,24 +40,13 @@ public class ToggleCommandDefBuilder {
     private String paramName = "state";
     private String paramDescription = "toggle";
 
+    /**
+     * @param name Command name.
+     * @param accessor Accessor the the command's boolean state component.
+     */
     public ToggleCommandDefBuilder(@NonNull String name, @NonNull ToggleCommandStateAccessor accessor) {
         this.name = name;
         this.accessor = accessor;
-    }
-
-    /**
-     * @return A toggle {@link CommandDef} built from the supplied parameters.
-     */
-    public CommandDef build() {
-        final BooleanParamDef param = new BooleanParamDef.Builder(paramName)
-            .setDescription(paramDescription)
-            .setOptional(new ToggleCommandAccessorDefaultValueSupplier(accessor))
-            .build();
-
-        return new CommandDef.Builder(name, new ToggleCommandExecutor(name, accessor))
-            .setDescription(description)
-            .addParam(param)
-            .build();
     }
 
     /**
@@ -85,5 +74,20 @@ public class ToggleCommandDefBuilder {
      */
     public void setParamDescription(@NonNull String paramDescription) {
         this.paramDescription = paramDescription;
+    }
+
+    /**
+     * @return A toggle {@link CommandDef} built out of this builder's parameters.
+     */
+    public CommandDef build() {
+        final BooleanParamDef param = new BooleanParamDef.Builder(paramName)
+            .setDescription(paramDescription)
+            .setOptional(new ToggleCommandAccessorDefaultValueSupplier(accessor))
+            .build();
+
+        return new CommandDef.Builder(name, new ToggleCommandExecutor(name, accessor))
+            .setDescription(description)
+            .addParam(param)
+            .build();
     }
 }

@@ -28,7 +28,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Creates {@link CommandDef}s out of {@link Method}s if they are accepted by one of the {@link MethodCommandFactory}.<br>
+ * Creates {@link CommandDef}s out of {@link Method}s if they are accepted by one of the {@link MethodCommandFactory}s.
  *
  * @author Yevgeny Krasik
  */
@@ -47,7 +47,7 @@ public class ReflectionMethodProcessor {
     }
 
     /**
-     * Process the method and create a {@link CommandDef} out of it, if it is annotated with a qualifying annotation.
+     * Process the method and create a {@link CommandDef} out of it, if it is accepted by one of the {@link MethodCommandFactory}s.
      *
      * @param instance Instance of a class to which this method belongs.
      * @param method Method to be processed.

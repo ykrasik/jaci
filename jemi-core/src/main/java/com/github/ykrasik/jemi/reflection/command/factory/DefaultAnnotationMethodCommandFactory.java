@@ -54,7 +54,7 @@ public class DefaultAnnotationMethodCommandFactory extends AbstractAnnotationMet
     }
 
     @Override
-    protected CommandDef doCreate(Object instance, Method method, Command annotation) {
+    protected CommandDef doCreate(Object instance, Method method, Command annotation) throws Exception {
         // Reflect method params.
         final List<ReflectionParameter> params = ReflectionUtils.reflectMethodParameters(method);
 

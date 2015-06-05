@@ -18,7 +18,7 @@ package com.github.ykrasik.jemi.command;
 
 import lombok.NonNull;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -39,8 +39,11 @@ public class CommandArgsImpl implements CommandArgs {
     }
 
     @Override
-    public List<Object> getArgs() {
-        return Collections.unmodifiableList(args);
+    public List<Object> prependArg(Object object) {
+        final List<Object> newArgs = new ArrayList<>(args.size() + 1);
+        newArgs.add(object);
+        newArgs.addAll(args);
+        return newArgs;
     }
 
     @Override

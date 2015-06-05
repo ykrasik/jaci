@@ -20,15 +20,16 @@ import com.github.ykrasik.jemi.api.StringParam;
 import com.github.ykrasik.jemi.param.StringParamDef;
 import com.github.ykrasik.jemi.util.function.Suppliers;
 import com.github.ykrasik.jemi.util.opt.Opt;
-import com.github.ykrasik.jemi.util.reflection.ReflectionParameter;
 import lombok.ToString;
 
 import static com.github.ykrasik.jemi.util.string.StringUtils.getNonEmptyString;
 
 /**
+ * Creates {@link StringParamDef}s out of {@link String} parameters annotated with {@link StringParam}.
+ * Empty names will be replaced with a generated name, and empty descriptions will use default values.
+ *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
 @ToString
 public class StringAnnotationParamFactory extends AnnotationMethodParamFactory<StringParamDef, StringParam> {
     public StringAnnotationParamFactory() {
@@ -36,8 +37,8 @@ public class StringAnnotationParamFactory extends AnnotationMethodParamFactory<S
     }
 
     @Override
-    protected StringParamDef createWithAnnotation(Object instance, ReflectionParameter param, StringParam annotation) throws Exception {
-        final StringParamDef.Builder builder = new StringParamDef.Builder(getNonEmptyString(annotation.value()).getOrElse(param.getDefaultName()));
+    protected StringParamDef createFromAnnotation(Object instance, String defaultParamName, StringParam annotation) throws Exception {
+        final StringParamDef.Builder builder = new StringParamDef.Builder(getNonEmptyString(annotation.value()).getOrElse(defaultParamName));
 
         final Opt<String> description = getNonEmptyString(annotation.description());
         if (description.isPresent()) {
@@ -68,7 +69,7 @@ public class StringAnnotationParamFactory extends AnnotationMethodParamFactory<S
     }
 
     @Override
-    protected StringParamDef createWithoutAnnotation(Object instance, ReflectionParameter param) throws Exception {
-        return new StringParamDef.Builder(param.getDefaultName()).build();
+    protected StringParamDef createDefault(String defaultParamName) throws Exception {
+        return new StringParamDef.Builder(defaultParamName).build();
     }
 }

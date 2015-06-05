@@ -28,7 +28,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 /**
- * Processes a class and creates {@link CommandDef}s from qualifying methods.<br>
+ * Processes a class and creates {@link CommandDef}s from qualifying methods.
  *
  * @author Yevgeny Krasik
  */
@@ -47,13 +47,12 @@ public class ReflectionClassProcessor {
     }
 
     /**
-     * Process the object and return a {@link Map} from a {@code path} to a {@link List} of {@link CommandDef}s
+     * Process the object and return a {@link Map} from a {@link ParsedPath} to a {@link List} of {@link CommandDef}s
      * that were defined for that path.
      *
      * @param instance Object to process.
      * @return The {@link CommandDef}s that were extracted out of the object.
      */
-    // TODO: JavaDoc
     public Map<ParsedPath, List<CommandDef>> processObject(@NonNull Object instance) {
         final Class<?> clazz = instance.getClass();
 
@@ -100,16 +99,24 @@ public class ReflectionClassProcessor {
         }
     }
 
+    /**
+     * Auxiliary class for collecting {@link CommandDef}s.
+     */
     @RequiredArgsConstructor
     private static class ClassContext {
         private final ParsedPath topLevelPath;
 
         private final Map<ParsedPath, List<CommandDef>> commandPaths = new HashMap<>();
 
-        // TODO: JavaDoc?
-        public void addCommandDef(ParsedPath commandPath, CommandDef commandDef) {
+        /**
+         * Add a {@link CommandDef} to the given {@link ParsedPath}.
+         *
+         * @param path Path to add the command to.
+         * @param commandDef CommandDef to add.
+         */
+        public void addCommandDef(ParsedPath path, CommandDef commandDef) {
             // Compose the top level path of the declaring class with the command path.
-            final ParsedPath composedPath = topLevelPath.append(commandPath);
+            final ParsedPath composedPath = topLevelPath.append(path);
             List<CommandDef> commands = commandPaths.get(composedPath);
             if (commands == null) {
                 commands = new ArrayList<>();

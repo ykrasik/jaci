@@ -107,6 +107,19 @@ public final class Suppliers {
         return new ReflectionSupplier<>(instance, method);
     }
 
+    // TODO: JavaDoc
+    public static <T> Supplier<T> reflectionSupplier(Object instance,
+                                                     String methodName,
+                                                     Class<T> suppliedClass,
+                                                     @NonNull Class<T> alternativeClass) {
+        try {
+            return reflectionSupplier(instance, methodName, suppliedClass);
+        } catch (IllegalArgumentException e) {
+            // Try the alternative return value.
+            return reflectionSupplier(instance, methodName, alternativeClass);
+        }
+    }
+
     /**
      * A {@link Supplier} that invokes a (possibly private) no-args method through reflection.
      *

@@ -25,12 +25,17 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
+ * A {@link MethodParamFactory} that can create {@link ParamDef}s out of {@link ReflectionParameter}s
+ * that are of a specific type (class).
+ *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
 public abstract class AbstractMethodParamFactory<T extends ParamDef<?>> implements MethodParamFactory<T> {
     private final List<Class<?>> acceptedParameterTypes;
 
+    /**
+     * @param acceptedParameterTypes Types of parameter this factory can accept.
+     */
     protected AbstractMethodParamFactory(@NonNull Class<?>... acceptedParameterTypes) {
         if (acceptedParameterTypes.length == 0) {
             throw new IllegalArgumentException("AbstractMethodParamFactory must process at least 1 parameter type!");
@@ -49,5 +54,13 @@ public abstract class AbstractMethodParamFactory<T extends ParamDef<?>> implemen
         return Opt.of(doCreate(instance, param));
     }
 
+    /**
+     * Create a {@link ParamDef} out of the {@link ReflectionParameter}, which is guaranteed to be of the accepted type.
+     *
+     * @param instance Instance of a class which contains the method for which this parameter is being created.
+     * @param param Parameter to be processed. Guaranteed to be of the accepted type.
+     * @return A {@link ParamDef} created out of this {@link ReflectionParameter}.
+     * @throws Exception If any error occurs.
+     */
     protected abstract T doCreate(Object instance, ReflectionParameter param) throws Exception;
 }

@@ -29,7 +29,7 @@ import java.util.List;
 
 /**
  * Represents the path in the system.<br>
- * Paths are delimited by '/', and support composition via {@link #append(ParsedPath)}.
+ * Paths are delimited by '/'. Path appending is supported via {@link #append(ParsedPath)}.
  *
  * @author Yevgeny Krasik
  */
@@ -42,12 +42,15 @@ public class ParsedPath implements Iterable<String> {
     private final boolean startsWithDelimiter;
     private final List<String> elements;
 
-    // TODO: JavaDoc
+    /**
+     * @return A copy of this path without the last element.
+     */
     public ParsedPath withoutLastElement() {
         if (this == EMPTY) {
             throw new IllegalArgumentException("Empty path!");
         }
         if (this == ROOT) {
+            // TODO: Make sure this doesn't mask any bugs.
             return ROOT;
         }
 
@@ -104,7 +107,25 @@ public class ParsedPath implements Iterable<String> {
         return (startsWithDelimiter ? "/" : "") + StringUtils.join(elements, "/");
     }
 
-    // TODO: JavaDoc
+    /**
+     * Returns a {@link ParsedPath} representing the root path.
+     * The root path is unique in that it is the only path that is allowed to start from the delimiter '/' and have no elements.
+     *
+     * @return A path representing the root path.
+     */
+    public static ParsedPath root() {
+        return ROOT;
+    }
+
+    /**
+     * Create a path that is expected to represent a path to a directory.
+     * This means that if the path ends with a delimiter '/', it is considered the same as if it didn't.
+     * i.e. path/to and path/to/ are considered the same - a path with 2 elements: 'path' and 'to'.
+     *
+     * @param rawPath Path to parse.
+     * @return A {@link ParsedPath} out of the given path.
+     * @throws IllegalArgumentException If any element along the path is empty.
+     */
     public static ParsedPath toDirectory(@NonNull String rawPath) {
         final String path = rawPath.trim();
         if (path.isEmpty()) {
@@ -125,7 +146,17 @@ public class ParsedPath implements Iterable<String> {
         return new ParsedPath(startsWithDelimiter, pathElements);
     }
 
-    // TODO: JavaDoc
+    /**
+     * Create a path that is expected to represent a path to any entry.
+     * This is different from {@link #toDirectory(String)} in that if the path ends with a delimiter '/',
+     * it is <b>not</b> considered the same as if it didn't.
+     * i.e. path/to would be a path with 2 elements: 'path' and 'to', but
+     * but  path/to/ would be a path with 3 elements: 'path', 'to' and an empty element ''.
+     *
+     * @param rawPath Path to parse.
+     * @return A {@link ParsedPath} out of the given path.
+     * @throws IllegalArgumentException If any element along the path except the last one is empty.
+     */
     public static ParsedPath toEntry(@NonNull String rawPath) {
         final String path = rawPath.trim();
 
@@ -167,10 +198,5 @@ public class ParsedPath implements Iterable<String> {
             limit = 0;
         }
         return pathWithoutDelimiters.split("/", limit);
-    }
-
-    // TODO: JavaDoc
-    public static ParsedPath root() {
-        return ROOT;
     }
 }

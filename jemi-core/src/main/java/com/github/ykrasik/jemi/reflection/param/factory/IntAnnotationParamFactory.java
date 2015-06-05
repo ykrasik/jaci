@@ -20,15 +20,16 @@ import com.github.ykrasik.jemi.api.IntParam;
 import com.github.ykrasik.jemi.param.IntParamDef;
 import com.github.ykrasik.jemi.util.function.Suppliers;
 import com.github.ykrasik.jemi.util.opt.Opt;
-import com.github.ykrasik.jemi.util.reflection.ReflectionParameter;
 import lombok.ToString;
 
 import static com.github.ykrasik.jemi.util.string.StringUtils.getNonEmptyString;
 
 /**
+ * Creates {@link IntParamDef}s out of {@link Integer} or {@code int} parameters annotated with {@link IntParam}.
+ * Empty names will be replaced with a generated name, and empty descriptions will use default values.
+ *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
 @ToString
 public class IntAnnotationParamFactory extends AnnotationMethodParamFactory<IntParamDef, IntParam> {
     public IntAnnotationParamFactory() {
@@ -36,8 +37,8 @@ public class IntAnnotationParamFactory extends AnnotationMethodParamFactory<IntP
     }
 
     @Override
-    protected IntParamDef createWithAnnotation(Object instance, ReflectionParameter param, IntParam annotation) throws Exception {
-        final IntParamDef.Builder builder = new IntParamDef.Builder(getNonEmptyString(annotation.value()).getOrElse(param.getDefaultName()));
+    protected IntParamDef createFromAnnotation(Object instance, String defaultParamName, IntParam annotation) throws Exception {
+        final IntParamDef.Builder builder = new IntParamDef.Builder(getNonEmptyString(annotation.value()).getOrElse(defaultParamName));
 
         final Opt<String> description = getNonEmptyString(annotation.description());
         if (description.isPresent()) {
@@ -50,7 +51,7 @@ public class IntAnnotationParamFactory extends AnnotationMethodParamFactory<IntP
             final Opt<String> defaultValueSupplierName = getNonEmptyString(annotation.defaultValueSupplier());
             if (defaultValueSupplierName.isPresent()) {
                 // FIXME: Test that this works when the supplier returns primitive (Integer.TYPE)
-                builder.setOptional(Suppliers.reflectionSupplier(instance, defaultValueSupplierName.get(), Integer.class));
+                builder.setOptional(Suppliers.reflectionSupplier(instance, defaultValueSupplierName.get(), Integer.TYPE, Integer.class));
             } else {
                 builder.setOptional(annotation.defaultValue());
             }
@@ -60,7 +61,7 @@ public class IntAnnotationParamFactory extends AnnotationMethodParamFactory<IntP
     }
 
     @Override
-    protected IntParamDef createWithoutAnnotation(Object instance, ReflectionParameter param) throws Exception {
-        return new IntParamDef.Builder(param.getDefaultName()).build();
+    protected IntParamDef createDefault(String defaultParamName) throws Exception {
+        return new IntParamDef.Builder(defaultParamName).build();
     }
 }

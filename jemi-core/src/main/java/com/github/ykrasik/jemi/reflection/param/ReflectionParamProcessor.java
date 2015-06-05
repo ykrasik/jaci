@@ -26,12 +26,17 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
+ * Creates {@link ParamDef}s out of {@link ReflectionParameter}s if they are accepted by one of the {@link MethodParamFactory}s.
+ *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
 public class ReflectionParamProcessor {
     private final List<MethodParamFactory<?>> factories;
 
+    /**
+     * Create a processor that will accept both annotated and non-annotated parameters of the types
+     * {boolean, int, double} (and their boxed versions) and String.
+     */
     public ReflectionParamProcessor() {
         this(
             new StringAnnotationParamFactory(),
@@ -53,13 +58,12 @@ public class ReflectionParamProcessor {
      * Since parameter names aren't always available to be reflected, parameter names can only be set through
      * the annotation. If absent, a name will be generated for the parameter.
      *
-     * @param instance The instance that contains the method this parameter is being generated for.
+     * @param instance The instance that contains the method this parameter is being constructed for.
      * @param param Information about the parameter.
-     * @return A {@link ParamDef} constructed from the annotation if it was present, or one with sensible defaults if it wasn't.
-     * @throws IllegalArgumentException If the parameter is of an incompatible type.
-     *                                  Only accepts {boolean, int, double} (and their boxed versions) and String.
+     * @return A {@link ParamDef} constructed from the parameter.
+     * @throws IllegalArgumentException If the parameter wasn't accepted by any of the {@link MethodParamFactory}s.
+     *                                  This means the parameter is of an incompatible type.
      */
-    // TODO: Wrong JavaDoc
     public ParamDef<?> createParam(@NonNull Object instance, @NonNull ReflectionParameter param) {
         try {
             return doCreateParam(instance, param);
@@ -76,6 +80,8 @@ public class ReflectionParamProcessor {
                 return def.get();
             }
         }
-        throw new IllegalArgumentException("Invalid param: " + param);
+
+        // No factory accepted this param.
+        throw new IllegalArgumentException("Invalid param!");
     }
 }

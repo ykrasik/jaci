@@ -39,7 +39,7 @@ public class ToggleAnnotationMethodCommandFactory extends AbstractAnnotationMeth
     }
 
     @Override
-    protected CommandDef doCreate(Object instance, Method method, ToggleCommand annotation) {
+    protected CommandDef doCreate(Object instance, Method method, ToggleCommand annotation) throws Exception {
         ReflectionUtils.assertReturnValue(method, ToggleCommandStateAccessor.class);
         ReflectionUtils.assertNoParameters(method);
         final ToggleCommandStateAccessor accessor = ReflectionUtils.invokeNoArgs(instance, method);

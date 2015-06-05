@@ -34,6 +34,7 @@ public interface MethodCommandFactory {
      * @param instance Instance of a class to which this method belongs.
      * @param method Method to be processed.
      * @return A {@code present} {@link CommandDef} if the method is accepted by this factory.
+     * @throws Exception If any error occurs.
      */
     Opt<CommandDef> create(Object instance, Method method) throws Exception;
 }

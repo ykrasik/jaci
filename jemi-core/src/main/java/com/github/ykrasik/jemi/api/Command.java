@@ -34,6 +34,7 @@ import java.lang.annotation.Target;
  *     <li>{@link Integer} or {@code int} parameters, optionally annotated with {@link IntParam}</li>
  *     <li>{@link String} parameters, optionally annotated with {@link StringParam}</li>
  * </ul>
+ * <br>
  * If the command name is empty, the command will receive the name of the method.<br>
  *
  * @author Yevgeny Krasik

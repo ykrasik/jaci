@@ -23,12 +23,18 @@ import com.github.ykrasik.jemi.util.reflection.ReflectionParameter;
 import java.lang.annotation.Annotation;
 
 /**
+ * A {@link MethodParamFactory} that can create {@link ParamDef}s out of {@link ReflectionParameter}s
+ * that are of a specific type (class), and have a specific annotation.
+ *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
 public abstract class AnnotationMethodParamFactory<T extends ParamDef<?>, A extends Annotation> extends AbstractMethodParamFactory<T> {
     private final Class<A> annotationClass;
 
+    /**
+     * @param annotationClass Type of annotation this factory supports.
+     * @param acceptedParameterTypes Types of parameter this factory can accept.
+     */
     protected AnnotationMethodParamFactory(Class<A> annotationClass, Class<?>... acceptedParameterTypes) {
         super(acceptedParameterTypes);
         this.annotationClass = annotationClass;
@@ -38,13 +44,31 @@ public abstract class AnnotationMethodParamFactory<T extends ParamDef<?>, A exte
     @Override
     protected T doCreate(Object instance, ReflectionParameter param) throws Exception {
         final Opt<A> annotation = param.getAnnotation(annotationClass);
+        final String defaultParamName = param.getDefaultName();
         if (annotation.isPresent()) {
-            return createWithAnnotation(instance, param, annotation.get());
+            return createFromAnnotation(instance, defaultParamName, annotation.get());
         } else {
-            return createWithoutAnnotation(instance, param);
+            return createDefault(defaultParamName);
         }
     }
 
-    protected abstract T createWithAnnotation(Object instance, ReflectionParameter param, A annotation) throws Exception;
-    protected abstract T createWithoutAnnotation(Object instance, ReflectionParameter param) throws Exception;
+    /**
+     * Create a {@link ParamDef} out of the annotation.
+     *
+     * @param instance Instance of a class which contains the method for which this parameter is being created.
+     * @param defaultParamName Default-generated parameter name.
+     * @param annotation Annotation the parameter is annotated with.
+     * @return A {@link ParamDef} created out of the annotation.
+     * @throws Exception If any error occurs.
+     */
+    protected abstract T createFromAnnotation(Object instance, String defaultParamName, A annotation) throws Exception;
+
+    /**
+     * Create a default {@link ParamDef} of the supported type.
+     *
+     * @param defaultParamName Default-generated parameter name.
+     * @return A default {@link ParamDef}.
+     * @throws Exception If any error occurs.
+     */
+    protected abstract T createDefault(String defaultParamName) throws Exception;
 }

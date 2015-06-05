@@ -63,11 +63,22 @@ public class AnnotationExample {
     }
 
     @Command
-    public void test(CommandOutput output, @StringParam(supplier = "supplier") String str) {
-        output.message("str = %s", str);
+    public void test(CommandOutput output,
+                     @StringParam(supplier = "supplier") String str,
+                     @BoolParam(optional = true, defaultValueSupplier = "boolSupplier1") boolean bool1,
+                     @BoolParam(optional = true, defaultValueSupplier = "boolSupplier2") Boolean bool2) {
+        output.message("str=%s, bool1=%s, bool2=%s", str, bool1, bool2);
     }
 
     private String[] supplier() {
         return new String[]{ "a", "b", "c" };
+    }
+
+    private Boolean boolSupplier1() {
+        return true;
+    }
+
+    private boolean boolSupplier2() {
+        return false;
     }
 }
