@@ -17,8 +17,8 @@
 package com.github.ykrasik.jemi.cli.param;
 
 import com.github.ykrasik.jemi.cli.exception.ParseException;
-import com.github.ykrasik.jemi.core.Identifier;
-import com.github.ykrasik.jemi.core.param.StringParamDef;
+import com.github.ykrasik.jemi.Identifier;
+import com.github.ykrasik.jemi.param.StringParamDef;
 import com.github.ykrasik.jemi.cli.assist.AutoComplete;
 import com.github.ykrasik.jemi.cli.assist.CliValueType;
 import com.github.ykrasik.jemi.util.function.Supplier;

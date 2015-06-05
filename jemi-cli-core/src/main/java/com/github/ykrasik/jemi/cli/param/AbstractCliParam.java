@@ -18,7 +18,7 @@ package com.github.ykrasik.jemi.cli.param;
 
 import com.github.ykrasik.jemi.cli.exception.ParseError;
 import com.github.ykrasik.jemi.cli.exception.ParseException;
-import com.github.ykrasik.jemi.core.Identifier;
+import com.github.ykrasik.jemi.Identifier;
 import com.github.ykrasik.jemi.util.function.Supplier;
 import com.github.ykrasik.jemi.util.opt.Opt;
 import lombok.AccessLevel;

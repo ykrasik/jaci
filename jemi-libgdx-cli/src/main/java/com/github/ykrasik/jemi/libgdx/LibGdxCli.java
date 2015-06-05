@@ -27,7 +27,7 @@ import com.github.ykrasik.jemi.cli.hierarchy.CliCommandHierarchy;
 import com.github.ykrasik.jemi.cli.hierarchy.CliCommandHierarchyImpl;
 import com.github.ykrasik.jemi.cli.output.CliOutput;
 import com.github.ykrasik.jemi.cli.output.CliSerializer;
-import com.github.ykrasik.jemi.core.hierarchy.CommandHierarchy;
+import com.github.ykrasik.jemi.hierarchy.CommandHierarchy;
 import lombok.NonNull;
 
 /**

@@ -17,7 +17,7 @@
 package com.github.ykrasik.jemi.cli.param;
 
 import com.github.ykrasik.jemi.cli.exception.ParseException;
-import com.github.ykrasik.jemi.core.Identifiable;
+import com.github.ykrasik.jemi.Identifiable;
 import com.github.ykrasik.jemi.cli.assist.AutoComplete;
 
 /**

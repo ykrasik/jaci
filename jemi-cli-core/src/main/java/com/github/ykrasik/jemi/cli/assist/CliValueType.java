@@ -16,7 +16,6 @@
 
 package com.github.ykrasik.jemi.cli.assist;
 
-import com.github.ykrasik.jemi.api.Constants;
 import com.github.ykrasik.jemi.util.function.Function;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +27,7 @@ import lombok.RequiredArgsConstructor;
  */
 public enum CliValueType {
     // FIXME: Doesn't belong here.
-    DIRECTORY(Constants.PATH_DELIMITER),
+    DIRECTORY('/'),
     COMMAND(' '),
     COMMAND_PARAM_NAME(' '),
     COMMAND_PARAM_VALUE(' ');

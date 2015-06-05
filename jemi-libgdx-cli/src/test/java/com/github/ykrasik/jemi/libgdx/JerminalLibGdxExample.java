@@ -21,7 +21,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.github.ykrasik.jemi.core.hierarchy.CommandHierarchy;
+import com.github.ykrasik.jemi.hierarchy.CommandHierarchy;
 
 /**
  * @author Yevgeny Krasik
@@ -45,7 +45,8 @@ public class JerminalLibGdxExample extends ApplicationAdapter {
 
     @Override
     public void create() {
-        final CommandHierarchy hierarchy = createFileSystem();
+        // FIXME: Builder should delegate to hierarchyBuilder, and not require a hierarchy up-front.
+        final CommandHierarchy hierarchy = createHierarchy();
         final LibGdxCli cli = new LibGdxCli.Builder(hierarchy).build();
         cli.setFillParent(true);
 
@@ -56,7 +57,7 @@ public class JerminalLibGdxExample extends ApplicationAdapter {
         Gdx.input.setInputProcessor(stage);
     }
 
-    private CommandHierarchy createFileSystem() {
+    private CommandHierarchy createHierarchy() {
         return new CommandHierarchy.Builder()
             .processClass(AnnotationExample.class)
             .build();

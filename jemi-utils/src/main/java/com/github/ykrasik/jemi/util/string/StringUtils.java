@@ -57,11 +57,6 @@ public final class StringUtils {
     }
 
     // TODO: JavaDoc
-    public static String getNonEmptyStringOrDefault(String str, String defaultValue) {
-        return getNonEmptyString(str).getOrElse(defaultValue);
-    }
-
-    // TODO: JavaDoc
     public static String emptyToNull(String str) {
         return (str != null && !str.isEmpty()) ? str : null;
     }

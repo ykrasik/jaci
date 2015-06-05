@@ -16,13 +16,13 @@
 
 package com.github.ykrasik.jemi.cli.directory;
 
-import com.github.ykrasik.jemi.api.Constants;
+import com.github.ykrasik.jemi.Identifiable;
+import com.github.ykrasik.jemi.Identifier;
+import com.github.ykrasik.jemi.cli.assist.AutoComplete;
 import com.github.ykrasik.jemi.cli.assist.CliValueType;
 import com.github.ykrasik.jemi.cli.command.CliCommand;
-import com.github.ykrasik.jemi.core.Identifiable;
-import com.github.ykrasik.jemi.core.Identifier;
-import com.github.ykrasik.jemi.core.command.CommandDef;
-import com.github.ykrasik.jemi.core.directory.CommandDirectoryDef;
+import com.github.ykrasik.jemi.command.CommandDef;
+import com.github.ykrasik.jemi.directory.CommandDirectoryDef;
 import com.github.ykrasik.jemi.util.opt.Opt;
 import com.github.ykrasik.jemi.util.trie.Trie;
 import com.github.ykrasik.jemi.util.trie.TrieBuilder;
@@ -107,8 +107,10 @@ public class CliDirectory implements Identifiable {
      * @return A {@link Trie} containing auto complete suggestions for the a child {@link CliDirectory}
      *         that starts with the given prefix. Case insensitive.
      */
-    public Trie<CliValueType> autoCompleteDirectory(String prefix) {
-        return childDirectories.subTrie(prefix).mapValues(DIRECTORY_VALUE_MAPPER);
+    // TODO: Wrong JavaDoc
+    public AutoComplete autoCompleteDirectory(String prefix) {
+        final Trie<CliValueType> possibilities = childDirectories.subTrie(prefix).mapValues(DIRECTORY_VALUE_MAPPER);
+        return new AutoComplete(prefix, possibilities);
     }
 
     /**
@@ -116,8 +118,10 @@ public class CliDirectory implements Identifiable {
      * @return A {@link Trie} containing auto complete suggestions for the a child {@link CliCommand}
      *         that starts with the given prefix. Case insensitive.
      */
-    public Trie<CliValueType> autoCompleteCommand(String prefix) {
-        return childCommands.subTrie(prefix).mapValues(COMMAND_VALUE_MAPPER);
+    // TODO: Wrong JavaDoc
+    public AutoComplete autoCompleteCommand(String prefix) {
+        final Trie<CliValueType> possibilities = childCommands.subTrie(prefix).mapValues(COMMAND_VALUE_MAPPER);
+        return new AutoComplete(prefix, possibilities);
     }
 
     /**
@@ -125,18 +129,19 @@ public class CliDirectory implements Identifiable {
      * @return A {@link Trie} containing auto complete suggestions for any child entry (either {@link CliDirectory} or
      *         {@link CliCommand}) that starts with the given prefix. Case insensitive.
      */
-    public Trie<CliValueType> autoCompleteEntry(String prefix) {
-        final Trie<CliValueType> directoryAutoComplete = autoCompleteDirectory(prefix);
-        final Trie<CliValueType> commandAutoComplete = autoCompleteCommand(prefix);
+    // TODO: Wrong JavaDoc
+    public AutoComplete autoCompleteEntry(String prefix) {
+        final AutoComplete directoryAutoComplete = autoCompleteDirectory(prefix);
+        final AutoComplete commandAutoComplete = autoCompleteCommand(prefix);
         return directoryAutoComplete.union(commandAutoComplete);
     }
 
     // TODO: JavaDoc
     public String toPath() {
         if (!parent.isPresent()) {
-            return Constants.PATH_DELIMITER_STRING;
+            return "/";
         }
-        return parent.get().toPath() + identifier.getName() + Constants.PATH_DELIMITER_STRING;
+        return parent.get().toPath() + identifier.getName() + '/';
     }
 
     @Override

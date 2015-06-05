@@ -30,7 +30,7 @@ import com.github.ykrasik.jemi.cli.hierarchy.CliCommandHierarchy;
 import com.github.ykrasik.jemi.cli.output.CliOutput;
 import com.github.ykrasik.jemi.cli.output.CliPrinter;
 import com.github.ykrasik.jemi.cli.output.CliSerializer;
-import com.github.ykrasik.jemi.core.command.CommandArgs;
+import com.github.ykrasik.jemi.command.CommandArgs;
 import com.github.ykrasik.jemi.util.opt.Opt;
 import lombok.NonNull;
 

@@ -16,25 +16,20 @@
 
 package com.github.ykrasik.jemi.cli.hierarchy;
 
-import com.github.ykrasik.jemi.api.Constants;
 import com.github.ykrasik.jemi.cli.CliConstants;
 import com.github.ykrasik.jemi.cli.assist.AutoComplete;
-import com.github.ykrasik.jemi.cli.assist.CliValueType;
 import com.github.ykrasik.jemi.cli.command.CliCommand;
 import com.github.ykrasik.jemi.cli.directory.CliDirectory;
 import com.github.ykrasik.jemi.cli.exception.ParseError;
 import com.github.ykrasik.jemi.cli.exception.ParseException;
-import com.github.ykrasik.jemi.core.directory.CommandDirectoryDef;
-import com.github.ykrasik.jemi.core.hierarchy.CommandHierarchy;
+import com.github.ykrasik.jemi.directory.CommandDirectoryDef;
+import com.github.ykrasik.jemi.hierarchy.CommandHierarchy;
+import com.github.ykrasik.jemi.path.ParsedPath;
 import com.github.ykrasik.jemi.util.opt.Opt;
-import com.github.ykrasik.jemi.util.string.StringUtils;
-import com.github.ykrasik.jemi.util.trie.Trie;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.experimental.Delegate;
-
-import java.util.List;
 
 /**
  * An immutable implementation of a {@link CliCommandHierarchy}.<br>
@@ -70,36 +65,108 @@ public class CliCommandHierarchyImpl implements CliCommandHierarchy {
 
     @Override
     public CliDirectory parsePathToDirectory(String rawPath) throws ParseException {
-        if (rawPath.isEmpty()) {
-            throw new ParseException(ParseError.INVALID_DIRECTORY, "Empty path!");
-        }
-
-        final boolean startsFromRoot = rawPath.startsWith(Constants.PATH_DELIMITER_STRING);
-        if (startsFromRoot && rawPath.length() == 1) {
-            return root;
-        }
-
-        // Remove leading and trailing '/'.
-        // TODO: Make sure this doesn't mask '//' or '///' as an error.
-        final String pathToSplit = StringUtils.removeLeadingAndTrailingDelimiter(rawPath, Constants.PATH_DELIMITER_STRING);
-
-        // Split the given path according to delimiter.
-        final List<String> splitPath = Constants.splitByPathDelimiter(pathToSplit);
-
         // Parse all elements as directories.
-        CliDirectory currentDirectory = startsFromRoot ? root : workingDirectory;
-        for (String directoryName : splitPath) {
+        final ParsedPath path = parsePath(rawPath);
+        return parsePathToDirectory(path);
+    }
+
+    @Override
+    public CliCommand parsePathToCommand(String rawPath) throws ParseException {
+        final ParsedPath path = parsePath(rawPath);
+
+        // TODO: There has to be better way for testing eligibility for being a system command.
+        if (!path.containsDelimiter()) {
+            // path does not contain a '/' delimiter.
+            // It could either be a systemCommands command, or a command under the current workingDirectory.
+            // The last path element is the only path element is this path in this case.
+            return getSystemOrWorkingDirectoryCommand(path.getLastElement());
+        }
+
+        // Path contains a '/' delimiter.
+        // Parse the path until the last element as a path to a directory, and have the last directory parse the last element as a command.
+        // So in "path/to/command", parse "path/to" as path to directory "to", and let "to" parse "command".
+        final CliDirectory lastDirectory = parsePathToLastDirectory(path);
+
+        // FIXME: This isn't going to work for paths that end with a delimiter. Solve this somehow in ParsedPath.
+        final String commandName = path.getLastElement();
+        final Opt<CliCommand> command = lastDirectory.getCommand(commandName);
+        if (!command.isPresent()) {
+            throw new ParseException(ParseError.INVALID_COMMAND, "Directory '%s' doesn't contain command: '%s'", lastDirectory.getName(), commandName);
+        }
+        return command.get();
+    }
+
+    private CliCommand getSystemOrWorkingDirectoryCommand(String name) throws ParseException {
+        // If 'name' is a system command, return it.
+        final Opt<CliCommand> systemCommand = systemCommands.getCommand(name);
+        if (systemCommand.isPresent()) {
+            return systemCommand.get();
+        }
+
+        // 'name' is not a system command, check if it is a child of the current workingDirectory.
+        final Opt<CliCommand> command = workingDirectory.getCommand(name);
+        if (command.isPresent()) {
+            command.get();
+        }
+
+        throw new ParseException(ParseError.INVALID_COMMAND, "'%s' is not a recognized command!", name);
+    }
+
+    @Override
+    public AutoComplete autoCompletePathToDirectory(String rawPath) throws ParseException {
+        final ParsedPath path = parsePath(rawPath);
+
+        // Parse the path until the last element as a path to a directory,
+        // and have the last directory auto complete the last element as a directory.
+        final CliDirectory lastDirectory = parsePathToLastDirectory(path);
+
+        final String directoryNamePrefix = path.getLastElement();
+        return lastDirectory.autoCompleteDirectory(directoryNamePrefix);
+    }
+
+    @Override
+    public AutoComplete autoCompletePath(String rawPath) throws ParseException {
+        final ParsedPath path = parsePath(rawPath);
+        final String prefix = path.getLastElement();
+
+        // TODO: There has to be better way for testing eligibility for being a system command.
+        if (!path.containsDelimiter()) {
+            // Path does not contain a '/' delimiter.
+            // It could be either a system command or an entry from the current workingDirectory.
+            final AutoComplete systemCommandsAutoComplete = systemCommands.autoCompleteCommand(prefix);
+            final AutoComplete entriesAutoComplete = workingDirectory.autoCompleteEntry(prefix);
+            return systemCommandsAutoComplete.union(entriesAutoComplete);
+        }
+
+        // Parse the path until the last element as a path to a directory,
+        // and have the last directory auto complete the last element as a directory or command.
+        final CliDirectory lastDirectory = parsePathToLastDirectory(path);
+        return lastDirectory.autoCompleteEntry(prefix);
+    }
+
+    private ParsedPath parsePath(String path) throws ParseException {
+        try {
+            return ParsedPath.from(path);
+        } catch (IllegalArgumentException e) {
+            throw new ParseException(ParseError.INVALID_DIRECTORY, e.getMessage());
+        }
+    }
+
+    private CliDirectory parsePathToLastDirectory(ParsedPath path) throws ParseException {
+        final ParsedPath pathToLastDirectory = path.withoutLastElement();
+        return parsePathToDirectory(pathToLastDirectory);
+    }
+
+    private CliDirectory parsePathToDirectory(ParsedPath path) throws ParseException {
+        // If the path starts with '/', it starts from root.
+        CliDirectory currentDirectory = path.startsWithDelimiter() ? root : workingDirectory;
+        for (String directoryName : path) {
             currentDirectory = parseChildDirectory(currentDirectory, directoryName);
         }
-
         return currentDirectory;
     }
 
     private CliDirectory parseChildDirectory(CliDirectory currentDirectory, String name) throws ParseException {
-        if (name.isEmpty()) {
-            throw new ParseException(ParseError.INVALID_DIRECTORY, "Empty directory name! Under: '%s'", currentDirectory.getName());
-        }
-
         if (CliConstants.PATH_THIS.equals(name)) {
             return currentDirectory;
         }
@@ -114,107 +181,12 @@ public class CliCommandHierarchyImpl implements CliCommandHierarchy {
 
         final Opt<CliDirectory> childDirectory = currentDirectory.getDirectory(name);
         if (!childDirectory.isPresent()) {
-            throw new ParseException(
-                ParseError.INVALID_DIRECTORY,
-                "Directory '%s' doesn't contain directory: '%s'", currentDirectory.getName(), name
-            );
+            throw new ParseException(ParseError.INVALID_DIRECTORY, "Directory '%s' doesn't contain directory: '%s'", currentDirectory.getName(), name);
         }
         return childDirectory.get();
     }
 
-    @Override
-    public CliCommand parsePathToCommand(String rawPath) throws ParseException {
-        // If rawPath does not contain a single delimiter, we can try use it as the command name.
-        final int delimiterIndex = rawPath.lastIndexOf(Constants.PATH_DELIMITER_STRING);
-        if (delimiterIndex == -1) {
-            // rawPath does not contain a delimiter.
-            // It could either be a systemCommands command, or a command under the current workingDirectory.
-            return getSystemOrWorkingDirectoryCommand(rawPath);
-        }
-
-        // rawPath contains a delimiter.
-        // Parse the path until the pre-last entry as directories, and let the last directory parse the last entry as a command.
-        // So in "path/to/command", parse "path/to" as path to directory "to", and let "to" parse "command".
-        final String pathToLastDirectory = rawPath.substring(0, delimiterIndex + 1);
-        final CliDirectory lastDirectory = parsePathToDirectory(pathToLastDirectory);
-
-        // FIXME: Why is this check needed? The last directory would just try to parse an empty command and fail.
-        // If rawPath ends with the delimiter, it cannot possibly point to a command.
-        final String commandName = rawPath.substring(delimiterIndex + 1);
-        if (commandName.isEmpty()) {
-            throw new ParseException(ParseError.INVALID_COMMAND, "Path doesn't point to a command: %s", rawPath);
-        }
-
-        final Opt<CliCommand> command = lastDirectory.getCommand(commandName);
-        if (!command.isPresent()) {
-            throw new ParseException(
-                ParseError.INVALID_COMMAND,
-                "Directory '%s' doesn't contain command: '%s'", lastDirectory.getName(), commandName
-            );
-        }
-        return command.get();
-    }
-
-    private CliCommand getSystemOrWorkingDirectoryCommand(String name) throws ParseException {
-        // If 'name' is a system command, return it.
-        final Opt<CliCommand> systemCommand = systemCommands.getCommand(name);
-        if (systemCommand.isPresent()) {
-            return systemCommand.get();
-        }
-
-        // 'name' is not a system command, check if it is a child of the current workingDirectory.
-        final Opt<CliCommand> command = workingDirectory.getCommand(name);
-        if (!command.isPresent()) {
-            throw new ParseException(ParseError.INVALID_COMMAND, "'%s' is not a recognized command!", name);
-        }
-        return command.get();
-    }
-
-    @Override
-    public AutoComplete autoCompletePathToDirectory(String rawPath) throws ParseException {
-        // Parse the path until the last delimiter, after which we autoComplete the remaining arg.
-        final int delimiterIndex = rawPath.lastIndexOf(Constants.PATH_DELIMITER_STRING);
-        if (delimiterIndex == -1) {
-            // rawPath did not contain a delimiter, just autoComplete it from the workingDirectory.
-            final Trie<CliValueType> possibilities = workingDirectory.autoCompleteDirectory(rawPath);
-            return new AutoComplete(rawPath, possibilities);
-        }
-
-        // rawPath contains a delimiter.
-        // Parse the path until the pre-last entry as directories, and let the last directory autoComplete the last entry as a directory.
-        // So in "path/to/directory", parse "path/to" as path to directory "to", and let "to" autoComplete "directory".
-        final String pathToLastDirectory = rawPath.substring(0, delimiterIndex + 1);
-        final CliDirectory lastDirectory = parsePathToDirectory(pathToLastDirectory);
-
-        final String directoryPrefix = rawPath.substring(delimiterIndex + 1);
-        final Trie<CliValueType> possibilities = lastDirectory.autoCompleteDirectory(directoryPrefix);
-        return new AutoComplete(directoryPrefix, possibilities);
-    }
-
-    @Override
-    public AutoComplete autoCompletePath(String rawPath) throws ParseException {
-        // Parse the path until the last delimiter, after which we autoComplete the remaining arg.
-        final int delimiterIndex = rawPath.lastIndexOf(Constants.PATH_DELIMITER_STRING);
-        if (delimiterIndex == -1) {
-            // rawPath did not contain a delimiter.
-            // It could be either a system command or an entry from the current workingDirectory.
-            final Trie<CliValueType> systemCommandPossibilities = systemCommands.autoCompleteCommand(rawPath);
-            final Trie<CliValueType> entryPossibilities = workingDirectory.autoCompleteEntry(rawPath);
-            final Trie<CliValueType> possibilities = entryPossibilities.union(systemCommandPossibilities);
-            return new AutoComplete(rawPath, possibilities);
-        }
-
-        // rawPath contains a delimiter.
-        // Parse the path until the pre-last entry as directories, and let the last directory autoComplete the last entry.
-        // So in "path/to/entry", parse "path/to" as path to directory "to", and let "to" autoComplete "entry".
-        final String pathToLastDirectory = rawPath.substring(0, delimiterIndex + 1);
-        final CliDirectory lastDirectory = parsePathToDirectory(pathToLastDirectory);
-
-        final String entryPrefix = rawPath.substring(delimiterIndex + 1);
-        final Trie<CliValueType> possibilities = lastDirectory.autoCompleteEntry(entryPrefix);
-        return new AutoComplete(entryPrefix, possibilities);
-    }
-
+    // TODO: Javadoc
     public static CliCommandHierarchyImpl from(CommandHierarchy hierarchy) {
         // Create hierarchy with the parameter as the root.
         final CommandDirectoryDef rootDef = hierarchy.getRoot();

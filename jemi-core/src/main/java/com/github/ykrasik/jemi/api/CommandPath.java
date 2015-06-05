@@ -25,20 +25,15 @@ import java.lang.annotation.Target;
  * Optional annotation, applicable to both Classes and Methods.<br>
  * <br>
  * Indicates the path under which commands should be added.
- * The path should be delimited with {@link Constants#PATH_DELIMITER}.<br>
+ * The path should be delimited with the delimiter '/'.<br>
  * The initial delimiter is unnecessary, as paths always start from the root.<br>
  * <br>
  * When a class is annotated, the path is referred to as the 'top level path'.
  * All the class's methods annotated with {@link Command} will inherit its 'top level path'.
- * {@link #override()} will be ignored in this case, as a 'top level path' always starts a new path.<br>
  * <br>
- * Each method annotated with {@link Command} can also specify it's own path, with the following conditions:<br>
- * <ul>
- *     <li>If the annotation is set to override (via {@link #override()},
- *         this annotation's {@link #value()} will replace the class's 'top level path'.</li>
- *     <li>If the annotation is not set to override (via {@link #override()},
- *         this annotation's {@link #value()} will be appended to the class's 'top level path'.</li>
- * </ul>
+ * Each method annotated with {@link Command} can also specify it's own path, in which case it will be appended
+ * to the class's 'top level path'.
+ * <br>
  * Classes not annotated will be considered as though they are under root and methods not annotated
  * will inherit the class's 'top level path'.
  *
@@ -52,9 +47,4 @@ public @interface CommandPath {
      *         Any directory along the path that doesn't exist will be created.
      */
     String value() default "";
-
-    /**
-     * @return Whether to append this path to the current 'top level path', or override it with this path.
-     */
-    boolean override() default false;
 }

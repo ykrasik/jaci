@@ -17,6 +17,7 @@
 package com.github.ykrasik.jemi.cli.assist;
 
 import lombok.Data;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -49,6 +50,8 @@ public class Suggestions {
      */
     private final List<String> paramValueSuggestions;
 
+    // TODO: JavaDoc
+    @ToString
     public static class Builder {
         private final List<String> directorySuggestions = new ArrayList<>();
         private final List<String> commandSuggestions = new ArrayList<>();

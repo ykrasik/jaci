@@ -16,8 +16,8 @@
 
 package com.github.ykrasik.jemi.cli.param;
 
-import com.github.ykrasik.jemi.core.Identifier;
-import com.github.ykrasik.jemi.core.param.IntParamDef;
+import com.github.ykrasik.jemi.Identifier;
+import com.github.ykrasik.jemi.param.IntParamDef;
 import com.github.ykrasik.jemi.util.function.Supplier;
 import com.github.ykrasik.jemi.util.opt.Opt;
 import lombok.NonNull;

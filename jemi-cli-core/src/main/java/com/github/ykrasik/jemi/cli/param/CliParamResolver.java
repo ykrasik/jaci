@@ -16,7 +16,7 @@
 
 package com.github.ykrasik.jemi.cli.param;
 
-import com.github.ykrasik.jemi.core.param.*;
+import com.github.ykrasik.jemi.param.*;
 
 /**
  * @author Yevgeny Krasik

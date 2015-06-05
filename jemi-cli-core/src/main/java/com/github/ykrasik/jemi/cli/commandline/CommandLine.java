@@ -32,24 +32,24 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class CommandLine {
     private final String rawCommandLine;
-    private final List<String> splitCommandLine;
+    private final List<String> elements;
 
     public boolean isEmpty() {
-        return splitCommandLine.isEmpty();
+        return elements.isEmpty();
     }
 
     public String getPathToCommand() {
-        // The first argument of the command line must be the path to a command.
-        return splitCommandLine.get(0);
+        // The first element of the command line must be the path to a command.
+        return elements.get(0);
     }
 
     public boolean hasCommandArgs() {
-        return splitCommandLine.size() > 1;
+        return elements.size() > 1;
     }
 
     public List<String> getCommandArgs() {
         // The command args start from the 2nd arg.
-        return splitCommandLine.subList(1, splitCommandLine.size());
+        return elements.subList(1, elements.size());
     }
 
     @Override
@@ -70,8 +70,8 @@ public class CommandLine {
     }
 
     public static CommandLine forExecute(@NonNull String rawCommandLine) {
-        final List<String> splitCommandLine = splitCommandLine(rawCommandLine);
-        return new CommandLine(rawCommandLine, splitCommandLine);
+        final List<String> elements = splitCommandLine(rawCommandLine);
+        return new CommandLine(rawCommandLine, elements);
     }
 
     // A pattern that matches spaces that aren't surrounded by single or double quotes.

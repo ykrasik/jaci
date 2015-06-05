@@ -16,8 +16,14 @@
 
 package com.github.ykrasik.jemi.util.function;
 
+import com.github.ykrasik.jemi.util.reflection.ReflectionUtils;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
+
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Yevgeny Krasik
@@ -31,13 +37,65 @@ public final class Suppliers {
         return new ConstSupplier<>(value);
     }
 
+    @ToString
     @RequiredArgsConstructor
     private static class ConstSupplier<T> implements Supplier<T> {
-        @NonNull private final T value;
+        private final T value;
 
         @Override
         public T get() {
             return value;
+        }
+    }
+
+    // TODO: JavaDoc
+    public static <T> Supplier<T> reflectionSupplier(@NonNull Object instance,
+                                                     @NonNull String methodName,
+                                                     @NonNull Class<T> suppliedClass) {
+        final Method method = ReflectionUtils.getNoArgsMethod(instance.getClass(), methodName);
+        ReflectionUtils.assertReturnValue(method, suppliedClass);
+        return new ReflectionSupplier<>(instance, method);
+    }
+
+    /**
+     * A {@link Supplier} that invokes a (possibly private) no-args method through reflection.
+     *
+     * @author Yevgeny Krasik
+     */
+    @ToString
+    @RequiredArgsConstructor
+    private static class ReflectionSupplier<T> implements Supplier<T> {
+        private final Object instance;
+        private final Method method;
+
+        @Override
+        public T get() {
+            return ReflectionUtils.invokeNoArgs(instance, method);
+        }
+    }
+
+    // TODO: JavaDoc
+    public static <T> Supplier<List<T>> reflectionListSupplier(Object instance,
+                                                               String methodName,
+                                                               Class<T[]> suppliedClass) {
+        final Supplier<T[]> supplier = reflectionSupplier(instance, methodName, suppliedClass);
+        return new ReflectionListSupplier<>(supplier);
+    }
+
+    /**
+     * A {@link Supplier} that invokes a (possibly private) no-args method that returns an array of {@code T}
+     * through reflection, and wraps the returned array in a {@link List}.
+     *
+     * @author Yevgeny Krasik
+     */
+    @ToString
+    @RequiredArgsConstructor
+    private static class ReflectionListSupplier<T> implements Supplier<List<T>> {
+        private final Supplier<T[]> supplier;
+
+        @Override
+        public List<T> get() {
+            return Arrays.asList(supplier.get());
         }
     }
 }
