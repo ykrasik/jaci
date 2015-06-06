@@ -19,25 +19,46 @@ package com.github.ykrasik.jemi.cli.assist;
 import com.github.ykrasik.jemi.cli.param.CliParam;
 import com.github.ykrasik.jemi.util.opt.Opt;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
 import java.util.Map;
 
 /**
+ * Contains a possibly-partial state of parsing a command's parameters.
+ * Contains all parameters that were bound (and parsed), as well as the next parameter to be parsed.
+ *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
-@RequiredArgsConstructor
+@ToString
 public class BoundParams {
-    @NonNull private final Map<CliParam, Object> values;
-    @NonNull private final Opt<CliParam> nextParam;
+    /**
+     * Parsed parameter values.
+     */
+    private final Map<CliParam, Object> values;
 
-    // TODO: JavaDoc
+    /**
+     * Next parameter to be parsed.
+     */
+    private final Opt<CliParam> nextParam;
+
+    public BoundParams(@NonNull Map<CliParam, Object> values, @NonNull Opt<CliParam> nextParam) {
+        this.values = values;
+        this.nextParam = nextParam;
+    }
+
+    /**
+     * @param param Parameter to get the bound value for.
+     * @return A {@code present} value containing the parameter's parsed argument,
+     *         if the given parameter has been parsed.
+     */
     public Opt<Object> getBoundValue(CliParam param) {
         return Opt.ofNullable(values.get(param));
     }
 
-    // TODO: JavaDoc
+    /**
+     * @return A {@code present} value containing the next parameter to be parsed, if such a parameter exists.
+     *         Will be {@code absent} if all command parameters have been parsed.
+     */
     public Opt<CliParam> getNextParam() {
         return nextParam;
     }

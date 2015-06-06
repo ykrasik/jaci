@@ -18,10 +18,9 @@ package com.github.ykrasik.jemi.cli.assist;
 
 import com.github.ykrasik.jemi.util.function.Function;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 
 /**
- * For an auto complete operation, this is the type of the value being auto completed.
+ * The different value types that exist in a CLI.
  *
  * @author Yevgeny Krasik
  */
@@ -39,13 +38,24 @@ public enum CliValueType {
         this.suffix = suffix;
     }
 
+    /**
+     * @return The suffix that is expected to appear after each type.
+     */
     public char getSuffix() {
         return suffix;
     }
 
-    @RequiredArgsConstructor
+    /**
+     * A {@link Function} that returns a constant {@link CliValueType} for each input.
+     *
+     * @param <T> Source type of the function.
+     */
     public static class Mapper<T> implements Function<T, CliValueType> {
-        @NonNull private final CliValueType type;
+        private final CliValueType type;
+
+        public Mapper(@NonNull CliValueType type) {
+            this.type = type;
+        }
 
         @Override
         public CliValueType apply(T t) {

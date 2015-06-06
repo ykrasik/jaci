@@ -23,7 +23,6 @@ package com.github.ykrasik.jemi.cli.commandline;
  *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
 public interface CommandLineManager {
     /**
      * @return The current command line.

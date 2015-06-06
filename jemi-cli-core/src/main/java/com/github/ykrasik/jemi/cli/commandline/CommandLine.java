@@ -27,26 +27,47 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * Represents a command line.
+ *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class CommandLine {
+    /**
+     * Elements present in the command line. Each one was typically separated by a whitespace.
+     */
     private final List<String> elements;
 
+    /**
+     * @return Whether the command line is empty - has no elements.
+     */
     public boolean isEmpty() {
         return elements.isEmpty();
     }
 
+    /**
+     * The first element of a command line must be the path to a command.
+     *
+     * @return The first element of the command line - the path to a command.
+     */
     public String getPathToCommand() {
-        // The first element of the command line must be the path to a command.
         return elements.get(0);
     }
 
+    /**
+     * @return Whether this command line has any elements beyond the first, which is the path to a command.
+     */
     public boolean hasCommandArgs() {
         return elements.size() > 1;
     }
 
+    /**
+     * The command args start from the 2nd command line element (the first is the path to the command).
+     * Should only be called if {@link #hasCommandArgs()} returns {@code true}.
+     *
+     * @return The command args.
+     * @throws IndexOutOfBoundsException If the command line didn't have any args.
+     */
     public List<String> getCommandArgs() {
         // The command args start from the 2nd arg.
         return elements.subList(1, elements.size());
@@ -57,7 +78,15 @@ public class CommandLine {
         return StringUtils.join(elements, " ");
     }
 
-    // TODO: JavaDoc
+    /**
+     * Parse the command line for an assist operation.
+     * Differs from {@link #forExecute(String)} in that if the command line was empty or ended with a space, a single
+     * empty element will be added to it.
+     * Essentially, the command line will never return empty from this operation.
+     *
+     * @param rawCommandLine Command line to parse.
+     * @return Parsed command line for assistance.
+     */
     public static CommandLine forAssist(@NonNull String rawCommandLine) {
         final List<String> splitCommandLine = splitCommandLine(rawCommandLine);
 
@@ -70,15 +99,22 @@ public class CommandLine {
         return new CommandLine(splitCommandLine);
     }
 
-    // TODO: JavaDoc
+    /**
+     * Parse the command line for execution. If the given command line is empty, an empty command line will be returned.
+     *
+     * @param rawCommandLine Command line to parse.
+     * @return Parsed command line for execution.
+     */
     public static CommandLine forExecute(@NonNull String rawCommandLine) {
         final List<String> elements = splitCommandLine(rawCommandLine);
         return new CommandLine(elements);
     }
 
-    // A pattern that matches spaces that aren't surrounded by single or double quotes.
     // FIXME: This pattern doesn't support named parameter calling with strings with whitespace (param="long string")
     // FIXME: Maybe the fix should not be in the pattern. Either way, calling long strings by name doesn't work.
+    /**
+     * A pattern that matches spaces that aren't surrounded by single or double quotes.
+     */
     private static final Pattern PATTERN = Pattern.compile("[^\\s\"']+|\"([^\"]*)\"|'([^']*)'");
 
     private static List<String> splitCommandLine(String commandLine) {

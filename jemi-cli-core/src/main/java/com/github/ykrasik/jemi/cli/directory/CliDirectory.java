@@ -32,20 +32,20 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Collection;
+import java.util.Collections;
 
 /**
- * The CLI representation of a {@link CommandDirectoryDef}.<br>
+ * The CLI implementation of a directory.
  * Contains child {@link CliDirectory directories} and {@link CliCommand commands} and can retrieve them by name or offer
  * auto complete suggestions.
  *
  * @author Yevgeny Krasik
  */
-@RequiredArgsConstructor(access = AccessLevel.PACKAGE)  // Package-visible for testing
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class CliDirectory implements Identifiable {
-    @NonNull private final Identifier identifier;
-
-    @NonNull private final Trie<CliDirectory> childDirectories;
-    @NonNull private final Trie<CliCommand> childCommands;
+    private final Identifier identifier;
+    private final Trie<CliDirectory> childDirectories;
+    private final Trie<CliCommand> childCommands;
 
     /**
      * The parent {@link CliDirectory}.
@@ -59,7 +59,9 @@ public class CliDirectory implements Identifiable {
         this.parent = Opt.of(parent);
     }
 
-    // TODO: JavaDoc
+    /**
+     * @return The parent {@link CliDirectory}.
+     */
     public Opt<CliDirectory> getParent() {
         return parent;
     }
@@ -69,13 +71,15 @@ public class CliDirectory implements Identifiable {
         return identifier;
     }
 
-    // TODO: JavaDoc
+    /**
+     * @return Directory name.
+     */
     public String getName() {
         return identifier.getName();
     }
 
     /**
-     * @param name The child directory name to look up.
+     * @param name Child directory name to look up.
      * @return A child {@link CliDirectory} with the given name, if one exists.
      */
     // TODO: should this be case insensitive?
@@ -83,13 +87,15 @@ public class CliDirectory implements Identifiable {
         return childDirectories.get(name);
     }
 
-    // TODO: JavaDoc
+    /**
+     * @return All child directories of this directory.
+     */
     public Collection<CliDirectory> getChildDirectories() {
-        return childDirectories.values();
+        return Collections.unmodifiableCollection(childDirectories.values());
     }
 
     /**
-     * @param name The child command name to look up.
+     * @param name Child command name to look up.
      * @return A child {@link CliCommand} with the given name, if one exists.
      */
     // TODO: should this be case insensitive?
@@ -97,46 +103,53 @@ public class CliDirectory implements Identifiable {
         return childCommands.get(name);
     }
 
-    // TODO: JavaDoc
+    /**
+     * @return All child commands of this directory.
+     */
     public Collection<CliCommand> getChildCommands() {
         return childCommands.values();
     }
 
     /**
+     * Auto complete the given prefix with child directory possibilities.
+     *
      * @param prefix Prefix to offer auto complete for.
-     * @return A {@link Trie} containing auto complete suggestions for the a child {@link CliDirectory}
-     *         that starts with the given prefix. Case insensitive.
+     * @return Auto complete for child {@link CliDirectory}s that starts with the given prefix. Case insensitive.
      */
-    // TODO: Wrong JavaDoc
     public AutoComplete autoCompleteDirectory(String prefix) {
         final Trie<CliValueType> possibilities = childDirectories.subTrie(prefix).mapValues(DIRECTORY_VALUE_MAPPER);
         return new AutoComplete(prefix, possibilities);
     }
 
     /**
+     * Auto complete the given prefix with child command possibilities.
+     *
      * @param prefix Prefix to offer auto complete for.
-     * @return A {@link Trie} containing auto complete suggestions for the a child {@link CliCommand}
-     *         that starts with the given prefix. Case insensitive.
+     * @return Auto complete for the child {@link CliCommand}s that starts with the given prefix. Case insensitive.
      */
-    // TODO: Wrong JavaDoc
     public AutoComplete autoCompleteCommand(String prefix) {
         final Trie<CliValueType> possibilities = childCommands.subTrie(prefix).mapValues(COMMAND_VALUE_MAPPER);
         return new AutoComplete(prefix, possibilities);
     }
 
     /**
+     * Auto complete the given prefix with child directory or command possibilities.
+     *
      * @param prefix Prefix to offer auto complete for.
-     * @return A {@link Trie} containing auto complete suggestions for any child entry (either {@link CliDirectory} or
-     *         {@link CliCommand}) that starts with the given prefix. Case insensitive.
+     * @return Auto complete for child entries (either {@link CliDirectory} or {@link CliCommand})
+     *         that start with the given prefix. Case insensitive.
      */
-    // TODO: Wrong JavaDoc
     public AutoComplete autoCompleteEntry(String prefix) {
         final AutoComplete directoryAutoComplete = autoCompleteDirectory(prefix);
         final AutoComplete commandAutoComplete = autoCompleteCommand(prefix);
         return directoryAutoComplete.union(commandAutoComplete);
     }
 
-    // TODO: JavaDoc
+    /**
+     * Get the path from root as a string.
+     *
+     * @return A string representation of this directory.
+     */
     public String toPath() {
         if (!parent.isPresent()) {
             return "/";
@@ -149,13 +162,18 @@ public class CliDirectory implements Identifiable {
         return toPath();
     }
 
-    // TODO: JavaDoc
+    /**
+     * Construct a CLI directory from a {@link CommandDirectoryDef}.
+     *
+     * @param def CommandDirectoryDef to construct a CLI directory from.
+     * @return A CLI directory constructed from the CommandDirectoryDef.
+     */
     public static CliDirectory fromDef(@NonNull CommandDirectoryDef def) {
         final Trie<CliDirectory> childDirectories = createChildDirectories(def);
         final Trie<CliCommand> childCommands = createChildCommands(def);
         final CliDirectory directory = new CliDirectory(def.getIdentifier(), childDirectories, childCommands);
 
-        // Link directories child directories to parent.
+        // Link child directories to parent.
         for (CliDirectory childDirectory : childDirectories.values()) {
             childDirectory.setParent(directory);
         }
@@ -180,7 +198,13 @@ public class CliDirectory implements Identifiable {
         return builder.build();
     }
 
-    // TODO: JavaDoc
+    /**
+     * Construct a CLI directory from the given parameters.
+     *
+     * @param identifier Directory identifier.
+     * @param commands Child CLI commands.
+     * @return A CLI directory constructed from the given parameters.
+     */
     public static CliDirectory from(Identifier identifier, CliCommand... commands) {
         final Trie<CliCommand> childCommands = createChildCommands(commands);
         return new CliDirectory(identifier, Tries.<CliDirectory>emptyTrie(), childCommands);

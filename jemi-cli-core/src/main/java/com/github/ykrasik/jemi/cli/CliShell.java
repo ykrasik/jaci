@@ -22,7 +22,6 @@ import com.github.ykrasik.jemi.cli.assist.ParamAssistInfo;
 import com.github.ykrasik.jemi.cli.assist.Suggestions;
 import com.github.ykrasik.jemi.cli.command.CliCommand;
 import com.github.ykrasik.jemi.cli.command.CliCommandOutput;
-import com.github.ykrasik.jemi.cli.command.CliCommandOutputImpl;
 import com.github.ykrasik.jemi.cli.commandline.CommandLine;
 import com.github.ykrasik.jemi.cli.commandline.CommandLineHistory;
 import com.github.ykrasik.jemi.cli.exception.ParseException;
@@ -175,7 +174,7 @@ public class CliShell {
         final CommandArgs args = command.parse(rawArgs);
 
         // Execute the command.
-        final CliCommandOutput commandOutput = new CliCommandOutputImpl(printer);
+        final CliCommandOutput commandOutput = new CliCommandOutput(printer);
         command.execute(commandOutput, args);
 
         if (commandOutput.isPrintDefaultExecutionMessage()) {

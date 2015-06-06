@@ -23,7 +23,7 @@ import com.github.ykrasik.jemi.cli.assist.AutoComplete;
 
 /**
  * A container for a hierarchy of {@link CliDirectory} and {@link CliCommand}.<br>
- * Can parse and auto-complete paths to {@link CliDirectory directories} and {@link CliCommand commands}.
+ * Can parse and auto-complete paths to {@link CliDirectory}s and {@link CliCommand}s.
  * Paths are expected to be separated by the delimiter '/', like "path/to/element".
  * Trying to parse or auto-complete an invalid path will result in a {@link ParseException} being thrown.<br>
  * <br>
@@ -40,6 +40,7 @@ public interface CliCommandHierarchy {
 
     /**
      * Set the working directory.
+     *
      * @param workingDirectory Working directory to set.
      */
     void setWorkingDirectory(CliDirectory workingDirectory);

@@ -34,7 +34,7 @@ import com.github.ykrasik.jemi.cli.libgdx.commandline.LibGdxCommandLineManager;
 import com.github.ykrasik.jemi.cli.output.CliOutput;
 import com.github.ykrasik.jemi.cli.output.CliSerializer;
 import com.github.ykrasik.jemi.cli.output.DefaultCliSerializer;
-import com.github.ykrasik.jemi.hierarchy.CommandHierarchy;
+import com.github.ykrasik.jemi.hierarchy.CommandHierarchyDef;
 import com.github.ykrasik.jemi.cli.libgdx.output.LibGdxCliOutput;
 import com.github.ykrasik.jemi.cli.libgdx.output.LibGdxCliOutputBuffer;
 import lombok.NonNull;
@@ -230,7 +230,7 @@ public class LibGdxCli extends Table {
      * a class and add any annotated methods as commands to this builder.
      */
     public static class Builder {
-        private final CommandHierarchy.Builder hierarchyBuilder = new CommandHierarchy.Builder();
+        private final CommandHierarchyDef.Builder hierarchyBuilder = new CommandHierarchyDef.Builder();
 
         private Skin skin;
         private int maxBufferEntries = 100;

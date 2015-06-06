@@ -46,6 +46,6 @@ public abstract class AbstractNumericCliParam<T> extends AbstractCliParam<T> {
 
     @Override
     public AutoComplete autoComplete(@NonNull String prefix) throws ParseException {
-        throw new ParseException(ParseError.INVALID_PARAM_VALUE, "Cannot autoComplete %s parameter: '%s'!'", getParamTypeName(), getIdentifier().getName());
+        throw new ParseException(ParseError.INVALID_PARAM_VALUE, "Cannot autoComplete %s parameter: '%s'!", getParamTypeName(), getIdentifier().getName());
     }
 }

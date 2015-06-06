@@ -16,7 +16,6 @@
 
 package com.github.ykrasik.jemi.cli.assist;
 
-import lombok.Data;
 import lombok.ToString;
 
 import java.util.ArrayList;
@@ -24,33 +23,59 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Possible suggestions, grouped by their type.
+ * Suggestions for words, grouped by their type.
+ * Used in auto-complete operations.
+ * Built through the {@link Suggestions.Builder} builder.
  *
  * @author Yevgeny Krasik
  */
-@Data
 public class Suggestions {
-    /**
-     * Directory suggestions.
-     */
     private final List<String> directorySuggestions;
-
-    /**
-     * Command name suggestions.
-     */
     private final List<String> commandSuggestions;
-
-    /**
-     * Command parameter name suggestions.
-     */
     private final List<String> paramNameSuggestions;
-
-    /**
-     * Command parameter value suggestions.
-     */
     private final List<String> paramValueSuggestions;
 
-    // TODO: JavaDoc
+    private Suggestions(List<String> directorySuggestions,
+                        List<String> commandSuggestions,
+                        List<String> paramNameSuggestions,
+                        List<String> paramValueSuggestions) {
+        this.directorySuggestions = directorySuggestions;
+        this.commandSuggestions = commandSuggestions;
+        this.paramNameSuggestions = paramNameSuggestions;
+        this.paramValueSuggestions = paramValueSuggestions;
+    }
+
+    /**
+     * @return Suggestions for directory names.
+     */
+    public List<String> getDirectorySuggestions() {
+        return directorySuggestions;
+    }
+
+    /**
+     * @return Suggestions for command names.
+     */
+    public List<String> getCommandSuggestions() {
+        return commandSuggestions;
+    }
+
+    /**
+     * @return Suggestions for parameter names.
+     */
+    public List<String> getParamNameSuggestions() {
+        return paramNameSuggestions;
+    }
+
+    /**
+     * @return Suggestions for parameter values.
+     */
+    public List<String> getParamValueSuggestions() {
+        return paramValueSuggestions;
+    }
+
+    /**
+     * A builder for {@link Suggestions}.
+     */
     @ToString
     public static class Builder {
         private final List<String> directorySuggestions = new ArrayList<>();
@@ -58,14 +83,13 @@ public class Suggestions {
         private final List<String> paramNameSuggestions = new ArrayList<>();
         private final List<String> paramValueSuggestions = new ArrayList<>();
 
-        public Suggestions build() {
-            sort(directorySuggestions);
-            sort(commandSuggestions);
-            sort(paramNameSuggestions);
-            sort(paramValueSuggestions);
-            return new Suggestions(directorySuggestions, commandSuggestions, paramNameSuggestions, paramValueSuggestions);
-        }
-
+        /**
+         * Add a suggestion to this builder.
+         *
+         * @param type Suggestion type to add.
+         * @param suggestion Word to suggest.
+         * @return {@code this}, for chaining.
+         */
         public Builder addSuggestion(CliValueType type, String suggestion) {
             final List<String> suggestions = getSuggestionsByType(type);
             suggestions.add(suggestion);
@@ -80,6 +104,17 @@ public class Suggestions {
                 case COMMAND_PARAM_VALUE: return paramValueSuggestions;
                 default: throw new IllegalArgumentException("Invalid CliValueType: " + type);
             }
+        }
+
+        /**
+         * @return {@link Suggestions} built out of this builder's parameters.
+         */
+        public Suggestions build() {
+            sort(directorySuggestions);
+            sort(commandSuggestions);
+            sort(paramNameSuggestions);
+            sort(paramValueSuggestions);
+            return new Suggestions(directorySuggestions, commandSuggestions, paramNameSuggestions, paramValueSuggestions);
         }
 
         private void sort(List<String> suggestions) {

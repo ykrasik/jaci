@@ -16,6 +16,7 @@
 
 package com.github.ykrasik.jemi.cli.hierarchy;
 
+import com.github.ykrasik.jemi.Identifier;
 import com.github.ykrasik.jemi.api.CommandOutput;
 import com.github.ykrasik.jemi.cli.command.CliCommand;
 import com.github.ykrasik.jemi.cli.command.CliCommandOutput;
@@ -24,7 +25,6 @@ import com.github.ykrasik.jemi.cli.param.BooleanCliParam;
 import com.github.ykrasik.jemi.cli.param.CliParam;
 import com.github.ykrasik.jemi.cli.param.CommandCliParam;
 import com.github.ykrasik.jemi.cli.param.DirectoryCliParam;
-import com.github.ykrasik.jemi.Identifier;
 import com.github.ykrasik.jemi.command.CommandArgs;
 import com.github.ykrasik.jemi.command.CommandExecutor;
 import com.github.ykrasik.jemi.util.function.Supplier;
@@ -37,10 +37,14 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * Creates the system commands of a CLI.
+ * Most system commands require an already built {@link CliCommandHierarchy}, but system commands are also a part
+ * of the CliCommandHierarchy, creating a circular dependency. This is resolved in the CliCommandHierarchy itself
+ * by offering a 'promise' object which will eventually delegate to the real implementation.
+ *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
-@RequiredArgsConstructor(access = AccessLevel.PACKAGE)  // Package-visible for testing
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class CliSystemCommandFactory {
     private final CliCommandHierarchy hierarchy;
 
@@ -108,6 +112,15 @@ public class CliSystemCommandFactory {
         });
     }
 
+    /**
+     * Create a directory containing all system commands. It is convenient to store all system commands in a directory.
+     * Most system commands require an already built {@link CliCommandHierarchy}, but system commands are also a part
+     * of the CliCommandHierarchy, creating a circular dependency. This is resolved in the CliCommandHierarchy itself
+     * by offering a 'promise' object which will eventually delegate to the real implementation.
+     *
+     * @param hierarchy Hierarchy on which the system commands will operate.
+     * @return A {@link CliDirectory} containing all system commands.
+     */
     public static CliDirectory from(@NonNull CliCommandHierarchy hierarchy) {
         final Identifier identifier = new Identifier("system", "System commands");
         final CliSystemCommandFactory factory = new CliSystemCommandFactory(hierarchy);

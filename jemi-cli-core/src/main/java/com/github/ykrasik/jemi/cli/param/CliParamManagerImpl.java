@@ -62,8 +62,11 @@ public class CliParamManagerImpl implements CliParamManager {
     }
 
     @Override
+    // TODO: Consider changing this to the following: a params context object that is passed instead of a list.
+    // TODO: It will live through the whole process and collect information from each call.
+    // TODO: Essentially, an object much larger then CliParamParseContext, but possibly more convenient to use.
     public ParamAssistInfo assist(List<String> args) throws ParseException {
-        // Only the last arg is up for autoCompletion, the rest are expected to be valid args.
+        // Only the last arg is up for auto-completion, the rest are expected to be valid args.
         // Parse all params that have been bound.
         final List<String> argsToBeParsed = args.subList(0, args.size() - 1);
         final CliParamParseContext context = doParse(argsToBeParsed);

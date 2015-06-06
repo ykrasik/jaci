@@ -20,11 +20,20 @@ import lombok.Data;
 import lombok.NonNull;
 
 /**
+ * Assistance information for a command's parameters.
+ * Includes parameters that were already bound (and parsed) as well as auto-complete suggestions for the next parameter.
+ *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
 @Data
 public class ParamAssistInfo {
+    /**
+     * The parameters that have already been parsed, as well as the next parameter to parse, if one exists.
+     */
     @NonNull private final BoundParams boundParams;
+
+    /**
+     * Auto-complete suggestions for the next parameter to parse.
+     */
     @NonNull private final AutoComplete autoComplete;
 }

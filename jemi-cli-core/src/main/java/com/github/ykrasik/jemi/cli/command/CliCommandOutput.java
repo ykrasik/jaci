@@ -18,23 +18,92 @@ package com.github.ykrasik.jemi.cli.command;
 
 import com.github.ykrasik.jemi.api.CommandOutput;
 import com.github.ykrasik.jemi.cli.directory.CliDirectory;
+import com.github.ykrasik.jemi.cli.output.CliPrinter;
+import lombok.NonNull;
 
 /**
+ * A CLI implementation of a {@link CommandOutput}.
+ * Extends the API with some CLI-specific calls.
+ *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
-public interface CliCommandOutput extends CommandOutput {
+public class CliCommandOutput implements CommandOutput {
     /**
-     * A default 'command executed successfully' message will be printed after the command is executed,
-     * but only if no other interactions were detected with the output.
+     * Cli-specific actions are delegated to this printer.
+     */
+    private final CliPrinter printer;
+
+    private boolean printDefaultExecutionMessage = true;
+
+    public CliCommandOutput(@NonNull CliPrinter printer) {
+        this.printer = printer;
+    }
+
+    @Override
+    public void message(String text) {
+        printer.println(text);
+        suppressDefaultExecutionMessage();
+    }
+
+    @Override
+    public void message(String format, Object... args) {
+        message(String.format(format, args));
+    }
+
+    @Override
+    public void error(String text) {
+        printer.errorPrintln(text);
+        suppressDefaultExecutionMessage();
+    }
+
+    @Override
+    public void error(String format, Object... args) {
+        error(String.format(format, args));
+    }
+
+    /**
+     * If {@code true}, a default 'command executed successfully' message will be printed after the command is executed.
      *
      * @return Whether the default 'command executed successfully' message should be printed after this command.
      */
-    boolean isPrintDefaultExecutionMessage();
+    public boolean isPrintDefaultExecutionMessage() {
+        return printDefaultExecutionMessage;
+    }
 
-    void setWorkingDirectory(CliDirectory directory);
+    /**
+     * Set the working directory. Only called when the working directory changes.
+     *
+     * @param directory Directory to set as working directory.
+     */
+    public void setWorkingDirectory(CliDirectory directory) {
+        printer.setWorkingDirectory(directory);
+        suppressDefaultExecutionMessage();
+    }
 
-    void printDirectory(CliDirectory directory, boolean recursive);
+    /**
+     * Print the contents of the directory.
+     *
+     * @param directory Directory to print.
+     * @param recursive Whether to recurse into sub-directories.
+     */
+    public void printDirectory(CliDirectory directory, boolean recursive) {
+        printer.printDirectory(directory, recursive);
+        suppressDefaultExecutionMessage();
+    }
 
-    void printCommand(CliCommand command);
+    /**
+     * Print the description of a command (and its parameters).
+     *
+     * @param command Command to describe.
+     */
+    public void printCommand(CliCommand command) {
+        printer.printCommand(command);
+        suppressDefaultExecutionMessage();
+    }
+
+    private void suppressDefaultExecutionMessage() {
+        // Called any time there is any interaction with this output.
+        // The default message should only be printed if the command didn't print anything by itself.
+        printDefaultExecutionMessage = false;
+    }
 }

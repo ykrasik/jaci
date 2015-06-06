@@ -37,9 +37,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * A CLI implementation of a command.
+ *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class CliCommand implements Identifiable, CliParamManager, CommandExecutor {
     private final Identifier identifier;
@@ -51,12 +52,16 @@ public class CliCommand implements Identifiable, CliParamManager, CommandExecuto
         return identifier;
     }
 
-    // TODO: JavaDoc
+    /**
+     * @return Command name.
+     */
     public String getName() {
         return identifier.getName();
     }
 
-    // TODO: JavaDoc
+    /**
+     * @return Command description.
+     */
     public String getDescription() {
         return identifier.getDescription();
     }
@@ -66,7 +71,6 @@ public class CliCommand implements Identifiable, CliParamManager, CommandExecuto
         return paramManager.getParams();
     }
 
-    // TODO: JavaDoc
     @Override
     public CommandArgs parse(List<String> args) throws ParseException {
         return paramManager.parse(args);
@@ -87,6 +91,12 @@ public class CliCommand implements Identifiable, CliParamManager, CommandExecuto
         return identifier.toString();
     }
 
+    /**
+     * Construct a CLI command from a {@link CommandDef}.
+     *
+     * @param def CommandDef to construct a CLI command from.
+     * @return A CLI command constructed from the CommandDef.
+     */
     public static CliCommand fromDef(@NonNull CommandDef def) {
         final Identifier identifier = def.getIdentifier();
         final List<CliParam> params = createParams(def.getParamDefs());
@@ -94,8 +104,16 @@ public class CliCommand implements Identifiable, CliParamManager, CommandExecuto
         return from(identifier, params, executor);
     }
 
+    /**
+     * Construct a CLI command from the given parameters.
+     *
+     * @param identifier Command identifier.
+     * @param params CLI parameters to use.
+     * @param executor Command executor.
+     * @return A CLI command constructed from the given parameters.
+     */
     public static CliCommand from(@NonNull Identifier identifier, @NonNull List<CliParam> params, @NonNull CommandExecutor executor) {
-        final CliParamManagerImpl paramManager = new CliParamManagerImpl(params);
+        final CliParamManager paramManager = new CliParamManagerImpl(params);
         return new CliCommand(identifier, paramManager, executor);
     }
 

@@ -23,24 +23,25 @@ import com.github.ykrasik.jemi.cli.directory.CliDirectory;
 import com.github.ykrasik.jemi.cli.exception.ParseError;
 import com.github.ykrasik.jemi.cli.exception.ParseException;
 import com.github.ykrasik.jemi.directory.CommandDirectoryDef;
-import com.github.ykrasik.jemi.hierarchy.CommandHierarchy;
+import com.github.ykrasik.jemi.hierarchy.CommandHierarchyDef;
 import com.github.ykrasik.jemi.path.ParsedPath;
 import com.github.ykrasik.jemi.util.opt.Opt;
-import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.experimental.Delegate;
 
 /**
- * An immutable implementation of a {@link CliCommandHierarchy}.<br>
+ * An implementation of a {@link CliCommandHierarchy}.<br>
  * Supports 2 types of commands - local commands which must belong to some {@link CliDirectory}
  * and system commands, which don't belong to any {@link CliDirectory} and are accessible from anywhere, no matter what
  * the current working directory is.
  *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
 public class CliCommandHierarchyImpl implements CliCommandHierarchy {
+    /***
+     * Root directory.
+     */
     private final CliDirectory root;
 
     /**
@@ -50,17 +51,25 @@ public class CliCommandHierarchyImpl implements CliCommandHierarchy {
      */
     private final CliDirectory systemCommands;
 
-    // TODO: Don't use lombok generated methods.
-    @Getter @Setter
-    @NonNull private CliDirectory workingDirectory;
-
     /**
-     * Package visible for testing
+     * Current working directory.
      */
-    CliCommandHierarchyImpl(@NonNull CliDirectory root, @NonNull CliDirectory systemCommands) {
+    private CliDirectory workingDirectory;
+
+    private CliCommandHierarchyImpl(@NonNull CliDirectory root, @NonNull CliDirectory systemCommands) {
         this.root = root;
         this.systemCommands = systemCommands;
         this.workingDirectory = root;
+    }
+
+    @Override
+    public CliDirectory getWorkingDirectory() {
+        return workingDirectory;
+    }
+
+    @Override
+    public void setWorkingDirectory(@NonNull CliDirectory workingDirectory) {
+        this.workingDirectory = workingDirectory;
     }
 
     @Override
@@ -193,10 +202,15 @@ public class CliCommandHierarchyImpl implements CliCommandHierarchy {
         return childDirectory.get();
     }
 
-    // TODO: Javadoc
-    public static CliCommandHierarchyImpl from(CommandHierarchy hierarchy) {
+    /**
+     * Construct a CLI hierarchy from a {@link CommandHierarchyDef}.
+     *
+     * @param def CommandHierarchyDef to construct a CLI hierarchy from.
+     * @return A CLI hierarchy constructed from the CommandHierarchyDef.
+     */
+    public static CliCommandHierarchyImpl from(@NonNull CommandHierarchyDef def) {
         // Create hierarchy with the parameter as the root.
-        final CommandDirectoryDef rootDef = hierarchy.getRoot();
+        final CommandDirectoryDef rootDef = def.getRoot();
         final CliDirectory root = CliDirectory.fromDef(rootDef);
 
         // Create system commands 'virtual' directory.
@@ -221,6 +235,7 @@ public class CliCommandHierarchyImpl implements CliCommandHierarchy {
      * So this class was born as a compromise.
      */
     private static class CliCommandHierarchyPromise implements CliCommandHierarchy {
+        // Though I usually try to avoid these Lombok annotations, here they just save so much code...
         @Delegate
         @Setter
         private CliCommandHierarchy hierarchy;

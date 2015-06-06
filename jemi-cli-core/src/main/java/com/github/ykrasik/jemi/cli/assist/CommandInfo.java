@@ -24,6 +24,7 @@ import lombok.NonNull;
  * @author Yevgeny Krasik
  */
 // TODO: JavaDoc
+// FIXME: This class may be redundant... Either actually attach it to ParseExceptions or remove it.
 @Data
 public class CommandInfo {
     @NonNull private final CliCommand command;

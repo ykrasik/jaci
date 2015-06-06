@@ -31,14 +31,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 /**
- * A hierarchy of {@link CommandDirectoryDef}s and {@link CommandDef}s.
+ * A definition for a hierarchy of {@link CommandDirectoryDef}s and {@link CommandDef}s.
  * Essentially, this is a file system starting from a single 'root' directory.
- * Built through the {@link CommandHierarchy.Builder} builder.
+ * Built through the {@link CommandHierarchyDef.Builder} builder.
  *
  * @author Yevgeny Krasik
  */
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class CommandHierarchy {
+public class CommandHierarchyDef {
     private final CommandDirectoryDef root;
 
     /**
@@ -49,7 +49,7 @@ public class CommandHierarchy {
     }
 
     /**
-     * A builder for a {@link CommandHierarchy}.
+     * A builder for a {@link CommandHierarchyDef}.
      */
     @ToString
     public static class Builder {
@@ -95,11 +95,11 @@ public class CommandHierarchy {
         }
 
         /**
-         * @return A {@link CommandHierarchy} built out of this builder's parameters.
+         * @return A {@link CommandHierarchyDef} built out of this builder's parameters.
          */
-        public CommandHierarchy build() {
+        public CommandHierarchyDef build() {
             final CommandDirectoryDef rootDef = root.build();
-            return new CommandHierarchy(rootDef);
+            return new CommandHierarchyDef(rootDef);
         }
     }
 }
