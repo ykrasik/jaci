@@ -37,7 +37,5 @@ public interface CliOutput {
 
     void errorPrintln(String text);
 
-    void setCommandLine(String commandLine);
-
     void setWorkingDirectory(String workingDirectory);
 }

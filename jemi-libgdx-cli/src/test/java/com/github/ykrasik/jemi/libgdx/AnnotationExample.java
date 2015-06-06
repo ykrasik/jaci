@@ -30,7 +30,7 @@ public class AnnotationExample {
                             @StringParam(value = "str", optional = true, defaultValue = "lala") String str,
                             @BoolParam("bool") boolean bool,
                             int integer) {
-        output.message("Oh yeah, str=%s, bool=%s, integer=%d", str, bool, integer);
+        output.message("str=%s, bool=%s, integer=%d", str, bool, integer);
     }
 
     @ToggleCommand(description = "toggles this and that")
@@ -52,14 +52,14 @@ public class AnnotationExample {
 
     @Command(description = "some global command")
     public void globalCommandSomething(CommandOutput output, String str) {
-        output.message("yes! str=%s", str);
+        output.message("str=%s", str);
     }
 
     @Command(description = "test command")
     public void nestCommand(CommandOutput output,
                             @StringParam(value = "nested", accepts = {"test1", "value2", "param3", "long string"}) String str,
                             @BoolParam("booleany") boolean booleany) {
-        output.message("yay: string = %s, booleany = %s", str, booleany);
+        output.message("string = %s, booleany = %s", str, booleany);
     }
 
     @Command

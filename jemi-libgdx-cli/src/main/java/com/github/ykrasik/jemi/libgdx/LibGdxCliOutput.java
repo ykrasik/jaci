@@ -18,24 +18,22 @@ package com.github.ykrasik.jemi.libgdx;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.github.ykrasik.jemi.cli.output.CliOutput;
 import lombok.NonNull;
 
 /**
+ * A LibGdx implementation of a {@link CliOutput}.
+ * Redirects {@link #println(String)} and {@link #errorPrintln(String)} to a {@link LibGdxCliOutputBuffer},
+ * and {@link #setWorkingDirectory(String)} to a {@link Label}.
+ *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
 public class LibGdxCliOutput implements CliOutput {
     private final LibGdxCliOutputBuffer buffer;
-    private final TextField commandLine;
     private final Label workingDirectory;
 
-    public LibGdxCliOutput(@NonNull LibGdxCliOutputBuffer buffer,
-                           @NonNull TextField commandLine,
-                           @NonNull Label workingDirectory) {
+    public LibGdxCliOutput(@NonNull LibGdxCliOutputBuffer buffer, @NonNull Label workingDirectory) {
         this.buffer = buffer;
-        this.commandLine = commandLine;
         this.workingDirectory = workingDirectory;
     }
 
@@ -57,11 +55,6 @@ public class LibGdxCliOutput implements CliOutput {
     @Override
     public void errorPrintln(String text) {
         buffer.println(text, Color.PINK);
-    }
-
-    @Override
-    public void setCommandLine(String commandLine) {
-        this.commandLine.setText(commandLine);
     }
 
     @Override

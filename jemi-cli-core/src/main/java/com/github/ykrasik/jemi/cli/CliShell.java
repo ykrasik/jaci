@@ -83,12 +83,11 @@ public class CliShell {
      * @param commandLine Command line to provide assistance for.
      * @return {@code true} if the command line was assisted successfully.
      */
-    // FIXME: JavaDoc - everything is a side effect.
-    public boolean assist(String commandLine) {
+    // FIXME: JavaDoc is wrong.
+    public Opt<String> assist(String commandLine) {
         printer.begin();
         try {
-            doAssist(commandLine);
-            return true;
+            return doAssist(commandLine);
         } catch (ParseException e) {
             handleParseException(e);
         } catch (Exception e) {
@@ -96,10 +95,10 @@ public class CliShell {
         } finally {
             printer.end();
         }
-        return false;
+        return Opt.absent();
     }
 
-    private void doAssist(String rawCommandLine) throws ParseException {
+    private Opt<String> doAssist(String rawCommandLine) throws ParseException {
         // This method does a few things:
         // 1. Display command info, if there is any.
         // 2. Determine the suggestions for auto complete.
@@ -132,10 +131,7 @@ public class CliShell {
         }
 
         // TODO: Print an error if no suggestions are available?
-        final Opt<String> autoCompletedSuffix = autoComplete.getAutoCompleteSuffix();
-        if (autoCompletedSuffix.isPresent()) {
-            printer.setCommandLine(rawCommandLine + autoCompletedSuffix.get());
-        }
+        return autoComplete.getAutoCompleteSuffix();
     }
 
     /**
@@ -161,7 +157,6 @@ public class CliShell {
 
     private void doExecute(String rawCommandLine) throws Exception {
         printer.printCommandLine(rawCommandLine);
-        printer.setCommandLine("");
 
         final CommandLine commandLine = CommandLine.forExecute(rawCommandLine);
         if (commandLine.isEmpty()) {
@@ -190,28 +185,17 @@ public class CliShell {
     }
 
     /**
-     * Set the command line to the previous one from history.
-     *
-     * @return @{code true} if there was a previous command line in history.
+     * @return Previous command line from history.
      */
-    public boolean setPrevCommandLineFromHistory() {
-        return setCommandLineIfPresent(history.getPrevCommandLine());
+    public Opt<String> getPrevCommandLineFromHistory() {
+        return history.getPrevCommandLine();
     }
 
     /**
-     * Set the command line to the next one from history.
-     *
-     * @return true if there was a next command line in history.
+     * @return Next command line in history.
      */
-    public boolean setNextCommandLineFromHistory() {
-        return setCommandLineIfPresent(history.getNextCommandLine());
-    }
-
-    private boolean setCommandLineIfPresent(Opt<String> commandLine) {
-        if (commandLine.isPresent()) {
-            printer.setCommandLine(commandLine.get());
-        }
-        return commandLine.isPresent();
+    public Opt<String> getNextCommandLineFromHistory() {
+        return history.getNextCommandLine();
     }
 
     private void handleParseException(ParseException e) {

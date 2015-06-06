@@ -61,11 +61,6 @@ public class CliPrinter {
     }
 
     // TODO: JavaDoc
-    public void setCommandLine(String commandLine) {
-        output.setCommandLine(commandLine);
-    }
-
-    // TODO: JavaDoc
     public void setWorkingDirectory(CliDirectory directory) {
         final String path = serializer.serializePathToDirectory(directory);
         output.setWorkingDirectory(path);

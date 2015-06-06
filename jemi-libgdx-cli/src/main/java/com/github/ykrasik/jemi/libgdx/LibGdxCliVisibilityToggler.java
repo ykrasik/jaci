@@ -20,28 +20,29 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
-
-import java.util.Objects;
+import lombok.NonNull;
 
 /**
  * An {@link InputListener} that should be registered with a {@link com.badlogic.gdx.scenes.scene2d.Stage} as a listener
  * {@link com.badlogic.gdx.scenes.scene2d.Stage#addListener(com.badlogic.gdx.scenes.scene2d.EventListener)}.
- * Will toggle the console on and off according to {@link InputEvent}s.
+ * Will toggle the CLI visibility on and off according to {@link InputEvent}s.
+ * By default, toggles on the default combination of Ctrl+` (aka tilda, back-tick, grave).
+ * If a different toggle combination is desired, subclass this class and override {@link #shouldToggle(int)}.
  *
  * @author Yevgeny Krasik
  */
 // FIXME: Separate this into VisibilityToggler and StageToggler (wraps an InputHandler and toggles between different stages).
-public class LibGdxCliToggler extends InputListener {
-    private final LibGdxCli console;
+public class LibGdxCliVisibilityToggler extends InputListener {
+    private final LibGdxCli cli;
 
-    public LibGdxCliToggler(LibGdxCli console) {
-        this.console = Objects.requireNonNull(console);
+    public LibGdxCliVisibilityToggler(@NonNull LibGdxCli cli) {
+        this.cli = cli;
     }
 
     @Override
     public boolean keyDown(InputEvent event, int keycode) {
         if (shouldToggle(keycode)) {
-            toggle();
+            cli.toggleVisibility();
             event.cancel();
             return true;
         } else {
@@ -49,19 +50,15 @@ public class LibGdxCliToggler extends InputListener {
         }
     }
 
-    private void toggle() {
-        console.setVisible(!console.isVisible());
-    }
-
     /**
      * The default toggle combination is Ctrl+` (back tick, usually above tab).
      * Can be overridden by subclasses that want to toggle on a different combination.<br>
-     * If overriding, it is recommended to not use any text keys as the toggles but combine them with another key.
-     * For example, don't use `, use Ctrl+` instead, because ` is a text character  that will be printed onto the
-     * command line when it regains focus, but Ctrl+` isn't.
+     * If overriding, it is recommended not to use any text keys as the toggles but combine them a meta-key.
+     * For example, don't use `, use Ctrl+` instead, because ` is a text character that will be printed onto the
+     * command line when it regains focus, but Ctrl+` won't.
      *
      * @param keycode keycode that was pressed.
-     * @return True if the console should be toggled on this event.
+     * @return {@code true} if the console should be toggled on this event.
      */
     protected boolean shouldToggle(int keycode) {
         return keycode == Keys.GRAVE && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT);

@@ -16,51 +16,43 @@
 
 package com.github.ykrasik.jemi.libgdx;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
-import com.github.ykrasik.jemi.cli.Cli;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
+import com.github.ykrasik.jemi.cli.commandline.CommandLineManager;
 import lombok.NonNull;
 
 /**
- * Links LibGdx input events to {@link Cli} events.
+ * A LibGdx implementation of a {@link CommandLineManager}.
+ * Wraps a {@link TextField} which it uses as a command-line.
  *
  * @author Yevgeny Krasik
  */
-public class LibGdxCliInputListener extends InputListener {
-    private final Cli cli;
+public class LibGdxCommandLineManager implements CommandLineManager {
+    private final TextField commandLine;
 
-    public LibGdxCliInputListener(@NonNull Cli cli) {
-        this.cli = cli;
+    /**
+     * @param commandLine TextField to use as a command-line.
+     */
+    public LibGdxCommandLineManager(@NonNull TextField commandLine) {
+        this.commandLine = commandLine;
     }
 
     @Override
-    public boolean keyDown(InputEvent event, int keycode) {
-        switch (keycode) {
-            case Keys.ENTER:
-                cli.execute();
-                return true;
+    public String getCommandLine() {
+        return commandLine.getText();
+    }
 
-            case Keys.TAB:
-                cli.assist();
-                return true;
+    @Override
+    public void setCommandLine(String commandLine) {
+        this.commandLine.setText(commandLine);
+    }
 
-            case Keys.DPAD_UP:
-                cli.setPrevCommandLineFromHistory();
-                return true;
+    @Override
+    public int getCaret() {
+        return commandLine.getCursorPosition();
+    }
 
-            case Keys.DPAD_DOWN:
-                cli.setNextCommandLineFromHistory();
-                return true;
-
-            case Keys.Z:
-                if (Gdx.input.isKeyPressed(Keys.CONTROL_LEFT)) {
-                    cli.clearCommandLine();
-                    return true;
-                }
-        }
-
-        return false;
+    @Override
+    public void setCaret(int position) {
+        this.commandLine.setCursorPosition(position);
     }
 }

@@ -109,7 +109,7 @@ public class CliCommandHierarchyImpl implements CliCommandHierarchy {
         // 'name' is not a system command, check if it is a child of the current workingDirectory.
         final Opt<CliCommand> command = workingDirectory.getCommand(name);
         if (command.isPresent()) {
-            command.get();
+            return command.get();
         }
 
         throw new ParseException(ParseError.INVALID_COMMAND, "'%s' is not a recognized command!", name);

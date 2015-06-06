@@ -18,6 +18,7 @@ package com.github.ykrasik.jemi.libgdx;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -27,12 +28,12 @@ import java.util.ArrayDeque;
 import java.util.Queue;
 
 /**
- * A {@link Terminal} implemented as a {@link Table} of {@link Label}.<br>
- * Keeps a configurable maximum number of lines.
+ * A LibGdx implementation of a 'terminal screen'.
+ * Implemented as a {@link Table} of {@link Label}, each Label representing a single line.
+ * Keeps a maximum amount of lines.
  *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
 public class LibGdxCliOutputBuffer extends Table {
     private final Skin skin;
     private final int maxBufferEntries;
@@ -41,7 +42,11 @@ public class LibGdxCliOutputBuffer extends Table {
     private final ScrollPane scrollPane;
     private final Queue<Label> bufferEntries;
 
-    // TODO: JavaDoc
+    /**
+     * @param skin Skin to use for the lines.
+     *             Must contain a {@link LabelStyle} called 'outputEntry' that will be used to style the lines.
+     * @param maxBufferEntries Maximum amount of lines to store.
+     */
     public LibGdxCliOutputBuffer(@NonNull Skin skin, int maxBufferEntries) {
         this.skin = skin;
         this.maxBufferEntries = maxBufferEntries;
@@ -66,6 +71,13 @@ public class LibGdxCliOutputBuffer extends Table {
         add(scrollPane);
     }
 
+    /**
+     * Add a single line to this buffer.
+     * The line may contain a '\n' character, and it will be honored, but this is discouraged.
+     *
+     * @param text Line text.
+     * @param color Line color.
+     */
     public void println(String text, Color color) {
         final Label label = new Label(text, skin, "outputEntry");
         label.setColor(color);
@@ -87,6 +99,7 @@ public class LibGdxCliOutputBuffer extends Table {
     }
 
     private void updateScroll() {
+        // Set the scroll to the bottom of the pane.
         scrollPane.layout();
         scrollPane.setScrollPercentY(1);
         scrollPane.updateVisualScroll();

@@ -14,17 +14,38 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jemi.libgdx;
-
-import com.github.ykrasik.jemi.cli.output.DefaultCliSerializer;
+package com.github.ykrasik.jemi.cli.commandline;
 
 /**
+ * A component that can communicate (read/write) with the command-line.
+ * It is assumed that the command-line does not change itself in any matter, only through this component.
+ * Command line is expected to keep the current command-line text and caret position as state.
+ *
  * @author Yevgeny Krasik
  */
 // TODO: JavaDoc
-public class LibGdxCliSerializer extends DefaultCliSerializer {
-    public LibGdxCliSerializer() {
-        // LibGdx seems to ignore \t or an all white-space tab, so we prepend a bogus char before...
-        super(((char) 0) + "    ");
-    }
+public interface CommandLineManager {
+    /**
+     * @return The current command line.
+     */
+    String getCommandLine();
+
+    /**
+     * Set the command line.
+     *
+     * @param commandLine Command line to set.
+     */
+    void setCommandLine(String commandLine);
+
+    /**
+     * @return The current caret position.
+     */
+    int getCaret();
+
+    /**
+     * Set the caret to the specified position.
+     *
+     * @param position Position to set the caret to.
+     */
+    void setCaret(int position);
 }

@@ -17,10 +17,17 @@
 package com.github.ykrasik.jemi.libgdx;
 
 /**
- * Invoked by {@link LibGdxCli} whenever it's visibility status changes.
+ * A listener that is invoked whenever an actor's visibility state changes.
  *
  * @author Yevgeny Krasik
  */
 public interface VisibleListener {
+    /**
+     * Invoked when the actor to which this listener is attached changed it's visiblity state.
+     * It was either visible and became invisible, or the other way.
+     *
+     * @param wasVisible Whether the actor was previously visible.
+     * @param isVisible Whether the actor is currently visible.
+     */
     void onVisibleChange(boolean wasVisible, boolean isVisible);
 }
