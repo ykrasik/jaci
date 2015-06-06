@@ -14,7 +14,7 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jemi.libgdx;
+package com.github.ykrasik.jemi.cli.libgdx;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -30,10 +30,13 @@ import com.github.ykrasik.jemi.cli.CliShell;
 import com.github.ykrasik.jemi.cli.commandline.CommandLineManager;
 import com.github.ykrasik.jemi.cli.hierarchy.CliCommandHierarchy;
 import com.github.ykrasik.jemi.cli.hierarchy.CliCommandHierarchyImpl;
+import com.github.ykrasik.jemi.cli.libgdx.commandline.LibGdxCommandLineManager;
 import com.github.ykrasik.jemi.cli.output.CliOutput;
 import com.github.ykrasik.jemi.cli.output.CliSerializer;
 import com.github.ykrasik.jemi.cli.output.DefaultCliSerializer;
 import com.github.ykrasik.jemi.hierarchy.CommandHierarchy;
+import com.github.ykrasik.jemi.cli.libgdx.output.LibGdxCliOutput;
+import com.github.ykrasik.jemi.cli.libgdx.output.LibGdxCliOutputBuffer;
 import lombok.NonNull;
 
 /**
@@ -153,10 +156,7 @@ public class LibGdxCli extends Table {
             @Override
             public void onVisibleChange(boolean wasVisible, boolean isVisible) {
                 if (!wasVisible && isVisible) {
-                    final Stage stage = getStage();
-                    if (stage != null) {
-                        stage.setKeyboardFocus(commandLine);
-                    }
+                    setKeyboardFocus(commandLine);
                 }
             }
         });
@@ -166,6 +166,14 @@ public class LibGdxCli extends Table {
         this.row();
         this.add(bottomRow).fill();
         this.top().left();
+        this.setFillParent(true);
+    }
+
+    private void setKeyboardFocus(TextField commandLine) {
+        final Stage stage = getStage();
+        if (stage != null) {
+            stage.setKeyboardFocus(commandLine);
+        }
     }
 
     /**
@@ -206,13 +214,12 @@ public class LibGdxCli extends Table {
     @Override
     protected void setStage(Stage stage) {
         super.setStage(stage);
-        if (stage != null) {
-            // Call the listeners when we're first added to a stage.
-            final boolean isVisible = isVisible();
-            final boolean wasVisible = !isVisible;
-            for (VisibleListener listener : visibleListeners) {
-                listener.onVisibleChange(wasVisible, isVisible);
-            }
+
+        // Call the listeners when we're first added to a stage.
+        final boolean isVisible = isVisible();
+        final boolean wasVisible = !isVisible;
+        for (VisibleListener listener : visibleListeners) {
+            listener.onVisibleChange(wasVisible, isVisible);
         }
     }
 
@@ -327,7 +334,7 @@ public class LibGdxCli extends Table {
             }
 
             // Default skin.
-            return new Skin(Gdx.files.classpath("com/github/ykrasik/jemi/libgdx/default_cli.cfg"));
+            return new Skin(Gdx.files.classpath("com/github/ykrasik/jemi/cli/libgdx/default_cli.cfg"));
         }
     }
 }

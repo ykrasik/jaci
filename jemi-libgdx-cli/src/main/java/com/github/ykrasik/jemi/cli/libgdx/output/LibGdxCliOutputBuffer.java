@@ -14,7 +14,7 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jemi.libgdx;
+package com.github.ykrasik.jemi.cli.libgdx.output;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;

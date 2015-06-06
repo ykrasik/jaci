@@ -14,51 +14,53 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jemi.libgdx;
+package com.github.ykrasik.jemi.cli.libgdx;
 
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.github.ykrasik.jemi.cli.output.CliOutput;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.github.ykrasik.jemi.cli.Cli;
 import lombok.NonNull;
 
 /**
- * A LibGdx implementation of a {@link CliOutput}.
- * Redirects {@link #println(String)} and {@link #errorPrintln(String)} to a {@link LibGdxCliOutputBuffer},
- * and {@link #setWorkingDirectory(String)} to a {@link Label}.
+ * Links LibGdx input events to {@link Cli} events.
  *
  * @author Yevgeny Krasik
  */
-public class LibGdxCliOutput implements CliOutput {
-    private final LibGdxCliOutputBuffer buffer;
-    private final Label workingDirectory;
+public class LibGdxCliInputListener extends InputListener {
+    private final Cli cli;
 
-    public LibGdxCliOutput(@NonNull LibGdxCliOutputBuffer buffer, @NonNull Label workingDirectory) {
-        this.buffer = buffer;
-        this.workingDirectory = workingDirectory;
+    public LibGdxCliInputListener(@NonNull Cli cli) {
+        this.cli = cli;
     }
 
     @Override
-    public void begin() {
-        // Nothing to do here.
-    }
+    public boolean keyDown(InputEvent event, int keycode) {
+        switch (keycode) {
+            case Keys.ENTER:
+                cli.execute();
+                return true;
 
-    @Override
-    public void end() {
-        // Nothing to do here.
-    }
+            case Keys.TAB:
+                cli.assist();
+                return true;
 
-    @Override
-    public void println(String text) {
-        buffer.println(text, Color.WHITE);
-    }
+            case Keys.DPAD_UP:
+                cli.setPrevCommandLineFromHistory();
+                return true;
 
-    @Override
-    public void errorPrintln(String text) {
-        buffer.println(text, Color.PINK);
-    }
+            case Keys.DPAD_DOWN:
+                cli.setNextCommandLineFromHistory();
+                return true;
 
-    @Override
-    public void setWorkingDirectory(String workingDirectory) {
-        this.workingDirectory.setText(workingDirectory);
+            case Keys.Z:
+                if (Gdx.input.isKeyPressed(Keys.CONTROL_LEFT)) {
+                    cli.clearCommandLine();
+                    return true;
+                }
+        }
+
+        return false;
     }
 }

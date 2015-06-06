@@ -14,45 +14,51 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jemi.libgdx;
+package com.github.ykrasik.jemi.cli.libgdx.output;
 
-import com.badlogic.gdx.scenes.scene2d.ui.TextField;
-import com.github.ykrasik.jemi.cli.commandline.CommandLineManager;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.github.ykrasik.jemi.cli.output.CliOutput;
 import lombok.NonNull;
 
 /**
- * A LibGdx implementation of a {@link CommandLineManager}.
- * Wraps a {@link TextField} which it uses as a command-line.
+ * A LibGdx implementation of a {@link CliOutput}.
+ * Redirects {@link #println(String)} and {@link #errorPrintln(String)} to a {@link LibGdxCliOutputBuffer},
+ * and {@link #setWorkingDirectory(String)} to a {@link Label}.
  *
  * @author Yevgeny Krasik
  */
-public class LibGdxCommandLineManager implements CommandLineManager {
-    private final TextField commandLine;
+public class LibGdxCliOutput implements CliOutput {
+    private final LibGdxCliOutputBuffer buffer;
+    private final Label workingDirectory;
 
-    /**
-     * @param commandLine TextField to use as a command-line.
-     */
-    public LibGdxCommandLineManager(@NonNull TextField commandLine) {
-        this.commandLine = commandLine;
+    public LibGdxCliOutput(@NonNull LibGdxCliOutputBuffer buffer, @NonNull Label workingDirectory) {
+        this.buffer = buffer;
+        this.workingDirectory = workingDirectory;
     }
 
     @Override
-    public String getCommandLine() {
-        return commandLine.getText();
+    public void begin() {
+        // Nothing to do here.
     }
 
     @Override
-    public void setCommandLine(String commandLine) {
-        this.commandLine.setText(commandLine);
+    public void end() {
+        // Nothing to do here.
     }
 
     @Override
-    public int getCaret() {
-        return commandLine.getCursorPosition();
+    public void println(String text) {
+        buffer.println(text, Color.WHITE);
     }
 
     @Override
-    public void setCaret(int position) {
-        this.commandLine.setCursorPosition(position);
+    public void errorPrintln(String text) {
+        buffer.println(text, Color.PINK);
+    }
+
+    @Override
+    public void setWorkingDirectory(String workingDirectory) {
+        this.workingDirectory.setText(workingDirectory);
     }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jemi.libgdx;
+package com.github.ykrasik.jemi.cli.libgdx;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -25,7 +25,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 /**
  * @author Yevgeny Krasik
  */
-public class JerminalLibGdxExample extends ApplicationAdapter {
+public class LibGdxCliExample extends ApplicationAdapter {
     private Stage stage;
 
     public static void main(String[] args) {
@@ -39,14 +39,18 @@ public class JerminalLibGdxExample extends ApplicationAdapter {
         config.x = 50;
         config.y = 50;
 
-        new LwjglApplication(new JerminalLibGdxExample(), config);
+        new LwjglApplication(new LibGdxCliExample(), config);
     }
 
     @Override
     public void create() {
-        // FIXME: Builder should delegate to hierarchyBuilder, and not require a hierarchy up-front.
-        final LibGdxCli cli = new LibGdxCli.Builder().processClass(AnnotationExample.class).build();
-        cli.setFillParent(true);
+        final LibGdxCli cli = new LibGdxCli.Builder()
+            .processClass(PathSample1.class)
+            .processClass(PathSample2.class)
+            .processClass(MandatoryParamsSample.class)
+            .processClass(OptionalParamsSample.class)
+            .processClass(StringParamSample.class)
+            .build();
 
         stage = new Stage();
         stage.addActor(cli);

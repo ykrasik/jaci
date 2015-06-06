@@ -46,7 +46,7 @@ import java.lang.annotation.Target;
  *     <li>Dynamic - The acceptable values are calculated at runtime, by invoking a method that takes no args and returns
  *                   an array of {@link String} (called the 'supplier').
  *                   The supplier must be a method in the same class and may be private.
- *                   Can be set through {@link #supplier()}.</li>
+ *                   Can be set through {@link #acceptsSupplier()}.</li>
  * </ol>
  *
  * @author Yevgeny Krasik
@@ -67,11 +67,11 @@ public @interface StringParam {
     /**
      * Static constraint - Constrain the parameter to only accept a pre-defined set of Strings.
      * By default accepts all Strings.
-     * Only taken into consideration if {@link #supplier()} returns an empty {@code String}.
+     * Only taken into consideration if {@link #acceptsSupplier()} returns an empty {@code String}.
      *
      * @return An array of constant String values that this parameter can accept. If this is an empty
      *         array, the parameter will accept any String value. If not, the parameter will only accept
-     *         values that are contained in the array. Only has effect if {@link #supplier()} returns an empty {@code String}.
+     *         values that are contained in the array. Only has effect if {@link #acceptsSupplier()} returns an empty {@code String}.
      */
     String[] accepts() default {};
 
@@ -87,7 +87,7 @@ public @interface StringParam {
      *         (may be private). This method will be invoked at runtime to determine the possible values for this parameter.
      *         If the supplier returns an empty array, all values will be permitted.
      */
-    String supplier() default "";
+    String acceptsSupplier() default "";
 
     /**
      * If this returns {@code true}, the annotated parameter will be considered optional.<br>

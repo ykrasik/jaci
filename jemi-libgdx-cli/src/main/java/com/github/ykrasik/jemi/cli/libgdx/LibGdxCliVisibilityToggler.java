@@ -14,7 +14,7 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jemi.libgdx;
+package com.github.ykrasik.jemi.cli.libgdx;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
@@ -31,7 +31,7 @@ import lombok.NonNull;
  *
  * @author Yevgeny Krasik
  */
-// FIXME: Separate this into VisibilityToggler and StageToggler (wraps an InputHandler and toggles between different stages).
+// TODO: Add A LibGdxCliScreenToggler
 public class LibGdxCliVisibilityToggler extends InputListener {
     private final LibGdxCli cli;
 

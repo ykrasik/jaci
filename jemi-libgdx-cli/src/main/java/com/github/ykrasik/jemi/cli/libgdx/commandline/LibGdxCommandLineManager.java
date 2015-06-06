@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2014 Yevgeny Krasik                                          *
+ * Copyright (C) 2015 Yevgeny Krasik                                          *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -14,20 +14,45 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jemi.libgdx;
+package com.github.ykrasik.jemi.cli.libgdx.commandline;
+
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
+import com.github.ykrasik.jemi.cli.commandline.CommandLineManager;
+import lombok.NonNull;
 
 /**
- * A listener that is invoked whenever an actor's visibility state changes.
+ * A LibGdx implementation of a {@link CommandLineManager}.
+ * Wraps a {@link TextField} which it uses as a command-line.
  *
  * @author Yevgeny Krasik
  */
-public interface VisibleListener {
+public class LibGdxCommandLineManager implements CommandLineManager {
+    private final TextField commandLine;
+
     /**
-     * Invoked when the actor to which this listener is attached changed it's visiblity state.
-     * It was either visible and became invisible, or the other way.
-     *
-     * @param wasVisible Whether the actor was previously visible.
-     * @param isVisible Whether the actor is currently visible.
+     * @param commandLine TextField to use as a command-line.
      */
-    void onVisibleChange(boolean wasVisible, boolean isVisible);
+    public LibGdxCommandLineManager(@NonNull TextField commandLine) {
+        this.commandLine = commandLine;
+    }
+
+    @Override
+    public String getCommandLine() {
+        return commandLine.getText();
+    }
+
+    @Override
+    public void setCommandLine(String commandLine) {
+        this.commandLine.setText(commandLine);
+    }
+
+    @Override
+    public int getCaret() {
+        return commandLine.getCursorPosition();
+    }
+
+    @Override
+    public void setCaret(int position) {
+        this.commandLine.setCursorPosition(position);
+    }
 }

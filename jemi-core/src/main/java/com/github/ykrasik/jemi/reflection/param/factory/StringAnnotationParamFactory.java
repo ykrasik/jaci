@@ -58,7 +58,7 @@ public class StringAnnotationParamFactory extends AnnotationMethodParamFactory<S
 
         // If the supplier name is not empty, use it as the values supplier.
         // Otherwise, use the values supplied by 'accepts'.
-        final Opt<String> valuesSupplierName = getNonEmptyString(annotation.supplier());
+        final Opt<String> valuesSupplierName = getNonEmptyString(annotation.acceptsSupplier());
         if (valuesSupplierName.isPresent()) {
             builder.setDynamicValues(Suppliers.reflectionListSupplier(instance, valuesSupplierName.get(), String[].class));
         } else {

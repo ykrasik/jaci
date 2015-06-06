@@ -14,53 +14,34 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jemi.libgdx;
+package com.github.ykrasik.jemi.cli.libgdx;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
-import com.github.ykrasik.jemi.cli.Cli;
-import lombok.NonNull;
+import com.github.ykrasik.jemi.api.*;
 
 /**
- * Links LibGdx input events to {@link Cli} events.
+ * A string param may be constrained to only accept a certain set of values.
+ * These are either pre-determined (set in the annotation) or computed at runtime via a supplier.
  *
  * @author Yevgeny Krasik
  */
-public class LibGdxCliInputListener extends InputListener {
-    private final Cli cli;
-
-    public LibGdxCliInputListener(@NonNull Cli cli) {
-        this.cli = cli;
+@CommandPath("stringParam")
+public class StringParamSample {
+    @Command(description = "String param that accepts all values")
+    public void unconstrainedString(CommandOutput output, @StringParam(accepts = {}) String str) {
+        output.message("unconstrainedString: str=%s", str);
     }
 
-    @Override
-    public boolean keyDown(InputEvent event, int keycode) {
-        switch (keycode) {
-            case Keys.ENTER:
-                cli.execute();
-                return true;
+    @Command(description = "String param that only accepts values stated in the annotation.")
+    public void staticConstrainedString(CommandOutput output, @StringParam(accepts = {"a", "b", "c"}) String str) {
+        output.message("staticConstrainedString: str=%s", str);
+    }
 
-            case Keys.TAB:
-                cli.assist();
-                return true;
+    @Command(description = "String param that only accepts values supplied at runtime via a supplier.")
+    public void dynamicConstrainedString(CommandOutput output, @StringParam(acceptsSupplier = "stringSupplier") String str) {
+        output.message("dynamicConstrainedString: str=%s", str);
+    }
 
-            case Keys.DPAD_UP:
-                cli.setPrevCommandLineFromHistory();
-                return true;
-
-            case Keys.DPAD_DOWN:
-                cli.setNextCommandLineFromHistory();
-                return true;
-
-            case Keys.Z:
-                if (Gdx.input.isKeyPressed(Keys.CONTROL_LEFT)) {
-                    cli.clearCommandLine();
-                    return true;
-                }
-        }
-
-        return false;
+    private String[] stringSupplier() {
+        return new String[]{ "d", "e", "f" };
     }
 }

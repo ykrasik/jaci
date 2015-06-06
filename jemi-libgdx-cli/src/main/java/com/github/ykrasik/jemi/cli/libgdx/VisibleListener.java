@@ -14,42 +14,20 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jemi.cli.assist;
-
-import com.github.ykrasik.jemi.util.function.Function;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+package com.github.ykrasik.jemi.cli.libgdx;
 
 /**
- * For an auto complete operation, this is the type of the value being auto completed.
+ * A listener that is invoked whenever an actor's visibility state changes.
  *
  * @author Yevgeny Krasik
  */
-public enum CliValueType {
-    // FIXME: Doesn't belong here.
-    // TODO: Have a special type for system commands, so they stand out a bit more?
-    DIRECTORY('/'),
-    COMMAND(' '),
-    COMMAND_PARAM_NAME(' '),
-    COMMAND_PARAM_VALUE(' ');
-
-    private final char suffix;
-
-    CliValueType(char suffix) {
-        this.suffix = suffix;
-    }
-
-    public char getSuffix() {
-        return suffix;
-    }
-
-    @RequiredArgsConstructor
-    public static class Mapper<T> implements Function<T, CliValueType> {
-        @NonNull private final CliValueType type;
-
-        @Override
-        public CliValueType apply(T t) {
-            return type;
-        }
-    }
+public interface VisibleListener {
+    /**
+     * Invoked when the actor to which this listener is attached changed it's visiblity state.
+     * It was either visible and became invisible, or the other way.
+     *
+     * @param wasVisible Whether the actor was previously visible.
+     * @param isVisible Whether the actor is currently visible.
+     */
+    void onVisibleChange(boolean wasVisible, boolean isVisible);
 }
