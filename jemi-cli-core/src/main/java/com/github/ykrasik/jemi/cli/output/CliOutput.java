@@ -17,9 +17,12 @@
 package com.github.ykrasik.jemi.cli.output;
 
 /**
+ * Output source of the CLI. Can be thought of as the "screen", everything that is visible to a user,
+ * except the command line.
+ * Outputs are allowed to prepare for execution and flush after execution via {@link #begin()} and {@link #end()}.
+ *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
 public interface CliOutput {
     /**
      * Called before anything is printed, to allow the implementation to prepare itself.
@@ -33,9 +36,27 @@ public interface CliOutput {
      */
     void end();
 
+    /**
+     * Print a single line to the output.
+     * A new line is expected to be added after the text by the output implementation.
+     *
+     * @param text Text to print.
+     */
     void println(String text);
 
+    /**
+     * Print a single error line to the output.
+     * A new line is expected to be added after the text by the output implementation.
+     *
+     * @param text Text to print as an error.
+     */
     void errorPrintln(String text);
 
+    /**
+     * Set the 'working directory' to the given path.
+     * This is a visual detail that simply displays what the current 'working directory' is.
+     *
+     * @param workingDirectory Working directory to set.
+     */
     void setWorkingDirectory(String workingDirectory);
 }

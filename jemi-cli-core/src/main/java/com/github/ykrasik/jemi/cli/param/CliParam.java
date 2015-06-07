@@ -21,9 +21,10 @@ import com.github.ykrasik.jemi.Identifiable;
 import com.github.ykrasik.jemi.cli.assist.AutoComplete;
 
 /**
+ * A CLI implementation of a parameter.
+ *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
 public interface CliParam extends Identifiable {
     /**
      * @return The external form representation of the parameter.
@@ -31,35 +32,43 @@ public interface CliParam extends Identifiable {
     String toExternalForm();
 
     /**
-     * Parse the rawValue into a real value that this parameter can accept.
+     * Parse the argument into a value that this parameter can accept.
      *
-     * @param rawValue Raw value to parse.
-     * @return Parsed value if acceptable.
-     * @throws ParseException If the raw value is not acceptable by this parameter.
+     * @param arg Argument to parse.
+     * @return Parsed value if the argument is valid.
+     * @throws ParseException If the argument is not a valid value for this parameter.
      */
-    Object parse(String rawValue) throws ParseException;
+    Object parse(String arg) throws ParseException;
 
     /**
-     * This parameter was bound to an empty value. Usually happens when the parameter is passed by name,
-     * without an explicit value afterwards.
+     * Called to inform the parameter that it wasn't bound to any value.
+     * It is up to the parameter to decide if this is valid -
+     * if the parameter returns a value, this value will be used as the parameter's value.
+     * If this is not valid, the parameter is expected to throw a {@link ParseException}.
+     * Typically, only optional parameters should return a value here, mandatory parameters should throw a {@link ParseException}.
      *
-     * @return A value that this parameter can accept when it is bound to an empty value.
-     * @throws ParseException If this parameter must be explicitly bound.
-     */
-    Object noValue() throws ParseException;
-
-    /**
-     * This parameter has not been bound to any value.
-     *
-     * @return A value that this parameter can accept when it wasn't explicitly bound to one.
+     * @return A value that is valid for this parameter when it wasn't explicitly bound to one.
      * @throws ParseException If this parameter must be explicitly bound.
      */
     Object unbound() throws ParseException;
 
     /**
+     * This parameter was bound to an empty value. Usually happens when the parameter is passed by name,
+     * without an explicit value afterwards.
+     * Invalid in most cases, except if the parameter knows how to handle this situation.
+     *
+     * @return A value that is valid for this parameter when it is bound to an empty value.
+     * @throws ParseException If this parameter must be explicitly bound.
+     */
+    Object noValue() throws ParseException;
+
+    /**
+     * Auto complete the given prefix.
+     *
      * @param prefix Prefix to auto complete.
-     * @return Auto complete possibilities for values this parameter can accept that start with the given prefix.
+     * @return Auto complete for values this parameter can accept that start with the given prefix.
      * @throws ParseException If the given prefix is invalid or the parameter cannot be auto completed.
      */
+    // TODO: Should the implementation throw a ParseException if the AutoComplete is empty?
     AutoComplete autoComplete(String prefix) throws ParseException;
 }

@@ -48,8 +48,9 @@ public class LibGdxCliExample extends ApplicationAdapter {
             .processClass(PathSample1.class)
             .processClass(PathSample2.class)
             .processClass(MandatoryParamsSample.class)
-            .processClass(OptionalParamsSample.class)
+            .processObject(new OptionalParamsSample())  // Just to show that this is also possible.
             .processClass(StringParamSample.class)
+            .processClass(ToggleSample.class)
             .build();
 
         stage = new Stage();

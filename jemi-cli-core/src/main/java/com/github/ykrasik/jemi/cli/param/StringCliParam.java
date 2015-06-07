@@ -16,11 +16,11 @@
 
 package com.github.ykrasik.jemi.cli.param;
 
-import com.github.ykrasik.jemi.cli.exception.ParseException;
 import com.github.ykrasik.jemi.Identifier;
-import com.github.ykrasik.jemi.param.StringParamDef;
 import com.github.ykrasik.jemi.cli.assist.AutoComplete;
 import com.github.ykrasik.jemi.cli.assist.CliValueType;
+import com.github.ykrasik.jemi.cli.exception.ParseException;
+import com.github.ykrasik.jemi.param.StringParamDef;
 import com.github.ykrasik.jemi.util.function.Function;
 import com.github.ykrasik.jemi.util.function.Supplier;
 import com.github.ykrasik.jemi.util.function.Suppliers;
@@ -32,13 +32,10 @@ import lombok.NonNull;
 import java.util.List;
 
 /**
- * A {@link CliParam} that parses string values.<br>
- * Can be configured in 3 modes - can either accept any string, be constrained to a pre-determined set of strings
- * or be constrained to a set of strings that is supplied dynamically at runtime.
+ * A {@link CliParam} that parses string values.
  *
  * @author Yevgeny Krasik
  */
-// FIXME: Add proper support for auto completing quoted strings.
 public class StringCliParam extends AbstractCliParam<String> {
     private final Supplier<Trie<CliValueType>> valuesSupplier;
 
@@ -66,28 +63,29 @@ public class StringCliParam extends AbstractCliParam<String> {
     }
 
     @Override
-    protected String getParamTypeName() {
+    protected String getValueTypeName() {
         return "string";
     }
 
     @Override
-    public String parse(@NonNull String rawValue) throws ParseException {
+    public String parse(@NonNull String arg) throws ParseException {
         final Trie<CliValueType> values = getValues();
 
         // If the values trie is empty, all values are accepted.
-        // If it isn't, rawValue must be contained in the possible values trie.
-        // TODO: SHould this be case insensitive?
-        if (values.isEmpty() || values.contains(rawValue)) {
-            return rawValue;
+        // If it isn't, arg must be contained in the possible values trie.
+        // TODO: Should this be case insensitive?
+        if (values.isEmpty() || values.contains(arg)) {
+            return arg;
         }
 
         // This string param is constrained by the values it can receive,
-        // and rawValue isn't contained in the possible values trie.
-        throw invalidParamValue(rawValue);
+        // and arg isn't contained in the possible values trie.
+        throw invalidParamValue(arg);
     }
 
     @Override
     public AutoComplete autoComplete(@NonNull String prefix) throws ParseException {
+        // FIXME: Add proper support for auto completing quoted strings.
         final Trie<CliValueType> possibilities = getValues().subTrie(prefix);
         return new AutoComplete(prefix, possibilities);
     }
@@ -96,7 +94,12 @@ public class StringCliParam extends AbstractCliParam<String> {
         return valuesSupplier.get();
     }
 
-    // TODO: JavaDoc
+    /**
+     * Construct a CLI string parameter from a {@link StringParamDef}.
+     *
+     * @param def StringParamDef to construct a CLI string parameter from.
+     * @return A CLI string parameter constructed from the StringParamDef.
+     */
     public static StringCliParam fromDef(@NonNull StringParamDef def) {
         return new StringCliParam(def.getIdentifier(), def.getDefaultValueSupplier(), def.getValuesSupplier());
     }

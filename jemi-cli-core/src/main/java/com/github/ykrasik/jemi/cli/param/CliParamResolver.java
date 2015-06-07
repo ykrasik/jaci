@@ -19,9 +19,10 @@ package com.github.ykrasik.jemi.cli.param;
 import com.github.ykrasik.jemi.param.*;
 
 /**
+ * A {@link ParamDefResolver} that translates ParamDefs into CLI parameters.
+ *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
 public class CliParamResolver implements ParamDefResolver<CliParam> {
     @Override
     public StringCliParam stringParam(StringParamDef def) {

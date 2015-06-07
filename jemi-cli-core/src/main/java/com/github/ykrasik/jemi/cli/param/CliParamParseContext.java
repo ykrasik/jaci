@@ -33,51 +33,73 @@ import lombok.NonNull;
 import java.util.*;
 
 /**
+ * A context that lives for the duration of a single parse parameters operation.
+ * Contains the state of the parse operation.
+ *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
 public class CliParamParseContext {
     private static final CliValueType.Mapper<CliParam> PARAM_NAME_MAPPER = new CliValueType.Mapper<>(CliValueType.COMMAND_PARAM_NAME);
 
     private final List<CliParam> params;
     private final Trie<CliParam> paramsTrie;
 
-    private final Map<CliParam, Object> args;
+    /**
+     * The values that were parsed.
+     */
+    private final Map<CliParam, Object> parsedValues;
+
+    /**
+     * Parameters that haven't been parsed yet.
+     */
     private final Queue<CliParam> unboundParams;
 
+    /**
+     * When this is {@code present}, the previous argument was a call-by-name, so the next argument is expected to be
+     * parsed by this parameter.
+     */
     private Opt<CliParam> nextNamedParam = Opt.absent();
 
-    // TODO: JavaDoc
     public CliParamParseContext(@NonNull List<CliParam> params, @NonNull Trie<CliParam> paramsTrie) {
         this.params = params;
         this.paramsTrie = paramsTrie;
 
-        this.args = new HashMap<>(params.size());
+        this.parsedValues = new HashMap<>(params.size());
         this.unboundParams = new LinkedList<>(params);
     }
 
-    // TODO: JavaDoc
-    public void parseValue(String rawValue) throws ParseException {
-        if (!rawValue.startsWith(CliConstants.NAMED_PARAM_PREFIX)) {
+    /**
+     * Parse the argument.
+     * The parameter that actually parses the argument depends on the context's state:
+     *   If the previous argument was a call-by-name argument, the parameter specified by that call-by-name will parse
+     *   the argument.
+     *   Otherwise, the next unbound positional parameter will parse this argument.
+     *
+     * @param arg Argument to parse.
+     * @throws ParseException If an error occurred while parsing the argument.
+     */
+    public void parseValue(String arg) throws ParseException {
+        if (!arg.startsWith(CliConstants.NAMED_PARAM_PREFIX)) {
             // Value doesn't start with '-', have the next param parse it.
-            parseNextArg(rawValue);
+            parseNextArg(arg);
             return;
         }
 
-        // Value starts with a '-', what comes after is expected to be a valid name of a parameter.
+        // Arg starts with a '-', what comes after is expected to be a valid name of a parameter.
         // Unless, and this is a corner case, the first character of the name is a number, which means we're
         // passing a negative number as a value.
         // Param names cannot start with a number.
-        final String paramName = rawValue.substring(1);
+        // TODO: Test this.
+        final String paramName = arg.substring(1);
         if (paramName.isEmpty()) {
             throw new ParseException(ParseError.INVALID_PARAM, "No parameter name specified after '%s'!", CliConstants.NAMED_PARAM_PREFIX);
         }
 
         if (Character.isDigit(paramName.charAt(0))) {
             // This value is a negative number, have the next param parse it.
-            parseNextArg(rawValue);
+            parseNextArg(arg);
         } else {
-            // rawValue starts with '-' and is the name of a parameter, set the next expected named parameter.
+            // arg starts with '-' and is the name of a parameter, set the next expected named parameter.
             setNextNamedParam(paramName);
         }
     }
@@ -89,51 +111,52 @@ public class CliParamParseContext {
         }
     }
 
-    private void parseNextArg(String rawValue) throws ParseException {
+    private void parseNextArg(String arg) throws ParseException {
         if (nextNamedParam.isPresent()) {
             // The prev param was the name of a param, the param specified by that name should parse the arg.
-            parseNextNamedParam(rawValue);
+            parseNextNamedParam(arg);
         } else {
             // Use the next unbound positional param to parse the arg.
-            parseNextPositionalParam(rawValue);
+            parseNextPositionalParam(arg);
         }
     }
 
-    private void parseNextPositionalParam(String rawValue) throws ParseException {
+    private void parseNextPositionalParam(String arg) throws ParseException {
         // Use the next unbound positional param to parse the arg.
-        final CliParam param = getNextUnboundParam(rawValue);
-        final Object arg = param.parse(rawValue);
-        addArg(param, arg);
+        final CliParam param = getNextUnboundParam(arg);
+        final Object parsedValue = param.parse(arg);
+        addArg(param, parsedValue);
     }
 
-    private CliParam getNextUnboundParam(String rawValue) throws ParseException {
+    private CliParam getNextUnboundParam(String arg) throws ParseException {
         final CliParam param = unboundParams.peek();
         if (param == null) {
-            throw new ParseException(ParseError.NO_MORE_PARAMS, "Excess argument: '%s'", rawValue);
+            throw new ParseException(ParseError.NO_MORE_PARAMS, "Excess argument: '%s'", arg);
         }
         return param;
     }
 
-    private void parseNextNamedParam(String rawValue) throws ParseException {
+    private void parseNextNamedParam(String arg) throws ParseException {
         if (!nextNamedParam.isPresent()) {
-            throw new IllegalStateException(String.format("Internal Error: Named parameter wasn't set: '%s'", rawValue));
+            // This is an internal error.
+            throw new IllegalStateException(String.format("Internal Error: Named parameter wasn't set: '%s'", arg));
         }
 
         // The prev param was the name of a param, the param specified by that name should parse the arg.
         final CliParam param = nextNamedParam.get();
-        final Object arg = parseNamedParam(param, rawValue);
-        addArg(param, arg);
+        final Object parsedValue = parseNamedParam(param, arg);
+        addArg(param, parsedValue);
         nextNamedParam = Opt.absent();
     }
 
-    private Object parseNamedParam(CliParam param, String rawValue) throws ParseException {
+    private Object parseNamedParam(CliParam param, String arg) throws ParseException {
         try {
-            return param.parse(rawValue);
+            return param.parse(arg);
         } catch (ParseException e) {
             // Try recovering with a fallback by having the param parse a 'no value' value.
             // This can only succeed with very specific parameters and very specific cases.
             try {
-                // FIXME: When this happens, the rawValue should not be consumed, but delegated to the next param to parse.
+                // FIXME: When this happens, the arg should not be consumed, but delegated to the next param to parse.
                 return param.noValue();
             } catch (ParseException e2) {
                 // Throw the original exception if the fallback failed.
@@ -142,9 +165,18 @@ public class CliParamParseContext {
         }
     }
 
-    // TODO: JavaDoc
+    /**
+     * Create {@link CommandArgs} out of this context's already parsed values.
+     * In case the last argument parsed by the context was a call-by-name (ended with '-{paramName}'),
+     * the context will try to resolve that parameter's value by calling the parameter's {@link CliParam#noValue()}.
+     * In case not all parameters were bound to values, the context will try to resolve those unbound parameters by
+     * calling their {@link CliParam#unbound()}.
+     *
+     * @return A {@link CommandArgs} if the context managed to construct one according to the above rules.
+     * @throws ParseException If an error occurred, according to the above rules.
+     */
     public CommandArgs createCommandArgs() throws ParseException {
-        // In case the last parsed arg ended with '-{paramName}', have that parameter parse a 'no-value' value.
+        // In case the last arg was a call-by-name , have that parameter parse a 'no-value' value.
         // Can only succeed in certain cases with certain parameters.
         if (nextNamedParam.isPresent()) {
             // The last parsed arg did indeed end with '-{paramName}' without assigning that parameter a value.
@@ -158,11 +190,12 @@ public class CliParamParseContext {
 
         final List<Object> commandArgs = new ArrayList<>(params.size());
         for (CliParam param : params) {
-            final Object arg = args.get(param);
-            if (arg == null) {
-                throw new IllegalStateException(String.format("Internal Error: Not all params have been parsed! Missing=" + param));
+            final Object parsedValue = parsedValues.get(param);
+            if (parsedValue == null) {
+                // If there is a missing arg value at this point, this is an internal error.
+                throw new IllegalStateException("Internal Error: Not all params have been parsed! Missing=" + param);
             }
-            commandArgs.add(arg);
+            commandArgs.add(parsedValue);
         }
         return new CommandArgsImpl(commandArgs);
     }
@@ -179,14 +212,26 @@ public class CliParamParseContext {
         }
     }
 
-    // TODO: JavaDoc
+    /**
+     * Create {@link ParamAssistInfo} out of this context's state (already parsed values, and parameters still needing
+     * to be parsed).
+     * In case the last argument parsed by the context was a call-by-name (ended with '-{paramName}'),
+     * the returned assist info will contain that parameter's auto complete.
+     * Otherwise, if the given prefix starts with '-' (call-by-name prefix), the returned assist info will contain
+     * suggestions for unbound parameter names.
+     * Otherwise the returned assist info will contain suggestions for values for the next unbound positional parameter.
+     *
+     * @param prefix Prefix to create assistance for.
+     * @return A {@link ParamAssistInfo} if the context managed to construct one according to the above rules.
+     * @throws ParseException If an error occurred, according to the above rules.
+     */
     public ParamAssistInfo createParamAssistInfo(String prefix) throws ParseException {
         if (nextNamedParam.isPresent()) {
-            // The last parsed value was of the form '-{paramName}'.
+            // The last parsed value was a call-by-name (ended with '-{paramName}').
             // Have that named parameter auto-complete the prefix.
             final CliParam param = nextNamedParam.get();
             final AutoComplete autoComplete = param.autoComplete(prefix);
-            final BoundParams boundParams = new BoundParams(args, nextNamedParam);
+            final BoundParams boundParams = new BoundParams(parsedValues, nextNamedParam);
             return new ParamAssistInfo(boundParams, autoComplete);
         }
 
@@ -205,7 +250,7 @@ public class CliParamParseContext {
             // Have the next unbound parameter auto complete it's value.
             autoComplete = nextParam.autoComplete(prefix);
         }
-        final BoundParams boundParams = new BoundParams(args, Opt.of(nextParam));
+        final BoundParams boundParams = new BoundParams(parsedValues, Opt.of(nextParam));
         return new ParamAssistInfo(boundParams, autoComplete);
     }
 
@@ -215,22 +260,22 @@ public class CliParamParseContext {
             @Override
             public boolean test(CliParam value) {
                 // Only keep unbound params.
-                return !args.containsKey(value);
+                return !parsedValues.containsKey(value);
             }
         });
         final Trie<CliValueType> paramNamePossibilities = unboundPrefixParams.mapValues(PARAM_NAME_MAPPER);
         return new AutoComplete(prefix, paramNamePossibilities);
     }
 
-    private void addArg(CliParam param, Object arg) throws ParseException {
-        doAddArg(param, arg);
+    private void addArg(CliParam param, Object parsedValue) throws ParseException {
+        doAddArg(param, parsedValue);
         if (!unboundParams.remove(param)) {
-            throw new IllegalStateException(String.format("Internal Error: Param bound to value wasn't previously unbound: param=%s, value='%s'", param.getIdentifier().getName(), arg));
+            throw new IllegalStateException(String.format("Internal Error: Param bound to value wasn't previously unbound: param=%s, value='%s'", param.getIdentifier().getName(), parsedValue));
         }
     }
 
-    private void doAddArg(CliParam param, Object arg) throws ParseException {
-        final Object prevArg = args.put(param, arg);
+    private void doAddArg(CliParam param, Object parsedValue) throws ParseException {
+        final Object prevArg = parsedValues.put(param, parsedValue);
         if (prevArg != null) {
             throw new ParseException(ParseError.PARAM_ALREADY_BOUND, "Parameter '%s' is already bound a value: '%s'", param.getIdentifier().getName(), prevArg);
         }

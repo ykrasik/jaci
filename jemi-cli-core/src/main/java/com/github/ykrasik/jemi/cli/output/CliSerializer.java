@@ -17,36 +17,74 @@
 package com.github.ykrasik.jemi.cli.output;
 
 import com.github.ykrasik.jemi.cli.assist.CommandInfo;
-import com.github.ykrasik.jemi.cli.assist.ParamAssistInfo;
 import com.github.ykrasik.jemi.cli.assist.Suggestions;
 import com.github.ykrasik.jemi.cli.command.CliCommand;
 import com.github.ykrasik.jemi.cli.directory.CliDirectory;
 
-import java.util.List;
-
 /**
+ * A component that can serialize CLI entities into {@link String}s or {@link Serialization}s (which is a sequence
+ * of lines) to be printed.
+ * This is the interface to implement in order to customize the CLI's print behavior.
+ *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
 public interface CliSerializer {
-    // TODO: JavaDoc
+    /**
+     * Serialize the path to a CLI directory. Used to display the current 'working directory'.
+     *
+     * @param directory Directory to serialize the path to.
+     * @return The path to given directory.
+     */
     String serializePathToDirectory(CliDirectory directory);
 
-    // TODO: JavaDoc
+    /**
+     * Serialize the command line. Called before printing the command line to the output,
+     * may be used to prepend or append characters to the command line.
+     *
+     * @param commandLine Command line that was typed.
+     * @return Command line to be printed.
+     */
     String serializeCommandLine(String commandLine);
 
-    // TODO: JavaDoc
-    List<String> serializeDirectory(CliDirectory directory, boolean recursive);
+    /**
+     * Serialize a directory and it's content.
+     *
+     * @param directory Directory to serialize.
+     * @param recursive Whether to recurse into sub-directories.
+     * @return A serialized representation of the directory and it's content.
+     */
+    Serialization serializeDirectory(CliDirectory directory, boolean recursive);
 
-    // TODO: JavaDoc
-    List<String> serializeCommand(CliCommand command);
+    /**
+     * Serialize a command (it's name, description and parameters).
+     *
+     * @param command Command to serialize.
+     * @return A serialized representation of the command.
+     */
+    Serialization serializeCommand(CliCommand command);
 
-    // TODO: JavaDoc
-    List<String> serializeException(Exception e);
+    /**
+     * Serialize an exception.
+     *
+     * @param e Exception to serialize.
+     * @return A serialized representation of the exception.
+     */
+    Serialization serializeException(Exception e);
 
-    // TODO: JavaDoc
-    List<String> serializeCommandInfo(CommandInfo info);
+    /**
+     * Serialize information about a command. Called to display assistance information about a command, or if a parse
+     * error occurred while parsing the command's parameters.
+     *
+     * @param info Command info to serialize.
+     * @return A serialized representation of the command info.
+     */
+    Serialization serializeCommandInfo(CommandInfo info);
 
-    // TODO: JavaDoc
-    List<String> serializeSuggestions(Suggestions suggestions);
+    /**
+     * Serialize suggestions.
+     *
+     * @param suggestions Suggestions to serialize.
+     * @return A serialized representation of the suggestions.
+     */
+    Serialization serializeSuggestions(Suggestions suggestions);
 }

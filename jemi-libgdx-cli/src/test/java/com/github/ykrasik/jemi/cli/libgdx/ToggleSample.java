@@ -14,44 +14,34 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jemi.cli;
+package com.github.ykrasik.jemi.cli.libgdx;
+
+import com.github.ykrasik.jemi.api.*;
 
 /**
- * CLI constants.
+ * Toggle commands are special commands that take a single optional boolean parameter and toggle the state of some
+ * component on or off.
+ *
+ * @see ToggleCommand
  *
  * @author Yevgeny Krasik
  */
-// TODO: This is meh...
-public final class CliConstants {
-    private CliConstants() { }
+@CommandPath("toggle")
+public class ToggleSample {
+    @ToggleCommand(description = "A toggle command")
+    public ToggleCommandStateAccessor toggle() {
+        return new ToggleCommandStateAccessor() {
+            private boolean state;
 
-    /**
-     * String representing 'this' in a path.
-     * For example: 'path/./to' is equal to 'path/to'.
-     */
-    public static final String PATH_THIS = ".";
+            @Override
+            public void set(boolean value) {
+                state = value;
+            }
 
-    /**
-     * String representing the parent directory in a path.
-     * For example: 'path/to/..' is equal to 'path/to'.
-     */
-    public static final String PATH_PARENT = "..";
-
-    /**
-     * When passing values to command parameters from the CLI,
-     * any value prefixed by this will indicate that the string afterwards is the name of a parameter.
-     * This is called call-by-value.
-     * For example:
-     *   Suppose we have a command, 'testCommand', which takes 2 parameters called 'param1' & 'param2' (in that order).
-     * All of these are equal:
-     * <ul>
-     *     <li>testCommand x y</li>
-     *     <li>testCommand -param1 x y</li>
-     *     <li>testCommand x -param2 y</li>
-     *     <li>testCommand -param2 y x</li>
-     *     <li>testCommand -param1 x -param2 y</li>
-     *     <li>testCommand -param2 y -param1 x</li>
-     * </ul>
-     */
-    public static final String NAMED_PARAM_PREFIX = "-";
+            @Override
+            public boolean get() {
+                return state;
+            }
+        };
+    }
 }

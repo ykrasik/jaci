@@ -23,7 +23,7 @@ import com.github.ykrasik.jemi.util.opt.Opt;
 import lombok.NonNull;
 
 /**
- * A {@link CliParam} that parses double values.<br>
+ * A {@link CliParam} that parses double values.
  * Cannot be auto-completed.
  *
  * @author Yevgeny Krasik
@@ -34,16 +34,21 @@ public class DoubleCliParam extends AbstractNumericCliParam<Double> {
     }
 
     @Override
-    protected String getParamTypeName() {
+    protected String getValueTypeName() {
         return "double";
     }
 
     @Override
-    protected Double parseNumber(String rawValue) {
-        return Double.parseDouble(rawValue);
+    protected Double parseNumber(String arg) {
+        return Double.parseDouble(arg);
     }
 
-    // TODO: JavaDoc
+    /**
+     * Construct a CLI double parameter from a {@link DoubleParamDef}.
+     *
+     * @param def DoubleParamDef to construct a CLI double parameter from.
+     * @return A CLI double parameter constructed from the DoubleParamDef.
+     */
     public static DoubleCliParam fromDef(@NonNull DoubleParamDef def) {
         return new DoubleCliParam(def.getIdentifier(), def.getDefaultValueSupplier());
     }

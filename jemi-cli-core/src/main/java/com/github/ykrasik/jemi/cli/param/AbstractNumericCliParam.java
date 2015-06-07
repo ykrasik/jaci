@@ -25,27 +25,36 @@ import com.github.ykrasik.jemi.util.opt.Opt;
 import lombok.NonNull;
 
 /**
+ * An abstract numeric {@link CliParam}.
+ * Numeric parameters cannot be auto completed.
+ *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
-public abstract class AbstractNumericCliParam<T> extends AbstractCliParam<T> {
+public abstract class AbstractNumericCliParam<T extends Number> extends AbstractCliParam<T> {
     protected AbstractNumericCliParam(Identifier identifier, Opt<Supplier<T>> defaultValueSupplier) {
         super(identifier, defaultValueSupplier);
     }
 
     @Override
-    public T parse(@NonNull String rawValue) throws ParseException {
+    public T parse(@NonNull String arg) throws ParseException {
         try {
-            return parseNumber(rawValue);
+            return parseNumber(arg);
         } catch (NumberFormatException ignored) {
-            throw invalidParamValue(rawValue);
+            throw invalidParamValue(arg);
         }
     }
 
-    protected abstract T parseNumber(String rawValue);
+    /**
+     * Parse the given argument as a number. Concrete number type depends on sub-class implementation.
+     *
+     * @param arg Argument to parse as a number.
+     * @return A parsed number, if the argument is a valid number.
+     * @throws NumberFormatException If the argument is not a valid number.
+     */
+    protected abstract T parseNumber(String arg) throws NumberFormatException;
 
     @Override
     public AutoComplete autoComplete(@NonNull String prefix) throws ParseException {
-        throw new ParseException(ParseError.INVALID_PARAM_VALUE, "Cannot autoComplete %s parameter: '%s'!", getParamTypeName(), getIdentifier().getName());
+        throw new ParseException(ParseError.INVALID_PARAM_VALUE, "Cannot autoComplete %s parameter: '%s'!", getValueTypeName(), getIdentifier().getName());
     }
 }

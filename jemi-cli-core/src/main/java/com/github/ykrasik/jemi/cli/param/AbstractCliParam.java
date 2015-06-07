@@ -16,24 +16,37 @@
 
 package com.github.ykrasik.jemi.cli.param;
 
+import com.github.ykrasik.jemi.Identifier;
 import com.github.ykrasik.jemi.cli.exception.ParseError;
 import com.github.ykrasik.jemi.cli.exception.ParseException;
-import com.github.ykrasik.jemi.Identifier;
 import com.github.ykrasik.jemi.util.function.Supplier;
 import com.github.ykrasik.jemi.util.opt.Opt;
-import lombok.AccessLevel;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 
 /**
+ * An abstract implementation of a {@link CliParam}.
+ * Handles most common cases like optional values.
+ * Specialized for a value type.
+ *
+ * @param <T> The type of values parsed by this parameter.
+ *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
-@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class AbstractCliParam<T> implements CliParam {
-    @NonNull private final Identifier identifier;
+    /**
+     * This parameter's identifier.
+     */
+    private final Identifier identifier;
 
-    @NonNull private final Opt<Supplier<T>> defaultValueSupplier;
+    /**
+     * If this value is present, this parameter is considered optional.
+     */
+    private final Opt<Supplier<T>> defaultValueSupplier;
+
+    protected AbstractCliParam(@NonNull Identifier identifier, @NonNull Opt<Supplier<T>> defaultValueSupplier) {
+        this.identifier = identifier;
+        this.defaultValueSupplier = defaultValueSupplier;
+    }
 
     @Override
     public Identifier getIdentifier() {
@@ -46,14 +59,14 @@ public abstract class AbstractCliParam<T> implements CliParam {
             .append(isOptional() ? '[' : '{')
             .append(getName())
             .append(" : ")
-            .append(getParamTypeName())
+            .append(getValueTypeName())
             .append(isOptional() ? ']' : '}')
             .toString();
     }
 
-    // Type specialization.
+    // Type specialization - subclasses must parse a value of type T.
     @Override
-    public abstract T parse(String rawValue) throws ParseException;
+    public abstract T parse(String arg) throws ParseException;
 
     @Override
     public Object noValue() throws ParseException {
@@ -80,11 +93,14 @@ public abstract class AbstractCliParam<T> implements CliParam {
     protected ParseException invalidParamValue(String value) throws ParseException {
         throw new ParseException(
             ParseError.INVALID_PARAM_VALUE,
-            "Invalid value for %s parameter '%s': '%s'", getParamTypeName(), getName(), value
+            "Invalid value for %s parameter '%s': '%s'", getValueTypeName(), getName(), value
         );
     }
 
-    protected abstract String getParamTypeName();
+    /**
+     * @return The name of the value type parsed by this parameter.
+     */
+    protected abstract String getValueTypeName();
 
     private String getName() {
         return identifier.getName();

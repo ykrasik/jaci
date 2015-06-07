@@ -23,7 +23,7 @@ import com.github.ykrasik.jemi.util.opt.Opt;
 import lombok.NonNull;
 
 /**
- * A {@link CliParam} that parses int values.<br>
+ * A {@link CliParam} that parses int values.
  * Cannot be auto-completed.
  *
  * @author Yevgeny Krasik
@@ -34,16 +34,21 @@ public class IntCliParam extends AbstractNumericCliParam<Integer> {
     }
 
     @Override
-    protected String getParamTypeName() {
+    protected String getValueTypeName() {
         return "int";
     }
 
     @Override
-    protected Integer parseNumber(String rawValue) {
-        return Integer.parseInt(rawValue);
+    protected Integer parseNumber(String arg) {
+        return Integer.parseInt(arg);
     }
 
-    // TODO: JavaDoc
+    /**
+     * Construct a CLI int parameter from an {@link IntParamDef}.
+     *
+     * @param def IntParamDef to construct a CLI int parameter from.
+     * @return A CLI int parameter constructed from the IntParamDef.
+     */
     public static IntCliParam fromDef(@NonNull IntParamDef def) {
         return new IntCliParam(def.getIdentifier(), def.getDefaultValueSupplier());
     }

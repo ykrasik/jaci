@@ -23,25 +23,32 @@ import com.github.ykrasik.jemi.command.CommandArgs;
 import java.util.List;
 
 /**
+ * A component that is in charge of parsing arguments and providing assistance for parameters.
+ *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
 public interface CliParamManager {
-    // TODO: JavaDoc
+    /**
+     * @return The parameters.
+     */
     List<CliParam> getParams();
 
     /**
-     * @param args Args to be parsed.
-     * @return Parsed args.
-     * @throws ParseException If an invalid value was supplied for a param, or if a param wasn't bound.
+     * Parse the given arguments.
+     *
+     * @param args Arguments to be parsed.
+     * @return Parsed arguments.
+     * @throws ParseException If any error occurs while parsing the arguments.
      */
     CommandArgs parse(List<String> args) throws ParseException;
 
     /**
-     * @param args Args to be auto-completed. Will only auto-complete the last arg.
+     * Provide assistance for about the parameters for the given arguments.
+     * Only the last argument is up for auto-completion, the rest are expected to be valid parameter values.
+     *
+     * @param args Arguments to be auto-completed. Will only auto-complete the last arg.
      * @return Auto complete suggestions for the last arg. Every preceding arg is expected to be a valid param value.
      * @throws ParseException If any of the args except the last one can't be validly parsed.
      */
-    // TODO: JavaDoc
     ParamAssistInfo assist(List<String> args) throws ParseException;
 }

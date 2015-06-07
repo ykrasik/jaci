@@ -16,20 +16,19 @@
 
 package com.github.ykrasik.jemi.cli.param;
 
+import com.github.ykrasik.jemi.Identifier;
+import com.github.ykrasik.jemi.cli.assist.AutoComplete;
 import com.github.ykrasik.jemi.cli.command.CliCommand;
 import com.github.ykrasik.jemi.cli.exception.ParseException;
 import com.github.ykrasik.jemi.cli.hierarchy.CliCommandHierarchy;
-import com.github.ykrasik.jemi.Identifier;
-import com.github.ykrasik.jemi.cli.assist.AutoComplete;
 import com.github.ykrasik.jemi.util.function.Supplier;
 import com.github.ykrasik.jemi.util.function.Suppliers;
 import com.github.ykrasik.jemi.util.opt.Opt;
 import lombok.NonNull;
-import lombok.Setter;
-import lombok.experimental.Accessors;
+import lombok.ToString;
 
 /**
- * A {@link CliParam} that parses {@link CliCommand} values.<br>
+ * A {@link CliParam} that parses {@link CliCommand} values.
  * Not a part of the official API - this is a CLI-only param which doesn't have a ParamDef,
  * which is why it can only be constructed through the {@link Builder}.
  *
@@ -47,13 +46,13 @@ public class CommandCliParam extends AbstractCliParam<CliCommand> {
     }
 
     @Override
-    protected String getParamTypeName() {
+    protected String getValueTypeName() {
         return "directory";
     }
 
     @Override
-    public CliCommand parse(@NonNull String rawValue) throws ParseException {
-        return hierarchy.parsePathToCommand(rawValue);
+    public CliCommand parse(@NonNull String arg) throws ParseException {
+        return hierarchy.parsePathToCommand(arg);
     }
 
     @Override
@@ -61,16 +60,14 @@ public class CommandCliParam extends AbstractCliParam<CliCommand> {
         return hierarchy.autoCompletePath(prefix);
     }
 
-    // TODO: JavaDoc - mention that this has a builder and other don't, because this is a cli-only param that doesn't have
-    // TODO: a def counterpart.
-    @Accessors(chain = true)
+    /**
+     * A builder for a {@link CommandCliParam}.
+     */
+    @ToString
     public static class Builder {
         private final String name;
         private final CliCommandHierarchy hierarchy;
-
-        @Setter
-        @NonNull private String description = "command";
-
+        private String description = "command";
         private Opt<Supplier<CliCommand>> defaultValueSupplier = Opt.absent();
 
         public Builder(@NonNull String name, @NonNull CliCommandHierarchy hierarchy) {
@@ -78,15 +75,39 @@ public class CommandCliParam extends AbstractCliParam<CliCommand> {
             this.hierarchy = hierarchy;
         }
 
+        /**
+         * @param description Parameter description.
+         * @return {@code this}, for chaining.
+         */
+        public Builder setDescription(@NonNull String description) {
+            this.description = description;
+            return this;
+        }
+
+        /**
+         * Set this parameter to be optional, and return the given {@link CliCommand} if it is not passed.
+         *
+         * @param defaultValue {@link CliCommand} to return if the parameter isn't passed.
+         * @return {@code this}, for chaining.
+         */
         public Builder setOptional(@NonNull CliCommand defaultValue) {
             return setOptional(Suppliers.of(defaultValue));
         }
 
+        /**
+         * Set this parameter to be optional, and invoke the given {@link Supplier} for a default value if it is not passed.
+         *
+         * @param defaultValueSupplier Supplier to invoke if the parameter isn't passed.
+         * @return {@code this}, for chaining.
+         */
         public Builder setOptional(@NonNull Supplier<CliCommand> defaultValueSupplier) {
             this.defaultValueSupplier = Opt.of(defaultValueSupplier);
             return this;
         }
 
+        /**
+         * @return A {@link CommandCliParam} built out of this builder's parameters.
+         */
         public CommandCliParam build() {
             final Identifier identifier = new Identifier(name, description);
             return new CommandCliParam(identifier, defaultValueSupplier, hierarchy);

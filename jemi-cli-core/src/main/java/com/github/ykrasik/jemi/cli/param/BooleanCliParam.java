@@ -29,12 +29,21 @@ import com.github.ykrasik.jemi.util.trie.TrieBuilder;
 import lombok.NonNull;
 
 /**
- * A {@link CliParam} that parses boolean values.<br>
+ * A {@link CliParam} that parses boolean values.
  * Specifically, only 'true' and 'false' (case insensitive).
+ *
+ * If the parameter is optional, it can be treated as a flag:
+ * This is a special case when calling the parameter by name, but not providing a value as the 2nd argument.
+ * In this case, the optional boolean parameter will just receive the value that is the inverse of its default value.
+ *
+ * Example:
+ *   There is an optional boolean parameter called 'r', with a default value of {@code false}.
+ *   When calling this parameter by name, the call-by-name syntax requires that a boolean value be provided after the
+ *   parameter name. However, if we only write '-r' without following with a boolean value, the parameter will
+ *   receive the value {@code true} - the inverse of it's default value.
  *
  * @author Yevgeny Krasik
  */
-// TODO: Mention special use case of optional boolean param being a flag.
 public class BooleanCliParam extends AbstractCliParam<Boolean> {
     private static final Trie<CliValueType> VALUES = new TrieBuilder<CliValueType>()
         .add("true", CliValueType.COMMAND_PARAM_VALUE)
@@ -46,7 +55,7 @@ public class BooleanCliParam extends AbstractCliParam<Boolean> {
     }
 
     @Override
-    protected String getParamTypeName() {
+    protected String getValueTypeName() {
         return "boolean";
     }
 
@@ -58,12 +67,11 @@ public class BooleanCliParam extends AbstractCliParam<Boolean> {
     }
 
     @Override
-    public Boolean parse(@NonNull String rawValue) throws ParseException {
-        if (VALUES.contains(rawValue.toLowerCase())) {
-            return Boolean.parseBoolean(rawValue);
+    public Boolean parse(@NonNull String arg) throws ParseException {
+        if (!VALUES.contains(arg.toLowerCase())) {
+            throw invalidParamValue(arg);
         }
-
-        throw invalidParamValue(rawValue);
+        return Boolean.parseBoolean(arg);
     }
 
     @Override
@@ -72,12 +80,23 @@ public class BooleanCliParam extends AbstractCliParam<Boolean> {
         return new AutoComplete(prefix, possibilities);
     }
 
-    // TODO: JavaDoc
+    /**
+     * Construct a CLI boolean parameter from a {@link BooleanParamDef}.
+     *
+     * @param def BooleanParamDef to construct a CLI boolean parameter from.
+     * @return A CLI boolean parameter constructed from the BooleanParamDef.
+     */
     public static BooleanCliParam fromDef(@NonNull BooleanParamDef def) {
         return new BooleanCliParam(def.getIdentifier(), def.getDefaultValueSupplier());
     }
 
-    // TODO: JavaDoc
+    /**
+     * Construct an optional CLI boolean parameter with the given default value.
+     *
+     * @param identifier Parameter identifier.
+     * @param defaultValue Default value to be used by the parameter if it isn't explicitly bound.
+     * @return A CLI boolean parameter constructed from the given parameters.
+     */
     public static BooleanCliParam optional(Identifier identifier, boolean defaultValue) {
         return new BooleanCliParam(identifier, Opt.of(Suppliers.of(defaultValue)));
     }

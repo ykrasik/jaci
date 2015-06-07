@@ -89,6 +89,7 @@ public class AutoComplete {
      * @return A value containing the auto-complete suffix that should be appended to the prefix
      *         from which this auto-complete was constructed, if auto-completion is possible.
      */
+    // TODO: Return a simple String, and have the CliShell convert empty strings to empty values?
     public Opt<String> getAutoCompleteSuffix() {
         if (possibilities.isEmpty()) {
             // There are no auto-complete possibilities.

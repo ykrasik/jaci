@@ -28,9 +28,11 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * An implementation of a {@link CliParamManager}.
+ * Delegates most calculations to a {@link CliParamParseContext}.
+ *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
 @ToString(of = "params")
 public class CliParamManagerImpl implements CliParamManager {
     private final List<CliParam> params;

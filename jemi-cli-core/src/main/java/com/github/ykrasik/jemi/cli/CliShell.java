@@ -29,6 +29,7 @@ import com.github.ykrasik.jemi.cli.hierarchy.CliCommandHierarchy;
 import com.github.ykrasik.jemi.cli.output.CliOutput;
 import com.github.ykrasik.jemi.cli.output.CliPrinter;
 import com.github.ykrasik.jemi.cli.output.CliSerializer;
+import com.github.ykrasik.jemi.cli.output.DefaultCliSerializer;
 import com.github.ykrasik.jemi.command.CommandArgs;
 import com.github.ykrasik.jemi.util.opt.Opt;
 import lombok.NonNull;
@@ -36,24 +37,30 @@ import lombok.NonNull;
 import java.util.List;
 
 /**
- * Built on top of a {@link ShellFileSystem}, processes command lines and displays results
- * as a side effect through a {@link com.github.ykrasik.jerminal.old.display.DisplayDriver}.<br>
- * Changes to the underlying {@link ShellFileSystem} will <b>not</b> be picked up after this object is constructed
- * (and why would you want to keep changing the {@link ShellFileSystem} afterwards, anyway?)<br>
- * <br>
- * The Shell does not alter the command line in any way. It is assumed that an external system
- * has ownership of the command line and is the one in charge of manipulating it. The Shell, in turn, simply returns
- * what the new command line should be on each of it's calls.<br>
- * <br>
+ * A shell usually refers to the program logic running within a CLI.
+ * A CliShell is a component responsible for parsing and executing command lines.
+ * The shell has no control over the command line itself, which is passed to it as a parameter.
+ * Thus, in turn, any manipulations of the command line are left for the caller.
+ * The shell simply returns values that should be appended to the command line.
+ *
+ * The shell requires 2 things to be built:
+ *   1. A {@link CliCommandHierarchy}: This is the shell's 'file-system'.
+ *   2. A {@link CliOutput}: This is the shell's output - the screen.
+ *
+ * The shell's API methods that print values ({@link #assist(String)}, {@link #execute(String)}) do so
+ * as a side effect, by calling the {@link CliOutput} the shell was built with.
  *
  * @author Yevgeny Krasik
  */
-// FIXME: JavaDoc
-// TODO: Create AssistInfo and ExecuteReturnValue instead of having a DisplayDriver with side effects?
+// TODO: Build through a builder: CliSerializer and maxHistory are optional.
 public class CliShell {
     private final CliCommandHierarchy hierarchy;
     private final CliPrinter printer;
     private final CommandLineHistory history;
+
+    public CliShell(CliCommandHierarchy hierarchy, CliOutput output, int maxHistory) {
+        this(hierarchy, output, new DefaultCliSerializer(), maxHistory);
+    }
 
     public CliShell(CliCommandHierarchy hierarchy, CliOutput output, CliSerializer serializer, int maxHistory) {
         this(hierarchy, new CliPrinter(output, serializer), new CommandLineHistory(maxHistory));
@@ -77,12 +84,34 @@ public class CliShell {
     }
 
     /**
-     * Provide assistance for the given command line.
+     * @return Previous command line from history.
+     */
+    public Opt<String> getPrevCommandLineFromHistory() {
+        return history.getPrevCommandLine();
+    }
+
+    /**
+     * @return Next command line in history.
+     */
+    public Opt<String> getNextCommandLineFromHistory() {
+        return history.getNextCommandLine();
+    }
+
+    /**
+     * Provide assistance for the given command line. Assistance means 2 things:
+     * <ol>
+     *     <li>Auto complete the command line</li>
+     *     <li>Print information that is specific to the context of the command line (if the command line indicates
+     *         that we are parsing a command, assist with information like values that were already parsed,
+     *         next parameter to parse etc').</li>
+     *     <li>Print suggestions for the next word to be added to the command line, if any.</li>
+     * </ol>
+     * Any output is printed as a side effect to the {@link CliOutput} this shell was constructed with.
+     * Returns the result of the auto complete operation that should be appended to the command line by the caller.
      *
      * @param commandLine Command line to provide assistance for.
-     * @return {@code true} if the command line was assisted successfully.
+     * @return A value that should be appended to the command line as a result of the auto complete operation.
      */
-    // FIXME: JavaDoc is wrong.
     public Opt<String> assist(String commandLine) {
         printer.begin();
         try {
@@ -135,9 +164,13 @@ public class CliShell {
 
     /**
      * Execute the command line.
+     * The command line will be parsed, verified for correctness and executed if it passes all correctness checks.
+     * Any output is printed as a side effect to the {@link CliOutput} this shell was constructed with.
+     * If any error occurs while parsing the command line or executing the parsed command line, it will also be printed
+     * to the {@link CliOutput} this shell was constructed with.
      *
      * @param commandLine Command line to execute.
-     * @return True if the command line was executed successfully.
+     * @return {@code true} if the command line was executed successfully.
      */
     public boolean execute(String commandLine) {
         printer.begin();
@@ -181,20 +214,6 @@ public class CliShell {
             final String message = String.format("Command '%s' executed successfully.", command.getName());
             printer.println(message);
         }
-    }
-
-    /**
-     * @return Previous command line from history.
-     */
-    public Opt<String> getPrevCommandLineFromHistory() {
-        return history.getPrevCommandLine();
-    }
-
-    /**
-     * @return Next command line in history.
-     */
-    public Opt<String> getNextCommandLineFromHistory() {
-        return history.getNextCommandLine();
     }
 
     private void handleParseException(ParseException e) {

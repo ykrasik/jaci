@@ -22,6 +22,7 @@ package com.github.ykrasik.jemi.param;
  * It is assumed that all parameters of an implementations have a common super-type: {@code E}.
  *
  * @param <E> Concrete paramDef implementation super-type.
+ *
  * @author Yevgeny Krasik
  */
 public interface ParamDefResolver<E> {

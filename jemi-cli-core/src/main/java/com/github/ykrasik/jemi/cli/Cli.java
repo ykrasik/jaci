@@ -21,9 +21,12 @@ import com.github.ykrasik.jemi.util.opt.Opt;
 import lombok.NonNull;
 
 /**
+ * A CLI is a component that can read from a command line via a {@link CommandLineManager},
+ * pass the command line to a {@link CliShell} to be processed, and according to the return value of the shell
+ * manipulate the command line as required and write the new command line to the CommandLineManager.
+ *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
 public class Cli {
     private final CliShell shell;
     private final CommandLineManager commandLineManager;

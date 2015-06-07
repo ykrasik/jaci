@@ -81,7 +81,7 @@ public class CliCommandOutput implements CommandOutput {
     }
 
     /**
-     * Print the contents of the directory.
+     * Print a directory and it's content.
      *
      * @param directory Directory to print.
      * @param recursive Whether to recurse into sub-directories.
@@ -92,7 +92,7 @@ public class CliCommandOutput implements CommandOutput {
     }
 
     /**
-     * Print the description of a command (and its parameters).
+     * Print a command (it's name, description and parameters).
      *
      * @param command Command to describe.
      */
