@@ -50,21 +50,14 @@ import java.util.List;
  * The shell's API methods that print values ({@link #assist(String)}, {@link #execute(String)}) do so
  * as a side effect, by calling the {@link CliOutput} the shell was built with.
  *
+ * Built through the {@link CliShell.Builder} builder.
+ *
  * @author Yevgeny Krasik
  */
-// TODO: Build through a builder: CliSerializer and maxHistory are optional.
 public class CliShell {
     private final CliCommandHierarchy hierarchy;
     private final CliPrinter printer;
     private final CommandLineHistory history;
-
-    public CliShell(CliCommandHierarchy hierarchy, CliOutput output, int maxHistory) {
-        this(hierarchy, output, new DefaultCliSerializer(), maxHistory);
-    }
-
-    public CliShell(CliCommandHierarchy hierarchy, CliOutput output, CliSerializer serializer, int maxHistory) {
-        this(hierarchy, new CliPrinter(output, serializer), new CommandLineHistory(maxHistory));
-    }
 
     /**
      * Package-protected for testing.
@@ -224,5 +217,51 @@ public class CliShell {
 
         final String errorMessage = String.format("Parse Error: %s", e.getMessage());
         printer.errorPrintln(errorMessage);
+    }
+
+    /**
+     * A builder for a {@link CliShell}.
+     */
+    public static class Builder {
+        private final CliCommandHierarchy hierarchy;
+        private final CliOutput output;
+        private CliSerializer serializer = new DefaultCliSerializer();
+        private int maxCommandHistory = 30;
+
+        public Builder(@NonNull CliCommandHierarchy hierarchy, @NonNull CliOutput output) {
+            this.hierarchy = hierarchy;
+            this.output = output;
+        }
+
+        /**
+         * Set a custom {@link CliSerializer}.
+         *
+         * @param serializer Serializer to use.
+         * @return {@code this}, for chaining.
+         */
+        public Builder setSerializer(CliSerializer serializer) {
+            this.serializer = serializer;
+            return this;
+        }
+
+        /**
+         * Set the maximum amount of command history entries to keep.
+         *
+         * @param maxCommandHistory Max command history entries to keep.
+         * @return {@code this}, for chaining.
+         */
+        public Builder setMaxCommandHistory(int maxCommandHistory) {
+            this.maxCommandHistory = maxCommandHistory;
+            return this;
+        }
+
+        /**
+         * @return A {@link CliShell} built out of this builder's parameters.
+         */
+        public CliShell build() {
+            final CliPrinter printer = new CliPrinter(output, serializer);
+            final CommandLineHistory history = new CommandLineHistory(maxCommandHistory);
+            return new CliShell(hierarchy, printer, history);
+        }
     }
 }

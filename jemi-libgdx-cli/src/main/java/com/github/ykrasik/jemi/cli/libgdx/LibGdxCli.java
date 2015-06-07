@@ -115,7 +115,10 @@ public class LibGdxCli extends Table {
         final CliSerializer serializer = new DefaultCliSerializer(((char) 0) + "    ");
 
         // Create the shell and the actual CLI.
-        final CliShell shell = new CliShell(hierarchy, output, serializer, maxCommandHistory);
+        final CliShell shell = new CliShell.Builder(hierarchy, output)
+            .setSerializer(serializer)
+            .setMaxCommandHistory(maxCommandHistory)
+            .build();
         final Cli cli = new Cli(shell, commandLineManager);
 
         // Hook input events to CLI events.
