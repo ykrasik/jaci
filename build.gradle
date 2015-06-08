@@ -27,39 +27,39 @@ subprojects {
     }
 }
 
-project("jemi-utils") {
-    description "Jemi utils"
+project("jaci-utils") {
+    description "Jaci utils"
 }
 
-project("jemi-core") {
-    description "Jemi API & API Consumer"
+project("jaci-core") {
+    description "Jaci API and Core implementation"
 
     dependencies {
-        compile project(":jemi-utils")
+        compile project(":jaci-utils")
     }
 }
 
-project("jemi-cli-core") {
-    description "Jemi command line interface core"
+project("jaci-cli-core") {
+    description "Jaci command-line-interface core implementation"
 
     dependencies {
-        compile project(":jemi-core")
+        compile project(":jaci-core")
     }
 }
 
-project("jemi-javafx-cli") {
-    description "Jemi JavaFX command line interface"
+//project("jaci-javafx-cli") {
+//    description "jaci JavaFX command line interface"
+//
+//    dependencies {
+//        compile project(":jaci-cli-core")
+//    }
+//}
+
+project("jaci-libgdx-cli") {
+    description "Jaci LibGdx command-line-interface implementation"
 
     dependencies {
-        compile project(":jemi-cli-core")
-    }
-}
-
-project("jemi-libgdx-cli") {
-    description "Jemi libGdx command line interface"
-
-    dependencies {
-        compile project(":jemi-cli-core")
+        compile project(":jaci-cli-core")
 
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"

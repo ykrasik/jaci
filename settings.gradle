@@ -1,9 +1,9 @@
-rootProject.name = 'jemi'
+rootProject.name = 'jaci'
 
-include "jemi-utils"
+include "jaci-utils"
 
-include "jemi-core"
-include "jemi-cli-core"
+include "jaci-core"
+include "jaci-cli-core"
 
-include "jemi-javafx-cli"
-include "jemi-libgdx-cli"
+//include "jaci-javafx-cli"
+include "jaci-libgdx-cli"
