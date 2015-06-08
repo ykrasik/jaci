@@ -17,7 +17,7 @@
 package com.github.ykrasik.jemi.param;
 
 import com.github.ykrasik.jemi.Identifiable;
-import com.github.ykrasik.jemi.util.function.Supplier;
+import com.github.ykrasik.jemi.util.function.Spplr;
 import com.github.ykrasik.jemi.util.opt.Opt;
 
 /**
@@ -36,13 +36,13 @@ import com.github.ykrasik.jemi.util.opt.Opt;
  */
 public interface ParamDef<T> extends Identifiable {
     /**
-     * If this returns a {@code present} value, this paramDef will be considered optional and the returned {@link Supplier}
+     * If this returns a {@code present} value, this paramDef will be considered optional and the returned {@link Spplr}
      * will be invoked when a value isn't explicitly passed to this parameter.
      * Otherwise, the parameter will be considered mandatory and not passing this value will be considered a parse error.
      *
-     * @return A {@code present} {@link Supplier} if this parameter should be optional, or an {@code absent} one otherwise.
+     * @return A {@code present} {@link Spplr} if this parameter should be optional, or an {@code absent} one otherwise.
      */
-    Opt<Supplier<T>> getDefaultValueSupplier();
+    Opt<Spplr<T>> getDefaultValueSupplier();
 
     /**
      * Resolve this paramDef into a concrete implementation using double-dispatch.

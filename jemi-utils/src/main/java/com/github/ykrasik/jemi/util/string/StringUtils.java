@@ -50,7 +50,13 @@ public final class StringUtils {
         }
     }
 
-    // TODO: JavaDoc
+    /**
+     * Removes the trailing delimiter from a string.
+     *
+     * @param str String to process.
+     * @param delimiter Delimiter to remove.
+     * @return The string with the trailing delimiter removed.
+     */
     public static String removeTrailingDelimiter(String str, String delimiter) {
         if (!str.endsWith(delimiter)) {
             return str;
@@ -59,7 +65,13 @@ public final class StringUtils {
         }
     }
 
-    // TODO: JavaDoc
+    /**
+     * Removes the leading delimiter from a string.
+     *
+     * @param str String to process.
+     * @param delimiter Delimiter to remove.
+     * @return The string with the leading delimiter removed.
+     */
     public static String removeLeadingDelimiter(String str, String delimiter) {
         if (!str.startsWith(delimiter)) {
             return str;
@@ -69,21 +81,34 @@ public final class StringUtils {
     }
 
     /**
-     * Transforms an all-whitespace string to an absent value.
+     * Transforms an all-whitespace string to an {@code absent} value.
      *
      * @param str String to check.
-     * @return A present value if the string had any non-whitespace character, or an absent value otherwise.
+     * @return A {@code present} containing the trimmed string, if the string had any non-whitespace character,
+     *         or an {@code absent} value otherwise.
      */
     public static Opt<String> getNonEmptyString(String str) {
         return Opt.ofNullable(emptyToNull(str.trim()));
     }
 
-    // TODO: JavaDoc
+    /**
+     * Transform an empty string into null.
+     *
+     * @param str String to check.
+     * @return The string if it was non-empty, or null otherwise.
+     */
     public static String emptyToNull(String str) {
         return (str != null && !str.isEmpty()) ? str : null;
     }
 
-    // TODO: JavaDoc
+    /**
+     * Create a string out of the list's elements using the given delimiter.
+     *
+     * @param list List to create a string from.
+     * @param delimiter Delimiter to use between elements.
+     * @param <T> Type of elements in the list.
+     * @return A string created from the given list's elements, delimited by the given delimiter.
+     */
     public static <T> String join(List<T> list, String delimiter) {
         if (list.isEmpty()) {
             return "";

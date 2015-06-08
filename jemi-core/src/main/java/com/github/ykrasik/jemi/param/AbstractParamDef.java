@@ -17,7 +17,7 @@
 package com.github.ykrasik.jemi.param;
 
 import com.github.ykrasik.jemi.Identifier;
-import com.github.ykrasik.jemi.util.function.Supplier;
+import com.github.ykrasik.jemi.util.function.Spplr;
 import com.github.ykrasik.jemi.util.opt.Opt;
 import lombok.*;
 
@@ -29,9 +29,9 @@ import lombok.*;
 @EqualsAndHashCode
 public abstract class AbstractParamDef<T> implements ParamDef<T> {
     private final Identifier identifier;
-    private final Opt<Supplier<T>> defaultValueSupplier;
+    private final Opt<Spplr<T>> defaultValueSupplier;
 
-    protected AbstractParamDef(@NonNull Identifier identifier, @NonNull Opt<Supplier<T>> defaultValueSupplier) {
+    protected AbstractParamDef(@NonNull Identifier identifier, @NonNull Opt<Spplr<T>> defaultValueSupplier) {
         this.identifier = identifier;
         this.defaultValueSupplier = defaultValueSupplier;
     }
@@ -42,7 +42,7 @@ public abstract class AbstractParamDef<T> implements ParamDef<T> {
     }
 
     @Override
-    public Opt<Supplier<T>> getDefaultValueSupplier() {
+    public Opt<Spplr<T>> getDefaultValueSupplier() {
         return defaultValueSupplier;
     }
 

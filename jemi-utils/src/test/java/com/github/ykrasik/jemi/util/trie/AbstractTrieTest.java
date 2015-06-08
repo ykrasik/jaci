@@ -16,8 +16,8 @@
 
 package com.github.ykrasik.jemi.util.trie;
 
-import com.github.ykrasik.jemi.util.function.Function;
-import com.github.ykrasik.jemi.util.function.Predicate;
+import com.github.ykrasik.jemi.util.function.Func;
+import com.github.ykrasik.jemi.util.function.Pred;
 import com.github.ykrasik.jemi.util.opt.Opt;
 import org.junit.Before;
 
@@ -72,11 +72,11 @@ public class AbstractTrieTest {
         assertTrue("Unexpected subTrie for prefix: " + prefix, trie.subTrie(prefix).isEmpty());
     }
 
-    protected void map(Function<String, String> function) {
+    protected void map(Func<String, String> function) {
         trie = trie.mapValues(function);
     }
 
-    protected void filter(Predicate<String> filter) {
+    protected void filter(Pred<String> filter) {
         trie = trie.filter(filter);
     }
 

@@ -16,15 +16,16 @@
 
 package com.github.ykrasik.jemi.util.trie;
 
-import com.github.ykrasik.jemi.util.function.Function;
-import com.github.ykrasik.jemi.util.function.Predicate;
+import com.github.ykrasik.jemi.util.function.Func;
+import com.github.ykrasik.jemi.util.function.Pred;
 import com.github.ykrasik.jemi.util.opt.Opt;
 
 import java.util.*;
 import java.util.Map.Entry;
 
 /**
- * A node in a {@link Trie}. Contains a character, a possible value, and children.
+ * An implementation of a {@link Trie}.
+ * Contains a character, a possible value, and children.
  *
  * @author Yevgeny Krasik
  */
@@ -38,6 +39,11 @@ public class TrieNode<T> implements Trie<T> {
     private volatile boolean numWordsCalculated;
     private int numWords;
 
+    /**
+     * Create a new node with the given character and no children.
+     *
+     * @param c Character to assign to this node.
+     */
     public TrieNode(char c) {
         this(c, new HashMap<Character, TrieNode<T>>(1));
     }
@@ -50,6 +56,7 @@ public class TrieNode<T> implements Trie<T> {
     @Override
     public int size() {
         if (!numWordsCalculated) {
+            // TODO: Am I overdoing this? Thread safety? For what?
             synchronized (this) {
                 calcNumWords();
             }
@@ -91,7 +98,7 @@ public class TrieNode<T> implements Trie<T> {
     @Override
     public boolean contains(String word) {
         final Opt<TrieNode<T>> node = getNode(word);
-        return node.exists(IS_WORD);
+        return node.exists(IS_WORD_PREDICATE);
     }
 
     @Override
@@ -120,7 +127,6 @@ public class TrieNode<T> implements Trie<T> {
             // Append child's character to prefix.
             prefixBuilder.append(currentNode.c);
         }
-
         return prefixBuilder.toString();
     }
 
@@ -136,6 +142,7 @@ public class TrieNode<T> implements Trie<T> {
         TrieNode<T> currentNavigationNode = this;
         TrieNode<T> currentCreationNode = prefixTrie;
 
+        // TODO: Consider a more elegant solution.
         for (int i = 0; i < prefix.length(); i++) {
             final char c = prefix.charAt(i);
             final Opt<TrieNode<T>> child = currentNavigationNode.getChild(c);
@@ -160,16 +167,16 @@ public class TrieNode<T> implements Trie<T> {
     }
 
     @Override
-    public <A> TrieNode<A> mapValues(Function<T, A> function) {
+    public <A> TrieNode<A> mapValues(Func<T, A> function) {
         if (isEmpty()) {
             return emptyTrie();
         }
 
-        final Opt<TrieNode<A>> newTrie = doMap(function);
+        final Opt<TrieNode<A>> newTrie = this.doMap(function);
         return newTrie.getOrElse(TrieNode.<A>emptyTrie());
     }
 
-    private <A> Opt<TrieNode<A>> doMap(Function<T, A> function) {
+    private <A> Opt<TrieNode<A>> doMap(Func<T, A> function) {
         final Opt<A> newValue = value.map(function);
 
         // Map the node's children.
@@ -185,7 +192,7 @@ public class TrieNode<T> implements Trie<T> {
         return Opt.of(newNode);
     }
 
-    private <A> Map<Character, TrieNode<A>> mapChildren(Function<T, A> function) {
+    private <A> Map<Character, TrieNode<A>> mapChildren(Func<T, A> function) {
         if (children.isEmpty()) {
             return Collections.emptyMap();
         }
@@ -201,8 +208,8 @@ public class TrieNode<T> implements Trie<T> {
     }
 
     @Override
-    public Trie<T> filter(final Predicate<T> filter) {
-        return mapValues(new Function<T, T>() {
+    public Trie<T> filter(final Pred<T> filter) {
+        return mapValues(new Func<T, T>() {
             @Override
             public T apply(T input) {
                 return filter.test(input) ? input : null;
@@ -396,16 +403,26 @@ public class TrieNode<T> implements Trie<T> {
 
     private static final TrieNode<?> EMPTY_TRIE = createRoot();
 
+    /**
+     * Create a node representing the root node of a Trie.
+     *
+     * @param <T> Trie type.
+     * @return A root node of a Trie.
+     */
     public static <T> TrieNode<T> createRoot() {
         return new TrieNode<>((char) 0);
     }
 
+    /**
+     * @param <T> Trie type.
+     * @return An empty Trie.
+     */
     @SuppressWarnings("unchecked")
     public static <T> TrieNode<T> emptyTrie() {
         return (TrieNode<T>) EMPTY_TRIE;
     }
 
-    private static final Predicate<TrieNode<?>> IS_WORD = new Predicate<TrieNode<?>>() {
+    private static final Pred<TrieNode<?>> IS_WORD_PREDICATE = new Pred<TrieNode<?>>() {
         @Override
         public boolean test(TrieNode<?> trieNode) {
             return trieNode.isWord();

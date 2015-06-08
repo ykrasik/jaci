@@ -18,7 +18,7 @@ package com.github.ykrasik.jemi.cli.param;
 
 import com.github.ykrasik.jemi.Identifier;
 import com.github.ykrasik.jemi.param.IntParamDef;
-import com.github.ykrasik.jemi.util.function.Supplier;
+import com.github.ykrasik.jemi.util.function.Spplr;
 import com.github.ykrasik.jemi.util.opt.Opt;
 import lombok.NonNull;
 
@@ -29,7 +29,7 @@ import lombok.NonNull;
  * @author Yevgeny Krasik
  */
 public class IntCliParam extends AbstractNumericCliParam<Integer> {
-    public IntCliParam(Identifier identifier, Opt<Supplier<Integer>> defaultValueSupplier) {
+    public IntCliParam(Identifier identifier, Opt<Spplr<Integer>> defaultValueSupplier) {
         super(identifier, defaultValueSupplier);
     }
 

@@ -18,7 +18,7 @@ package com.github.ykrasik.jemi.reflection.param.factory;
 
 import com.github.ykrasik.jemi.api.IntParam;
 import com.github.ykrasik.jemi.param.IntParamDef;
-import com.github.ykrasik.jemi.util.function.Suppliers;
+import com.github.ykrasik.jemi.util.function.MoreSuppliers;
 import com.github.ykrasik.jemi.util.opt.Opt;
 import lombok.ToString;
 
@@ -51,7 +51,7 @@ public class IntAnnotationParamFactory extends AnnotationMethodParamFactory<IntP
             final Opt<String> defaultValueSupplierName = getNonEmptyString(annotation.defaultValueSupplier());
             if (defaultValueSupplierName.isPresent()) {
                 // FIXME: Test that this works when the supplier returns primitive (Integer.TYPE)
-                builder.setOptional(Suppliers.reflectionSupplier(instance, defaultValueSupplierName.get(), Integer.TYPE, Integer.class));
+                builder.setOptional(MoreSuppliers.reflectionSupplier(instance, defaultValueSupplierName.get(), Integer.TYPE, Integer.class));
             } else {
                 builder.setOptional(annotation.defaultValue());
             }

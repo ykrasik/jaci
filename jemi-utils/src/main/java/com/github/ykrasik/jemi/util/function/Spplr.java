@@ -17,9 +17,16 @@
 package com.github.ykrasik.jemi.util.function;
 
 /**
+ * Just like Java 8's or Guava's Supplier.
+ * Uses a different name to avoid name confusion.
+ *
+ * @param <T> Argument type.
+ *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
-public interface Predicate<T> {
-    boolean test(T t);
+public interface Spplr<T> {
+    /**
+     * @return Supplied value.
+     */
+    T get();
 }

@@ -16,8 +16,8 @@
 
 package com.github.ykrasik.jemi.util.trie;
 
-import com.github.ykrasik.jemi.util.function.Function;
-import com.github.ykrasik.jemi.util.function.Predicate;
+import com.github.ykrasik.jemi.util.function.Func;
+import com.github.ykrasik.jemi.util.function.Pred;
 import org.junit.Test;
 
 import java.util.*;
@@ -93,7 +93,7 @@ public class TrieBasicTest extends AbstractTrieTest {
         buildAndAssertTrie("1", "2", "3");
 
         // A function that adds 1 to it's input.
-        map(new Function<String, String>() {
+        map(new Func<String, String>() {
             @Override
             public String apply(String input) {
                 return String.valueOf(Integer.parseInt(input) + 1);
@@ -112,7 +112,7 @@ public class TrieBasicTest extends AbstractTrieTest {
         buildAndAssertTrie("invalid1", "a", "invalid2", "b", "cd", "invalidity");
 
         // Filter all values starting with "invalid"
-        filter(new Predicate<String>() {
+        filter(new Pred<String>() {
             @Override
             public boolean test(String input) {
                 return input.startsWith("invalid");

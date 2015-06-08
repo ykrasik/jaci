@@ -17,15 +17,15 @@
 package com.github.ykrasik.jemi.reflection.command;
 
 import com.github.ykrasik.jemi.api.ToggleCommandStateAccessor;
-import com.github.ykrasik.jemi.util.function.Supplier;
+import com.github.ykrasik.jemi.util.function.Spplr;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 /**
- * A {@link Supplier} that returns the inverse of the current {@link ToggleCommandStateAccessor#get()}.
+ * A {@link Spplr} that returns the inverse of the current {@link ToggleCommandStateAccessor#get()}.
  */
 @RequiredArgsConstructor
-public class ToggleCommandAccessorDefaultValueSupplier implements Supplier<Boolean> {
+public class ToggleCommandAccessorDefaultValueSupplier implements Spplr<Boolean> {
     @NonNull private final ToggleCommandStateAccessor accessor;
 
     @Override

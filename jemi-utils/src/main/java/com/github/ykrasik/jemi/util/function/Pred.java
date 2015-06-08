@@ -17,9 +17,19 @@
 package com.github.ykrasik.jemi.util.function;
 
 /**
+ * Just like Java 8's or Guava's Predicate.
+ * Uses a different name to avoid name confusion.
+ *
+ * @param <T> Argument type.
+ *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
-public interface Function<T, R> {
-    R apply(T t);
+public interface Pred<T> {
+    /**
+     * Apply this predicate to the argument.
+     *
+     * @param t Argument to apply the predicate to.
+     * @return Result of applying the predicate to the argument.
+     */
+    boolean test(T t);
 }

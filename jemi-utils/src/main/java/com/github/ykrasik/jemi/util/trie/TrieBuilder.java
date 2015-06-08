@@ -28,29 +28,14 @@ import java.util.Map.Entry;
  * @author Yevgeny Krasik
  */
 public class TrieBuilder<T> {
-    private final Map<String, T> map;
-
-    /**
-     * Construct an empty {@link TrieBuilder}.
-     */
-    public TrieBuilder() {
-        this.map = new HashMap<>();
-    }
-
-    /**
-     * Construct a {@link TrieBuilder} with the word-value mappings from the given map.
-     * @param map The map to initialize the {@link TrieBuilder} from.
-     */
-    public TrieBuilder(Map<String, T> map) {
-        this.map = new HashMap<>(map);
-    }
+    private final Map<String, T> map = new HashMap<>();
 
     /**
      * Add a word-value mapping to the Trie. Expects there not to be a previous mapping for the word.
      *
      * @param word The word for the word-value mapping.
      * @param value The value for the word-value mapping.
-     * @return This for chaining.
+     * @return {@code this}, for chaining.
      * @throws IllegalStateException If this Trie already contained a mapping for the given word.
      */
     public TrieBuilder<T> add(String word, T value) {
@@ -65,11 +50,12 @@ public class TrieBuilder<T> {
     }
 
     /**
-     * Add all word-value pairs in the given map to the Trie. Expects there not to be any previous mappings for any of the words.
+     * Add all word-value pairs from the given map to the Trie.
+     * Expects there not to be any previous mappings for any of the words.
      *
      * @param map Map to add word-value pairs from.
-     * @return This for chaining.
-     * @throws IllegalStateException If this Trie already contained any of the map's word-value pairs.
+     * @return {@code this}, for chaining.
+     * @throws IllegalStateException If this Trie already contained a mapping for any of the map's words (keys).
      */
     public TrieBuilder<T> addAll(Map<String, T> map) {
         for (Entry<String, T> entry : map.entrySet()) {
@@ -84,7 +70,7 @@ public class TrieBuilder<T> {
      *
      * @param word The word for the word-value mapping.
      * @param value The value for the word-value mapping.
-     * @return This for chaining.
+     * @return {@code this}, for chaining.
      */
     public TrieBuilder<T> set(String word, T value) {
         assertNotEmptyWord(word);
@@ -95,10 +81,11 @@ public class TrieBuilder<T> {
     }
 
     /**
-     * Set all word-value pairs in the given map to the Trie. If any previous mapping exists, it will be overwritten.
+     * Set all word-value pairs in the given map to the Trie.
+     * If any previous mapping exists, it will be overwritten.
      *
      * @param map Map to set word-value pairs from.
-     * @return This for chaining.
+     * @return {@code this}, for chaining.
      */
     public TrieBuilder<T> setAll(Map<String, T> map) {
         for (Entry<String, T> entry : map.entrySet()) {

@@ -16,15 +16,16 @@
 
 package com.github.ykrasik.jemi.util.opt;
 
-import com.github.ykrasik.jemi.util.function.Function;
-import com.github.ykrasik.jemi.util.function.Predicate;
+import com.github.ykrasik.jemi.util.function.Func;
+import com.github.ykrasik.jemi.util.function.Pred;
 
 import java.util.*;
 
 /**
+ * An implementation of a {@code present} {@link Opt}.
+ *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
 final class Present<T> extends Opt<T> {
     private static final long serialVersionUID = 0;
 
@@ -60,22 +61,22 @@ final class Present<T> extends Opt<T> {
     }
 
     @Override
-    public <V> Opt<V> map(Function<? super T, V> function) {
+    public <V> Opt<V> map(Func<? super T, V> function) {
         return Opt.ofNullable(function.apply(value));
     }
 
     @Override
-    public <V> Opt<V> flatMap(Function<? super T, Opt<V>> function) {
+    public <V> Opt<V> flatMap(Func<? super T, Opt<V>> function) {
         return function.apply(value);
     }
 
     @Override
-    public boolean exists(Predicate<? super T> predicate) {
+    public boolean exists(Pred<? super T> predicate) {
         return predicate.test(value);
     }
 
     @Override
-    public Opt<T> filter(Predicate<? super T> predicate) {
+    public Opt<T> filter(Pred<? super T> predicate) {
         return predicate.test(value) ? this : Opt.<T>absent();
     }
 
@@ -111,6 +112,6 @@ final class Present<T> extends Opt<T> {
 
     @Override
     public String toString() {
-        return "Opt.of(" + value + ')';
+        return "Present(" + value + ')';
     }
 }

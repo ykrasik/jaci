@@ -17,9 +17,20 @@
 package com.github.ykrasik.jemi.util.function;
 
 /**
+ * Just like Java 8's or Guava's Function.
+ * Uses a different name to avoid name confusion.
+ *
+ * @param <T> Argument type.
+ * @param <R> Return type.
+ *
  * @author Yevgeny Krasik
  */
-// TODO: JavaDoc
-public interface Supplier<T> {
-    T get();
+public interface Func<T, R> {
+    /**
+     * Apply this function to the argument.
+     *
+     * @param t Argument to apply the function to.
+     * @return Result of applying the function to the argument.
+     */
+    R apply(T t);
 }

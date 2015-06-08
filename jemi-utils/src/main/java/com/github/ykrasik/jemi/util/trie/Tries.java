@@ -24,35 +24,37 @@ import java.util.List;
  *
  * @author Yevgeny Krasik
  */
+// TODO: I think this class can be deleted.
 public final class Tries {
-    private Tries() {
-    }
+    private Tries() { }
 
     /**
      * @param <T> Type of {@link Trie}.
      * @return An empty {@link Trie}.
      */
+    // TODO: Only used from CliDirectory...
     public static <T> Trie<T> emptyTrie() {
         return TrieNode.emptyTrie();
     }
 
     /**
      * Sometimes a Trie's values aren't important, only the words matter.
-     * Convenience method that associates each word with a constant value.
+     * Convenience method that associates each word with an empty value.
      *
      * @param words Words to put in the Trie.
-     * @return A Trie where each word is present in the Trie, but associated to some constant value.
+     * @return A Trie where each word is associated to an empty value.
      */
+    // TODO: This is only used in tests now, so find a more suitable place for it.
     public static Trie<String> toStringTrie(String... words) {
         return toStringTrie(Arrays.asList(words));
     }
 
     /**
      * Sometimes a Trie's values aren't important, only the words matter.
-     * Convenience method that associates each word with a constant, empty value.
+     * Convenience method that associates each word with an empty value.
      *
      * @param words Words to put in the Trie.
-     * @return A Trie where each word is present in the Trie, but associated to some constant value.
+     * @return A Trie where each word is associated to an empty value.
      */
     public static Trie<String> toStringTrie(List<String> words) {
         final TrieBuilder<String> builder = new TrieBuilder<>();

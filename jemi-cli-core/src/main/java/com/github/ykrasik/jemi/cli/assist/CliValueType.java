@@ -16,7 +16,7 @@
 
 package com.github.ykrasik.jemi.cli.assist;
 
-import com.github.ykrasik.jemi.util.function.Function;
+import com.github.ykrasik.jemi.util.function.Func;
 import lombok.NonNull;
 
 /**
@@ -46,11 +46,11 @@ public enum CliValueType {
     }
 
     /**
-     * A {@link Function} that returns a constant {@link CliValueType} for each input.
+     * A {@link Func} that returns a constant {@link CliValueType} for each input.
      *
      * @param <T> Source type of the function.
      */
-    public static class Mapper<T> implements Function<T, CliValueType> {
+    public static class Mapper<T> implements Func<T, CliValueType> {
         private final CliValueType type;
 
         public Mapper(@NonNull CliValueType type) {

@@ -21,9 +21,9 @@ import com.github.ykrasik.jemi.cli.assist.AutoComplete;
 import com.github.ykrasik.jemi.cli.assist.CliValueType;
 import com.github.ykrasik.jemi.cli.exception.ParseException;
 import com.github.ykrasik.jemi.param.StringParamDef;
-import com.github.ykrasik.jemi.util.function.Function;
-import com.github.ykrasik.jemi.util.function.Supplier;
-import com.github.ykrasik.jemi.util.function.Suppliers;
+import com.github.ykrasik.jemi.util.function.Func;
+import com.github.ykrasik.jemi.util.function.Spplr;
+import com.github.ykrasik.jemi.util.function.MoreSuppliers;
 import com.github.ykrasik.jemi.util.opt.Opt;
 import com.github.ykrasik.jemi.util.trie.Trie;
 import com.github.ykrasik.jemi.util.trie.TrieBuilder;
@@ -37,16 +37,16 @@ import java.util.List;
  * @author Yevgeny Krasik
  */
 public class StringCliParam extends AbstractCliParam<String> {
-    private final Supplier<Trie<CliValueType>> valuesSupplier;
+    private final Spplr<Trie<CliValueType>> valuesSupplier;
 
     public StringCliParam(Identifier identifier,
-                          Opt<Supplier<String>> defaultValueSupplier,
-                          @NonNull Supplier<List<String>> valuesSupplier) {
+                          Opt<Spplr<String>> defaultValueSupplier,
+                          @NonNull Spplr<List<String>> valuesSupplier) {
         super(identifier, defaultValueSupplier);
 
         // If the supplier is a const supplier type (supplies a constant or cached value), the returned supplier
         // will also cache the result and not re-calculate it on every call.
-        this.valuesSupplier = Suppliers.transform(valuesSupplier, new Function<List<String>, Trie<CliValueType>>() {
+        this.valuesSupplier = MoreSuppliers.map(valuesSupplier, new Func<List<String>, Trie<CliValueType>>() {
             @Override
             public Trie<CliValueType> apply(List<String> values) {
                 return createValuesTrie(values);

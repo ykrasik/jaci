@@ -17,28 +17,49 @@
 package com.github.ykrasik.jemi.util.reflection;
 
 import com.github.ykrasik.jemi.util.opt.Opt;
-import lombok.Data;
 import lombok.NonNull;
 
 import java.lang.annotation.Annotation;
 
 /**
- * Provides reflection information about a parameter. Used due to lack in Java 7.
+ * Reflection information about a method parameter. Used due to lack in Java 7.
  *
  * @author Yevgeny Krasik
  */
-@Data
 public class ReflectionParameter {
-    @NonNull private final Class<?> parameterType;
-    @NonNull private final Annotation[] annotations;
-
-    /**
-     * The parameter's index in the list of parameters, starting from 0.
-     */
+    private final Class<?> parameterType;
+    private final Annotation[] annotations;
     private final int index;
 
+    public ReflectionParameter(@NonNull Class<?> parameterType, @NonNull Annotation[] annotations, int index) {
+        this.parameterType = parameterType;
+        this.annotations = annotations;
+        this.index = index;
+    }
+
     /**
-     * @param annotationClass Type of annotation to find.
+     * @return The parameter's type.
+     */
+    public Class<?> getParameterType() {
+        return parameterType;
+    }
+
+    /**
+     * @return The parameter's annotations.
+     */
+    public Annotation[] getAnnotations() {
+        return annotations;
+    }
+
+    /**
+     * @return The parameter's index in the list of parameters, starting from 0.
+     */
+    public int getIndex() {
+        return index;
+    }
+
+    /**
+     * @param annotationClass Class of annotation to find.
      * @param <T> Type of annotation to find.
      * @return Annotation of the requested type, if exists.
      */
@@ -52,7 +73,11 @@ public class ReflectionParameter {
         return Opt.absent();
     }
 
-    // TODO: JavaDoc
+    /**
+     * Generate a default name for the parameter, since parameter names aren't available in Java 7's reflection API.
+     *
+     * @return A default-generated parameter name, of the form: "${type}Param${index}"
+     */
     public String getDefaultName() {
         final String type = parameterType.getSimpleName().toLowerCase();
         return type + "Param" + index;

@@ -18,7 +18,7 @@ package com.github.ykrasik.jemi.reflection.param.factory;
 
 import com.github.ykrasik.jemi.api.StringParam;
 import com.github.ykrasik.jemi.param.StringParamDef;
-import com.github.ykrasik.jemi.util.function.Suppliers;
+import com.github.ykrasik.jemi.util.function.MoreSuppliers;
 import com.github.ykrasik.jemi.util.opt.Opt;
 import lombok.ToString;
 
@@ -50,7 +50,7 @@ public class StringAnnotationParamFactory extends AnnotationMethodParamFactory<S
             // Otherwise, use the value supplied by 'defaultValue'.
             final Opt<String> defaultValueSupplierName = getNonEmptyString(annotation.defaultValueSupplier());
             if (defaultValueSupplierName.isPresent()) {
-                builder.setOptional(Suppliers.reflectionSupplier(instance, defaultValueSupplierName.get(), String.class));
+                builder.setOptional(MoreSuppliers.reflectionSupplier(instance, defaultValueSupplierName.get(), String.class));
             } else {
                 builder.setOptional(annotation.defaultValue());
             }
@@ -60,7 +60,7 @@ public class StringAnnotationParamFactory extends AnnotationMethodParamFactory<S
         // Otherwise, use the values supplied by 'accepts'.
         final Opt<String> valuesSupplierName = getNonEmptyString(annotation.acceptsSupplier());
         if (valuesSupplierName.isPresent()) {
-            builder.setDynamicValues(Suppliers.reflectionListSupplier(instance, valuesSupplierName.get(), String[].class));
+            builder.setDynamicValues(MoreSuppliers.reflectionListSupplier(instance, valuesSupplierName.get(), String[].class));
         } else {
             builder.setStaticValues(annotation.accepts());
         }

@@ -18,7 +18,7 @@ package com.github.ykrasik.jemi.cli.param;
 
 import com.github.ykrasik.jemi.Identifier;
 import com.github.ykrasik.jemi.param.DoubleParamDef;
-import com.github.ykrasik.jemi.util.function.Supplier;
+import com.github.ykrasik.jemi.util.function.Spplr;
 import com.github.ykrasik.jemi.util.opt.Opt;
 import lombok.NonNull;
 
@@ -29,7 +29,7 @@ import lombok.NonNull;
  * @author Yevgeny Krasik
  */
 public class DoubleCliParam extends AbstractNumericCliParam<Double> {
-    public DoubleCliParam(Identifier identifier, Opt<Supplier<Double>> defaultValueSupplier) {
+    public DoubleCliParam(Identifier identifier, Opt<Spplr<Double>> defaultValueSupplier) {
         super(identifier, defaultValueSupplier);
     }
 

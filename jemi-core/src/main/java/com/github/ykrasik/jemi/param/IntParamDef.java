@@ -17,8 +17,8 @@
 package com.github.ykrasik.jemi.param;
 
 import com.github.ykrasik.jemi.Identifier;
-import com.github.ykrasik.jemi.util.function.Supplier;
-import com.github.ykrasik.jemi.util.function.Suppliers;
+import com.github.ykrasik.jemi.util.function.Spplr;
+import com.github.ykrasik.jemi.util.function.MoreSuppliers;
 import com.github.ykrasik.jemi.util.opt.Opt;
 import lombok.NonNull;
 import lombok.ToString;
@@ -30,7 +30,7 @@ import lombok.ToString;
  * @author Yevgeny Krasik
  */
 public class IntParamDef extends AbstractParamDef<Integer> {
-    private IntParamDef(Identifier identifier, Opt<Supplier<Integer>> defaultValueSupplier) {
+    private IntParamDef(Identifier identifier, Opt<Spplr<Integer>> defaultValueSupplier) {
         super(identifier, defaultValueSupplier);
     }
 
@@ -46,7 +46,7 @@ public class IntParamDef extends AbstractParamDef<Integer> {
     public static class Builder {
         private final String name;
         private String description = "int";
-        private Opt<Supplier<Integer>> defaultValueSupplier = Opt.absent();
+        private Opt<Spplr<Integer>> defaultValueSupplier = Opt.absent();
 
         /**
          * @param name Parameter name.
@@ -71,16 +71,16 @@ public class IntParamDef extends AbstractParamDef<Integer> {
          * @return {@code this}, for chaining.
          */
         public Builder setOptional(int defaultValue) {
-            return setOptional(Suppliers.of(defaultValue));
+            return setOptional(MoreSuppliers.of(defaultValue));
         }
 
         /**
-         * Set this parameter to be optional, and invoke the given {@link Supplier} for a default value if it is not passed.
+         * Set this parameter to be optional, and invoke the given {@link Spplr} for a default value if it is not passed.
          *
          * @param defaultValueSupplier Supplier to invoke if the parameter isn't passed.
          * @return {@code this}, for chaining.
          */
-        public Builder setOptional(@NonNull Supplier<Integer> defaultValueSupplier) {
+        public Builder setOptional(@NonNull Spplr<Integer> defaultValueSupplier) {
             this.defaultValueSupplier = Opt.of(defaultValueSupplier);
             return this;
         }

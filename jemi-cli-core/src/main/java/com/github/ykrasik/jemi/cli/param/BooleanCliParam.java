@@ -21,8 +21,8 @@ import com.github.ykrasik.jemi.Identifier;
 import com.github.ykrasik.jemi.param.BooleanParamDef;
 import com.github.ykrasik.jemi.cli.assist.AutoComplete;
 import com.github.ykrasik.jemi.cli.assist.CliValueType;
-import com.github.ykrasik.jemi.util.function.Supplier;
-import com.github.ykrasik.jemi.util.function.Suppliers;
+import com.github.ykrasik.jemi.util.function.Spplr;
+import com.github.ykrasik.jemi.util.function.MoreSuppliers;
 import com.github.ykrasik.jemi.util.opt.Opt;
 import com.github.ykrasik.jemi.util.trie.Trie;
 import com.github.ykrasik.jemi.util.trie.TrieBuilder;
@@ -50,7 +50,7 @@ public class BooleanCliParam extends AbstractCliParam<Boolean> {
         .add("false", CliValueType.COMMAND_PARAM_VALUE)
         .build();
 
-    public BooleanCliParam(Identifier identifier, Opt<Supplier<Boolean>> defaultValueSupplier) {
+    public BooleanCliParam(Identifier identifier, Opt<Spplr<Boolean>> defaultValueSupplier) {
         super(identifier, defaultValueSupplier);
     }
 
@@ -98,6 +98,6 @@ public class BooleanCliParam extends AbstractCliParam<Boolean> {
      * @return A CLI boolean parameter constructed from the given parameters.
      */
     public static BooleanCliParam optional(Identifier identifier, boolean defaultValue) {
-        return new BooleanCliParam(identifier, Opt.of(Suppliers.of(defaultValue)));
+        return new BooleanCliParam(identifier, Opt.of(MoreSuppliers.of(defaultValue)));
     }
 }

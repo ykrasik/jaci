@@ -27,7 +27,7 @@ import com.github.ykrasik.jemi.cli.param.CommandCliParam;
 import com.github.ykrasik.jemi.cli.param.DirectoryCliParam;
 import com.github.ykrasik.jemi.command.CommandArgs;
 import com.github.ykrasik.jemi.command.CommandExecutor;
-import com.github.ykrasik.jemi.util.function.Supplier;
+import com.github.ykrasik.jemi.util.function.Spplr;
 import lombok.AccessLevel;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -76,7 +76,7 @@ public class CliSystemCommandFactory {
         final List<CliParam> params = Arrays.<CliParam>asList(
             new DirectoryCliParam.Builder("dir", hierarchy)
                 .setDescription("Directory to list")
-                .setOptional(new Supplier<CliDirectory>() {
+                .setOptional(new Spplr<CliDirectory>() {
                     @Override
                     public CliDirectory get() {
                         return hierarchy.getWorkingDirectory();

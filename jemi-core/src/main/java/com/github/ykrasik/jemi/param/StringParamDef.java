@@ -17,8 +17,8 @@
 package com.github.ykrasik.jemi.param;
 
 import com.github.ykrasik.jemi.Identifier;
-import com.github.ykrasik.jemi.util.function.Supplier;
-import com.github.ykrasik.jemi.util.function.Suppliers;
+import com.github.ykrasik.jemi.util.function.Spplr;
+import com.github.ykrasik.jemi.util.function.MoreSuppliers;
 import com.github.ykrasik.jemi.util.opt.Opt;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
@@ -36,17 +36,17 @@ import java.util.List;
  * <ol>
  *     <li>None - All values are accepted. This is the default, applies if the accepted values list is empty.</li>
  *     <li>Static - Only pre-defined values are accepted. Can be set through {@link StringParamDef.Builder#setStaticValues(List)}.</li>
- *     <li>Dynamic - The acceptable values are calculated at runtime, by invoking a {@link Supplier}.
- *                   Can be set through {@link StringParamDef.Builder#setDynamicValues(Supplier)}.</li>
+ *     <li>Dynamic - The acceptable values are calculated at runtime, by invoking a {@link Spplr}.
+ *                   Can be set through {@link StringParamDef.Builder#setDynamicValues(Spplr)}.</li>
  * </ol>
  *
  * @author Yevgeny Krasik
  */
 @EqualsAndHashCode(callSuper = true)
 public class StringParamDef extends AbstractParamDef<String> {
-    private final Supplier<List<String>> valuesSupplier;
+    private final Spplr<List<String>> valuesSupplier;
 
-    private StringParamDef(Identifier identifier, Opt<Supplier<String>> defaultValueSupplier, @NonNull Supplier<List<String>> valuesSupplier) {
+    private StringParamDef(Identifier identifier, Opt<Spplr<String>> defaultValueSupplier, @NonNull Spplr<List<String>> valuesSupplier) {
         super(identifier, defaultValueSupplier);
         this.valuesSupplier = valuesSupplier;
     }
@@ -57,10 +57,10 @@ public class StringParamDef extends AbstractParamDef<String> {
     }
 
     /**
-     * @return The accepted values {@link Supplier}. If the {@link List} returned by the supplier is empty, all values
+     * @return The accepted values {@link Spplr}. If the {@link List} returned by the supplier is empty, all values
      *         are accepted.
      */
-    public Supplier<List<String>> getValuesSupplier() {
+    public Spplr<List<String>> getValuesSupplier() {
         return valuesSupplier;
     }
 
@@ -69,12 +69,12 @@ public class StringParamDef extends AbstractParamDef<String> {
      */
     @ToString
     public static class Builder {
-        private static final Supplier<List<String>> NO_VALUES_SUPPLIER = Suppliers.of(Collections.<String>emptyList());
+        private static final Spplr<List<String>> NO_VALUES_SUPPLIER = MoreSuppliers.of(Collections.<String>emptyList());
 
         private final String name;
         private String description = "string";
-        private Opt<Supplier<String>> defaultValueSupplier = Opt.absent();
-        private Supplier<List<String>> valuesSupplier = NO_VALUES_SUPPLIER;
+        private Opt<Spplr<String>> defaultValueSupplier = Opt.absent();
+        private Spplr<List<String>> valuesSupplier = NO_VALUES_SUPPLIER;
 
         /**
          * @param name Parameter name.
@@ -99,16 +99,16 @@ public class StringParamDef extends AbstractParamDef<String> {
          * @return {@code this}, for chaining.
          */
         public Builder setOptional(@NonNull String defaultValue) {
-            return setOptional(Suppliers.of(defaultValue));
+            return setOptional(MoreSuppliers.of(defaultValue));
         }
 
         /**
-         * Set this parameter to be optional, and invoke the given {@link Supplier} for a default value if it is not passed.
+         * Set this parameter to be optional, and invoke the given {@link Spplr} for a default value if it is not passed.
          *
          * @param defaultValueSupplier Supplier to invoke if the parameter isn't passed.
          * @return {@code this}, for chaining.
          */
-        public Builder setOptional(@NonNull Supplier<String> defaultValueSupplier) {
+        public Builder setOptional(@NonNull Spplr<String> defaultValueSupplier) {
             this.defaultValueSupplier = Opt.of(defaultValueSupplier);
             return this;
         }
@@ -132,19 +132,19 @@ public class StringParamDef extends AbstractParamDef<String> {
          * @return {@code this}, for chaining.
          */
         public Builder setStaticValues(@NonNull List<String> values) {
-            this.valuesSupplier = Suppliers.of(values);
+            this.valuesSupplier = MoreSuppliers.of(values);
             return this;
         }
 
         /**
-         * Set this parameter to only accept a set of values that is calculated at runtime, supplied by the {@link Supplier}.
+         * Set this parameter to only accept a set of values that is calculated at runtime, supplied by the {@link Spplr}.
          * If the supplier returns an empty values list, all values will be accepted.
          *
-         * @param valuesSupplier {@link Supplier} to invoke for the list of acceptable values.
+         * @param valuesSupplier {@link Spplr} to invoke for the list of acceptable values.
          *                       If the returned list is empty, all values will be accepted.
          * @return {@code this}, for chaining.
          */
-        public Builder setDynamicValues(@NonNull Supplier<List<String>> valuesSupplier) {
+        public Builder setDynamicValues(@NonNull Spplr<List<String>> valuesSupplier) {
             this.valuesSupplier = valuesSupplier;
             return this;
         }

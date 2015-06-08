@@ -17,8 +17,8 @@
 package com.github.ykrasik.jemi.param;
 
 import com.github.ykrasik.jemi.Identifier;
-import com.github.ykrasik.jemi.util.function.Supplier;
-import com.github.ykrasik.jemi.util.function.Suppliers;
+import com.github.ykrasik.jemi.util.function.Spplr;
+import com.github.ykrasik.jemi.util.function.MoreSuppliers;
 import com.github.ykrasik.jemi.util.opt.Opt;
 import lombok.NonNull;
 import lombok.ToString;
@@ -30,7 +30,7 @@ import lombok.ToString;
  * @author Yevgeny Krasik
  */
 public class BooleanParamDef extends AbstractParamDef<Boolean> {
-    private BooleanParamDef(Identifier identifier, Opt<Supplier<Boolean>> defaultValueSupplier) {
+    private BooleanParamDef(Identifier identifier, Opt<Spplr<Boolean>> defaultValueSupplier) {
         super(identifier, defaultValueSupplier);
     }
 
@@ -46,7 +46,7 @@ public class BooleanParamDef extends AbstractParamDef<Boolean> {
     public static class Builder {
         private final String name;
         private String description = "boolean";
-        private Opt<Supplier<Boolean>> defaultValueSupplier = Opt.absent();
+        private Opt<Spplr<Boolean>> defaultValueSupplier = Opt.absent();
 
         /**
          * @param name Parameter name.
@@ -71,16 +71,16 @@ public class BooleanParamDef extends AbstractParamDef<Boolean> {
          * @return {@code this}, for chaining.
          */
         public Builder setOptional(boolean defaultValue) {
-            return setOptional(Suppliers.of(defaultValue));
+            return setOptional(MoreSuppliers.of(defaultValue));
         }
 
         /**
-         * Set this parameter to be optional, and invoke the given {@link Supplier} for a default value if it is not passed.
+         * Set this parameter to be optional, and invoke the given {@link Spplr} for a default value if it is not passed.
          *
          * @param defaultValueSupplier Supplier to invoke if the parameter isn't passed.
          * @return {@code this}, for chaining.
          */
-        public Builder setOptional(@NonNull Supplier<Boolean> defaultValueSupplier) {
+        public Builder setOptional(@NonNull Spplr<Boolean> defaultValueSupplier) {
             this.defaultValueSupplier = Opt.of(defaultValueSupplier);
             return this;
         }

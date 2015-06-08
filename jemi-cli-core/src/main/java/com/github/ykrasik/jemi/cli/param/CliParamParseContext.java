@@ -25,7 +25,7 @@ import com.github.ykrasik.jemi.cli.exception.ParseError;
 import com.github.ykrasik.jemi.cli.exception.ParseException;
 import com.github.ykrasik.jemi.command.CommandArgs;
 import com.github.ykrasik.jemi.command.CommandArgsImpl;
-import com.github.ykrasik.jemi.util.function.Predicate;
+import com.github.ykrasik.jemi.util.function.Pred;
 import com.github.ykrasik.jemi.util.opt.Opt;
 import com.github.ykrasik.jemi.util.trie.Trie;
 import lombok.NonNull;
@@ -256,7 +256,7 @@ public class CliParamParseContext {
 
     private AutoComplete autoCompleteParamName(String prefix) {
         final Trie<CliParam> prefixParams = paramsTrie.subTrie(prefix);
-        final Trie<CliParam> unboundPrefixParams = prefixParams.filter(new Predicate<CliParam>() {
+        final Trie<CliParam> unboundPrefixParams = prefixParams.filter(new Pred<CliParam>() {
             @Override
             public boolean test(CliParam value) {
                 // Only keep unbound params.

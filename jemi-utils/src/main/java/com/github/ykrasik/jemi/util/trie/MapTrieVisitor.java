@@ -25,11 +25,7 @@ import java.util.Map;
  * @author Yevgeny Krasik
  */
 public class MapTrieVisitor<T> implements TrieVisitor<T> {
-    private final Map<String, T> values;
-
-    public MapTrieVisitor() {
-        this.values = new HashMap<>();
-    }
+    private final Map<String, T> values = new HashMap<>();
 
     @Override
     public void visit(String word, T value) {

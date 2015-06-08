@@ -16,8 +16,8 @@
 
 package com.github.ykrasik.jemi.util.trie;
 
-import com.github.ykrasik.jemi.util.function.Function;
-import com.github.ykrasik.jemi.util.function.Predicate;
+import com.github.ykrasik.jemi.util.function.Func;
+import com.github.ykrasik.jemi.util.function.Pred;
 import com.github.ykrasik.jemi.util.opt.Opt;
 
 import java.util.Collection;
@@ -32,7 +32,6 @@ import java.util.Set;
  *
  * @author Yevgeny Krasik
  */
-// TODO: Consider Optimizing: Use word segments as children, not characters.
 public interface Trie<T> {
     /**
      * @return The amount of words in this Trie.
@@ -40,13 +39,13 @@ public interface Trie<T> {
     int size();
 
     /**
-     * @return True if this Trie does not contain any words.
+     * @return {@code true} if this Trie does not contain any words.
      */
     boolean isEmpty();
 
     /**
      * @param word The word to check.
-     * @return True if this Trie contains the word.
+     * @return {@code true} if this Trie contains the word.
      */
     boolean contains(String word);
 
@@ -58,7 +57,7 @@ public interface Trie<T> {
 
     /**
      * @return The longest common prefix in this Trie.<br>
-     *         For example, for the words 'abc', 'abcd' and 'abcde', the longest common prefix is 'abc'.
+     *         For example, for the words 'abcd', 'abce' and 'abcf', the longest common prefix is 'abc'.
      */
     String getLongestPrefix();
 
@@ -68,26 +67,27 @@ public interface Trie<T> {
      *         If no such words exist in the Trie, an empty Trie is returned.<br>
      *         Does not alter this Trie. Case Insensitive.
      */
+    // TODO: From the point of an API, doesn't it make more sense to return Opt?
     Trie<T> subTrie(String prefix);
 
     /**
      * @param function Function to apply to each value in this Trie.
-     * @param <A> Type to transform values to.
-     * @return A Trie in which the value of each word was transformed by calling {@link Function#apply}.<br>
+     * @param <R> Type to transform values to.
+     * @return A Trie in which the value of each word was transformed by calling {@link Func#apply}.<br>
      *         If the result of the transformation returned 'null', that word and value will not appear in the returned Trie.<br>
      *         Does not alter this Trie.
      */
-    // TODO: I don't like that fact that function can return null.
-    <A> Trie<A> mapValues(Function<T, A> function);
+    // TODO: I don't like that the function can return null.
+    <R> Trie<R> mapValues(Func<T, R> function);
 
     // TODO: Add a lazy map that saves the function and only applies it when traversed.
 
     /**
      * @param filter Predicate that determines which values to keep in the Trie.
-     * @return A Trie in which all values for which {@link Predicate#test} returned false are removed.<br>
+     * @return A Trie which only contains values for which {@link Pred#test} returned {@code true}.<br>
      *         Does not alter this Trie.
      */
-    Trie<T> filter(Predicate<T> filter);
+    Trie<T> filter(Pred<T> filter);
 
     /**
      * @param other The other Trie of the union.

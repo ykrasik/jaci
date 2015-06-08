@@ -19,7 +19,7 @@ package com.github.ykrasik.jemi.cli.param;
 import com.github.ykrasik.jemi.Identifier;
 import com.github.ykrasik.jemi.cli.exception.ParseError;
 import com.github.ykrasik.jemi.cli.exception.ParseException;
-import com.github.ykrasik.jemi.util.function.Supplier;
+import com.github.ykrasik.jemi.util.function.Spplr;
 import com.github.ykrasik.jemi.util.opt.Opt;
 import lombok.NonNull;
 
@@ -41,9 +41,9 @@ public abstract class AbstractCliParam<T> implements CliParam {
     /**
      * If this value is present, this parameter is considered optional.
      */
-    private final Opt<Supplier<T>> defaultValueSupplier;
+    private final Opt<Spplr<T>> defaultValueSupplier;
 
-    protected AbstractCliParam(@NonNull Identifier identifier, @NonNull Opt<Supplier<T>> defaultValueSupplier) {
+    protected AbstractCliParam(@NonNull Identifier identifier, @NonNull Opt<Spplr<T>> defaultValueSupplier) {
         this.identifier = identifier;
         this.defaultValueSupplier = defaultValueSupplier;
     }

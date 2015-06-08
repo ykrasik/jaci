@@ -21,8 +21,8 @@ import com.github.ykrasik.jemi.cli.assist.AutoComplete;
 import com.github.ykrasik.jemi.cli.directory.CliDirectory;
 import com.github.ykrasik.jemi.cli.exception.ParseException;
 import com.github.ykrasik.jemi.cli.hierarchy.CliCommandHierarchy;
-import com.github.ykrasik.jemi.util.function.Supplier;
-import com.github.ykrasik.jemi.util.function.Suppliers;
+import com.github.ykrasik.jemi.util.function.Spplr;
+import com.github.ykrasik.jemi.util.function.MoreSuppliers;
 import com.github.ykrasik.jemi.util.opt.Opt;
 import lombok.NonNull;
 import lombok.ToString;
@@ -38,7 +38,7 @@ public class DirectoryCliParam extends AbstractCliParam<CliDirectory> {
     private final CliCommandHierarchy hierarchy;
 
     private DirectoryCliParam(Identifier identifier,
-                              Opt<Supplier<CliDirectory>> defaultValueSupplier,
+                              Opt<Spplr<CliDirectory>> defaultValueSupplier,
                               @NonNull CliCommandHierarchy hierarchy) {
         super(identifier, defaultValueSupplier);
 
@@ -68,7 +68,7 @@ public class DirectoryCliParam extends AbstractCliParam<CliDirectory> {
         private final String name;
         private final CliCommandHierarchy hierarchy;
         private String description = "directory";
-        private Opt<Supplier<CliDirectory>> defaultValueSupplier = Opt.absent();
+        private Opt<Spplr<CliDirectory>> defaultValueSupplier = Opt.absent();
 
         public Builder(@NonNull String name, @NonNull CliCommandHierarchy hierarchy) {
             this.name = name;
@@ -91,16 +91,16 @@ public class DirectoryCliParam extends AbstractCliParam<CliDirectory> {
          * @return {@code this}, for chaining.
          */
         public Builder setOptional(@NonNull CliDirectory defaultValue) {
-            return setOptional(Suppliers.of(defaultValue));
+            return setOptional(MoreSuppliers.of(defaultValue));
         }
 
         /**
-         * Set this parameter to be optional, and invoke the given {@link Supplier} for a default value if it is not passed.
+         * Set this parameter to be optional, and invoke the given {@link Spplr} for a default value if it is not passed.
          *
          * @param defaultValueSupplier Supplier to invoke if the parameter isn't passed.
          * @return {@code this}, for chaining.
          */
-        public Builder setOptional(@NonNull Supplier<CliDirectory> defaultValueSupplier) {
+        public Builder setOptional(@NonNull Spplr<CliDirectory> defaultValueSupplier) {
             this.defaultValueSupplier = Opt.of(defaultValueSupplier);
             return this;
         }

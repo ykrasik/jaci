@@ -36,9 +36,12 @@ public final class ReflectionUtils {
 
     /**
      * Creates an instance of this class through reflection. Class must have a no-args constructor.
+     * Bypasses any checked exceptions that could be throw and throws them at runtime.
      *
      * @param clazz Class to instantiate.
      * @return An instance of the provided class.
+     * @throws RuntimeException If an error occurred while instantiating an object of the class (for example, if the
+     *                          class doesn't have a no-args constructor).
      */
     @SneakyThrows
     public static Object createInstanceNoArgs(Class<?> clazz) {
@@ -47,25 +50,21 @@ public final class ReflectionUtils {
 
     /**
      * Returns a method with the provided name that takes no-args.
-     * If the method is private, it will be made accessible outside of it's class.
      *
      * @param clazz Class to search.
      * @param methodName Method name.
      * @return A method with the provided name that takes no-args.
-     * @throws RuntimeException If the class doesn't contain a method with the provided name and args.
+     * @throws RuntimeException If the class doesn't contain a no-args method with the given name.
      */
     @SneakyThrows
     public static Method getNoArgsMethod(Class<?> clazz, String methodName) {
-        // TODO: Support inheritance.
         final Method method = clazz.getDeclaredMethod(methodName, NO_ARGS_TYPE);
-        if (!method.isAccessible()) {
-            method.setAccessible(true);
-        }
+        // TODO: Support inheritance?
         return method;
     }
 
     /**
-     * Find the first encountered method with the provided name. Doesn't take parameter into account.
+     * Find the first encountered method with the provided name. Doesn't take parameters into account.
      * Includes inherited methods.
      *
      * @param clazz Class to search.
@@ -74,7 +73,6 @@ public final class ReflectionUtils {
      * @throws IllegalArgumentException If the class doesn't contain a method with the provided name.
      */
     public static Method lookupMethod(Class<?> clazz, String methodName) {
-        // TODO: Support inheritance.
         for (Method method : clazz.getMethods()) {
             if (method.getName().equals(methodName)) {
                 return method;
@@ -85,12 +83,13 @@ public final class ReflectionUtils {
 
     /**
      * Invokes the method, using the provided instance as 'this'.
-     * Method must be no-args and return the correct type.
+     * Method must be no-args and have a return value of type {@code T}.
+     * If the method is private, it will be made accessible outside of it's class.
      *
      * @param instance Instance to use as 'this' for invocation.
      * @param method Method to invoke.
      * @param <T> Return type.
-     * @return The result of invoking the no-args method.
+     * @return Result of invoking the no-args method.
      * @throws RuntimeException If an error occurred invoking the method.
      */
     @SuppressWarnings("unchecked")
@@ -102,7 +101,13 @@ public final class ReflectionUtils {
         return (T) method.invoke(instance, NO_ARGS);
     }
 
-    // TODO: JavaDoc
+    /**
+     * Assert that the given method returns the expected return type.
+     *
+     * @param method Method to assert.
+     * @param expectedReturnType Expected return type of the method.
+     * @throws IllegalArgumentException If the method's return type doesn't match the expected type.
+     */
     public static void assertReturnValue(Method method, Class<?> expectedReturnType) {
         final Class<?> returnType = method.getReturnType();
         if (returnType != expectedReturnType) {
@@ -111,7 +116,12 @@ public final class ReflectionUtils {
         }
     }
 
-    // TODO: JavaDoc
+    /**
+     * Assert that the given method takes no parameters.
+     *
+     * @param method Method to assert.
+     * @throws IllegalArgumentException If the method takes any parameters.
+     */
     public static void assertNoParameters(Method method) {
         final Class<?>[] parameterTypes = method.getParameterTypes();
         if (parameterTypes.length > 0) {

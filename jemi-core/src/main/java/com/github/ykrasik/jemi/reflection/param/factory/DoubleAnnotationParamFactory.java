@@ -18,7 +18,7 @@ package com.github.ykrasik.jemi.reflection.param.factory;
 
 import com.github.ykrasik.jemi.api.DoubleParam;
 import com.github.ykrasik.jemi.param.DoubleParamDef;
-import com.github.ykrasik.jemi.util.function.Suppliers;
+import com.github.ykrasik.jemi.util.function.MoreSuppliers;
 import com.github.ykrasik.jemi.util.opt.Opt;
 import lombok.ToString;
 
@@ -51,7 +51,7 @@ public class DoubleAnnotationParamFactory extends AnnotationMethodParamFactory<D
             final Opt<String> defaultValueSupplierName = getNonEmptyString(annotation.defaultValueSupplier());
             if (defaultValueSupplierName.isPresent()) {
                 // FIXME: Test that this works when the supplier returns primitive (Double.TYPE)
-                builder.setOptional(Suppliers.reflectionSupplier(instance, defaultValueSupplierName.get(), Double.TYPE, Double.class));
+                builder.setOptional(MoreSuppliers.reflectionSupplier(instance, defaultValueSupplierName.get(), Double.TYPE, Double.class));
             } else {
                 builder.setOptional(annotation.defaultValue());
             }

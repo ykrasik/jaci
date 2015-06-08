@@ -20,7 +20,7 @@ import com.github.ykrasik.jemi.cli.exception.ParseError;
 import com.github.ykrasik.jemi.cli.exception.ParseException;
 import com.github.ykrasik.jemi.Identifier;
 import com.github.ykrasik.jemi.cli.assist.AutoComplete;
-import com.github.ykrasik.jemi.util.function.Supplier;
+import com.github.ykrasik.jemi.util.function.Spplr;
 import com.github.ykrasik.jemi.util.opt.Opt;
 import lombok.NonNull;
 
@@ -31,7 +31,7 @@ import lombok.NonNull;
  * @author Yevgeny Krasik
  */
 public abstract class AbstractNumericCliParam<T extends Number> extends AbstractCliParam<T> {
-    protected AbstractNumericCliParam(Identifier identifier, Opt<Supplier<T>> defaultValueSupplier) {
+    protected AbstractNumericCliParam(Identifier identifier, Opt<Spplr<T>> defaultValueSupplier) {
         super(identifier, defaultValueSupplier);
     }
 
