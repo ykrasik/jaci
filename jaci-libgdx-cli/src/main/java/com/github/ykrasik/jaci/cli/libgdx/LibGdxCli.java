@@ -337,7 +337,7 @@ public class LibGdxCli extends Table {
             }
 
             // Default skin.
-            return new Skin(Gdx.files.classpath("com/github/ykrasik/jemi/cli/libgdx/default_cli.cfg"));
+            return new Skin(Gdx.files.classpath("com/github/ykrasik/jaci/cli/libgdx/default_cli.cfg"));
         }
     }
 }
