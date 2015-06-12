@@ -157,6 +157,7 @@ public class CliParamParseContext {
             // This can only succeed with very specific parameters and very specific cases.
             try {
                 // FIXME: When this happens, the arg should not be consumed, but delegated to the next param to parse.
+                // FIXME: Doesn't work with flags followed by a named parameter call.
                 return param.noValue();
             } catch (ParseException e2) {
                 // Throw the original exception if the fallback failed.

@@ -28,7 +28,7 @@ import com.github.ykrasik.jaci.util.opt.Opt;
  * which will translate the definition to a concrete implementation.
  * <br>
  * Contains the parameter's name, description, whether the parameter is optional and any other parameter-type-specific information.
- * <br/>
+ * <br>
  * Any parameter can be optional. A parameter will be considered optional if {@link #getDefaultValueSupplier()} returns
  * a {@code present} value.<br>
  *

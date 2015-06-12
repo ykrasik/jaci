@@ -42,7 +42,7 @@ public final class CliConstants {
      * any value prefixed by this will indicate that the string afterwards is the name of a parameter.
      * This is called call-by-value.
      * For example:
-     *   Suppose we have a command, 'testCommand', which takes 2 parameters called 'param1' & 'param2' (in that order).
+     *   Suppose we have a command, 'testCommand', which takes 2 parameters called 'param1' &amp; 'param2' (in that order).
      * All of these are equal:
      * <ul>
      *     <li>testCommand x y</li>

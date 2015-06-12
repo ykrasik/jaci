@@ -1,5 +1,5 @@
 # What is Jaci?
-Java Annotation Command Interface.
+Java Annotation Command Interface.  
 Jaci generates User Interfaces (CLI/GUI) from annotated methods, which can then be embedded into your application.
 
 # What is Jaci for?

@@ -115,7 +115,7 @@ public class TrieBasicTest extends AbstractTrieTest {
         filter(new Pred<String>() {
             @Override
             public boolean test(String input) {
-                return input.startsWith("invalid");
+                return !input.startsWith("invalid");
             }
         });
 
