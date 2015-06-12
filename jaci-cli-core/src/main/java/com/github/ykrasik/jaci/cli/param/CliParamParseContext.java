@@ -29,6 +29,7 @@ import com.github.ykrasik.jaci.util.function.Pred;
 import com.github.ykrasik.jaci.util.opt.Opt;
 import com.github.ykrasik.jaci.util.trie.Trie;
 import lombok.NonNull;
+import lombok.ToString;
 
 import java.util.*;
 
@@ -38,6 +39,7 @@ import java.util.*;
  *
  * @author Yevgeny Krasik
  */
+@ToString(of = { "parsedValues", "unboundParams" })
 public class CliParamParseContext {
     private static final CliValueType.Mapper<CliParam> PARAM_NAME_MAPPER = new CliValueType.Mapper<>(CliValueType.COMMAND_PARAM_NAME);
 
@@ -79,53 +81,71 @@ public class CliParamParseContext {
      * @throws ParseException If an error occurred while parsing the argument.
      */
     public void parseValue(String arg) throws ParseException {
-        if (!arg.startsWith(CliConstants.NAMED_PARAM_PREFIX)) {
-            // Value doesn't start with '-', have the next param parse it.
-            parseNextArg(arg);
-            return;
-        }
+        if (isParamValue(arg)) {
+            if (nextNamedParam.isPresent()) {
+                final boolean parsed = parseNextNamedParam(arg);
+                nextNamedParam = Opt.absent();
+                if (parsed) {
+                    // Parse operation completed successfully.
+                    return;
+                }
 
-        // Arg starts with a '-', what comes after is expected to be a valid name of a parameter.
-        // Unless, and this is a corner case, the first character of the name is a number, which means we're
-        // passing a negative number as a value.
-        // Param names cannot start with a number.
-        // TODO: Test this.
+                // Parse operation completed with a fallback.
+                // 'arg' must then be parsed by the next unbound parameter.
+            }
+            final CliParam nextUnboundParam = getNextUnboundParam(arg);
+            addArg(nextUnboundParam, nextUnboundParam.parse(arg));
+        } else {
+            // Arg is not a viable param value, it is a call-by-name.
+            if (nextNamedParam.isPresent()) {
+                // Notify the current next named param that it isn't going to receive a value.
+                final CliParam param = nextNamedParam.get();
+                addArg(param, param.noValue());
+                nextNamedParam = Opt.absent();
+            }
+            setNextNamedParam(arg);
+        }
+    }
+
+    private boolean isParamValue(String arg) {
+        // Arg can be a param value if:
+        //   1. It doesn't start with '-'.
+        //   2. It does start with a '-', but the following character is a digit, meaning it is a negative number.
+        return !arg.startsWith(CliConstants.NAMED_PARAM_PREFIX) || arg.length() >= 2 && Character.isDigit(arg.charAt(1));
+    }
+
+    private boolean parseNextNamedParam(String arg) throws ParseException {
+        final CliParam param = nextNamedParam.get();
+        try {
+            addArg(param, param.parse(arg));
+
+            // Parse operation completed successfully.
+            return true;
+        } catch (ParseException e) {
+            // Try recovering with a fallback by notifying the previous named  param it isn't going to receive a value.
+            // This can only succeed with very specific parameters and very specific cases.
+            try {
+                addArg(param, param.noValue());
+
+                // Parse operation completed with a fallback.
+                return false;
+            } catch (ParseException ignored) {
+                // Throw the original exception if the fallback failed.
+                throw e;
+            }
+        }
+    }
+
+    private void setNextNamedParam(String arg) throws ParseException {
         final String paramName = arg.substring(1);
         if (paramName.isEmpty()) {
             throw new ParseException(ParseError.INVALID_PARAM, "No parameter name specified after '%s'!", CliConstants.NAMED_PARAM_PREFIX);
         }
 
-        if (Character.isDigit(paramName.charAt(0))) {
-            // This value is a negative number, have the next param parse it.
-            parseNextArg(arg);
-        } else {
-            // arg starts with '-' and is the name of a parameter, set the next expected named parameter.
-            setNextNamedParam(paramName);
-        }
-    }
-
-    private void setNextNamedParam(String paramName) throws ParseException {
         nextNamedParam = paramsTrie.get(paramName);
         if (!nextNamedParam.isPresent()) {
             throw new ParseException(ParseError.INVALID_PARAM, "Invalid parameter name: '%s'", paramName);
         }
-    }
-
-    private void parseNextArg(String arg) throws ParseException {
-        if (nextNamedParam.isPresent()) {
-            // The prev param was the name of a param, the param specified by that name should parse the arg.
-            parseNextNamedParam(arg);
-        } else {
-            // Use the next unbound positional param to parse the arg.
-            parseNextPositionalParam(arg);
-        }
-    }
-
-    private void parseNextPositionalParam(String arg) throws ParseException {
-        // Use the next unbound positional param to parse the arg.
-        final CliParam param = getNextUnboundParam(arg);
-        final Object parsedValue = param.parse(arg);
-        addArg(param, parsedValue);
     }
 
     private CliParam getNextUnboundParam(String arg) throws ParseException {
@@ -134,36 +154,6 @@ public class CliParamParseContext {
             throw new ParseException(ParseError.NO_MORE_PARAMS, "Excess argument: '%s'", arg);
         }
         return param;
-    }
-
-    private void parseNextNamedParam(String arg) throws ParseException {
-        if (!nextNamedParam.isPresent()) {
-            // This is an internal error.
-            throw new IllegalStateException(String.format("Internal Error: Named parameter wasn't set: '%s'", arg));
-        }
-
-        // The prev param was the name of a param, the param specified by that name should parse the arg.
-        final CliParam param = nextNamedParam.get();
-        final Object parsedValue = parseNamedParam(param, arg);
-        addArg(param, parsedValue);
-        nextNamedParam = Opt.absent();
-    }
-
-    private Object parseNamedParam(CliParam param, String arg) throws ParseException {
-        try {
-            return param.parse(arg);
-        } catch (ParseException e) {
-            // Try recovering with a fallback by having the param parse a 'no value' value.
-            // This can only succeed with very specific parameters and very specific cases.
-            try {
-                // FIXME: When this happens, the arg should not be consumed, but delegated to the next param to parse.
-                // FIXME: Doesn't work with flags followed by a named parameter call.
-                return param.noValue();
-            } catch (ParseException e2) {
-                // Throw the original exception if the fallback failed.
-                throw e;
-            }
-        }
     }
 
     /**
