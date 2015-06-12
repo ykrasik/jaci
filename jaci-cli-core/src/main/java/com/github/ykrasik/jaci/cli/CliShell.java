@@ -71,7 +71,8 @@ public class CliShell {
 
         // Welcome message.
         printer.begin();
-        printer.println("Welcome to Jemi!");
+        printer.setWorkingDirectory(hierarchy.getWorkingDirectory());
+        printer.println("Welcome!");
         printer.println("");
         printer.end();
     }
@@ -181,7 +182,7 @@ public class CliShell {
     }
 
     private void doExecute(String rawCommandLine) throws Exception {
-        printer.printCommandLine(rawCommandLine);
+        printer.printCommandLine(hierarchy.getWorkingDirectory(), rawCommandLine);
 
         final CommandLine commandLine = CommandLine.forExecute(rawCommandLine);
         if (commandLine.isEmpty()) {

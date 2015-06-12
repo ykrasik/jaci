@@ -41,10 +41,11 @@ public interface CliSerializer {
      * Serialize the command line. Called before printing the command line to the output,
      * may be used to prepend or append characters to the command line.
      *
+     * @param workingDirectory Current working directory.
      * @param commandLine Command line that was typed.
      * @return Command line to be printed.
      */
-    String serializeCommandLine(String commandLine);
+    String serializeCommandLine(CliDirectory workingDirectory, String commandLine);
 
     /**
      * Serialize a directory and it's content.

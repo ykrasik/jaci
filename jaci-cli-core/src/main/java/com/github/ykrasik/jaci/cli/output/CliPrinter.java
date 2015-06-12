@@ -84,10 +84,11 @@ public class CliPrinter {
     /**
      * Print the command line.
      *
+     * @param workingDirectory Current working directory.
      * @param commandLine Command line to print.
      */
-    public void printCommandLine(String commandLine) {
-        final String serializedCommandLine = serializer.serializeCommandLine(commandLine);
+    public void printCommandLine(CliDirectory workingDirectory, String commandLine) {
+        final String serializedCommandLine = serializer.serializeCommandLine(workingDirectory, commandLine);
         output.println(serializedCommandLine);
     }
 

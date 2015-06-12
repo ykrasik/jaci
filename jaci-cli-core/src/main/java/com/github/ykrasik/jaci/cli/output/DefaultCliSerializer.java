@@ -63,8 +63,9 @@ public class DefaultCliSerializer implements CliSerializer {
     }
 
     @Override
-    public String serializeCommandLine(@NonNull String commandLine) {
-        return "> " + commandLine;
+    public String serializeCommandLine(CliDirectory workingDirectory, @NonNull String commandLine) {
+        final String path = serializePathToDirectory(workingDirectory);
+        return '[' + path + "] " + commandLine;
     }
 
     @Override
