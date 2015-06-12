@@ -14,22 +14,46 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jaci.reflection.command;
+package com.github.ykrasik.jaci.command;
 
-import com.github.ykrasik.jaci.api.ToggleCommandStateAccessor;
-import com.github.ykrasik.jaci.util.function.Spplr;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import com.github.ykrasik.jaci.api.CommandOutput;
 
 /**
- * A {@link Spplr} that returns the inverse of the current {@link ToggleCommandStateAccessor#get()}.
+ * A {@link CommandOutput} that promises to eventually contain a concrete implementation.
+ * Delegates all calls to that concrete implementation.
+ * This will be injected into objects expecting a {@link CommandOutput}, for the Annotation API.
+ *
+ * @author Yevgeny Krasik
  */
-@RequiredArgsConstructor
-public class ToggleCommandAccessorDefaultValueSupplier implements Spplr<Boolean> {
-    @NonNull private final ToggleCommandStateAccessor accessor;
+public class CommandOutputPromise implements CommandOutput {
+    private CommandOutput output;
+
+    /**
+     * Set the concrete {@link CommandOutput} implementation to delegate to.
+     *
+     * @param output Concrete implementation to delegate to.
+     */
+    public void setOutput(CommandOutput output) {
+        this.output = output;
+    }
 
     @Override
-    public Boolean get() {
-        return !accessor.get();
+    public void message(String text) {
+        output.message(text);
+    }
+
+    @Override
+    public void message(String format, Object... args) {
+        output.message(format, args);
+    }
+
+    @Override
+    public void error(String text) {
+        output.error(text);
+    }
+
+    @Override
+    public void error(String format, Object... args) {
+        output.error(format, args);
     }
 }

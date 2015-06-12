@@ -26,19 +26,20 @@ import com.github.ykrasik.jaci.api.*;
  */
 @CommandPath("mandatoryParams")
 public class MandatoryParamsSample {
+    private CommandOutput output;
+
     @Command(description = "Primitive params without annotations. Without annotations all parameters are considered mandatory.")
-    public void primitiveParamsNoAnnotations(CommandOutput output, boolean b, int i, double d, String str) {
+    public void primitiveParamsNoAnnotations(boolean b, int i, double d, String str) {
         output.message("primitiveParamsNoAnnotations: b=%s, i=%s, d=%s, str=%s", b, i, d, str);
     }
 
     @Command(description = "Boxed (nullable primitive) params without annotations. Without annotations all parameters are considered mandatory.")
-    public void boxedParamsNoAnnotations(CommandOutput output, Boolean b, Integer i, Double d, String str) {
+    public void boxedParamsNoAnnotations(Boolean b, Integer i, Double d, String str) {
         output.message("boxedParamsNoAnnotations: b=%s, i=%s, d=%s, str=%s", b, i, d, str);
     }
 
     @Command(description = "Primitive params with annotations, but annotations have no data.")
-    public void primitiveParamsWithDefaultAnnotations(CommandOutput output,
-                                                      @BoolParam boolean b,
+    public void primitiveParamsWithDefaultAnnotations(@BoolParam boolean b,
                                                       @IntParam int i,
                                                       @DoubleParam double d,
                                                       @StringParam String str) {
@@ -46,8 +47,7 @@ public class MandatoryParamsSample {
     }
 
     @Command(description = "Primitive params with annotations")
-    public void primitiveParamsWithAnnotations(CommandOutput output,
-                                               @BoolParam(value = "b", description = "Mandatory bool") boolean b,
+    public void primitiveParamsWithAnnotations(@BoolParam(value = "b", description = "Mandatory bool") boolean b,
                                                @IntParam(value = "i", description = "Mandatory int") int i,
                                                @DoubleParam(value = "d", description = "Mandatory double") double d,
                                                @StringParam(value = "str", description = "Mandatory String") String str) {
@@ -55,8 +55,7 @@ public class MandatoryParamsSample {
     }
 
     @Command(description = "Boxed (nullable primitive) with annotations, but annotations have no data.")
-    public void boxedParamsWithDefaultAnnotations(CommandOutput output,
-                                                  @BoolParam Boolean b,
+    public void boxedParamsWithDefaultAnnotations(@BoolParam Boolean b,
                                                   @IntParam Integer i,
                                                   @DoubleParam Double d,
                                                   @StringParam String str) {
@@ -64,8 +63,7 @@ public class MandatoryParamsSample {
     }
 
     @Command(description = "Boxed (nullable primitive) with annotations")
-    public void boxedParamsWithAnnotations(CommandOutput output,
-                                           @BoolParam(value = "b", description = "Mandatory Boolean") Boolean b,
+    public void boxedParamsWithAnnotations(@BoolParam(value = "b", description = "Mandatory Boolean") Boolean b,
                                            @IntParam(value = "i", description = "Mandatory Integer") Integer i,
                                            @DoubleParam(value = "d", description = "Mandatory Double") Double d,
                                            @StringParam(value = "str", description = "Mandatory String") String str) {

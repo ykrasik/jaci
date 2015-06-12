@@ -28,9 +28,10 @@ import com.github.ykrasik.jaci.api.*;
  */
 @CommandPath("optionalParams")
 public class OptionalParamsSample {
+    private CommandOutput output;
+
     @Command(description = "All params are optional, with const default values.")
-    public void defaultConstValues(CommandOutput output,
-                                   @BoolParam(value = "b", optional = true, defaultValue = true) boolean b,
+    public void defaultConstValues(@BoolParam(value = "b", optional = true, defaultValue = true) boolean b,
                                    @IntParam(value = "i", optional = true, defaultValue = 5) int i,
                                    @DoubleParam(value = "d", optional = true, defaultValue = 4.5) double d,
                                    @StringParam(value = "str", optional = true, defaultValue = "default") String str) {
@@ -38,8 +39,7 @@ public class OptionalParamsSample {
     }
 
     @Command(description = "All params are optional, with default value suppliers.")
-    public void defaultValueSuppliers(CommandOutput output,
-                                      @BoolParam(value = "b", optional = true, defaultValueSupplier = "booleanSupplier") boolean b,
+    public void defaultValueSuppliers(@BoolParam(value = "b", optional = true, defaultValueSupplier = "booleanSupplier") boolean b,
                                       @IntParam(value = "i", optional = true, defaultValueSupplier = "intSupplier") int i,
                                       @DoubleParam(value = "d", optional = true, defaultValueSupplier = "doubleSupplier") double d,
                                       @StringParam(value = "str", optional = true, defaultValueSupplier = "stringSupplier") String str) {

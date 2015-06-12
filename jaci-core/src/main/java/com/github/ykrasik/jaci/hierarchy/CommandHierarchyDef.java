@@ -51,10 +51,9 @@ public class CommandHierarchyDef {
     /**
      * A builder for a {@link CommandHierarchyDef}.
      */
-    @ToString
+    @ToString(of = "root")
     public static class Builder {
-        private static final ReflectionClassProcessor PROCESSOR = new ReflectionClassProcessor();
-
+        private final ReflectionClassProcessor processor = new ReflectionClassProcessor();
         private final CommandDirectoryDef.Builder root = new CommandDirectoryDef.Builder("root").setDescription("root");
 
         /**
@@ -76,7 +75,7 @@ public class CommandHierarchyDef {
          * @return {@code this}, for chaining.
          */
         public Builder processObject(@NonNull Object instance) {
-            final Map<ParsedPath, List<CommandDef>> pathToCommandDefsMap = PROCESSOR.processObject(instance);
+            final Map<ParsedPath, List<CommandDef>> pathToCommandDefsMap = processor.processObject(instance);
 
             // Add the returned commands to the hierarchy.
             for (Entry<ParsedPath, List<CommandDef>> entry : pathToCommandDefsMap.entrySet()) {

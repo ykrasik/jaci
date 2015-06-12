@@ -16,14 +16,18 @@
 
 package com.github.ykrasik.jaci.reflection;
 
+import com.github.ykrasik.jaci.api.CommandOutput;
 import com.github.ykrasik.jaci.api.CommandPath;
 import com.github.ykrasik.jaci.command.CommandDef;
+import com.github.ykrasik.jaci.command.CommandOutputPromise;
 import com.github.ykrasik.jaci.path.ParsedPath;
-import com.github.ykrasik.jaci.reflection.command.ReflectionMethodProcessor;
+import com.github.ykrasik.jaci.reflection.method.ReflectionMethodProcessor;
 import com.github.ykrasik.jaci.util.opt.Opt;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 
@@ -33,16 +37,29 @@ import java.util.*;
  * @author Yevgeny Krasik
  */
 public class ReflectionClassProcessor {
+    /**
+     * Will be injected into all processed instances.
+     */
+    private final CommandOutputPromise outputPromise;
+
     private final ReflectionMethodProcessor methodProcessor;
 
     public ReflectionClassProcessor() {
-        this(new ReflectionMethodProcessor());
+        this(new CommandOutputPromise());
     }
 
     /**
-     * Package-visible for testing.
+     * Package-protected for testing.
      */
-    ReflectionClassProcessor(@NonNull ReflectionMethodProcessor methodProcessor) {
+    ReflectionClassProcessor(CommandOutputPromise outputPromise) {
+        this(outputPromise, new ReflectionMethodProcessor(outputPromise));
+    }
+
+    /**
+     * Package-protected for testing.
+     */
+    ReflectionClassProcessor(@NonNull CommandOutputPromise outputPromise, @NonNull ReflectionMethodProcessor methodProcessor) {
+        this.outputPromise = outputPromise;
         this.methodProcessor = methodProcessor;
     }
 
@@ -52,9 +69,16 @@ public class ReflectionClassProcessor {
      *
      * @param instance Object to process.
      * @return The {@link CommandDef}s that were extracted out of the object.
+     * @throws RuntimeException If any error occurs.
      */
+    @SneakyThrows
     public Map<ParsedPath, List<CommandDef>> processObject(@NonNull Object instance) {
         final Class<?> clazz = instance.getClass();
+
+        // Inject our outputPromise into the processed instance.
+        // Any commands declared in the instance will reference this outputPromise, which will eventually
+        // contain a concrete implementation of a CommandOutput.
+        injectOutputPromise(instance, clazz);
 
         // All method paths will be appended to the class's top level path.
         final ParsedPath topLevelPath = getTopLevelPath(clazz);
@@ -68,6 +92,17 @@ public class ReflectionClassProcessor {
         }
 
         return context.commandPaths;
+    }
+
+    private void injectOutputPromise(Object instance, Class<?> clazz) throws IllegalAccessException {
+        for (Field field : clazz.getDeclaredFields()) {
+            if (field.getType() == CommandOutput.class) {
+                if (!field.isAccessible()) {
+                    field.setAccessible(true);
+                }
+                field.set(instance, outputPromise);
+            }
+        }
     }
 
     private void processMethod(ClassContext context, Object instance, Method method) {

@@ -14,7 +14,7 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jaci.reflection.command;
+package com.github.ykrasik.jaci.command.toggle;
 
 import com.github.ykrasik.jaci.api.ToggleCommandStateAccessor;
 import com.github.ykrasik.jaci.command.CommandDef;
@@ -42,7 +42,7 @@ public class ToggleCommandDefBuilder {
 
     /**
      * @param name Command name.
-     * @param accessor Accessor the the command's boolean state component.
+     * @param accessor Accessor for the command's boolean state component.
      */
     public ToggleCommandDefBuilder(@NonNull String name, @NonNull ToggleCommandStateAccessor accessor) {
         this.name = name;

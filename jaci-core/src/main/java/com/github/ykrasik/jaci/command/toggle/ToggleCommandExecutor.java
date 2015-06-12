@@ -14,35 +14,30 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jaci.reflection.command;
+package com.github.ykrasik.jaci.command.toggle;
 
 import com.github.ykrasik.jaci.api.CommandOutput;
+import com.github.ykrasik.jaci.api.ToggleCommandStateAccessor;
 import com.github.ykrasik.jaci.command.CommandArgs;
 import com.github.ykrasik.jaci.command.CommandExecutor;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
-
-import java.lang.reflect.Method;
-import java.util.List;
 
 /**
- * A {@link CommandExecutor} that calls the underlying {@link Method} via reflection.
- *
- * @author Yevgeny Krasik
+ * A {@link CommandExecutor} that sets the value of it's {@link ToggleCommandStateAccessor} according to input.
  */
-@ToString
-@RequiredArgsConstructor
-public class ReflectionCommandExecutor implements CommandExecutor {
-    @NonNull private final Object instance;
-    @NonNull private final Method method;
+public class ToggleCommandExecutor implements CommandExecutor {
+    private final String name;
+    private final ToggleCommandStateAccessor accessor;
+
+    public ToggleCommandExecutor(@NonNull String name, @NonNull ToggleCommandStateAccessor accessor) {
+        this.name = name;
+        this.accessor = accessor;
+    }
 
     @Override
     public void execute(CommandOutput output, CommandArgs args) throws Exception {
-        // Add output as first arg.
-        final List<Object> reflectionArgs = args.prependArg(output);
-
-        // Invoke method.
-        method.invoke(instance, reflectionArgs.toArray());
+        final boolean toggle = args.popArg();
+        accessor.set(toggle);
+        output.message("%s: %s", name, toggle);
     }
 }
