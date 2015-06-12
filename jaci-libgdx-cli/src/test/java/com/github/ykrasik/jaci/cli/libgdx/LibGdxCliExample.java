@@ -62,7 +62,7 @@ public class LibGdxCliExample extends ApplicationAdapter {
 
     @Override
     public void resize(int width, int height) {
-        stage.setViewport(width, height);
+        stage.getViewport().update(width, height);
     }
 
     @Override

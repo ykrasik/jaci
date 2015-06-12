@@ -55,7 +55,6 @@ public class LibGdxCliOutputBuffer extends Table {
         this.buffer = new Table();
         buffer.setName("outputBuffer");
         buffer.bottom().left();
-        buffer.debug();
 
         // Wrap the buffer in a scrollpane.
         scrollPane = new ScrollPane(buffer);
