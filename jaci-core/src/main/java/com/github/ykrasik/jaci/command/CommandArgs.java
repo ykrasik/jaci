@@ -28,12 +28,9 @@ import java.util.List;
  */
 public interface CommandArgs {
     /**
-     * Prepend the given arg to the start of the args list and return the new list.
-     *
-     * @param object Arg to prepend to the list of args.
-     * @return A new {@link List} of args in which the given arg is prepended to the start of the list.
+     * @return Parsed arguments as a {@link List}.
      */
-    List<Object> prependArg(Object object);
+    List<Object> getArgs();
 
     /**
      * @param <T> Type that the next argument to pop is expected to have.

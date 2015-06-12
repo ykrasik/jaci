@@ -14,44 +14,24 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jaci.command;
+package com.github.ykrasik.jaci.command.toggle;
 
+import com.github.ykrasik.jaci.api.ToggleCommandStateAccessor;
+import com.github.ykrasik.jaci.util.function.Spplr;
 import lombok.NonNull;
 
-import java.util.Collections;
-import java.util.List;
-
 /**
- * An implementation of a {@link CommandArgs}.
- * Popping args is implemented by maintaining an index that can only be increased.
- *
- * @author Yevgeny Krasik
+ * A {@link Spplr} that returns the inverse of the current {@link ToggleCommandStateAccessor#get()}.
  */
-public class CommandArgsImpl implements CommandArgs {
-    private final List<Object> args;
-    private int index = 0;
+public class ToggleCommandAccessorDefaultValueSupplier implements Spplr<Boolean> {
+    private final ToggleCommandStateAccessor accessor;
 
-    /**
-     * @param args Parsed command args.
-     */
-    public CommandArgsImpl(@NonNull List<Object> args) {
-        this.args = args;
+    public ToggleCommandAccessorDefaultValueSupplier(@NonNull ToggleCommandStateAccessor accessor) {
+        this.accessor = accessor;
     }
 
     @Override
-    public List<Object> getArgs() {
-        return Collections.unmodifiableList(args);
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T> T popArg() {
-        if (index >= args.size()) {
-            throw new IllegalArgumentException("No more arguments!");
-        }
-
-        final Object value = args.get(index);
-        index++;
-        return (T) value;
+    public Boolean get() {
+        return !accessor.get();
     }
 }

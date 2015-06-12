@@ -14,13 +14,13 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jaci.reflection.command.factory;
+package com.github.ykrasik.jaci.reflection.method.factory;
 
 import com.github.ykrasik.jaci.api.Command;
-import com.github.ykrasik.jaci.api.CommandOutput;
 import com.github.ykrasik.jaci.command.CommandDef;
+import com.github.ykrasik.jaci.command.CommandOutputPromise;
 import com.github.ykrasik.jaci.param.ParamDef;
-import com.github.ykrasik.jaci.reflection.command.ReflectionCommandExecutor;
+import com.github.ykrasik.jaci.reflection.method.ReflectionCommandExecutor;
 import com.github.ykrasik.jaci.reflection.param.ReflectionParamProcessor;
 import com.github.ykrasik.jaci.util.opt.Opt;
 import com.github.ykrasik.jaci.util.reflection.ReflectionParameter;
@@ -39,17 +39,24 @@ import static com.github.ykrasik.jaci.util.string.StringUtils.getNonEmptyString;
  * @author Yevgeny Krasik
  */
 public class DefaultAnnotationMethodCommandFactory extends AbstractAnnotationMethodCommandFactory<Command> {
+    private final CommandOutputPromise outputPromise;
     private final ReflectionParamProcessor paramProcessor;
 
-    public DefaultAnnotationMethodCommandFactory() {
-        this(new ReflectionParamProcessor());
+    /**
+     * @param outputPromise An {@link CommandOutputPromise} that will be injected into the instance containing the methods.
+     *                      Used by the {@link ReflectionCommandExecutor}s constructed by this factory.
+     */
+    public DefaultAnnotationMethodCommandFactory(CommandOutputPromise outputPromise) {
+        this(outputPromise, new ReflectionParamProcessor());
     }
 
     /**
      * Package-visible for testing.
      */
-    DefaultAnnotationMethodCommandFactory(@NonNull ReflectionParamProcessor paramProcessor) {
+    DefaultAnnotationMethodCommandFactory(@NonNull CommandOutputPromise outputPromise,
+                                          @NonNull ReflectionParamProcessor paramProcessor) {
         super(Command.class);
+        this.outputPromise = outputPromise;
         this.paramProcessor = paramProcessor;
     }
 
@@ -58,29 +65,19 @@ public class DefaultAnnotationMethodCommandFactory extends AbstractAnnotationMet
         // Reflect method params.
         final List<ReflectionParameter> params = ReflectionUtils.reflectMethodParameters(method);
 
-        // First parameter must be CommandOutput.
-        if (params.isEmpty() || !isCommandOutput(params.get(0).getParameterType())) {
-            throw new IllegalArgumentException("First parameter of a command must be of type " + CommandOutput.class);
-        }
-
         final String name = getNonEmptyString(annotation.value()).getOrElse(method.getName());
-        final CommandDef.Builder builder = new CommandDef.Builder(name, new ReflectionCommandExecutor(instance, method));
+        final CommandDef.Builder builder = new CommandDef.Builder(name, new ReflectionCommandExecutor(outputPromise, instance, method));
 
         final Opt<String> description = getNonEmptyString(annotation.description());
         if (description.isPresent()) {
             builder.setDescription(description.get());
         }
 
-        for (int i = 1; i < params.size(); i++) {
-            final ReflectionParameter param = params.get(i);
+        for (ReflectionParameter param : params) {
             final ParamDef<?> paramDef = paramProcessor.createParam(instance, param);
             builder.addParam(paramDef);
         }
 
         return builder.build();
-    }
-
-    private boolean isCommandOutput(Class<?> clazz) {
-        return CommandOutput.class.isAssignableFrom(clazz);
     }
 }

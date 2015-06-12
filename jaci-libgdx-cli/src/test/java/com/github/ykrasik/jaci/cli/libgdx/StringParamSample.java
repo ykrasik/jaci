@@ -26,18 +26,20 @@ import com.github.ykrasik.jaci.api.*;
  */
 @CommandPath("stringParam")
 public class StringParamSample {
+    private CommandOutput output;
+
     @Command(description = "String param that accepts all values")
-    public void unconstrainedString(CommandOutput output, @StringParam(accepts = {}) String str) {
+    public void unconstrainedString(@StringParam(accepts = {}) String str) {
         output.message("unconstrainedString: str=%s", str);
     }
 
     @Command(description = "String param that only accepts values stated in the annotation.")
-    public void staticConstrainedString(CommandOutput output, @StringParam(accepts = {"a", "b", "c"}) String str) {
+    public void staticConstrainedString(@StringParam(accepts = {"a", "b", "c"}) String str) {
         output.message("staticConstrainedString: str=%s", str);
     }
 
     @Command(description = "String param that only accepts values supplied at runtime via a supplier.")
-    public void dynamicConstrainedString(CommandOutput output, @StringParam(acceptsSupplier = "stringSupplier") String str) {
+    public void dynamicConstrainedString(@StringParam(acceptsSupplier = "stringSupplier") String str) {
         output.message("dynamicConstrainedString: str=%s", str);
     }
 

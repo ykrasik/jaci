@@ -14,27 +14,50 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jaci.reflection.command.factory;
+package com.github.ykrasik.jaci.reflection.method.factory;
 
 import com.github.ykrasik.jaci.command.CommandDef;
 import com.github.ykrasik.jaci.util.opt.Opt;
+import lombok.NonNull;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 /**
- * Creates {@link CommandDef}s out of {@link Method}s. Is not required to support all methods, may signal that a method
- * is not supported by returning an {@code absent} value from {@link #create(Object, Method)}.
+ * A {@link MethodCommandFactory} that can create {@link CommandDef}s out of {@link Method}s that are annotated with
+ * a single annotation.
  *
  * @author Yevgeny Krasik
  */
-public interface MethodCommandFactory {
+public abstract class AbstractAnnotationMethodCommandFactory<T extends Annotation> implements MethodCommandFactory {
+    private final Class<T> annotationClass;
+
     /**
-     * Process the method and create a {@link CommandDef} out of it, if this factory can accept this method.
+     * @param annotationClass Type of annotation supported by this factory.
+     */
+    protected AbstractAnnotationMethodCommandFactory(@NonNull Class<T> annotationClass) {
+        this.annotationClass = annotationClass;
+    }
+
+    @Override
+    public Opt<CommandDef> create(@NonNull Object instance, @NonNull Method method) throws Exception {
+        final T annotation = method.getAnnotation(annotationClass);
+        if (annotation == null) {
+            // Method isn't annotated.
+            return Opt.absent();
+        }
+
+        return Opt.of(doCreate(instance, method, annotation));
+    }
+
+    /**
+     * Create a {@link CommandDef} out of the {@link Method} and its annotation.
      *
      * @param instance Instance of a class to which this method belongs.
-     * @param method Method to be processed.
-     * @return A {@code present} {@link CommandDef} if the method is accepted by this factory.
+     * @param method Method to create a {@link CommandDef} out of.
+     * @param annotation The method's annotation.
+     * @return A {@link CommandDef} created out of the {@link Method} and its annotation.
      * @throws Exception If any error occurs.
      */
-    Opt<CommandDef> create(Object instance, Method method) throws Exception;
+    protected abstract CommandDef doCreate(Object instance, Method method, T annotation) throws Exception;
 }

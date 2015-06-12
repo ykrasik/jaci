@@ -28,38 +28,40 @@ import com.github.ykrasik.jaci.api.CommandPath;
  */
 @CommandPath("topLevelPath")
 public class PathSample2 {
+    private CommandOutput output;
+
     @Command(description = "Command without path.")
-    public void noPath(CommandOutput output) {
+    public void noPath() {
         output.message("noPath: This command should be located under /topLevelPath");
     }
 
     @CommandPath("/new")
     @Command(description = "Path specialization prefixed with a '/' delimiter, has no effect.")
-    public void specializedPath1(CommandOutput output) {
+    public void specializedPath1() {
         output.message("specializedPath1: This command should be located under /topLevelPath/new");
     }
 
     @CommandPath("new/")
     @Command(description = "Path specialization suffixed with a '/' delimiter, has no effect.")
-    public void specializedPath2(CommandOutput output) {
+    public void specializedPath2() {
         output.message("specializedPath2: This command should be located under /topLevelPath/new");
     }
 
     @CommandPath("new/path")
     @Command(description = "Path specialization with a delimited path.")
-    public void specializedPath3(CommandOutput output) {
+    public void specializedPath3() {
         output.message("specializedPath3: This command should be located under /topLevelPath/new/path");
     }
 
     @CommandPath("/new/path")
     @Command(description = "Path specialization with a delimited path prefixed with a '/' delimiter, has no effect.")
-    public void specializedPath4(CommandOutput output) {
+    public void specializedPath4() {
         output.message("specializedPath4: This command should be located under /topLevelPath/new/path");
     }
 
     @CommandPath("new/path/")
     @Command(description = "Path specialization with a delimited path suffixed with a '/' delimiter, has no effect.")
-    public void specializedPath5(CommandOutput output) {
+    public void specializedPath5() {
         output.message("specializedPath5: This command should be located under /topLevelPath/new/path");
     }
 }

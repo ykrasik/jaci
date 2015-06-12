@@ -14,12 +14,12 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jaci.reflection.command.factory;
+package com.github.ykrasik.jaci.reflection.method.factory;
 
 import com.github.ykrasik.jaci.api.ToggleCommand;
 import com.github.ykrasik.jaci.api.ToggleCommandStateAccessor;
 import com.github.ykrasik.jaci.command.CommandDef;
-import com.github.ykrasik.jaci.reflection.command.ToggleCommandDefBuilder;
+import com.github.ykrasik.jaci.command.toggle.ToggleCommandDefBuilder;
 import com.github.ykrasik.jaci.util.opt.Opt;
 import com.github.ykrasik.jaci.util.reflection.ReflectionUtils;
 

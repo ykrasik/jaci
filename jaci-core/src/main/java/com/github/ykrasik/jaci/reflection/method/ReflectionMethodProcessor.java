@@ -14,12 +14,13 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jaci.reflection.command;
+package com.github.ykrasik.jaci.reflection.method;
 
-import com.github.ykrasik.jaci.reflection.command.factory.MethodCommandFactory;
-import com.github.ykrasik.jaci.reflection.command.factory.DefaultAnnotationMethodCommandFactory;
-import com.github.ykrasik.jaci.reflection.command.factory.ToggleAnnotationMethodCommandFactory;
 import com.github.ykrasik.jaci.command.CommandDef;
+import com.github.ykrasik.jaci.command.CommandOutputPromise;
+import com.github.ykrasik.jaci.reflection.method.factory.DefaultAnnotationMethodCommandFactory;
+import com.github.ykrasik.jaci.reflection.method.factory.MethodCommandFactory;
+import com.github.ykrasik.jaci.reflection.method.factory.ToggleAnnotationMethodCommandFactory;
 import com.github.ykrasik.jaci.util.opt.Opt;
 import lombok.NonNull;
 
@@ -35,8 +36,11 @@ import java.util.List;
 public class ReflectionMethodProcessor {
     private final List<MethodCommandFactory> factories;
 
-    public ReflectionMethodProcessor() {
-        this(new DefaultAnnotationMethodCommandFactory(), new ToggleAnnotationMethodCommandFactory());
+    /**
+     * @param outputPromise An {@link CommandOutputPromise} that will be injected into the instance containing the methods.
+     */
+    public ReflectionMethodProcessor(@NonNull CommandOutputPromise outputPromise) {
+        this(new DefaultAnnotationMethodCommandFactory(outputPromise), new ToggleAnnotationMethodCommandFactory());
     }
 
     /**
