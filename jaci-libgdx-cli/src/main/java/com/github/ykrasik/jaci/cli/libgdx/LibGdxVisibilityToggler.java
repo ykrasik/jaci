@@ -18,6 +18,7 @@ package com.github.ykrasik.jaci.cli.libgdx;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import lombok.NonNull;
@@ -25,24 +26,24 @@ import lombok.NonNull;
 /**
  * An {@link InputListener} that should be registered with a {@link com.badlogic.gdx.scenes.scene2d.Stage} as a listener
  * {@link com.badlogic.gdx.scenes.scene2d.Stage#addListener(com.badlogic.gdx.scenes.scene2d.EventListener)}.
- * Will toggle the CLI visibility on and off according to {@link InputEvent}s.
+ * Will toggle an actor's visibility on and off according to {@link InputEvent}s.
  * By default, toggles on the default combination of Ctrl+` (aka tilda, back-tick, grave).
  * If a different toggle combination is desired, subclass this class and override {@link #shouldToggle(int)}.
  *
  * @author Yevgeny Krasik
  */
 // TODO: Add A LibGdxCliScreenToggler
-public class LibGdxCliVisibilityToggler extends InputListener {
-    private final LibGdxCli cli;
+public class LibGdxVisibilityToggler extends InputListener {
+    private final Actor actor;
 
-    public LibGdxCliVisibilityToggler(@NonNull LibGdxCli cli) {
-        this.cli = cli;
+    public LibGdxVisibilityToggler(@NonNull Actor actor) {
+        this.actor = actor;
     }
 
     @Override
     public boolean keyDown(InputEvent event, int keycode) {
         if (shouldToggle(keycode)) {
-            cli.toggleVisibility();
+            actor.setVisible(!actor.isVisible());
             event.cancel();
             return true;
         } else {
@@ -52,13 +53,10 @@ public class LibGdxCliVisibilityToggler extends InputListener {
 
     /**
      * The default toggle combination is Ctrl+` (back tick, usually above tab).
-     * Can be overridden by subclasses that want to toggle on a different combination.<br>
-     * If overriding, it is recommended not to use any text keys as the toggles but combine them a meta-key.
-     * For example, don't use `, use Ctrl+` instead, because ` is a text character that will be printed onto the
-     * command line when it regains focus, but Ctrl+` won't.
+     * Can be overridden by subclasses that want to toggle on a different combination.
      *
      * @param keycode keycode that was pressed.
-     * @return {@code true} if the console should be toggled on this event.
+     * @return {@code true} if the actor's visibility should be toggled on this keycode.
      */
     protected boolean shouldToggle(int keycode) {
         return keycode == Keys.GRAVE && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT);

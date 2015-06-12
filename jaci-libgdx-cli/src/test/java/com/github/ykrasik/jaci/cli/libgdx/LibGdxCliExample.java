@@ -55,7 +55,7 @@ public class LibGdxCliExample extends ApplicationAdapter {
 
         stage = new Stage();
         stage.addActor(cli);
-        stage.addListener(new LibGdxCliVisibilityToggler(cli));
+        stage.addListener(new LibGdxVisibilityToggler(cli));
 
         Gdx.input.setInputProcessor(stage);
     }
