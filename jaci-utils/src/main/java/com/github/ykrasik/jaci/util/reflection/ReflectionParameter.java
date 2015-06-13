@@ -18,6 +18,7 @@ package com.github.ykrasik.jaci.util.reflection;
 
 import com.github.ykrasik.jaci.util.opt.Opt;
 import lombok.NonNull;
+import lombok.ToString;
 
 import java.lang.annotation.Annotation;
 
@@ -26,6 +27,7 @@ import java.lang.annotation.Annotation;
  *
  * @author Yevgeny Krasik
  */
+@ToString
 public class ReflectionParameter {
     private final Class<?> parameterType;
     private final Annotation[] annotations;

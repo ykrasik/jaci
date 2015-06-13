@@ -5,5 +5,5 @@ include "jaci-utils"
 include "jaci-core"
 include "jaci-cli-core"
 
-//include "jaci-javafx-cli"
+include "jaci-javafx-cli"
 include "jaci-libgdx-cli"

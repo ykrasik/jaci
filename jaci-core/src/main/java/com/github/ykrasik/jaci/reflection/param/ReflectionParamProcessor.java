@@ -21,6 +21,7 @@ import com.github.ykrasik.jaci.reflection.param.factory.*;
 import com.github.ykrasik.jaci.util.opt.Opt;
 import com.github.ykrasik.jaci.util.reflection.ReflectionParameter;
 import lombok.NonNull;
+import lombok.SneakyThrows;
 
 import java.util.Arrays;
 import java.util.List;
@@ -64,16 +65,8 @@ public class ReflectionParamProcessor {
      * @throws IllegalArgumentException If the parameter wasn't accepted by any of the {@link MethodParamFactory}s.
      *                                  This means the parameter is of an incompatible type.
      */
+    @SneakyThrows
     public ParamDef<?> createParam(@NonNull Object instance, @NonNull ReflectionParameter param) {
-        try {
-            return doCreateParam(instance, param);
-        } catch (Exception e) {
-            final String message = String.format("Error creating parameter: object=%s, param=%s", instance, param);
-            throw new IllegalArgumentException(message, e);
-        }
-    }
-
-    private ParamDef<?> doCreateParam(Object instance, ReflectionParameter param) throws Exception {
         for (MethodParamFactory<?> factory : factories) {
             final Opt<? extends ParamDef<?>> def = factory.create(instance, param);
             if (def.isPresent()) {
@@ -82,6 +75,6 @@ public class ReflectionParamProcessor {
         }
 
         // No factory accepted this param.
-        throw new IllegalArgumentException("Invalid param!");
+        throw new IllegalArgumentException(String.format("Invalid param: class=%s, param=%s", instance.getClass(), param));
     }
 }

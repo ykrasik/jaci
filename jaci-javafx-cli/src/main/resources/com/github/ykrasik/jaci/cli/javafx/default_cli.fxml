@@ -8,21 +8,18 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.paint.*?>
 
-<BorderPane id="BorderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane id="cli" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
     <center>
-        <TextArea fx:id="terminal" editable="false" style="-fx-background-color: DARKGRAY;" wrapText="true" />
+        <TextArea id="cliOutput" fx:id="cliOutput" editable="false" style="-fx-background-color: LIGHTGRAY;" wrapText="true" />
     </center>
     <bottom>
         <BorderPane prefHeight="41.0" style="-fx-background-color: GRAY;" BorderPane.alignment="CENTER">
             <left>
-                <Label fx:id="currentPath" text="" BorderPane.alignment="CENTER" />
+                <Label id="workingDirectory" fx:id="workingDirectory" text="" BorderPane.alignment="CENTER" />
             </left>
             <center>
-                <TextField fx:id="commandLine" BorderPane.alignment="CENTER" />
+                <TextField id="commandLine" fx:id="commandLine" BorderPane.alignment="CENTER" />
             </center>
-            <BorderPane.margin>
-                <Insets />
-            </BorderPane.margin>
             <padding>
                 <Insets left="5.0" right="5.0" />
             </padding>

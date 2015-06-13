@@ -14,33 +14,35 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jaci.old.javafx;
+package com.github.ykrasik.jaci.cli.javafx;
 
 import javafx.event.EventHandler;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
-
-import java.util.Objects;
+import lombok.NonNull;
 
 /**
- * An {@link javafx.event.EventHandler} that toggles a node's visibility on or off when a key combination is pressed.
+ * An {@link EventHandler} that toggles a node's visibility on or off when a key combination is pressed.
  * The default key combination is Ctrl+` (back tick, usually above tab).
  *
  * @author Yevgeny Krasik
  */
-// FIXME: BUG: When doing a sceneToggle and the cursor was over the textArea, the cursor remaings the text cursor.
+// FIXME: When doing a sceneToggle and the cursor is over the textArea, the cursor remains the text cursor.
 public class NodeVisibilityToggler implements EventHandler<KeyEvent> {
     private static final KeyCombination DEFAULT_KEY_COMBINATION = KeyCombination.keyCombination("Ctrl+`");
 
     private final Node node;
-
     private KeyCombination toggleCombination = DEFAULT_KEY_COMBINATION;
 
-    public NodeVisibilityToggler(Node node) {
-        this.node = Objects.requireNonNull(node);
+    /**
+     * Create a toggler that will toggle the given node when the default Ctrl+` (back-tick) key combination is detected.
+     *
+     * @param node Node whose visibility should be toggled when the key combination is detected.
+     */
+    public NodeVisibilityToggler(@NonNull Node node) {
+        this.node = node;
     }
 
     /**
@@ -48,8 +50,20 @@ public class NodeVisibilityToggler implements EventHandler<KeyEvent> {
      *
      * @param toggleCombination New keyCombination to set.
      */
-    public void setToggleCombination(KeyCombination toggleCombination) {
-        this.toggleCombination = Objects.requireNonNull(toggleCombination);
+    public void setToggleCombination(@NonNull KeyCombination toggleCombination) {
+        this.toggleCombination = toggleCombination;
+    }
+
+    /**
+     * Register as an event filter with the given scene.
+     * Will toggle on the configured key combination.
+     *
+     * @param scene Scene to register on.
+     *
+     * @see #setToggleCombination(KeyCombination)
+     */
+    public void register(Scene scene) {
+        scene.addEventFilter(KeyEvent.KEY_PRESSED, this);
     }
 
     @Override
@@ -57,30 +71,5 @@ public class NodeVisibilityToggler implements EventHandler<KeyEvent> {
         if (toggleCombination.match(event)) {
             node.setVisible(!node.isVisible());
         }
-    }
-
-    /**
-     * Register a {@link SceneToggler} as an event filter with the {@link javafx.scene.Scene}.
-     * Will toggle on the default key combination of Ctrl+`
-     *
-     * @param scene Scene to register on.
-     * @param parent The parent to show upon toggle.
-     */
-    public static void register(Scene scene, Parent parent) {
-        register(scene, parent, DEFAULT_KEY_COMBINATION);
-    }
-
-    /**
-     * Register a {@link SceneToggler} as an event filter with the {@link javafx.scene.Scene}.
-     * Will toggle on the supplied key combination.
-     *
-     * @param scene Stage to register on.
-     * @param parent The parent to show upon toggle.
-     * @param toggleCombination The key combination to toggle on.
-     */
-    public static void register(Scene scene, Parent parent, KeyCombination toggleCombination) {
-        final NodeVisibilityToggler toggler = new NodeVisibilityToggler(parent);
-        toggler.setToggleCombination(toggleCombination);
-        scene.addEventFilter(KeyEvent.KEY_PRESSED, toggler);
     }
 }

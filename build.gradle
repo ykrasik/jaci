@@ -47,13 +47,13 @@ project("jaci-cli-core") {
     }
 }
 
-//project("jaci-javafx-cli") {
-//    description "jaci JavaFX command line interface"
-//
-//    dependencies {
-//        compile project(":jaci-cli-core")
-//    }
-//}
+project("jaci-javafx-cli") {
+    description "Jaci JavaFX command-line-interface implementation"
+
+    dependencies {
+        compile project(":jaci-cli-core")
+    }
+}
 
 project("jaci-libgdx-cli") {
     description "Jaci LibGdx command-line-interface implementation"
