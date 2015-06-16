@@ -27,7 +27,7 @@ import com.github.ykrasik.jaci.api.*;
  * @author Yevgeny Krasik
  */
 @CommandPath("optionalParams")
-public class OptionalParamsSample {
+public class OptionalParamsCommands {
     private CommandOutput output;
 
     @Command(description = "All params are optional, with const default values.")

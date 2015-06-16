@@ -93,7 +93,7 @@ public class LibGdxCli extends Table {
                       int maxCommandHistory) {
         super(skin);
 
-        // Buffer to cli output.
+        // Buffer for cli output.
         final LibGdxCliOutputBuffer buffer = new LibGdxCliOutputBuffer(skin, maxBufferEntries);
         buffer.setName("buffer");
         buffer.bottom().left();

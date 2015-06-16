@@ -36,17 +36,16 @@ public class JavaFxCliExample extends Application {
     @Override
     @SneakyThrows
     public void start(Stage stage) {
-        stage.setTitle("Jaci");
         stage.setWidth(1280);
         stage.setHeight(720);
 
         // Create a CLI.
         final Parent cli = new JavaFxCliBuilder()
-            .processClass(AnnotationExample.class)
+            .processClass(AnnotationExample.class)  // This is the place to process more classes.
             .build();
 
         // Add a scene toggler.
-        // The toggler will switch between the main scene and the CLI scene on a a key combination (default Ctrl+`).
+        // The toggler will switch between the main scene and the CLI scene on a key combination (default Ctrl+`).
         SceneToggler.register(stage, cli);
 
         // Create a boring main scene.

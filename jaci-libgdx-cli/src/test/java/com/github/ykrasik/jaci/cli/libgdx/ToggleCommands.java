@@ -19,31 +19,29 @@ package com.github.ykrasik.jaci.cli.libgdx;
 import com.github.ykrasik.jaci.api.*;
 
 /**
- * A string param may be constrained to only accept a certain set of values.
- * These are either pre-determined (set in the annotation) or computed at runtime via a supplier.
+ * Toggle commands are special commands that take a single optional boolean parameter and toggle the state of some
+ * component on or off.
+ *
+ * @see ToggleCommand
  *
  * @author Yevgeny Krasik
  */
-@CommandPath("stringParam")
-public class StringParamSample {
-    private CommandOutput output;
+@CommandPath("toggle")
+public class ToggleCommands {
+    @ToggleCommand(description = "A toggle command")
+    public ToggleCommandStateAccessor toggle() {
+        return new ToggleCommandStateAccessor() {
+            private boolean state;
 
-    @Command(description = "String param that accepts all values")
-    public void unconstrainedString(@StringParam(accepts = {}) String str) {
-        output.message("unconstrainedString: str=%s", str);
-    }
+            @Override
+            public void set(boolean value) {
+                state = value;
+            }
 
-    @Command(description = "String param that only accepts values stated in the annotation.")
-    public void staticConstrainedString(@StringParam(accepts = {"a", "b", "c"}) String str) {
-        output.message("staticConstrainedString: str=%s", str);
-    }
-
-    @Command(description = "String param that only accepts values supplied at runtime via a supplier.")
-    public void dynamicConstrainedString(@StringParam(acceptsSupplier = "stringSupplier") String str) {
-        output.message("dynamicConstrainedString: str=%s", str);
-    }
-
-    private String[] stringSupplier() {
-        return new String[]{ "d", "e", "f" };
+            @Override
+            public boolean get() {
+                return state;
+            }
+        };
     }
 }

@@ -25,7 +25,7 @@ import com.github.ykrasik.jaci.api.*;
  * @author Yevgeny Krasik
  */
 @CommandPath("mandatoryParams")
-public class MandatoryParamsSample {
+public class MandatoryParamsCommands {
     private CommandOutput output;
 
     @Command(description = "Primitive params without annotations. Without annotations all parameters are considered mandatory.")

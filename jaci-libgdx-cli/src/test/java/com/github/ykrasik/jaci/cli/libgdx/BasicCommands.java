@@ -19,17 +19,31 @@ package com.github.ykrasik.jaci.cli.libgdx;
 import com.github.ykrasik.jaci.api.*;
 
 /**
- * Toggle commands are special commands that take a single optional boolean parameter and toggle the state of some
- * component on or off.
- *
- * @see ToggleCommand
- *
  * @author Yevgeny Krasik
  */
-@CommandPath("toggle")
-public class ToggleSample {
-    @ToggleCommand(description = "A toggle command")
-    public ToggleCommandStateAccessor toggle() {
+public class BasicCommands {
+    // This field will be injected by Jaci when the class is processed.
+    private CommandOutput output;
+
+    @Command
+    public void paramExample(@IntParam("mandatoryInt") int intParam,
+                             @StringParam(value = "optionalString", optional = true, defaultValueSupplier = "defaultSupplier") String stringParam,
+                             @BoolParam(value = "flag", optional = true, defaultValue = false) boolean flag) {
+        output.message("mandatoryInt=%d, optionalString=%s, flag=%s", intParam, stringParam, flag);
+    }
+
+    private String defaultSupplier() {
+        // Should be replaced by a real calculation
+        return "suppliedDefault";
+    }
+
+    @Command(description = "Display 'Hello, World!'")
+    public void helloWorld() {
+        output.message("Hello, World!");
+    }
+
+    @ToggleCommand(description = "Toggles something")
+    public ToggleCommandStateAccessor toggle2() {
         return new ToggleCommandStateAccessor() {
             private boolean state;
 

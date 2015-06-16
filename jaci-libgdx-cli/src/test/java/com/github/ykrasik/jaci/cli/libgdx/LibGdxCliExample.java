@@ -20,6 +20,7 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 
 /**
@@ -45,16 +46,20 @@ public class LibGdxCliExample extends ApplicationAdapter {
     @Override
     public void create() {
         final LibGdxCli cli = new LibGdxCli.Builder()
-            .processClass(PathSample1.class)
-            .processClass(PathSample2.class)
-            .processClass(MandatoryParamsSample.class)
-            .processObject(new OptionalParamsSample())  // Just to show that this is also possible.
-            .processClass(StringParamSample.class)
-            .processClass(ToggleSample.class)
+            .processClass(BasicCommands.class)
+            .processClass(PathCommands1.class)
+            .processClass(PathCommands2.class)
+            .processClass(MandatoryParamsCommands.class)
+            .processObject(new OptionalParamsCommands())  // Just to show that this is also possible.
+            .processClass(StringParamCommands.class)
+            .processClass(ToggleCommands.class)
             .build();
 
         stage = new Stage();
         stage.addActor(cli);
+
+        // Add an InputListener that will toggle the CLI's visibility on and off
+        // on the default Ctrl+` key-combination.
         stage.addListener(new LibGdxVisibilityToggler(cli));
 
         Gdx.input.setInputProcessor(stage);
@@ -67,6 +72,9 @@ public class LibGdxCliExample extends ApplicationAdapter {
 
     @Override
     public void render() {
+        Gdx.gl.glClearColor(0f, 0f, 0f, 1f);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+
         stage.act();
         stage.draw();
     }

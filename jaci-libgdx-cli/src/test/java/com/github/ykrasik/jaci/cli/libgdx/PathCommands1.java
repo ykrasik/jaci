@@ -16,52 +16,50 @@
 
 package com.github.ykrasik.jaci.cli.libgdx;
 
-import com.github.ykrasik.jaci.api.Command;
-import com.github.ykrasik.jaci.api.CommandOutput;
-import com.github.ykrasik.jaci.api.CommandPath;
+import com.github.ykrasik.jaci.api.*;
 
 /**
- * Class declares a 'top level path', all commands will be appended to it.
+ * Class doesn't declare a 'top level path', so all commands will be added under 'root' by default.
  * Contains examples of how to specialize the paths for each command.
  *
  * @author Yevgeny Krasik
  */
-@CommandPath("topLevelPath")
-public class PathSample2 {
+public class PathCommands1 {
     private CommandOutput output;
 
-    @Command(description = "Command without path.")
-    public void noPath() {
-        output.message("noPath: This command should be located under /topLevelPath");
+    @CommandPath("new")
+    @Command(description = "Simple path specialization.")
+    public void specializedPath1() {
+        output.message("specializedPath1: This command should be located under /new");
     }
 
     @CommandPath("/new")
     @Command(description = "Path specialization prefixed with a '/' delimiter, has no effect.")
-    public void specializedPath1() {
-        output.message("specializedPath1: This command should be located under /topLevelPath/new");
+    public void specializedPath2() {
+        output.message("specializedPath2: This command should be located under /new");
     }
 
     @CommandPath("new/")
     @Command(description = "Path specialization suffixed with a '/' delimiter, has no effect.")
-    public void specializedPath2() {
-        output.message("specializedPath2: This command should be located under /topLevelPath/new");
+    public void specializedPath3() {
+        output.message("specializedPath3: This command should be located under /new");
     }
 
     @CommandPath("new/path")
     @Command(description = "Path specialization with a delimited path.")
-    public void specializedPath3() {
-        output.message("specializedPath3: This command should be located under /topLevelPath/new/path");
+    public void specializedPath4() {
+        output.message("specializedPath4: This command should be located under /new/path");
     }
 
     @CommandPath("/new/path")
     @Command(description = "Path specialization with a delimited path prefixed with a '/' delimiter, has no effect.")
-    public void specializedPath4() {
-        output.message("specializedPath4: This command should be located under /topLevelPath/new/path");
+    public void specializedPath5() {
+        output.message("specializedPath5: This command should be located under /new/path");
     }
 
     @CommandPath("new/path/")
     @Command(description = "Path specialization with a delimited path suffixed with a '/' delimiter, has no effect.")
-    public void specializedPath5() {
-        output.message("specializedPath5: This command should be located under /topLevelPath/new/path");
+    public void specializedPath6() {
+        output.message("specializedPath6: This command should be located under /new/path");
     }
 }
