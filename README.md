@@ -45,18 +45,7 @@ Let's explain what's going on here:
 * The command then just sends the parameter values to the output. The string sent to the output will be formatted with String.format().
 
 Here is how this looks on a LibGdx CLI implementation:  
-[[images/fullExample.PNG]]
-
-1. `ls -r` - Print the contents of our hierarchy, recursing into sub-directories.
-2. `cd example/simple` - Change working directory to to `example/simple`.
-3. `simpleCommand a d 3 4.5 true` - Call _simpleCommand_ with these values.
-4. Some invocations of _simpleCommand_ with invalid parameter values.
-5. `simpleCommand a d -int 3 -double 4.5 -flag` - Call _simpleCommand_ with a mix of passing values by-position and by-name. `-int 3` passes the value 3 for the parameter named `int`. `-flag` is a shortcut only applicable to optional boolean parameters where just specifying the parameter name without a value afterwards will bind the boolean parameter to the inverse of it's default value.
-6. `simpleCommand a -int 3 -double 4.5 -flag` - Call _simpleCommand_ without specifying the value of `str2`, it receives the default value of "default".
-7. `simpleCommand a -int 3 -flag` - Call _simpleCommand_ without specifying the value of `str2` or `double`, they receive the default values of "default" and 3.5, respectively.
-8. `simpleCommand a -int 3` - Call _simpleCommand_ with only values bound to mandatory parameters, all optional parameters receive default values.
-9. `simpleCommand a 3` - A parse error, since the next parameter to parse a value according to it's position is `str2`.
-
+![alt text](https://github.com/ykrasik/jaci/wiki/images/fullExample.PNG)
 
 # Full Documentation
 See the [Wiki](https://github.com/ykrasik/jaci/wiki) for full documentation.
