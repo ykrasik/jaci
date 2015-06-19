@@ -5,6 +5,16 @@ buildscript {
 
         junitVersion = '4.11'
         mockitoVersion = '1.9.5'
+
+        nexusStagingPluginVersion = '0.5.3'
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:$nexusStagingPluginVersion"
     }
 }
 
@@ -25,6 +35,12 @@ subprojects {
         testCompile "junit:junit:$junitVersion"
         testCompile "org.mockito:mockito-all:$mockitoVersion"
     }
+}
+
+apply plugin: 'io.codearte.nexus-staging'
+
+nexusStaging {
+    packageGroup = "com.github.ykrasik"
 }
 
 project("jaci-utils") {
