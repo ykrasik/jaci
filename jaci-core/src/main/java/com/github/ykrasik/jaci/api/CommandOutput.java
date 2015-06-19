@@ -17,12 +17,10 @@
 package com.github.ykrasik.jaci.api;
 
 /**
- * Output source of a Command.<br>
- * Methods annotated with {@link Command}(referred to as 'commands') <b>MUST</b> receive a {@link CommandOutput} as the first parameter.
- * Commands that do not have a {@link CommandOutput} as their first parameter will not be accepted.
- * This essentially means that commands must always be at least 1-arity.<br>
- * Methods annotated with {@link ToggleCommand}(referred to as 'toggle commands') aren't bound by this, and in fact
- * can't have access to a {@link CommandOutput}, because toggle commands aren't meant to be general purpose commands.
+ * Output source of a Command.
+ * Can display info and error messages.
+ * Each class with commands should have a private, non-final (uninitialized) field of this type
+ * into which an implementation will be injected by the library when the class is processed.
  *
  * @author Yevgeny Krasik
  */

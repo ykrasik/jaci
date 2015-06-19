@@ -23,11 +23,7 @@ import java.lang.annotation.Target;
 
 /**
  * Indicates that the annotated method is a command.<br>
- * Annotated methods (referred to as 'commands') <b>MUST</b> receive a {@link CommandOutput} as the first parameter.<br>
- * Commands that do not have a {@link CommandOutput} as their first parameter will not be accepted.<br>
- * This essentially means that commands must always be at least 1-arity.<br>
- * <br>
- * A command may receive any of the following parameters (besides the first {@link CommandOutput} parameter):
+ * A command may receive any of the following parameters:
  * <ul>
  *     <li>{@link Boolean} or {@code boolean} parameters, optionally annotated with {@link BoolParam}</li>
  *     <li>{@link Double} or {@code double} parameters, optionally annotated with {@link DoubleParam}</li>
@@ -35,6 +31,7 @@ import java.lang.annotation.Target;
  *     <li>{@link String} parameters, optionally annotated with {@link StringParam}</li>
  * </ul>
  * <br>
+ * Output may be written to the containing class's {@link CommandOutput}.<br>
  * If the command name is empty, the command will receive the name of the method.<br>
  *
  * @author Yevgeny Krasik

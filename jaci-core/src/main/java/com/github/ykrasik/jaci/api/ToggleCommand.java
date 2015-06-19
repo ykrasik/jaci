@@ -27,8 +27,6 @@ import java.lang.annotation.Target;
  * the boolean state of some component on or off. The state of the component is accessed via a {@link ToggleCommandStateAccessor}.<br>
  * <br>
  * Annotated methods must be no-args and return a {@link ToggleCommandStateAccessor}.<br>
- * Toggle commands can't have access to a {@link CommandOutput},
- * because toggle commands aren't meant to be general purpose commands.
  *
  * @author Yevgeny Krasik
  */
