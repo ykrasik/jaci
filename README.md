@@ -57,7 +57,7 @@ The binaries depend on your choice of UI-platform:
 <dependency>
     <groupId>com.github.ykrasik</groupId>
     <artifactId>jaci-libgdx-cli</artifactId>
-    <version>0.1.0</version>
+    <version>0.2.0</version>
 </dependency>
 ```
 
