@@ -64,25 +64,25 @@ public class JavaFxCliBuilder {
     private int maxCommandHistory = 30;
 
     /**
-     * Process a class and add any commands defined through annotations to this builder.
-     * Class must have a no-args constructor.
+     * Process the classes and add any commands defined through annotations to this builder.
+     * Each class must have a no-args constructor.
      *
-     * @param clazz Class to process.
+     * @param classes Classes to process.
      * @return {@code this}, for chaining.
      */
-    public JavaFxCliBuilder processClass(Class<?> clazz) {
-        hierarchyBuilder.processClass(clazz);
+    public JavaFxCliBuilder processClass(Class<?>... classes) {
+        hierarchyBuilder.processClasses(classes);
         return this;
     }
 
     /**
-     * Process the object's class and add any commands defined through annotations to this builder.
+     * Process the objects' classes and add any commands defined through annotations to this builder.
      *
-     * @param instance Object whose class to process.
+     * @param instances Objects whose classes to process.
      * @return {@code this}, for chaining.
      */
-    public JavaFxCliBuilder processObject(Object instance) {
-        hierarchyBuilder.processObject(instance);
+    public JavaFxCliBuilder process(Object... instances) {
+        hierarchyBuilder.process(instances);
         return this;
     }
 

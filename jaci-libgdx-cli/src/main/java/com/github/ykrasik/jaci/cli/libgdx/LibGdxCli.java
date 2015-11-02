@@ -228,7 +228,7 @@ public class LibGdxCli extends Table {
     /**
      * A builder for a {@link LibGdxCli}.
      * Builds a CLI with a default skin, unless a custom skin is specified via {@link #setSkin(Skin)}.<br>
-     * The main methods to use are {@link #processClass(Class)} and {@link #processObject(Object)} which process
+     * The main methods to use are {@link #processClasses(Class[])} and {@link #process(Object[])} which process
      * a class and add any annotated methods as commands to this builder.
      */
     public static class Builder {
@@ -239,25 +239,25 @@ public class LibGdxCli extends Table {
         private int maxCommandHistory = 30;
 
         /**
-         * Process a class and add any commands defined through annotations to this builder.
-         * Class must have a no-args constructor.
+         * Process the classes and add any commands defined through annotations to this builder.
+         * Each class must have a no-args constructor.
          *
-         * @param clazz Class to process.
+         * @param classes Classes to process.
          * @return {@code this}, for chaining.
          */
-        public Builder processClass(Class<?> clazz) {
-            hierarchyBuilder.processClass(clazz);
+        public Builder processClasses(Class<?>... classes) {
+            hierarchyBuilder.processClasses(classes);
             return this;
         }
 
         /**
-         * Process the object's class and add any commands defined through annotations to this builder.
+         * Process the objects' classes and add any commands defined through annotations to this builder.
          *
-         * @param instance Object whose class to process.
+         * @param instances Objects whose classes to process.
          * @return {@code this}, for chaining.
          */
-        public Builder processObject(Object instance) {
-            hierarchyBuilder.processObject(instance);
+        public Builder process(Object... instances) {
+            hierarchyBuilder.process(instances);
             return this;
         }
 

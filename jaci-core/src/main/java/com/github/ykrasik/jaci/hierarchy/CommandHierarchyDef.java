@@ -57,31 +57,44 @@ public class CommandHierarchyDef {
         private final CommandDirectoryDef.Builder root = new CommandDirectoryDef.Builder("root").setDescription("root");
 
         /**
-         * Process a class and add any commands defined through annotations to this builder.
-         * Class must have a no-args constructor.
+         * Process the classes and add any commands defined through annotations to this builder.
+         * Each class must have a no-args constructor.
          *
-         * @param clazz Class to process.
+         * @param classes Classes to process.
          * @return {@code this}, for chaining.
          */
-        public Builder processClass(@NonNull Class<?> clazz) {
+        public Builder processClasses(@NonNull Class<?>... classes) {
+            for (Class<?> clazz : classes) {
+                doProcessClass(clazz);
+            }
+            return this;
+        }
+
+        private void doProcessClass(Class<?> clazz) {
             final Object instance = ReflectionUtils.createInstanceNoArgs(clazz);
-            return processObject(instance);
+            doProcess(instance);
         }
 
         /**
-         * Process the object's class and add any commands defined through annotations to this builder.
+         * Process the objects' classes and add any commands defined through annotations to this builder.
          *
-         * @param instance Object whose class to process.
+         * @param instances Objects whose classes to process.
          * @return {@code this}, for chaining.
          */
-        public Builder processObject(@NonNull Object instance) {
+        public Builder process(@NonNull Object... instances) {
+            for (Object instance : instances) {
+                doProcess(instance);
+            }
+            return this;
+        }
+
+        private void doProcess(Object instance) {
             final Map<ParsedPath, List<CommandDef>> pathToCommandDefsMap = processor.processObject(instance);
 
             // Add the returned commands to the hierarchy.
             for (Entry<ParsedPath, List<CommandDef>> entry : pathToCommandDefsMap.entrySet()) {
                 addCommandDefs(entry.getKey(), entry.getValue());
             }
-            return this;
         }
 
         private void addCommandDefs(ParsedPath path, List<CommandDef> commandDefs) {
