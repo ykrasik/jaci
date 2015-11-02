@@ -110,9 +110,8 @@ public class LibGdxCli extends Table {
         commandLine.setName("commandLine");
         final CommandLineManager commandLineManager = new LibGdxCommandLineManager(commandLine);
 
-        // LibGdx seems to ignore leading \t or white-spaces,
-        // so we need a special tab char - prepend a bogus char...
-        final CliSerializer serializer = new DefaultCliSerializer(((char) 0) + "    ");
+        // LibGdx seems to ignore leading \t
+        final CliSerializer serializer = new DefaultCliSerializer("    ");
 
         // Create the shell and the actual CLI.
         final CliShell shell = new CliShell.Builder(hierarchy, output)

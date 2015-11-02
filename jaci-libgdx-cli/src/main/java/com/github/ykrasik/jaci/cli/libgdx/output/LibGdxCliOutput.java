@@ -54,7 +54,7 @@ public class LibGdxCliOutput implements CliOutput {
 
     @Override
     public void errorPrintln(String text) {
-        buffer.println(text, Color.PINK);
+        buffer.println(text, Color.SALMON);
     }
 
     @Override

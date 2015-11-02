@@ -91,8 +91,7 @@ public class LibGdxCliOutputBuffer extends Table {
         }
 
         bufferEntries.add(newEntry);
-        // TODO: Why expandX?
-        buffer.add(newEntry).left().fillX().expandX();
+        buffer.add(newEntry).left().row();
 
         updateScroll();
     }

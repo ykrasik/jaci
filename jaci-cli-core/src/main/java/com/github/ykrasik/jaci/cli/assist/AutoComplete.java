@@ -51,37 +51,6 @@ public class AutoComplete {
     }
 
     /**
-     * @return Whether this auto-complete has any possibilities.
-     */
-    public boolean isEmpty() {
-        return possibilities.isEmpty();
-    }
-
-    /**
-     * Create a new auto-complete by merging this auto-complete with the given auto-complete.
-     * The resulting auto-complete will contain possibilities from both this and the given auto-complete.
-     *
-     * @param other Auto-complete to merge with.
-     * @return A merged auto-complete containing possibilities from both this and the given auto-complete.
-     */
-    public AutoComplete union(AutoComplete other) {
-        if (possibilities.isEmpty()) {
-            return other;
-        }
-        if (other.possibilities.isEmpty()) {
-            return this;
-        }
-
-        // TODO: Make sure this can't happen.
-        if (!this.prefix.equals(other.prefix)) {
-            throw new IllegalArgumentException(String.format("Trying to perform union on different prefixes: prefix1='%s', prefix2='%s'", this.prefix, other.prefix));
-        }
-
-        final Trie<CliValueType> unifiedPossibilities = this.possibilities.union(other.possibilities);
-        return new AutoComplete(prefix, unifiedPossibilities);
-    }
-
-    /**
      * Get a string that can be appended to the prefix from which this auto-complete was built.
      * This is, in essence, the actual auto-complete operation.
      * Will only return a {@code present} value if there is a non-empty string to append.
@@ -136,5 +105,29 @@ public class AutoComplete {
             builder.addSuggestion(entry.getValue(), entry.getKey());
         }
         return Opt.of(builder.build());
+    }
+
+    /**
+     * Create a new auto-complete by merging this auto-complete with the given auto-complete.
+     * The resulting auto-complete will contain possibilities from both this and the given auto-complete.
+     *
+     * @param other Auto-complete to merge with.
+     * @return A merged auto-complete containing possibilities from both this and the given auto-complete.
+     */
+    public AutoComplete union(AutoComplete other) {
+        if (possibilities.isEmpty()) {
+            return other;
+        }
+        if (other.possibilities.isEmpty()) {
+            return this;
+        }
+
+        // TODO: Make sure this can't happen.
+        if (!this.prefix.equals(other.prefix)) {
+            throw new IllegalArgumentException(String.format("Trying to perform union on different prefixes: prefix1='%s', prefix2='%s'", this.prefix, other.prefix));
+        }
+
+        final Trie<CliValueType> unifiedPossibilities = this.possibilities.union(other.possibilities);
+        return new AutoComplete(prefix, unifiedPossibilities);
     }
 }
