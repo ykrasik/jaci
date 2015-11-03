@@ -18,9 +18,15 @@ buildscript {
     }
 }
 
+apply plugin: 'io.codearte.nexus-staging'
+nexusStaging {
+    packageGroup = "com.github.ykrasik"
+}
+
 subprojects {
     apply plugin: "java"
-    apply from: 'https://raw.githubusercontent.com/ykrasik/gradle-publish-script/master/publish.gradle'
+    apply from: 'https://raw.githubusercontent.com/ykrasik/gradle-scripts/master/publish.gradle'
+    apply from: 'https://raw.githubusercontent.com/ykrasik/gradle-scripts/master/provided.gradle'
 
     sourceCompatibility = 1.7
     targetCompatibility = 1.7
@@ -30,17 +36,11 @@ subprojects {
     }
 
     dependencies {
-        compile "org.projectlombok:lombok:$lombokVersion"
+        provided "org.projectlombok:lombok:$lombokVersion"
 
         testCompile "junit:junit:$junitVersion"
         testCompile "org.mockito:mockito-all:$mockitoVersion"
     }
-}
-
-apply plugin: 'io.codearte.nexus-staging'
-
-nexusStaging {
-    packageGroup = "com.github.ykrasik"
 }
 
 project("jaci-utils") {
@@ -77,9 +77,8 @@ project("jaci-libgdx-cli") {
     dependencies {
         compile project(":jaci-cli-core")
 
-        compile "com.badlogicgames.gdx:gdx:$gdxVersion"
-
-        testCompile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
-        testCompile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+        provided "com.badlogicgames.gdx:gdx:$gdxVersion"
+        provided "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
+        provided "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
     }
 }
