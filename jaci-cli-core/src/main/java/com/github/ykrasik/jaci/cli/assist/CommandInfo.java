@@ -17,16 +17,62 @@
 package com.github.ykrasik.jaci.cli.assist;
 
 import com.github.ykrasik.jaci.cli.command.CliCommand;
-import lombok.Data;
-import lombok.NonNull;
+
+import java.util.Objects;
 
 /**
  * @author Yevgeny Krasik
  */
 // TODO: JavaDoc
 // FIXME: This class may be redundant... Either actually attach it to ParseExceptions or remove it.
-@Data
 public class CommandInfo {
-    @NonNull private final CliCommand command;
-    @NonNull private final BoundParams boundParams;
+    private final CliCommand command;
+    private final BoundParams boundParams;
+
+    public CommandInfo(CliCommand command, BoundParams boundParams) {
+        this.command = Objects.requireNonNull(command, "command");
+        this.boundParams = Objects.requireNonNull(boundParams, "boundParams");
+    }
+
+    public CliCommand getCommand() {
+        return command;
+    }
+
+    public BoundParams getBoundParams() {
+        return boundParams;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        final CommandInfo that = (CommandInfo) o;
+
+        if (!command.equals(that.command)) {
+            return false;
+        }
+        return boundParams.equals(that.boundParams);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = command.hashCode();
+        result = 31 * result + boundParams.hashCode();
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("CommandInfo{");
+        sb.append("command=").append(command);
+        sb.append(", boundParams=").append(boundParams);
+        sb.append('}');
+        return sb.toString();
+    }
 }

@@ -26,9 +26,8 @@ import com.github.ykrasik.jaci.directory.CommandDirectoryDef;
 import com.github.ykrasik.jaci.hierarchy.CommandHierarchyDef;
 import com.github.ykrasik.jaci.path.ParsedPath;
 import com.github.ykrasik.jaci.util.opt.Opt;
-import lombok.NonNull;
-import lombok.Setter;
-import lombok.experimental.Delegate;
+
+import java.util.Objects;
 
 /**
  * An implementation of a {@link CliCommandHierarchy}.<br>
@@ -56,9 +55,9 @@ public class CliCommandHierarchyImpl implements CliCommandHierarchy {
      */
     private CliDirectory workingDirectory;
 
-    private CliCommandHierarchyImpl(@NonNull CliDirectory root, @NonNull CliDirectory systemCommands) {
-        this.root = root;
-        this.systemCommands = systemCommands;
+    private CliCommandHierarchyImpl(CliDirectory root, CliDirectory systemCommands) {
+        this.root = Objects.requireNonNull(root, "root");
+        this.systemCommands = Objects.requireNonNull(systemCommands, "systemCommands");
         this.workingDirectory = root;
     }
 
@@ -68,8 +67,8 @@ public class CliCommandHierarchyImpl implements CliCommandHierarchy {
     }
 
     @Override
-    public void setWorkingDirectory(@NonNull CliDirectory workingDirectory) {
-        this.workingDirectory = workingDirectory;
+    public void setWorkingDirectory(CliDirectory workingDirectory) {
+        this.workingDirectory = Objects.requireNonNull(workingDirectory, "workingDirectory");
     }
 
     @Override
@@ -98,12 +97,12 @@ public class CliCommandHierarchyImpl implements CliCommandHierarchy {
 
         final String commandName = path.getLastElement();
         if (commandName.isEmpty()) {
-            throw new ParseException(ParseError.INVALID_COMMAND, "Path doesn't point to command: '%s'", rawPath);
+            throw new ParseException(ParseError.INVALID_COMMAND, "Path doesn't point to command: '"+rawPath+'\'');
         }
 
         final Opt<CliCommand> command = lastDirectory.getCommand(commandName);
         if (!command.isPresent()) {
-            throw new ParseException(ParseError.INVALID_COMMAND, "Directory '%s' doesn't contain command: '%s'", lastDirectory.getName(), commandName);
+            throw new ParseException(ParseError.INVALID_COMMAND, "Directory '"+lastDirectory.getName()+"' doesn't contain command: '"+commandName+'\'');
         }
         return command.get();
     }
@@ -121,7 +120,7 @@ public class CliCommandHierarchyImpl implements CliCommandHierarchy {
             return command.get();
         }
 
-        throw new ParseException(ParseError.INVALID_COMMAND, "'%s' is not a recognized command!", name);
+        throw new ParseException(ParseError.INVALID_COMMAND, '\''+name+"' is not a recognized command!");
     }
 
     @Override
@@ -190,14 +189,14 @@ public class CliCommandHierarchyImpl implements CliCommandHierarchy {
         if (CliConstants.PATH_PARENT.equals(name)) {
             final Opt<CliDirectory> parent = currentDirectory.getParent();
             if (!parent.isPresent()) {
-                throw new ParseException(ParseError.INVALID_DIRECTORY, "Directory '%s' doesn't have a parent.", currentDirectory.getName());
+                throw new ParseException(ParseError.INVALID_DIRECTORY, "Directory '"+currentDirectory.getName()+"' doesn't have a parent.");
             }
             return parent.get();
         }
 
         final Opt<CliDirectory> childDirectory = currentDirectory.getDirectory(name);
         if (!childDirectory.isPresent()) {
-            throw new ParseException(ParseError.INVALID_DIRECTORY, "Directory '%s' doesn't contain directory: '%s'", currentDirectory.getName(), name);
+            throw new ParseException(ParseError.INVALID_DIRECTORY, "Directory '"+currentDirectory.getName()+"' doesn't contain directory: '"+name+'\'');
         }
         return childDirectory.get();
     }
@@ -208,7 +207,7 @@ public class CliCommandHierarchyImpl implements CliCommandHierarchy {
      * @param def CommandHierarchyDef to construct a CLI hierarchy from.
      * @return A CLI hierarchy constructed from the CommandHierarchyDef.
      */
-    public static CliCommandHierarchyImpl from(@NonNull CommandHierarchyDef def) {
+    public static CliCommandHierarchyImpl from(CommandHierarchyDef def) {
         // Create hierarchy with the parameter as the root.
         final CommandDirectoryDef rootDef = def.getRoot();
         final CliDirectory root = CliDirectory.fromDef(rootDef);
@@ -223,7 +222,7 @@ public class CliCommandHierarchyImpl implements CliCommandHierarchy {
 
         // Update the 'promise' hierarchy with the concrete implementation.
         final CliCommandHierarchyImpl cliHierarchy = new CliCommandHierarchyImpl(root, systemCommands);
-        hierarchyPromise.setHierarchy(cliHierarchy);
+        hierarchyPromise.setDelegate(cliHierarchy);
         return cliHierarchy;
     }
 
@@ -235,9 +234,40 @@ public class CliCommandHierarchyImpl implements CliCommandHierarchy {
      * So this class was born as a compromise.
      */
     private static class CliCommandHierarchyPromise implements CliCommandHierarchy {
-        // Though I usually try to avoid these Lombok annotations, here they just save so much code...
-        @Delegate
-        @Setter
-        private CliCommandHierarchy hierarchy;
+        private CliCommandHierarchy delegate;
+
+        public void setDelegate(CliCommandHierarchy delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public CliDirectory getWorkingDirectory() {
+            return delegate.getWorkingDirectory();
+        }
+
+        @Override
+        public void setWorkingDirectory(CliDirectory workingDirectory) {
+            delegate.setWorkingDirectory(workingDirectory);
+        }
+
+        @Override
+        public CliDirectory parsePathToDirectory(String rawPath) throws ParseException {
+            return delegate.parsePathToDirectory(rawPath);
+        }
+
+        @Override
+        public CliCommand parsePathToCommand(String rawPath) throws ParseException {
+            return delegate.parsePathToCommand(rawPath);
+        }
+
+        @Override
+        public AutoComplete autoCompletePathToDirectory(String rawPath) throws ParseException {
+            return delegate.autoCompletePathToDirectory(rawPath);
+        }
+
+        @Override
+        public AutoComplete autoCompletePath(String rawPath) throws ParseException {
+            return delegate.autoCompletePath(rawPath);
+        }
     }
 }

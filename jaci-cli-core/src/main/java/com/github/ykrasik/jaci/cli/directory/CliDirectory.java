@@ -27,12 +27,10 @@ import com.github.ykrasik.jaci.util.opt.Opt;
 import com.github.ykrasik.jaci.util.trie.Trie;
 import com.github.ykrasik.jaci.util.trie.TrieBuilder;
 import com.github.ykrasik.jaci.util.trie.Tries;
-import lombok.AccessLevel;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Objects;
 
 /**
  * The CLI implementation of a directory.
@@ -41,7 +39,6 @@ import java.util.Collections;
  *
  * @author Yevgeny Krasik
  */
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class CliDirectory implements Identifiable {
     private final Identifier identifier;
     private final Trie<CliDirectory> childDirectories;
@@ -51,6 +48,12 @@ public class CliDirectory implements Identifiable {
      * The parent {@link CliDirectory}.
      */
     private Opt<CliDirectory> parent = Opt.absent();
+
+    public CliDirectory(Identifier identifier, Trie<CliDirectory> childDirectories, Trie<CliCommand> childCommands) {
+        this.identifier = Objects.requireNonNull(identifier, "identifier");
+        this.childDirectories = Objects.requireNonNull(childDirectories, "childDirectories");
+        this.childCommands = Objects.requireNonNull(childCommands, "childCommands");
+    }
 
     private void setParent(CliDirectory parent) {
         if (this.parent.isPresent()) {
@@ -168,7 +171,7 @@ public class CliDirectory implements Identifiable {
      * @param def CommandDirectoryDef to construct a CLI directory from.
      * @return A CLI directory constructed from the CommandDirectoryDef.
      */
-    public static CliDirectory fromDef(@NonNull CommandDirectoryDef def) {
+    public static CliDirectory fromDef(CommandDirectoryDef def) {
         final Trie<CliDirectory> childDirectories = createChildDirectories(def);
         final Trie<CliCommand> childCommands = createChildCommands(def);
         final CliDirectory directory = new CliDirectory(def.getIdentifier(), childDirectories, childCommands);

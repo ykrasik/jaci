@@ -18,7 +18,8 @@ package com.github.ykrasik.jaci.cli.libgdx.commandline;
 
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.github.ykrasik.jaci.cli.commandline.CommandLineManager;
-import lombok.NonNull;
+
+import java.util.Objects;
 
 /**
  * A LibGdx implementation of a {@link CommandLineManager}.
@@ -32,8 +33,8 @@ public class LibGdxCommandLineManager implements CommandLineManager {
     /**
      * @param commandLine TextField to use as a command-line.
      */
-    public LibGdxCommandLineManager(@NonNull TextField commandLine) {
-        this.commandLine = commandLine;
+    public LibGdxCommandLineManager(TextField commandLine) {
+        this.commandLine = Objects.requireNonNull(commandLine, "commandLine");
     }
 
     @Override

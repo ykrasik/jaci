@@ -16,7 +16,10 @@
 
 package com.github.ykrasik.jaci.cli.libgdx;
 
-import com.github.ykrasik.jaci.api.*;
+import com.github.ykrasik.jaci.api.Command;
+import com.github.ykrasik.jaci.api.CommandOutput;
+import com.github.ykrasik.jaci.api.CommandPath;
+import com.github.ykrasik.jaci.api.StringParam;
 
 /**
  * A string param may be constrained to only accept a certain set of values.
@@ -30,17 +33,17 @@ public class StringParamCommands {
 
     @Command(description = "String param that accepts all values")
     public void unconstrainedString(@StringParam(accepts = {}) String str) {
-        output.message("unconstrainedString: str=%s", str);
+        output.message("unconstrainedString: str=" + str);
     }
 
     @Command(description = "String param that only accepts values stated in the annotation.")
     public void staticConstrainedString(@StringParam(accepts = {"a", "b", "c"}) String str) {
-        output.message("staticConstrainedString: str=%s", str);
+        output.message("staticConstrainedString: str=" + str);
     }
 
     @Command(description = "String param that only accepts values supplied at runtime via a supplier.")
     public void dynamicConstrainedString(@StringParam(acceptsSupplier = "stringSupplier") String str) {
-        output.message("dynamicConstrainedString: str=%s", str);
+        output.message("dynamicConstrainedString: str=" + str);
     }
 
     private String[] stringSupplier() {

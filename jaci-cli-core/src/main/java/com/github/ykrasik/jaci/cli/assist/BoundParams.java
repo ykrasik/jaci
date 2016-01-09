@@ -18,10 +18,9 @@ package com.github.ykrasik.jaci.cli.assist;
 
 import com.github.ykrasik.jaci.cli.param.CliParam;
 import com.github.ykrasik.jaci.util.opt.Opt;
-import lombok.NonNull;
-import lombok.ToString;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Contains a possibly-partial state of parsing a command's parameters.
@@ -29,7 +28,6 @@ import java.util.Map;
  *
  * @author Yevgeny Krasik
  */
-@ToString
 public class BoundParams {
     /**
      * Parsed parameter values.
@@ -41,9 +39,9 @@ public class BoundParams {
      */
     private final Opt<CliParam> nextParam;
 
-    public BoundParams(@NonNull Map<CliParam, Object> values, @NonNull Opt<CliParam> nextParam) {
-        this.values = values;
-        this.nextParam = nextParam;
+    public BoundParams(Map<CliParam, Object> values, Opt<CliParam> nextParam) {
+        this.values = Objects.requireNonNull(values, "values");
+        this.nextParam = Objects.requireNonNull(nextParam, "nextParam");
     }
 
     /**
@@ -61,5 +59,14 @@ public class BoundParams {
      */
     public Opt<CliParam> getNextParam() {
         return nextParam;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("BoundParams{");
+        sb.append("values=").append(values);
+        sb.append(", nextParam=").append(nextParam);
+        sb.append('}');
+        return sb.toString();
     }
 }

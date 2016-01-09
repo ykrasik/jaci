@@ -44,7 +44,7 @@ public class TrieBuilder<T> {
         // Save the word-value pair in the map. The actual construction will be done later.
         final T prevValue = map.put(word, value);
         if (prevValue != null) {
-            throw new IllegalArgumentException(String.format("Trie already contains a value for '%s': %s", word, prevValue));
+            throw new IllegalArgumentException("Trie already contains a value for '"+word+"': " + prevValue);
         }
         return this;
     }

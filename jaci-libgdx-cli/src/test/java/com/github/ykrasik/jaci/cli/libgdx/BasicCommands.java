@@ -29,7 +29,7 @@ public class BasicCommands {
     public void paramExample(@IntParam("mandatoryInt") int intParam,
                              @StringParam(value = "optionalString", optional = true, defaultValueSupplier = "defaultSupplier") String stringParam,
                              @BoolParam(value = "flag", optional = true, defaultValue = false) boolean flag) {
-        output.message("mandatoryInt=%d, optionalString=%s, flag=%s", intParam, stringParam, flag);
+        output.message("mandatoryInt="+intParam+", optionalString="+stringParam+", flag=" + flag);
     }
 
     private String defaultSupplier() {

@@ -16,8 +16,7 @@
 
 package com.github.ykrasik.jaci.cli.assist;
 
-import lombok.Data;
-import lombok.NonNull;
+import java.util.Objects;
 
 /**
  * Assistance information for a command's parameters.
@@ -25,15 +24,60 @@ import lombok.NonNull;
  *
  * @author Yevgeny Krasik
  */
-@Data
 public class ParamAssistInfo {
-    /**
-     * The parameters that have already been parsed, as well as the next parameter to parse, if one exists.
-     */
-    @NonNull private final BoundParams boundParams;
+    private final BoundParams boundParams;
+    private final AutoComplete autoComplete;
+
+    public ParamAssistInfo(BoundParams boundParams, AutoComplete autoComplete) {
+        this.boundParams = Objects.requireNonNull(boundParams, "boundParams");
+        this.autoComplete = Objects.requireNonNull(autoComplete, "autoComplete");
+    }
 
     /**
-     * Auto-complete suggestions for the next parameter to parse.
+     * @return Parameters that have already been parsed, as well as the next parameter to parse, if one exists.
      */
-    @NonNull private final AutoComplete autoComplete;
+    public BoundParams getBoundParams() {
+        return boundParams;
+    }
+
+    /**
+     * @return Auto-complete suggestions for the next parameter to parse.
+     */
+    public AutoComplete getAutoComplete() {
+        return autoComplete;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        final ParamAssistInfo that = (ParamAssistInfo) o;
+
+        if (!boundParams.equals(that.boundParams)) {
+            return false;
+        }
+        return autoComplete.equals(that.autoComplete);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = boundParams.hashCode();
+        result = 31 * result + autoComplete.hashCode();
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("ParamAssistInfo{");
+        sb.append("boundParams=").append(boundParams);
+        sb.append(", autoComplete=").append(autoComplete);
+        sb.append('}');
+        return sb.toString();
+    }
 }

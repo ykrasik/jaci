@@ -17,12 +17,10 @@
 package com.github.ykrasik.jaci.cli.commandline;
 
 import com.github.ykrasik.jaci.util.string.StringUtils;
-import lombok.AccessLevel;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,12 +29,15 @@ import java.util.regex.Pattern;
  *
  * @author Yevgeny Krasik
  */
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class CommandLine {
     /**
      * Elements present in the command line. Each one was typically separated by a whitespace.
      */
     private final List<String> elements;
+
+    private CommandLine(List<String> elements) {
+        this.elements = Objects.requireNonNull(elements, "elements");
+    }
 
     /**
      * @return Whether the command line is empty - has no elements.
@@ -87,7 +88,7 @@ public class CommandLine {
      * @param rawCommandLine Command line to parse.
      * @return Parsed command line for assistance.
      */
-    public static CommandLine forAssist(@NonNull String rawCommandLine) {
+    public static CommandLine forAssist(String rawCommandLine) {
         final List<String> splitCommandLine = splitCommandLine(rawCommandLine);
 
         // If the commandLine ends with a space (or is empty), we manually insert an empty arg.
@@ -105,7 +106,7 @@ public class CommandLine {
      * @param rawCommandLine Command line to parse.
      * @return Parsed command line for execution.
      */
-    public static CommandLine forExecute(@NonNull String rawCommandLine) {
+    public static CommandLine forExecute(String rawCommandLine) {
         final List<String> elements = splitCommandLine(rawCommandLine);
         return new CommandLine(elements);
     }
@@ -121,7 +122,7 @@ public class CommandLine {
         // Split the commandLine by whitespace.
         // Allow escaping single and double quoted strings.
         final List<String> matchList = new ArrayList<>();
-        final Matcher matcher = PATTERN.matcher(commandLine);
+        final Matcher matcher = PATTERN.matcher(Objects.requireNonNull(commandLine, "commandLine"));
         while (matcher.find()) {
             if (matcher.group(1) != null) {
                 // Add double-quoted string without the quotes.

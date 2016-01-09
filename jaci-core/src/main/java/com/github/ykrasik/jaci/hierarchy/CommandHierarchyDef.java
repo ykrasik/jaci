@@ -21,14 +21,11 @@ import com.github.ykrasik.jaci.directory.CommandDirectoryDef;
 import com.github.ykrasik.jaci.path.ParsedPath;
 import com.github.ykrasik.jaci.reflection.ReflectionClassProcessor;
 import com.github.ykrasik.jaci.util.reflection.ReflectionUtils;
-import lombok.AccessLevel;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 
 /**
  * A definition for a hierarchy of {@link CommandDirectoryDef}s and {@link CommandDef}s.
@@ -37,9 +34,12 @@ import java.util.Map.Entry;
  *
  * @author Yevgeny Krasik
  */
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class CommandHierarchyDef {
     private final CommandDirectoryDef root;
+
+    private CommandHierarchyDef(CommandDirectoryDef root) {
+        this.root = Objects.requireNonNull(root, "root");
+    }
 
     /**
      * @return Root {@link CommandDirectoryDef}.
@@ -51,7 +51,6 @@ public class CommandHierarchyDef {
     /**
      * A builder for a {@link CommandHierarchyDef}.
      */
-    @ToString(of = "root")
     public static class Builder {
         private final ReflectionClassProcessor processor = new ReflectionClassProcessor();
         private final CommandDirectoryDef.Builder root = new CommandDirectoryDef.Builder("root").setDescription("root");
@@ -63,7 +62,7 @@ public class CommandHierarchyDef {
          * @param classes Classes to process.
          * @return {@code this}, for chaining.
          */
-        public Builder processClasses(@NonNull Class<?>... classes) {
+        public Builder processClasses(Class<?>... classes) {
             for (Class<?> clazz : classes) {
                 doProcessClass(clazz);
             }
@@ -81,7 +80,7 @@ public class CommandHierarchyDef {
          * @param instances Objects whose classes to process.
          * @return {@code this}, for chaining.
          */
-        public Builder process(@NonNull Object... instances) {
+        public Builder process(Object... instances) {
             for (Object instance : instances) {
                 doProcess(instance);
             }
@@ -112,6 +111,14 @@ public class CommandHierarchyDef {
         public CommandHierarchyDef build() {
             final CommandDirectoryDef rootDef = root.build();
             return new CommandHierarchyDef(rootDef);
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("Builder{");
+            sb.append("root=").append(root);
+            sb.append('}');
+            return sb.toString();
         }
     }
 }

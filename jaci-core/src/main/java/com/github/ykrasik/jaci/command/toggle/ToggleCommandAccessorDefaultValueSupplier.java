@@ -18,7 +18,8 @@ package com.github.ykrasik.jaci.command.toggle;
 
 import com.github.ykrasik.jaci.api.ToggleCommandStateAccessor;
 import com.github.ykrasik.jaci.util.function.Spplr;
-import lombok.NonNull;
+
+import java.util.Objects;
 
 /**
  * A {@link Spplr} that returns the inverse of the current {@link ToggleCommandStateAccessor#get()}.
@@ -26,8 +27,8 @@ import lombok.NonNull;
 public class ToggleCommandAccessorDefaultValueSupplier implements Spplr<Boolean> {
     private final ToggleCommandStateAccessor accessor;
 
-    public ToggleCommandAccessorDefaultValueSupplier(@NonNull ToggleCommandStateAccessor accessor) {
-        this.accessor = accessor;
+    public ToggleCommandAccessorDefaultValueSupplier(ToggleCommandStateAccessor accessor) {
+        this.accessor = Objects.requireNonNull(accessor, "accessor");
     }
 
     @Override

@@ -19,21 +19,21 @@ package com.github.ykrasik.jaci.param;
 import com.github.ykrasik.jaci.Identifier;
 import com.github.ykrasik.jaci.util.function.Spplr;
 import com.github.ykrasik.jaci.util.opt.Opt;
-import lombok.*;
+
+import java.util.Objects;
 
 /**
  * An abstract implementation of a {@link ParamDef}
  *
  * @author Yevgeny Krasik
  */
-@EqualsAndHashCode
 public abstract class AbstractParamDef<T> implements ParamDef<T> {
     private final Identifier identifier;
     private final Opt<Spplr<T>> defaultValueSupplier;
 
-    protected AbstractParamDef(@NonNull Identifier identifier, @NonNull Opt<Spplr<T>> defaultValueSupplier) {
-        this.identifier = identifier;
-        this.defaultValueSupplier = defaultValueSupplier;
+    protected AbstractParamDef(Identifier identifier, Opt<Spplr<T>> defaultValueSupplier) {
+        this.identifier = Objects.requireNonNull(identifier, "identifier");
+        this.defaultValueSupplier = Objects.requireNonNull(defaultValueSupplier, "defaultValueSupplier");
     }
 
     @Override
@@ -44,6 +44,31 @@ public abstract class AbstractParamDef<T> implements ParamDef<T> {
     @Override
     public Opt<Spplr<T>> getDefaultValueSupplier() {
         return defaultValueSupplier;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        final AbstractParamDef<?> that = (AbstractParamDef<?>) o;
+
+        if (!identifier.equals(that.identifier)) {
+            return false;
+        }
+        return defaultValueSupplier.equals(that.defaultValueSupplier);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = identifier.hashCode();
+        result = 31 * result + defaultValueSupplier.hashCode();
+        return result;
     }
 
     @Override

@@ -21,10 +21,6 @@ import com.github.ykrasik.jaci.Identifier;
 import com.github.ykrasik.jaci.command.CommandDef;
 import com.github.ykrasik.jaci.util.opt.Opt;
 import com.github.ykrasik.jaci.util.string.StringUtils;
-import lombok.AccessLevel;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
 
 import java.util.*;
 
@@ -35,11 +31,16 @@ import java.util.*;
  *
  * @author Yevgeny Krasik
  */
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class CommandDirectoryDef implements Identifiable {
     private final Identifier identifier;
     private final List<CommandDirectoryDef> directoryDefs;
     private final List<CommandDef> commandDefs;
+
+    private CommandDirectoryDef(Identifier identifier, List<CommandDirectoryDef> directoryDefs, List<CommandDef> commandDefs) {
+        this.identifier = Objects.requireNonNull(identifier, "identifier");
+        this.directoryDefs = Objects.requireNonNull(directoryDefs, "directoryDefs");
+        this.commandDefs = Objects.requireNonNull(commandDefs, "commandDefs");
+    }
 
     @Override
     public Identifier getIdentifier() {
@@ -68,7 +69,6 @@ public class CommandDirectoryDef implements Identifiable {
     /**
      * A builder for a {@link CommandDirectoryDef}.
      */
-    @ToString
     public static class Builder {
         private final Map<String, Builder> childDirectories = new HashMap<>();
         private final Map<String, CommandDef> childCommands = new HashMap<>();
@@ -80,8 +80,8 @@ public class CommandDirectoryDef implements Identifiable {
         /**
          * @param name directory name.
          */
-        public Builder(@NonNull String name) {
-            this.name = name;
+        public Builder(String name) {
+            this.name = Objects.requireNonNull(name, "name");
         }
 
         /**
@@ -90,8 +90,8 @@ public class CommandDirectoryDef implements Identifiable {
          * @param description Description to set.
          * @return {@code this}, for chaining.
          */
-        public Builder setDescription(@NonNull String description) {
-            this.description = description;
+        public Builder setDescription(String description) {
+            this.description = Objects.requireNonNull(description, "description");
             return this;
         }
 
@@ -103,7 +103,7 @@ public class CommandDirectoryDef implements Identifiable {
          * @return An existing or newly created child {@link Builder}.
          * @throws IllegalArgumentException If the name is empty or clashes with an existing child commandDef.
          */
-        public Builder getOrCreateDirectory(@NonNull String name) {
+        public Builder getOrCreateDirectory(String name) {
             final Opt<String> nonEmptyName = StringUtils.getNonEmptyString(name);
             if (!nonEmptyName.isPresent()) {
                 throw new IllegalArgumentException("Empty or all-whitespace name is invalid!");
@@ -150,7 +150,7 @@ public class CommandDirectoryDef implements Identifiable {
 
         private void assertLegalName(String name) {
             if (childDirectories.containsKey(name) || childCommands.containsKey(name)) {
-                throw new IllegalArgumentException(String.format("Directory '%s' already contains child entry: '%s'", this.name, name));
+                throw new IllegalArgumentException("Directory '"+this.name+"' already contains child entry: '"+name+'\'');
             }
         }
 
@@ -174,6 +174,17 @@ public class CommandDirectoryDef implements Identifiable {
 
         private List<CommandDef> buildCommandDefs() {
             return Collections.unmodifiableList(new ArrayList<>(childCommands.values()));
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("Builder{");
+            sb.append("childDirectories=").append(childDirectories);
+            sb.append(", childCommands=").append(childCommands);
+            sb.append(", name='").append(name).append('\'');
+            sb.append(", description='").append(description).append('\'');
+            sb.append('}');
+            return sb.toString();
         }
     }
 }

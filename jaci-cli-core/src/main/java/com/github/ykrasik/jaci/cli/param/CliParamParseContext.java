@@ -28,8 +28,6 @@ import com.github.ykrasik.jaci.command.CommandArgsImpl;
 import com.github.ykrasik.jaci.util.function.Pred;
 import com.github.ykrasik.jaci.util.opt.Opt;
 import com.github.ykrasik.jaci.util.trie.Trie;
-import lombok.NonNull;
-import lombok.ToString;
 
 import java.util.*;
 
@@ -39,7 +37,6 @@ import java.util.*;
  *
  * @author Yevgeny Krasik
  */
-@ToString(of = { "parsedValues", "unboundParams" })
 public class CliParamParseContext {
     private static final CliValueType.Mapper<CliParam> PARAM_NAME_MAPPER = new CliValueType.Mapper<>(CliValueType.COMMAND_PARAM_NAME);
 
@@ -62,9 +59,9 @@ public class CliParamParseContext {
      */
     private Opt<CliParam> nextNamedParam = Opt.absent();
 
-    public CliParamParseContext(@NonNull List<CliParam> params, @NonNull Trie<CliParam> paramsTrie) {
-        this.params = params;
-        this.paramsTrie = paramsTrie;
+    public CliParamParseContext(List<CliParam> params, Trie<CliParam> paramsTrie) {
+        this.params = Objects.requireNonNull(params, "params");
+        this.paramsTrie = Objects.requireNonNull(paramsTrie, "paramsTrie");
 
         this.parsedValues = new HashMap<>(params.size());
         this.unboundParams = new LinkedList<>(params);
@@ -139,19 +136,19 @@ public class CliParamParseContext {
     private void setNextNamedParam(String arg) throws ParseException {
         final String paramName = arg.substring(1);
         if (paramName.isEmpty()) {
-            throw new ParseException(ParseError.INVALID_PARAM, "No parameter name specified after '%s'!", CliConstants.NAMED_PARAM_PREFIX);
+            throw new ParseException(ParseError.INVALID_PARAM, "No parameter name specified after '"+CliConstants.NAMED_PARAM_PREFIX+"'!");
         }
 
         nextNamedParam = paramsTrie.get(paramName);
         if (!nextNamedParam.isPresent()) {
-            throw new ParseException(ParseError.INVALID_PARAM, "Invalid parameter name: '%s'", paramName);
+            throw new ParseException(ParseError.INVALID_PARAM, "Invalid parameter name: '"+paramName+'\'');
         }
     }
 
     private CliParam getNextUnboundParam(String arg) throws ParseException {
         final CliParam param = unboundParams.peek();
         if (param == null) {
-            throw new ParseException(ParseError.NO_MORE_PARAMS, "Excess argument: '%s'", arg);
+            throw new ParseException(ParseError.NO_MORE_PARAMS, "Excess argument: '"+arg+'\'');
         }
         return param;
     }
@@ -261,14 +258,23 @@ public class CliParamParseContext {
     private void addArg(CliParam param, Object parsedValue) throws ParseException {
         doAddArg(param, parsedValue);
         if (!unboundParams.remove(param)) {
-            throw new IllegalStateException(String.format("Internal Error: Param bound to value wasn't previously unbound: param=%s, value='%s'", param.getIdentifier().getName(), parsedValue));
+            throw new IllegalStateException("Internal Error: Param bound to value wasn't previously unbound: param="+param.getIdentifier().getName()+", value='"+parsedValue+'\'');
         }
     }
 
     private void doAddArg(CliParam param, Object parsedValue) throws ParseException {
         final Object prevArg = parsedValues.put(param, parsedValue);
         if (prevArg != null) {
-            throw new ParseException(ParseError.PARAM_ALREADY_BOUND, "Parameter '%s' is already bound a value: '%s'", param.getIdentifier().getName(), prevArg);
+            throw new ParseException(ParseError.PARAM_ALREADY_BOUND, "Parameter '"+param.getIdentifier().getName()+"' is already bound a value: '"+prevArg+'\'');
         }
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("CliParamParseContext{");
+        sb.append("parsedValues=").append(parsedValues);
+        sb.append(", unboundParams=").append(unboundParams);
+        sb.append('}');
+        return sb.toString();
     }
 }

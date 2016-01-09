@@ -19,7 +19,8 @@ package com.github.ykrasik.jaci.command.toggle;
 import com.github.ykrasik.jaci.api.ToggleCommandStateAccessor;
 import com.github.ykrasik.jaci.command.CommandDef;
 import com.github.ykrasik.jaci.param.BooleanParamDef;
-import lombok.NonNull;
+
+import java.util.Objects;
 
 /**
  * Creates toggle {@link CommandDef}s.<br>
@@ -44,9 +45,9 @@ public class ToggleCommandDefBuilder {
      * @param name Command name.
      * @param accessor Accessor for the command's boolean state component.
      */
-    public ToggleCommandDefBuilder(@NonNull String name, @NonNull ToggleCommandStateAccessor accessor) {
-        this.name = name;
-        this.accessor = accessor;
+    public ToggleCommandDefBuilder(String name, ToggleCommandStateAccessor accessor) {
+        this.name = Objects.requireNonNull(name, "name");
+        this.accessor = Objects.requireNonNull(accessor, "accessor");
     }
 
     /**
@@ -54,8 +55,8 @@ public class ToggleCommandDefBuilder {
      *
      * @param description Description to set.
      */
-    public void setDescription(@NonNull String description) {
-        this.description = description;
+    public void setDescription(String description) {
+        this.description = Objects.requireNonNull(description, "description");
     }
 
     /**
@@ -63,8 +64,8 @@ public class ToggleCommandDefBuilder {
      *
      * @param paramName Name to set.
      */
-    public void setParamName(@NonNull String paramName) {
-        this.paramName = paramName;
+    public void setParamName(String paramName) {
+        this.paramName = Objects.requireNonNull(paramName, "paramName");
     }
 
     /**
@@ -72,8 +73,8 @@ public class ToggleCommandDefBuilder {
      *
      * @param paramDescription Description to set.
      */
-    public void setParamDescription(@NonNull String paramDescription) {
-        this.paramDescription = paramDescription;
+    public void setParamDescription(String paramDescription) {
+        this.paramDescription = Objects.requireNonNull(paramDescription, "paramDescription");
     }
 
     /**
@@ -89,5 +90,17 @@ public class ToggleCommandDefBuilder {
             .setDescription(description)
             .addParam(param)
             .build();
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("ToggleCommandDefBuilder{");
+        sb.append("name='").append(name).append('\'');
+        sb.append(", accessor=").append(accessor);
+        sb.append(", description='").append(description).append('\'');
+        sb.append(", paramName='").append(paramName).append('\'');
+        sb.append(", paramDescription='").append(paramDescription).append('\'');
+        sb.append('}');
+        return sb.toString();
     }
 }

@@ -21,11 +21,11 @@ import com.github.ykrasik.jaci.cli.assist.AutoComplete;
 import com.github.ykrasik.jaci.cli.command.CliCommand;
 import com.github.ykrasik.jaci.cli.exception.ParseException;
 import com.github.ykrasik.jaci.cli.hierarchy.CliCommandHierarchy;
-import com.github.ykrasik.jaci.util.function.Spplr;
 import com.github.ykrasik.jaci.util.function.MoreSuppliers;
+import com.github.ykrasik.jaci.util.function.Spplr;
 import com.github.ykrasik.jaci.util.opt.Opt;
-import lombok.NonNull;
-import lombok.ToString;
+
+import java.util.Objects;
 
 /**
  * A {@link CliParam} that parses {@link CliCommand} values.
@@ -39,10 +39,10 @@ public class CommandCliParam extends AbstractCliParam<CliCommand> {
 
     private CommandCliParam(Identifier identifier,
                             Opt<Spplr<CliCommand>> defaultValueSupplier,
-                            @NonNull CliCommandHierarchy hierarchy) {
+                            CliCommandHierarchy hierarchy) {
         super(identifier, defaultValueSupplier);
 
-        this.hierarchy = hierarchy;
+        this.hierarchy = Objects.requireNonNull(hierarchy, "hierarchy");
     }
 
     @Override
@@ -51,36 +51,35 @@ public class CommandCliParam extends AbstractCliParam<CliCommand> {
     }
 
     @Override
-    public CliCommand parse(@NonNull String arg) throws ParseException {
+    public CliCommand parse(String arg) throws ParseException {
         return hierarchy.parsePathToCommand(arg);
     }
 
     @Override
-    public AutoComplete autoComplete(@NonNull String prefix) throws ParseException {
+    public AutoComplete autoComplete(String prefix) throws ParseException {
         return hierarchy.autoCompletePath(prefix);
     }
 
     /**
      * A builder for a {@link CommandCliParam}.
      */
-    @ToString
     public static class Builder {
         private final String name;
         private final CliCommandHierarchy hierarchy;
         private String description = "command";
         private Opt<Spplr<CliCommand>> defaultValueSupplier = Opt.absent();
 
-        public Builder(@NonNull String name, @NonNull CliCommandHierarchy hierarchy) {
-            this.name = name;
-            this.hierarchy = hierarchy;
+        public Builder(String name, CliCommandHierarchy hierarchy) {
+            this.name = Objects.requireNonNull(name, "name");
+            this.hierarchy = Objects.requireNonNull(hierarchy, "hierarchy");
         }
 
         /**
          * @param description Parameter description.
          * @return {@code this}, for chaining.
          */
-        public Builder setDescription(@NonNull String description) {
-            this.description = description;
+        public Builder setDescription(String description) {
+            this.description = Objects.requireNonNull(description, "description");
             return this;
         }
 
@@ -90,8 +89,8 @@ public class CommandCliParam extends AbstractCliParam<CliCommand> {
          * @param defaultValue {@link CliCommand} to return if the parameter isn't passed.
          * @return {@code this}, for chaining.
          */
-        public Builder setOptional(@NonNull CliCommand defaultValue) {
-            return setOptional(MoreSuppliers.of(defaultValue));
+        public Builder setOptional(CliCommand defaultValue) {
+            return setOptional(MoreSuppliers.of(Objects.requireNonNull(defaultValue, "defaultValue")));
         }
 
         /**
@@ -100,7 +99,7 @@ public class CommandCliParam extends AbstractCliParam<CliCommand> {
          * @param defaultValueSupplier Supplier to invoke if the parameter isn't passed.
          * @return {@code this}, for chaining.
          */
-        public Builder setOptional(@NonNull Spplr<CliCommand> defaultValueSupplier) {
+        public Builder setOptional(Spplr<CliCommand> defaultValueSupplier) {
             this.defaultValueSupplier = Opt.of(defaultValueSupplier);
             return this;
         }
@@ -111,6 +110,17 @@ public class CommandCliParam extends AbstractCliParam<CliCommand> {
         public CommandCliParam build() {
             final Identifier identifier = new Identifier(name, description);
             return new CommandCliParam(identifier, defaultValueSupplier, hierarchy);
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("Builder{");
+            sb.append("name='").append(name).append('\'');
+            sb.append(", hierarchy=").append(hierarchy);
+            sb.append(", description='").append(description).append('\'');
+            sb.append(", defaultValueSupplier=").append(defaultValueSupplier);
+            sb.append('}');
+            return sb.toString();
         }
     }
 }

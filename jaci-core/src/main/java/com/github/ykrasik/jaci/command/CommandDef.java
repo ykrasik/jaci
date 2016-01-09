@@ -19,14 +19,11 @@ package com.github.ykrasik.jaci.command;
 import com.github.ykrasik.jaci.Identifiable;
 import com.github.ykrasik.jaci.Identifier;
 import com.github.ykrasik.jaci.param.ParamDef;
-import lombok.AccessLevel;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A definition for a command.
@@ -36,11 +33,16 @@ import java.util.List;
  *
  * @author Yevgeny Krasik
  */
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class CommandDef implements Identifiable {
     private final Identifier identifier;
     private final List<ParamDef<?>> paramDefs;
     private final CommandExecutor executor;
+
+    private CommandDef(Identifier identifier, List<ParamDef<?>> paramDefs, CommandExecutor executor) {
+        this.identifier = identifier;
+        this.paramDefs = paramDefs;
+        this.executor = executor;
+    }
 
     @Override
     public Identifier getIdentifier() {
@@ -69,7 +71,6 @@ public class CommandDef implements Identifiable {
     /**
      * A builder for a {@link CommandDef}.
      */
-    @ToString
     public static class Builder {
         private final String name;
         private final CommandExecutor executor;
@@ -81,9 +82,9 @@ public class CommandDef implements Identifiable {
          * @param name Command name.
          * @param executor Command executor.
          */
-        public Builder(@NonNull String name, @NonNull CommandExecutor executor) {
-            this.name = name;
-            this.executor = executor;
+        public Builder(String name, CommandExecutor executor) {
+            this.name = Objects.requireNonNull(name, "name");
+            this.executor = Objects.requireNonNull(executor, "executor");
         }
 
         /**
@@ -92,8 +93,8 @@ public class CommandDef implements Identifiable {
          * @param description Description to set.
          * @return {@code this}, for chaining.
          */
-        public Builder setDescription(@NonNull String description) {
-            this.description = description;
+        public Builder setDescription(String description) {
+            this.description = Objects.requireNonNull(description, "description");
             return this;
         }
 
@@ -103,8 +104,8 @@ public class CommandDef implements Identifiable {
          * @param paramDef Parameter definition to add.
          * @return {@code this}, for chaining.
          */
-        public Builder addParam(@NonNull ParamDef<?> paramDef) {
-            this.paramDefs.add(paramDef);
+        public Builder addParam(ParamDef<?> paramDef) {
+            this.paramDefs.add(Objects.requireNonNull(paramDef, "paramDef"));
             return this;
         }
 
@@ -113,6 +114,17 @@ public class CommandDef implements Identifiable {
          */
         public CommandDef build() {
             return new CommandDef(new Identifier(name, description), Collections.unmodifiableList(new ArrayList<>(paramDefs)), executor);
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("Builder{");
+            sb.append("name='").append(name).append('\'');
+            sb.append(", executor=").append(executor);
+            sb.append(", description='").append(description).append('\'');
+            sb.append(", paramDefs=").append(paramDefs);
+            sb.append('}');
+            return sb.toString();
         }
     }
 }

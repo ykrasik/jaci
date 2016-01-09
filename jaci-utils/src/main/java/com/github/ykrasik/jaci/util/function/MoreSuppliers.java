@@ -17,13 +17,11 @@
 package com.github.ykrasik.jaci.util.function;
 
 import com.github.ykrasik.jaci.util.reflection.ReflectionUtils;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Supplier related utilities.
@@ -47,14 +45,24 @@ public final class MoreSuppliers {
     /**
      * A {@link Spplr} that returns a constant value.
      */
-    @ToString
-    @RequiredArgsConstructor
     private static class ConstSupplier<T> implements Spplr<T> {
         private final T value;
+
+        private ConstSupplier(T value) {
+            this.value = value;
+        }
 
         @Override
         public T get() {
             return value;
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("ConstSupplier{");
+            sb.append("value=").append(value);
+            sb.append('}');
+            return sb.toString();
         }
     }
 
@@ -70,7 +78,7 @@ public final class MoreSuppliers {
      * @param <R> Transformed value type.
      * @return A {@link Spplr} that will apply the given function to the value supplied by the given supplier.
      */
-    public static <T, R> Spplr<R> map(@NonNull Spplr<T> supplier, @NonNull Func<T, R> function) {
+    public static <T, R> Spplr<R> map(Spplr<T> supplier, Func<T, R> function) {
         if (supplier instanceof ConstSupplier || supplier instanceof CachingSupplier) {
             return of(function.apply(supplier.get()));
         }
@@ -80,15 +88,26 @@ public final class MoreSuppliers {
     /**
      * A {@link Spplr} that returns a the result of applying a function to the value supplied by the wrapped supplier.
      */
-    @ToString(of = "supplier")
-    @RequiredArgsConstructor
     private static class TransformingSupplier<T, R> implements Spplr<R> {
         private final Spplr<T> supplier;
         private final Func<T, R> function;
 
+        private TransformingSupplier(Spplr<T> supplier, Func<T, R> function) {
+            this.supplier = Objects.requireNonNull(supplier, "supplier");
+            this.function = Objects.requireNonNull(function, "function");
+        }
+
         @Override
         public R get() {
             return function.apply(supplier.get());
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("TransformingSupplier{");
+            sb.append("supplier=").append(supplier);
+            sb.append('}');
+            return sb.toString();
         }
     }
 
@@ -104,20 +123,19 @@ public final class MoreSuppliers {
      * @return A {@link Spplr} that will call the wrapped supplier once and only once and cache the value for future
      *         calls.
      */
-    public static <T> Spplr<T> cache(@NonNull Spplr<T> supplier) {
+    public static <T> Spplr<T> cache(Spplr<T> supplier) {
         return new CachingSupplier<>(supplier);
     }
 
     /**
      * A {@link Spplr} that calls the underlying supplier once and only once and caches the returned value for future calls.
      */
-    @ToString
     private static class CachingSupplier<T> implements Spplr<T> {
         private Spplr<T> supplier;
         private volatile T value;
 
         private CachingSupplier(Spplr<T> supplier) {
-            this.supplier = supplier;
+            this.supplier = Objects.requireNonNull(supplier, "supplier");
         }
 
         @Override
@@ -133,6 +151,15 @@ public final class MoreSuppliers {
             }
             return value;
         }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("CachingSupplier{");
+            sb.append("supplier=").append(supplier);
+            sb.append(", value=").append(value);
+            sb.append('}');
+            return sb.toString();
+        }
     }
 
     /**
@@ -147,9 +174,9 @@ public final class MoreSuppliers {
      * @param <T> Supplier return type.
      * @return A {@link Spplr} that will invoke the no-args method specified by the given name on the given instance.
      */
-    public static <T> Spplr<T> reflectionSupplier(@NonNull Object instance,
-                                                  @NonNull String methodName,
-                                                  @NonNull Class<T> suppliedClass) {
+    public static <T> Spplr<T> reflectionSupplier(Object instance,
+                                                  String methodName,
+                                                  Class<T> suppliedClass) {
         final Method method = ReflectionUtils.getNoArgsMethod(instance.getClass(), methodName);
         ReflectionUtils.assertReturnValue(method, suppliedClass);
         return new ReflectionSupplier<>(instance, method);
@@ -188,15 +215,27 @@ public final class MoreSuppliers {
      *
      * @author Yevgeny Krasik
      */
-    @ToString
-    @RequiredArgsConstructor
     private static class ReflectionSupplier<T> implements Spplr<T> {
         private final Object instance;
         private final Method method;
 
+        private ReflectionSupplier(Object instance, Method method) {
+            this.instance = Objects.requireNonNull(instance, "instance");
+            this.method = Objects.requireNonNull(method, "method");
+        }
+
         @Override
         public T get() {
             return ReflectionUtils.invokeNoArgs(instance, method);
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("ReflectionSupplier{");
+            sb.append("instance=").append(instance);
+            sb.append(", method=").append(method);
+            sb.append('}');
+            return sb.toString();
         }
     }
 
@@ -215,23 +254,33 @@ public final class MoreSuppliers {
      */
     public static <T> Spplr<List<T>> reflectionListSupplier(Object instance, String methodName, Class<T[]> suppliedClass) {
         final Spplr<T[]> supplier = reflectionSupplier(instance, methodName, suppliedClass);
-        return new ReflectionListSupplier<>(supplier);
+        return new ArrayListSupplier<>(supplier);
     }
 
     /**
-     * A {@link Spplr} that invokes a (possibly private) no-args method that returns an array of {@code T}
-     * through reflection, and wraps the returned array in a {@link List}.
+     * A {@link Spplr} that wraps another {@link Spplr} that returns an array of {@code T}, delegates to that supplier
+     * and instead wraps the returned array in a {@link List} of {@code T}.
      *
      * @author Yevgeny Krasik
      */
-    @ToString
-    @RequiredArgsConstructor
-    private static class ReflectionListSupplier<T> implements Spplr<List<T>> {
+    private static class ArrayListSupplier<T> implements Spplr<List<T>> {
         private final Spplr<T[]> supplier;
+
+        private ArrayListSupplier(Spplr<T[]> supplier) {
+            this.supplier = Objects.requireNonNull(supplier);
+        }
 
         @Override
         public List<T> get() {
             return Arrays.asList(supplier.get());
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("ReflectionListSupplier{");
+            sb.append("supplier=").append(supplier);
+            sb.append('}');
+            return sb.toString();
         }
     }
 }

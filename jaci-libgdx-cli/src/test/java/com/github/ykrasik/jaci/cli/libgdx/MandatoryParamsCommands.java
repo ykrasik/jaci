@@ -30,12 +30,12 @@ public class MandatoryParamsCommands {
 
     @Command(description = "Primitive params without annotations. Without annotations all parameters are considered mandatory.")
     public void primitiveParamsNoAnnotations(boolean b, int i, double d, String str) {
-        output.message("primitiveParamsNoAnnotations: b=%s, i=%s, d=%s, str=%s", b, i, d, str);
+        output.message("primitiveParamsNoAnnotations: b="+b+", i="+i+", d="+d+", str="+str);
     }
 
     @Command(description = "Boxed (nullable primitive) params without annotations. Without annotations all parameters are considered mandatory.")
     public void boxedParamsNoAnnotations(Boolean b, Integer i, Double d, String str) {
-        output.message("boxedParamsNoAnnotations: b=%s, i=%s, d=%s, str=%s", b, i, d, str);
+        output.message("boxedParamsNoAnnotations: b="+b+", i="+i+", d="+d+", str="+str);
     }
 
     @Command(description = "Primitive params with annotations, but annotations have no data.")
@@ -43,7 +43,7 @@ public class MandatoryParamsCommands {
                                                       @IntParam int i,
                                                       @DoubleParam double d,
                                                       @StringParam String str) {
-        output.message("primitiveParamsWithDefaultAnnotations: b=%s, i=%s, d=%s, str=%s", b, i, d, str);
+        output.message("primitiveParamsWithDefaultAnnotations: b="+b+", i="+i+", d="+d+", str="+str);
     }
 
     @Command(description = "Primitive params with annotations")
@@ -51,7 +51,7 @@ public class MandatoryParamsCommands {
                                                @IntParam(value = "i", description = "Mandatory int") int i,
                                                @DoubleParam(value = "d", description = "Mandatory double") double d,
                                                @StringParam(value = "str", description = "Mandatory String") String str) {
-        output.message("primitiveParamsWithAnnotations: b=%s, i=%s, d=%s, str=%s", b, i, d, str);
+        output.message("primitiveParamsWithAnnotations: b="+b+", i="+i+", d="+d+", str="+str);
     }
 
     @Command(description = "Boxed (nullable primitive) with annotations, but annotations have no data.")
@@ -59,7 +59,7 @@ public class MandatoryParamsCommands {
                                                   @IntParam Integer i,
                                                   @DoubleParam Double d,
                                                   @StringParam String str) {
-        output.message("boxedParamsWithDefaultAnnotations: b=%s, i=%s, d=%s, str=%s", b, i, d, str);
+        output.message("boxedParamsWithDefaultAnnotations: b="+b+", i="+i+", d="+d+", str="+str);
     }
 
     @Command(description = "Boxed (nullable primitive) with annotations")
@@ -67,6 +67,6 @@ public class MandatoryParamsCommands {
                                            @IntParam(value = "i", description = "Mandatory Integer") Integer i,
                                            @DoubleParam(value = "d", description = "Mandatory Double") Double d,
                                            @StringParam(value = "str", description = "Mandatory String") String str) {
-        output.message("boxedParamsWithAnnotations: b=%s, i=%s, d=%s, str=%s", b, i, d, str);
+        output.message("boxedParamsWithAnnotations: b="+b+", i="+i+", d="+d+", str="+str);
     }
 }

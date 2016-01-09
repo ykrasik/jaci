@@ -43,17 +43,7 @@ public class CommandOutputPromise implements CommandOutput {
     }
 
     @Override
-    public void message(String format, Object... args) {
-        output.message(format, args);
-    }
-
-    @Override
     public void error(String text) {
         output.error(text);
-    }
-
-    @Override
-    public void error(String format, Object... args) {
-        output.error(format, args);
     }
 }

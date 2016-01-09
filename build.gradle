@@ -1,7 +1,6 @@
 buildscript {
     ext {
-        lombokVersion = '1.16.6'
-        gdxVersion = '1.7.0'
+        gdxVersion = '1.8.0'
 
         junitVersion = '4.11'
         mockitoVersion = '1.9.5'
@@ -26,7 +25,6 @@ nexusStaging {
 subprojects {
     apply plugin: "java"
     apply from: 'https://raw.githubusercontent.com/ykrasik/gradle-scripts/master/publish.gradle'
-    apply from: 'https://raw.githubusercontent.com/ykrasik/gradle-scripts/master/provided.gradle'
 
     sourceCompatibility = 1.7
     targetCompatibility = 1.7
@@ -36,10 +34,12 @@ subprojects {
     }
 
     dependencies {
-        provided "org.projectlombok:lombok:$lombokVersion"
-
         testCompile "junit:junit:$junitVersion"
         testCompile "org.mockito:mockito-all:$mockitoVersion"
+    }
+
+    jar {
+        from sourceSets.main.allJava
     }
 }
 
@@ -77,8 +77,9 @@ project("jaci-libgdx-cli") {
     dependencies {
         compile project(":jaci-cli-core")
 
-        provided "com.badlogicgames.gdx:gdx:$gdxVersion"
-        provided "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
-        provided "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+        compile "com.badlogicgames.gdx:gdx:$gdxVersion"
+
+        testCompile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
+        testCompile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
     }
 }

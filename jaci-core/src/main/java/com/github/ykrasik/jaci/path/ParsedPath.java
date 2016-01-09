@@ -17,15 +17,8 @@
 package com.github.ykrasik.jaci.path;
 
 import com.github.ykrasik.jaci.util.string.StringUtils;
-import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Represents the path in the system.<br>
@@ -33,14 +26,17 @@ import java.util.List;
  *
  * @author Yevgeny Krasik
  */
-@EqualsAndHashCode
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class ParsedPath implements Iterable<String> {
     private static final ParsedPath ROOT = new ParsedPath(true, Collections.<String>emptyList());
     private static final ParsedPath EMPTY = new ParsedPath(false, Collections.<String>emptyList());
 
     private final boolean startsWithDelimiter;
     private final List<String> elements;
+
+    private ParsedPath(boolean startsWithDelimiter, List<String> elements) {
+        this.startsWithDelimiter = startsWithDelimiter;
+        this.elements = Objects.requireNonNull(elements, "elements");
+    }
 
     /**
      * @return A copy of this path without the last element.
@@ -103,6 +99,31 @@ public class ParsedPath implements Iterable<String> {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        final ParsedPath strings = (ParsedPath) o;
+
+        if (startsWithDelimiter != strings.startsWithDelimiter) {
+            return false;
+        }
+        return elements.equals(strings.elements);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (startsWithDelimiter ? 1 : 0);
+        result = 31 * result + elements.hashCode();
+        return result;
+    }
+
+    @Override
     public String toString() {
         return (startsWithDelimiter ? "/" : "") + StringUtils.join(elements, "/");
     }
@@ -126,7 +147,7 @@ public class ParsedPath implements Iterable<String> {
      * @return A {@link ParsedPath} out of the given path.
      * @throws IllegalArgumentException If any element along the path is empty.
      */
-    public static ParsedPath toDirectory(@NonNull String rawPath) {
+    public static ParsedPath toDirectory(String rawPath) {
         final String path = rawPath.trim();
         if (path.isEmpty()) {
             // TODO: Is This legal?
@@ -157,7 +178,7 @@ public class ParsedPath implements Iterable<String> {
      * @return A {@link ParsedPath} out of the given path.
      * @throws IllegalArgumentException If any element along the path except the last one is empty.
      */
-    public static ParsedPath toEntry(@NonNull String rawPath) {
+    public static ParsedPath toEntry(String rawPath) {
         final String path = rawPath.trim();
 
         final boolean startsWithDelimiter = path.startsWith("/");
@@ -179,7 +200,7 @@ public class ParsedPath implements Iterable<String> {
             if (i < rawElements.length - 1) {
                 // Only the last element can be allowed to be empty.
                 if (trimmedElement.isEmpty()) {
-                    throw new IllegalArgumentException(String.format("Invalid path: '%s'", rawPath));
+                    throw new IllegalArgumentException("Invalid path: '"+rawPath+'\'');
                 }
             }
             pathElements.add(trimmedElement);

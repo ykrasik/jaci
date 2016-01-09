@@ -17,11 +17,11 @@
 package com.github.ykrasik.jaci.param;
 
 import com.github.ykrasik.jaci.Identifier;
-import com.github.ykrasik.jaci.util.function.Spplr;
 import com.github.ykrasik.jaci.util.function.MoreSuppliers;
+import com.github.ykrasik.jaci.util.function.Spplr;
 import com.github.ykrasik.jaci.util.opt.Opt;
-import lombok.NonNull;
-import lombok.ToString;
+
+import java.util.Objects;
 
 /**
  * A boolean parameter definition.
@@ -42,7 +42,6 @@ public class BooleanParamDef extends AbstractParamDef<Boolean> {
     /**
      * A builder for a {@link BooleanParamDef}.
      */
-    @ToString
     public static class Builder {
         private final String name;
         private String description = "boolean";
@@ -51,16 +50,16 @@ public class BooleanParamDef extends AbstractParamDef<Boolean> {
         /**
          * @param name Parameter name.
          */
-        public Builder(@NonNull String name) {
-            this.name = name;
+        public Builder(String name) {
+            this.name = Objects.requireNonNull(name, "name");
         }
 
         /**
          * @param description Parameter description.
          * @return {@code this}, for chaining.
          */
-        public Builder setDescription(@NonNull String description) {
-            this.description = description;
+        public Builder setDescription(String description) {
+            this.description = Objects.requireNonNull(description, "description");
             return this;
         }
 
@@ -80,7 +79,7 @@ public class BooleanParamDef extends AbstractParamDef<Boolean> {
          * @param defaultValueSupplier Supplier to invoke if the parameter isn't passed.
          * @return {@code this}, for chaining.
          */
-        public Builder setOptional(@NonNull Spplr<Boolean> defaultValueSupplier) {
+        public Builder setOptional(Spplr<Boolean> defaultValueSupplier) {
             this.defaultValueSupplier = Opt.of(defaultValueSupplier);
             return this;
         }
@@ -91,6 +90,16 @@ public class BooleanParamDef extends AbstractParamDef<Boolean> {
         public BooleanParamDef build() {
             final Identifier identifier = new Identifier(name, description);
             return new BooleanParamDef(identifier, defaultValueSupplier);
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("Builder{");
+            sb.append("name='").append(name).append('\'');
+            sb.append(", description='").append(description).append('\'');
+            sb.append(", defaultValueSupplier=").append(defaultValueSupplier);
+            sb.append('}');
+            return sb.toString();
         }
     }
 }

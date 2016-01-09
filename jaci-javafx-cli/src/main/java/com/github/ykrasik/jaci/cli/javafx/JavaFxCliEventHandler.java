@@ -19,9 +19,8 @@ package com.github.ykrasik.jaci.cli.javafx;
 import com.github.ykrasik.jaci.cli.Cli;
 import javafx.event.EventHandler;
 import javafx.scene.input.KeyEvent;
-import lombok.NonNull;
 
-import java.io.Console;
+import java.util.Objects;
 
 /**
  * Links {@link KeyEvent}s to {@link Cli} calls.
@@ -31,8 +30,8 @@ import java.io.Console;
 public class JavaFxCliEventHandler implements EventHandler<KeyEvent> {
     private final Cli cli;
 
-    public JavaFxCliEventHandler(@NonNull Cli cli) {
-        this.cli = cli;
+    public JavaFxCliEventHandler(Cli cli) {
+        this.cli = Objects.requireNonNull(cli, "cli");
     }
 
     @Override

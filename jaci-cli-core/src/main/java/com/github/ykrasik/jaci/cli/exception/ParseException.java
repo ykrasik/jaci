@@ -18,8 +18,8 @@ package com.github.ykrasik.jaci.cli.exception;
 
 import com.github.ykrasik.jaci.cli.assist.CommandInfo;
 import com.github.ykrasik.jaci.util.opt.Opt;
-import lombok.NonNull;
-import lombok.ToString;
+
+import java.util.Objects;
 
 /**
  * An exception that signals an error while parsing the command line.
@@ -27,7 +27,6 @@ import lombok.ToString;
  * @author Yevgeny Krasik
  */
 // TODO: Split this into 2 exceptions: CommandParseException, ParamParseException? will save the optional<commandInfo>.
-@ToString
 public class ParseException extends Exception {
     private final ParseError error;
     private final Opt<CommandInfo> commandInfo;
@@ -36,16 +35,10 @@ public class ParseException extends Exception {
         this(message, error, Opt.<CommandInfo>absent());
     }
 
-    public ParseException(ParseError error, String format, Object... args) {
-        this(String.format(format, args), error, Opt.<CommandInfo>absent());
-    }
-
-    private ParseException(@NonNull String message,
-                           @NonNull ParseError error,
-                           @NonNull Opt<CommandInfo> commandInfo) {
-        super(message);
-        this.error = error;
-        this.commandInfo = commandInfo;
+    private ParseException(String message, ParseError error, Opt<CommandInfo> commandInfo) {
+        super(Objects.requireNonNull(message, "message"));
+        this.error = Objects.requireNonNull(error, "error");
+        this.commandInfo = Objects.requireNonNull(commandInfo, "commandInfo");
     }
 
     /**
@@ -71,5 +64,15 @@ public class ParseException extends Exception {
      */
     public Opt<CommandInfo> getCommandInfo() {
         return commandInfo;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("ParseException{");
+        sb.append("error=").append(error);
+        sb.append(", message=").append(getMessage());
+        sb.append(", commandInfo=").append(commandInfo);
+        sb.append('}');
+        return sb.toString();
     }
 }

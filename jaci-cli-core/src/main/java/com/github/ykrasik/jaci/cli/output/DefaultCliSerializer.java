@@ -27,11 +27,11 @@ import com.github.ykrasik.jaci.cli.directory.CliDirectory;
 import com.github.ykrasik.jaci.cli.param.CliParam;
 import com.github.ykrasik.jaci.util.opt.Opt;
 import com.github.ykrasik.jaci.util.string.StringUtils;
-import lombok.NonNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A default implementation of a {@link CliSerializer}.
@@ -53,23 +53,24 @@ public class DefaultCliSerializer implements CliSerializer {
      *
      * @param tab String to use as a 'tab' string.
      */
-    public DefaultCliSerializer(@NonNull String tab) {
-        this.tab = tab;
+    public DefaultCliSerializer(String tab) {
+        this.tab = Objects.requireNonNull(tab, "tab");
     }
 
     @Override
-    public String serializePathToDirectory(@NonNull CliDirectory directory) {
+    public String serializePathToDirectory(CliDirectory directory) {
         return directory.toPath();
     }
 
     @Override
-    public String serializeCommandLine(CliDirectory workingDirectory, @NonNull String commandLine) {
+    public String serializeCommandLine(CliDirectory workingDirectory, String commandLine) {
+        Objects.requireNonNull(commandLine, "commandLine");
         final String path = serializePathToDirectory(workingDirectory);
         return '[' + path + "] " + commandLine;
     }
 
     @Override
-    public Serialization serializeDirectory(@NonNull CliDirectory directory, boolean recursive) {
+    public Serialization serializeDirectory(CliDirectory directory, boolean recursive) {
         final Serialization serialization = createSerialization();
         serializeDirectory(serialization, directory, recursive);
         return serialization;

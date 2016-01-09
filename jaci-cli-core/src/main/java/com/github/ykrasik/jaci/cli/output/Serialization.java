@@ -16,11 +16,10 @@
 
 package com.github.ykrasik.jaci.cli.output;
 
-import lombok.NonNull;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A buffer of lines to be printed.
@@ -56,8 +55,8 @@ public class Serialization implements Iterable<String> {
     /**
      * @param tab String to use as tab (1 unit of indentation).
      */
-    public Serialization(@NonNull String tab) {
-        this.tab = tab;
+    public Serialization(String tab) {
+        this.tab = Objects.requireNonNull(tab, "tab");
     }
 
     /**

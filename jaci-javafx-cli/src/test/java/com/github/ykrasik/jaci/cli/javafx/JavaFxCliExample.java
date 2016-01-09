@@ -22,7 +22,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
-import lombok.SneakyThrows;
 
 /**
  * @author Yevgeny Krasik
@@ -34,7 +33,6 @@ public class JavaFxCliExample extends Application {
     }
 
     @Override
-    @SneakyThrows
     public void start(Stage stage) {
         stage.setWidth(1280);
         stage.setHeight(720);

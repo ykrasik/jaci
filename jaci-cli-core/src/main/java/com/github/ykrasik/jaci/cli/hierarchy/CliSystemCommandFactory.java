@@ -28,13 +28,11 @@ import com.github.ykrasik.jaci.cli.param.DirectoryCliParam;
 import com.github.ykrasik.jaci.command.CommandArgs;
 import com.github.ykrasik.jaci.command.CommandExecutor;
 import com.github.ykrasik.jaci.util.function.Spplr;
-import lombok.AccessLevel;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Creates the system commands of a CLI.
@@ -44,9 +42,12 @@ import java.util.List;
  *
  * @author Yevgeny Krasik
  */
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class CliSystemCommandFactory {
     private final CliCommandHierarchy hierarchy;
+
+    private CliSystemCommandFactory(CliCommandHierarchy hierarchy) {
+        this.hierarchy = Objects.requireNonNull(hierarchy, "hierarchy");
+    }
 
     // TODO: Add the following commands: list all commands
 
@@ -121,7 +122,7 @@ public class CliSystemCommandFactory {
      * @param hierarchy Hierarchy on which the system commands will operate.
      * @return A {@link CliDirectory} containing all system commands.
      */
-    public static CliDirectory from(@NonNull CliCommandHierarchy hierarchy) {
+    public static CliDirectory from(CliCommandHierarchy hierarchy) {
         final Identifier identifier = new Identifier("system", "System commands");
         final CliSystemCommandFactory factory = new CliSystemCommandFactory(hierarchy);
         return CliDirectory.from(

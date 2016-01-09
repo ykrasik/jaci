@@ -19,10 +19,9 @@ package com.github.ykrasik.jaci.cli.assist;
 import com.github.ykrasik.jaci.util.opt.Opt;
 import com.github.ykrasik.jaci.util.string.StringUtils;
 import com.github.ykrasik.jaci.util.trie.Trie;
-import lombok.NonNull;
-import lombok.ToString;
 
 import java.util.Map.Entry;
+import java.util.Objects;
 
 /**
  * The return value of an auto complete operation.<br>
@@ -33,7 +32,6 @@ import java.util.Map.Entry;
  */
 // TODO: Find a way to get rid of CliValueType and replace it with a char?
 // TODO: Find a way to get rid of prefix?
-@ToString
 public class AutoComplete {
     /**
      * The prefix that was auto completed.
@@ -45,9 +43,9 @@ public class AutoComplete {
      */
     private final Trie<CliValueType> possibilities;
 
-    public AutoComplete(@NonNull String prefix, @NonNull Trie<CliValueType> possibilities) {
-        this.prefix = prefix;
-        this.possibilities = possibilities;
+    public AutoComplete(String prefix, Trie<CliValueType> possibilities) {
+        this.prefix = Objects.requireNonNull(prefix, "prefix");
+        this.possibilities = Objects.requireNonNull(possibilities, "possibilities");
     }
 
     /**
@@ -124,10 +122,19 @@ public class AutoComplete {
 
         // TODO: Make sure this can't happen.
         if (!this.prefix.equals(other.prefix)) {
-            throw new IllegalArgumentException(String.format("Trying to perform union on different prefixes: prefix1='%s', prefix2='%s'", this.prefix, other.prefix));
+            throw new IllegalArgumentException("Trying to perform union on different prefixes: prefix1='"+this.prefix+"', prefix2='"+other.prefix+'\'');
         }
 
         final Trie<CliValueType> unifiedPossibilities = this.possibilities.union(other.possibilities);
         return new AutoComplete(prefix, unifiedPossibilities);
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("AutoComplete{");
+        sb.append("prefix='").append(prefix).append('\'');
+        sb.append(", possibilities=").append(possibilities);
+        sb.append('}');
+        return sb.toString();
     }
 }

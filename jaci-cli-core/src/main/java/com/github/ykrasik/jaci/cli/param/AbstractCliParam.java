@@ -21,7 +21,8 @@ import com.github.ykrasik.jaci.cli.exception.ParseError;
 import com.github.ykrasik.jaci.cli.exception.ParseException;
 import com.github.ykrasik.jaci.util.function.Spplr;
 import com.github.ykrasik.jaci.util.opt.Opt;
-import lombok.NonNull;
+
+import java.util.Objects;
 
 /**
  * An abstract implementation of a {@link CliParam}.
@@ -43,9 +44,9 @@ public abstract class AbstractCliParam<T> implements CliParam {
      */
     private final Opt<Spplr<T>> defaultValueSupplier;
 
-    protected AbstractCliParam(@NonNull Identifier identifier, @NonNull Opt<Spplr<T>> defaultValueSupplier) {
-        this.identifier = identifier;
-        this.defaultValueSupplier = defaultValueSupplier;
+    protected AbstractCliParam(Identifier identifier, Opt<Spplr<T>> defaultValueSupplier) {
+        this.identifier = Objects.requireNonNull(identifier, "identifier");
+        this.defaultValueSupplier = Objects.requireNonNull(defaultValueSupplier, "defaultValueSupplier");
     }
 
     @Override
@@ -87,13 +88,13 @@ public abstract class AbstractCliParam<T> implements CliParam {
     }
 
     private ParseException missingParamValue() throws ParseException {
-        throw new ParseException(ParseError.PARAM_NOT_BOUND, "Parameter value missing: '%s'", getName());
+        throw new ParseException(ParseError.PARAM_NOT_BOUND, "Parameter value missing: '"+getName()+'\'');
     }
 
     protected ParseException invalidParamValue(String value) throws ParseException {
         throw new ParseException(
             ParseError.INVALID_PARAM_VALUE,
-            "Invalid value for %s parameter '%s': '%s'", getValueTypeName(), getName(), value
+            "Invalid value for "+getValueTypeName()+" parameter '"+getName()+"': '"+value+'\''
         );
     }
 

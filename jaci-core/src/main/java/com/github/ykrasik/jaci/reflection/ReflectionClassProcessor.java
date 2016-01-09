@@ -23,9 +23,6 @@ import com.github.ykrasik.jaci.command.CommandOutputPromise;
 import com.github.ykrasik.jaci.path.ParsedPath;
 import com.github.ykrasik.jaci.reflection.method.ReflectionMethodProcessor;
 import com.github.ykrasik.jaci.util.opt.Opt;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -58,9 +55,9 @@ public class ReflectionClassProcessor {
     /**
      * Package-protected for testing.
      */
-    ReflectionClassProcessor(@NonNull CommandOutputPromise outputPromise, @NonNull ReflectionMethodProcessor methodProcessor) {
-        this.outputPromise = outputPromise;
-        this.methodProcessor = methodProcessor;
+    ReflectionClassProcessor(CommandOutputPromise outputPromise, ReflectionMethodProcessor methodProcessor) {
+        this.outputPromise = Objects.requireNonNull(outputPromise, "outputPromise");
+        this.methodProcessor = Objects.requireNonNull(methodProcessor, "methodProcessor");
     }
 
     /**
@@ -71,8 +68,7 @@ public class ReflectionClassProcessor {
      * @return The {@link CommandDef}s that were extracted out of the object.
      * @throws RuntimeException If any error occurs.
      */
-    @SneakyThrows
-    public Map<ParsedPath, List<CommandDef>> processObject(@NonNull Object instance) {
+    public Map<ParsedPath, List<CommandDef>> processObject(Object instance) {
         final Class<?> clazz = instance.getClass();
 
         // Inject our outputPromise into the processed instance.
@@ -94,14 +90,18 @@ public class ReflectionClassProcessor {
         return context.commandPaths;
     }
 
-    private void injectOutputPromise(Object instance, Class<?> clazz) throws IllegalAccessException {
-        for (Field field : clazz.getDeclaredFields()) {
-            if (field.getType() == CommandOutput.class) {
-                if (!field.isAccessible()) {
-                    field.setAccessible(true);
+    private void injectOutputPromise(Object instance, Class<?> clazz) {
+        try {
+            for (Field field : clazz.getDeclaredFields()) {
+                if (field.getType() == CommandOutput.class) {
+                    if (!field.isAccessible()) {
+                        field.setAccessible(true);
+                    }
+                    field.set(instance, outputPromise);
                 }
-                field.set(instance, outputPromise);
             }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -137,11 +137,14 @@ public class ReflectionClassProcessor {
     /**
      * Auxiliary class for collecting {@link CommandDef}s.
      */
-    @RequiredArgsConstructor
     private static class ClassContext {
         private final ParsedPath topLevelPath;
 
         private final Map<ParsedPath, List<CommandDef>> commandPaths = new HashMap<>();
+
+        private ClassContext(ParsedPath topLevelPath) {
+            this.topLevelPath = topLevelPath;
+        }
 
         /**
          * Add a {@link CommandDef} to the given {@link ParsedPath}.

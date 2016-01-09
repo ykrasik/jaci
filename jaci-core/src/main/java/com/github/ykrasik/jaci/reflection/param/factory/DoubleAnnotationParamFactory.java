@@ -20,7 +20,6 @@ import com.github.ykrasik.jaci.api.DoubleParam;
 import com.github.ykrasik.jaci.param.DoubleParamDef;
 import com.github.ykrasik.jaci.util.function.MoreSuppliers;
 import com.github.ykrasik.jaci.util.opt.Opt;
-import lombok.ToString;
 
 import static com.github.ykrasik.jaci.util.string.StringUtils.getNonEmptyString;
 
@@ -30,7 +29,6 @@ import static com.github.ykrasik.jaci.util.string.StringUtils.getNonEmptyString;
  *
  * @author Yevgeny Krasik
  */
-@ToString
 public class DoubleAnnotationParamFactory extends AnnotationMethodParamFactory<DoubleParamDef, DoubleParam> {
     public DoubleAnnotationParamFactory() {
         super(DoubleParam.class, Double.class, Double.TYPE);

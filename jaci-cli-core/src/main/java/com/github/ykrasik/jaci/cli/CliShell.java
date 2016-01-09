@@ -32,9 +32,9 @@ import com.github.ykrasik.jaci.cli.output.CliSerializer;
 import com.github.ykrasik.jaci.cli.output.DefaultCliSerializer;
 import com.github.ykrasik.jaci.command.CommandArgs;
 import com.github.ykrasik.jaci.util.opt.Opt;
-import lombok.NonNull;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A shell usually refers to the program logic running within a CLI.
@@ -62,12 +62,10 @@ public class CliShell {
     /**
      * Package-protected for testing.
      */
-    CliShell(@NonNull CliCommandHierarchy hierarchy,
-             @NonNull CliPrinter printer,
-             @NonNull CommandLineHistory history) {
-        this.hierarchy = hierarchy;
-        this.printer = printer;
-        this.history = history;
+    CliShell(CliCommandHierarchy hierarchy, CliPrinter printer, CommandLineHistory history) {
+        this.hierarchy = Objects.requireNonNull(hierarchy, "hierarchy");
+        this.printer = Objects.requireNonNull(printer, "printer");
+        this.history = Objects.requireNonNull(history, "history");
 
         // Welcome message.
         printer.begin();
@@ -205,8 +203,7 @@ public class CliShell {
         command.execute(commandOutput, args);
 
         if (commandOutput.isPrintDefaultExecutionMessage()) {
-            final String message = String.format("Command '%s' executed successfully.", command.getName());
-            printer.println(message);
+            printer.println("Command '"+command.getName()+"' executed successfully.");
         }
     }
 
@@ -216,8 +213,7 @@ public class CliShell {
             printer.printCommandInfo(commandInfo.get());
         }
 
-        final String errorMessage = String.format("Parse Error: %s", e.getMessage());
-        printer.errorPrintln(errorMessage);
+        printer.errorPrintln("Parse Error: " + e.getMessage());
     }
 
     /**
@@ -229,9 +225,9 @@ public class CliShell {
         private CliSerializer serializer = new DefaultCliSerializer();
         private int maxCommandHistory = 30;
 
-        public Builder(@NonNull CliCommandHierarchy hierarchy, @NonNull CliOutput output) {
-            this.hierarchy = hierarchy;
-            this.output = output;
+        public Builder(CliCommandHierarchy hierarchy, CliOutput output) {
+            this.hierarchy = Objects.requireNonNull(hierarchy, "hierarchy");
+            this.output = Objects.requireNonNull(output, "output");
         }
 
         /**

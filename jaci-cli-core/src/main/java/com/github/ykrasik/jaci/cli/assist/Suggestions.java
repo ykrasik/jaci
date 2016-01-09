@@ -16,11 +16,10 @@
 
 package com.github.ykrasik.jaci.cli.assist;
 
-import lombok.ToString;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Suggestions for words, grouped by their type.
@@ -39,10 +38,10 @@ public class Suggestions {
                         List<String> commandSuggestions,
                         List<String> paramNameSuggestions,
                         List<String> paramValueSuggestions) {
-        this.directorySuggestions = directorySuggestions;
-        this.commandSuggestions = commandSuggestions;
-        this.paramNameSuggestions = paramNameSuggestions;
-        this.paramValueSuggestions = paramValueSuggestions;
+        this.directorySuggestions = Objects.requireNonNull(directorySuggestions, "directorySuggestions");
+        this.commandSuggestions = Objects.requireNonNull(commandSuggestions, "commandSuggestions");
+        this.paramNameSuggestions = Objects.requireNonNull(paramNameSuggestions, "paramNameSuggestions");
+        this.paramValueSuggestions = Objects.requireNonNull(paramValueSuggestions, "paramValueSuggestions");
     }
 
     /**
@@ -76,7 +75,6 @@ public class Suggestions {
     /**
      * A builder for {@link Suggestions}.
      */
-    @ToString
     public static class Builder {
         private final List<String> directorySuggestions = new ArrayList<>();
         private final List<String> commandSuggestions = new ArrayList<>();
@@ -121,6 +119,17 @@ public class Suggestions {
             if (suggestions.size() > 1) {
                 Collections.sort(suggestions);
             }
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("Builder{");
+            sb.append("directorySuggestions=").append(directorySuggestions);
+            sb.append(", commandSuggestions=").append(commandSuggestions);
+            sb.append(", paramNameSuggestions=").append(paramNameSuggestions);
+            sb.append(", paramValueSuggestions=").append(paramValueSuggestions);
+            sb.append('}');
+            return sb.toString();
         }
     }
 }

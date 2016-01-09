@@ -18,10 +18,10 @@ package com.github.ykrasik.jaci.reflection.method.factory;
 
 import com.github.ykrasik.jaci.command.CommandDef;
 import com.github.ykrasik.jaci.util.opt.Opt;
-import lombok.NonNull;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Objects;
 
 /**
  * A {@link MethodCommandFactory} that can create {@link CommandDef}s out of {@link Method}s that are annotated with
@@ -35,12 +35,12 @@ public abstract class AbstractAnnotationMethodCommandFactory<T extends Annotatio
     /**
      * @param annotationClass Type of annotation supported by this factory.
      */
-    protected AbstractAnnotationMethodCommandFactory(@NonNull Class<T> annotationClass) {
-        this.annotationClass = annotationClass;
+    protected AbstractAnnotationMethodCommandFactory(Class<T> annotationClass) {
+        this.annotationClass = Objects.requireNonNull(annotationClass, "annotationClass");
     }
 
     @Override
-    public Opt<CommandDef> create(@NonNull Object instance, @NonNull Method method) throws Exception {
+    public Opt<CommandDef> create(Object instance, Method method) throws Exception {
         final T annotation = method.getAnnotation(annotationClass);
         if (annotation == null) {
             // Method isn't annotated.

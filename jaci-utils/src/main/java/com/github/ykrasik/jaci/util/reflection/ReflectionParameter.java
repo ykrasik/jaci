@@ -17,25 +17,24 @@
 package com.github.ykrasik.jaci.util.reflection;
 
 import com.github.ykrasik.jaci.util.opt.Opt;
-import lombok.NonNull;
-import lombok.ToString;
 
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Reflection information about a method parameter. Used due to lack in Java 7.
  *
  * @author Yevgeny Krasik
  */
-@ToString
 public class ReflectionParameter {
     private final Class<?> parameterType;
     private final Annotation[] annotations;
     private final int index;
 
-    public ReflectionParameter(@NonNull Class<?> parameterType, @NonNull Annotation[] annotations, int index) {
-        this.parameterType = parameterType;
-        this.annotations = annotations;
+    public ReflectionParameter(Class<?> parameterType, Annotation[] annotations, int index) {
+        this.parameterType = Objects.requireNonNull(parameterType, "parameterType");
+        this.annotations = Objects.requireNonNull(annotations, "annotations");
         this.index = index;
     }
 
@@ -83,5 +82,15 @@ public class ReflectionParameter {
     public String getDefaultName() {
         final String type = parameterType.getSimpleName().toLowerCase();
         return type + "Param" + index;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("ReflectionParameter{");
+        sb.append("parameterType=").append(parameterType);
+        sb.append(", annotations=").append(Arrays.toString(annotations));
+        sb.append(", index=").append(index);
+        sb.append('}');
+        return sb.toString();
     }
 }

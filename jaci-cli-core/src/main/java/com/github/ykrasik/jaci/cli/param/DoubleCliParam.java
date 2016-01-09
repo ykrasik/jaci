@@ -20,7 +20,6 @@ import com.github.ykrasik.jaci.Identifier;
 import com.github.ykrasik.jaci.param.DoubleParamDef;
 import com.github.ykrasik.jaci.util.function.Spplr;
 import com.github.ykrasik.jaci.util.opt.Opt;
-import lombok.NonNull;
 
 /**
  * A {@link CliParam} that parses double values.
@@ -49,7 +48,7 @@ public class DoubleCliParam extends AbstractNumericCliParam<Double> {
      * @param def DoubleParamDef to construct a CLI double parameter from.
      * @return A CLI double parameter constructed from the DoubleParamDef.
      */
-    public static DoubleCliParam fromDef(@NonNull DoubleParamDef def) {
+    public static DoubleCliParam fromDef(DoubleParamDef def) {
         return new DoubleCliParam(def.getIdentifier(), def.getDefaultValueSupplier());
     }
 }

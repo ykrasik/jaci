@@ -21,11 +21,11 @@ import com.github.ykrasik.jaci.cli.assist.AutoComplete;
 import com.github.ykrasik.jaci.cli.directory.CliDirectory;
 import com.github.ykrasik.jaci.cli.exception.ParseException;
 import com.github.ykrasik.jaci.cli.hierarchy.CliCommandHierarchy;
-import com.github.ykrasik.jaci.util.function.Spplr;
 import com.github.ykrasik.jaci.util.function.MoreSuppliers;
+import com.github.ykrasik.jaci.util.function.Spplr;
 import com.github.ykrasik.jaci.util.opt.Opt;
-import lombok.NonNull;
-import lombok.ToString;
+
+import java.util.Objects;
 
 /**
  * A {@link CliParam} that parses {@link CliDirectory} values.
@@ -39,10 +39,10 @@ public class DirectoryCliParam extends AbstractCliParam<CliDirectory> {
 
     private DirectoryCliParam(Identifier identifier,
                               Opt<Spplr<CliDirectory>> defaultValueSupplier,
-                              @NonNull CliCommandHierarchy hierarchy) {
+                              CliCommandHierarchy hierarchy) {
         super(identifier, defaultValueSupplier);
 
-        this.hierarchy = hierarchy;
+        this.hierarchy = Objects.requireNonNull(hierarchy, "hierarchy");
     }
 
     @Override
@@ -51,36 +51,35 @@ public class DirectoryCliParam extends AbstractCliParam<CliDirectory> {
     }
 
     @Override
-    public CliDirectory parse(@NonNull String arg) throws ParseException {
+    public CliDirectory parse(String arg) throws ParseException {
         return hierarchy.parsePathToDirectory(arg);
     }
 
     @Override
-    public AutoComplete autoComplete(@NonNull String prefix) throws ParseException {
+    public AutoComplete autoComplete(String prefix) throws ParseException {
         return hierarchy.autoCompletePathToDirectory(prefix);
     }
 
     /**
      * A builder for a {@link DirectoryCliParam}.
      */
-    @ToString
     public static class Builder {
         private final String name;
         private final CliCommandHierarchy hierarchy;
         private String description = "directory";
         private Opt<Spplr<CliDirectory>> defaultValueSupplier = Opt.absent();
 
-        public Builder(@NonNull String name, @NonNull CliCommandHierarchy hierarchy) {
-            this.name = name;
-            this.hierarchy = hierarchy;
+        public Builder(String name, CliCommandHierarchy hierarchy) {
+            this.name = Objects.requireNonNull(name, "name");
+            this.hierarchy = Objects.requireNonNull(hierarchy, "hierarchy");
         }
 
         /**
          * @param description Parameter description.
          * @return {@code this}, for chaining.
          */
-        public Builder setDescription(@NonNull String description) {
-            this.description = description;
+        public Builder setDescription(String description) {
+            this.description = Objects.requireNonNull(description, "description");
             return this;
         }
 
@@ -90,8 +89,8 @@ public class DirectoryCliParam extends AbstractCliParam<CliDirectory> {
          * @param defaultValue {@link CliDirectory} to return if the parameter isn't passed.
          * @return {@code this}, for chaining.
          */
-        public Builder setOptional(@NonNull CliDirectory defaultValue) {
-            return setOptional(MoreSuppliers.of(defaultValue));
+        public Builder setOptional(CliDirectory defaultValue) {
+            return setOptional(MoreSuppliers.of(Objects.requireNonNull(defaultValue, "defaultValue")));
         }
 
         /**
@@ -100,7 +99,7 @@ public class DirectoryCliParam extends AbstractCliParam<CliDirectory> {
          * @param defaultValueSupplier Supplier to invoke if the parameter isn't passed.
          * @return {@code this}, for chaining.
          */
-        public Builder setOptional(@NonNull Spplr<CliDirectory> defaultValueSupplier) {
+        public Builder setOptional(Spplr<CliDirectory> defaultValueSupplier) {
             this.defaultValueSupplier = Opt.of(defaultValueSupplier);
             return this;
         }
@@ -111,6 +110,17 @@ public class DirectoryCliParam extends AbstractCliParam<CliDirectory> {
         public DirectoryCliParam build() {
             final Identifier identifier = new Identifier(name, description);
             return new DirectoryCliParam(identifier, defaultValueSupplier, hierarchy);
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("Builder{");
+            sb.append("name='").append(name).append('\'');
+            sb.append(", hierarchy=").append(hierarchy);
+            sb.append(", description='").append(description).append('\'');
+            sb.append(", defaultValueSupplier=").append(defaultValueSupplier);
+            sb.append('}');
+            return sb.toString();
         }
     }
 }

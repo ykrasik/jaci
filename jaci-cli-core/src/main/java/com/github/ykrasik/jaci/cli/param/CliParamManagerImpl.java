@@ -21,11 +21,10 @@ import com.github.ykrasik.jaci.cli.exception.ParseException;
 import com.github.ykrasik.jaci.command.CommandArgs;
 import com.github.ykrasik.jaci.util.trie.Trie;
 import com.github.ykrasik.jaci.util.trie.TrieBuilder;
-import lombok.NonNull;
-import lombok.ToString;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * An implementation of a {@link CliParamManager}.
@@ -33,13 +32,12 @@ import java.util.List;
  *
  * @author Yevgeny Krasik
  */
-@ToString(of = "params")
 public class CliParamManagerImpl implements CliParamManager {
     private final List<CliParam> params;
     private final Trie<CliParam> paramsTrie;
 
-    public CliParamManagerImpl(@NonNull List<CliParam> params) {
-        this.params = Collections.unmodifiableList(params);
+    public CliParamManagerImpl(List<CliParam> params) {
+        this.params = Collections.unmodifiableList(Objects.requireNonNull(params, "params"));
         this.paramsTrie = createParamsTrie(params);
     }
 
@@ -83,5 +81,13 @@ public class CliParamManagerImpl implements CliParamManager {
             context.parseValue(arg);
         }
         return context;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("CliParamManagerImpl{");
+        sb.append("params=").append(params);
+        sb.append('}');
+        return sb.toString();
     }
 }

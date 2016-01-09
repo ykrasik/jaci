@@ -16,10 +16,9 @@
 
 package com.github.ykrasik.jaci.command;
 
-import lombok.NonNull;
-
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * An implementation of a {@link CommandArgs}.
@@ -34,8 +33,8 @@ public class CommandArgsImpl implements CommandArgs {
     /**
      * @param args Parsed command args.
      */
-    public CommandArgsImpl(@NonNull List<Object> args) {
-        this.args = args;
+    public CommandArgsImpl(List<Object> args) {
+        this.args = Objects.requireNonNull(args, "args");
     }
 
     @Override

@@ -17,16 +17,14 @@
 package com.github.ykrasik.jaci.param;
 
 import com.github.ykrasik.jaci.Identifier;
-import com.github.ykrasik.jaci.util.function.Spplr;
 import com.github.ykrasik.jaci.util.function.MoreSuppliers;
+import com.github.ykrasik.jaci.util.function.Spplr;
 import com.github.ykrasik.jaci.util.opt.Opt;
-import lombok.EqualsAndHashCode;
-import lombok.NonNull;
-import lombok.ToString;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A boolean parameter definition.
@@ -42,13 +40,12 @@ import java.util.List;
  *
  * @author Yevgeny Krasik
  */
-@EqualsAndHashCode(callSuper = true)
 public class StringParamDef extends AbstractParamDef<String> {
     private final Spplr<List<String>> valuesSupplier;
 
-    private StringParamDef(Identifier identifier, Opt<Spplr<String>> defaultValueSupplier, @NonNull Spplr<List<String>> valuesSupplier) {
+    private StringParamDef(Identifier identifier, Opt<Spplr<String>> defaultValueSupplier, Spplr<List<String>> valuesSupplier) {
         super(identifier, defaultValueSupplier);
-        this.valuesSupplier = valuesSupplier;
+        this.valuesSupplier = Objects.requireNonNull(valuesSupplier, "valuesSupplier");
     }
 
     @Override
@@ -67,7 +64,6 @@ public class StringParamDef extends AbstractParamDef<String> {
     /**
      * A builder for a {@link StringParamDef}.
      */
-    @ToString
     public static class Builder {
         private static final Spplr<List<String>> NO_VALUES_SUPPLIER = MoreSuppliers.of(Collections.<String>emptyList());
 
@@ -79,16 +75,16 @@ public class StringParamDef extends AbstractParamDef<String> {
         /**
          * @param name Parameter name.
          */
-        public Builder(@NonNull String name) {
-            this.name = name;
+        public Builder(String name) {
+            this.name = Objects.requireNonNull(name, "name");
         }
 
         /**
          * @param description Parameter description.
          * @return {@code this}, for chaining.
          */
-        public Builder setDescription(@NonNull String description) {
-            this.description = description;
+        public Builder setDescription(String description) {
+            this.description = Objects.requireNonNull(description, "description");
             return this;
         }
 
@@ -98,8 +94,8 @@ public class StringParamDef extends AbstractParamDef<String> {
          * @param defaultValue Constant value to return if the parameter isn't passed.
          * @return {@code this}, for chaining.
          */
-        public Builder setOptional(@NonNull String defaultValue) {
-            return setOptional(MoreSuppliers.of(defaultValue));
+        public Builder setOptional(String defaultValue) {
+            return setOptional(MoreSuppliers.of(Objects.requireNonNull(defaultValue, "defaultValue")));
         }
 
         /**
@@ -108,7 +104,7 @@ public class StringParamDef extends AbstractParamDef<String> {
          * @param defaultValueSupplier Supplier to invoke if the parameter isn't passed.
          * @return {@code this}, for chaining.
          */
-        public Builder setOptional(@NonNull Spplr<String> defaultValueSupplier) {
+        public Builder setOptional(Spplr<String> defaultValueSupplier) {
             this.defaultValueSupplier = Opt.of(defaultValueSupplier);
             return this;
         }
@@ -120,7 +116,7 @@ public class StringParamDef extends AbstractParamDef<String> {
          * @param values Values this parameter can accept. If empty, all values will be accepted.
          * @return {@code this}, for chaining.
          */
-        public Builder setStaticValues(@NonNull String... values) {
+        public Builder setStaticValues(String... values) {
             return setStaticValues(Arrays.asList(values));
         }
 
@@ -131,8 +127,8 @@ public class StringParamDef extends AbstractParamDef<String> {
          * @param values Values this parameter can accept. If empty, all values will be accepted.
          * @return {@code this}, for chaining.
          */
-        public Builder setStaticValues(@NonNull List<String> values) {
-            this.valuesSupplier = MoreSuppliers.of(values);
+        public Builder setStaticValues(List<String> values) {
+            this.valuesSupplier = MoreSuppliers.of(Objects.requireNonNull(values, "values"));
             return this;
         }
 
@@ -144,8 +140,8 @@ public class StringParamDef extends AbstractParamDef<String> {
          *                       If the returned list is empty, all values will be accepted.
          * @return {@code this}, for chaining.
          */
-        public Builder setDynamicValues(@NonNull Spplr<List<String>> valuesSupplier) {
-            this.valuesSupplier = valuesSupplier;
+        public Builder setDynamicValues(Spplr<List<String>> valuesSupplier) {
+            this.valuesSupplier = Objects.requireNonNull(valuesSupplier, "valuesSupplier");
             return this;
         }
 
@@ -155,6 +151,17 @@ public class StringParamDef extends AbstractParamDef<String> {
         public StringParamDef build() {
             final Identifier identifier = new Identifier(name, description);
             return new StringParamDef(identifier, defaultValueSupplier, valuesSupplier);
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("Builder{");
+            sb.append("name='").append(name).append('\'');
+            sb.append(", description='").append(description).append('\'');
+            sb.append(", defaultValueSupplier=").append(defaultValueSupplier);
+            sb.append(", valuesSupplier=").append(valuesSupplier);
+            sb.append('}');
+            return sb.toString();
         }
     }
 }

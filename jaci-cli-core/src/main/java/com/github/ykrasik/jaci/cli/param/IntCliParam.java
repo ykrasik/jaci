@@ -20,7 +20,6 @@ import com.github.ykrasik.jaci.Identifier;
 import com.github.ykrasik.jaci.param.IntParamDef;
 import com.github.ykrasik.jaci.util.function.Spplr;
 import com.github.ykrasik.jaci.util.opt.Opt;
-import lombok.NonNull;
 
 /**
  * A {@link CliParam} that parses int values.
@@ -49,7 +48,7 @@ public class IntCliParam extends AbstractNumericCliParam<Integer> {
      * @param def IntParamDef to construct a CLI int parameter from.
      * @return A CLI int parameter constructed from the IntParamDef.
      */
-    public static IntCliParam fromDef(@NonNull IntParamDef def) {
+    public static IntCliParam fromDef(IntParamDef def) {
         return new IntCliParam(def.getIdentifier(), def.getDefaultValueSupplier());
     }
 }

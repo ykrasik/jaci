@@ -20,7 +20,8 @@ import com.github.ykrasik.jaci.cli.assist.CommandInfo;
 import com.github.ykrasik.jaci.cli.assist.Suggestions;
 import com.github.ykrasik.jaci.cli.command.CliCommand;
 import com.github.ykrasik.jaci.cli.directory.CliDirectory;
-import lombok.NonNull;
+
+import java.util.Objects;
 
 /**
  * A component that serializes CLI entities into {@link String}s and prints them to a {@link CliOutput}.
@@ -31,9 +32,9 @@ public class CliPrinter {
     private final CliOutput output;
     private final CliSerializer serializer;
 
-    public CliPrinter(@NonNull CliOutput output, @NonNull CliSerializer serializer) {
-        this.output = output;
-        this.serializer = serializer;
+    public CliPrinter(CliOutput output, CliSerializer serializer) {
+        this.output = Objects.requireNonNull(output, "output");
+        this.serializer = Objects.requireNonNull(serializer, "serializer");
     }
 
     /**

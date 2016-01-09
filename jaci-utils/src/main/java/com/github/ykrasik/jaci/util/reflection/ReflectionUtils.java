@@ -16,8 +16,6 @@
 
 package com.github.ykrasik.jaci.util.reflection;
 
-import lombok.SneakyThrows;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -43,9 +41,12 @@ public final class ReflectionUtils {
      * @throws RuntimeException If an error occurred while instantiating an object of the class (for example, if the
      *                          class doesn't have a no-args constructor).
      */
-    @SneakyThrows
     public static Object createInstanceNoArgs(Class<?> clazz) {
-        return clazz.newInstance();
+        try {
+            return clazz.newInstance();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -56,11 +57,13 @@ public final class ReflectionUtils {
      * @return A method with the provided name that takes no-args.
      * @throws RuntimeException If the class doesn't contain a no-args method with the given name.
      */
-    @SneakyThrows
     public static Method getNoArgsMethod(Class<?> clazz, String methodName) {
-        final Method method = clazz.getDeclaredMethod(methodName, NO_ARGS_TYPE);
-        // TODO: Support inheritance?
-        return method;
+        try {
+            // TODO: Support inheritance?
+            return clazz.getDeclaredMethod(methodName, NO_ARGS_TYPE);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -78,7 +81,7 @@ public final class ReflectionUtils {
                 return method;
             }
         }
-        throw new IllegalArgumentException(String.format("Class '%s' doesn't have method: '%s'", clazz, methodName));
+        throw new IllegalArgumentException("Class '"+clazz+"' doesn't have method: '"+methodName+'\'');
     }
 
     /**
@@ -93,12 +96,15 @@ public final class ReflectionUtils {
      * @throws RuntimeException If an error occurred invoking the method.
      */
     @SuppressWarnings("unchecked")
-    @SneakyThrows
     public static <T> T invokeNoArgs(Object instance, Method method) {
         if (!method.isAccessible()) {
             method.setAccessible(true);
         }
-        return (T) method.invoke(instance, NO_ARGS);
+        try {
+            return (T) method.invoke(instance, NO_ARGS);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -111,7 +117,7 @@ public final class ReflectionUtils {
     public static void assertReturnValue(Method method, Class<?> expectedReturnType) {
         final Class<?> returnType = method.getReturnType();
         if (returnType != expectedReturnType) {
-            final String message = String.format("Class='%s', method='%s': Must return a value of type '%s'!", method.getDeclaringClass(), method.getName(), expectedReturnType);
+            final String message = "Class='"+method.getDeclaringClass()+"', method='"+method.getName()+"': Must return a value of type '"+expectedReturnType+"'!";
             throw new IllegalArgumentException(message);
         }
     }
@@ -125,7 +131,7 @@ public final class ReflectionUtils {
     public static void assertNoParameters(Method method) {
         final Class<?>[] parameterTypes = method.getParameterTypes();
         if (parameterTypes.length > 0) {
-            final String message = String.format("Class='%s', method='%s': Must take no parameters!", method.getDeclaringClass(), method.getName());
+            final String message = "Class='"+method.getDeclaringClass()+"', method='"+method.getName()+"': Must take no parameters!";
             throw new IllegalArgumentException(message);
         }
     }

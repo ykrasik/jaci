@@ -32,7 +32,7 @@ public class AnnotationExample {
     public void testCommand(@StringParam(value = "str", acceptsSupplier = "testSupplier") String str,
                             @BoolParam("bool") boolean bool,
                             int integer) {
-        output.message("str=%s, bool=%s, integer=%d", str, bool, integer);
+        output.message("str="+str+", bool="+bool+", integer="+integer);
     }
 
     @Command
@@ -43,7 +43,7 @@ public class AnnotationExample {
     public void paramExample(@IntParam(value = "mandatoryInt", description = "Mandatory int param") int intParam,
                              @StringParam(value = "optionalString", description = "Optional string param", optional = true, defaultValue = "default") String stringParam,
                              @BoolParam(value = "flag", optional = true) boolean flag) {
-        output.message("mandatoryInt=%d, optionalString=%s, flag=%s", intParam, stringParam, flag);
+        output.message("mandatoryInt="+intParam+", optionalString="+stringParam+", flag="+flag);
     }
 
     private String[] testSupplier() {
@@ -70,17 +70,17 @@ public class AnnotationExample {
 
     @Command(description = "some global command")
     public void someCommand(String str) {
-        output.message("str=%s", str);
+        output.message("str=" + str);
     }
 
     @Command(description = "test command")
     public void nestCommand(@StringParam(value = "nested", accepts = {"test1", "value2", "param3", "long string"}) String str,
                             @BoolParam("booleany") boolean booleany) {
-        output.message("string = %s, booleany = %s", str, booleany);
+        output.message("string = "+str+", booleany = " + booleany);
     }
 
     @Command
     public void noParamAnnotations(int intParam, boolean boolParam, String stringParam, double doubleParam) {
-        output.message("intParam=%d, boolParam=%s, stringParam=%s, doubleParam=%s", intParam, boolParam, stringParam, doubleParam);
+        output.message("intParam="+intParam+", boolParam="+boolParam+", stringParam="+stringParam+", doubleParam="+doubleParam);
     }
 }

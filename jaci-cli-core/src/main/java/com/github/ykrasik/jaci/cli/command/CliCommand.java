@@ -16,6 +16,8 @@
 
 package com.github.ykrasik.jaci.cli.command;
 
+import com.github.ykrasik.jaci.Identifiable;
+import com.github.ykrasik.jaci.Identifier;
 import com.github.ykrasik.jaci.api.CommandOutput;
 import com.github.ykrasik.jaci.cli.assist.ParamAssistInfo;
 import com.github.ykrasik.jaci.cli.exception.ParseException;
@@ -23,29 +25,30 @@ import com.github.ykrasik.jaci.cli.param.CliParam;
 import com.github.ykrasik.jaci.cli.param.CliParamManager;
 import com.github.ykrasik.jaci.cli.param.CliParamManagerImpl;
 import com.github.ykrasik.jaci.cli.param.CliParamResolver;
-import com.github.ykrasik.jaci.Identifiable;
-import com.github.ykrasik.jaci.Identifier;
 import com.github.ykrasik.jaci.command.CommandArgs;
 import com.github.ykrasik.jaci.command.CommandDef;
 import com.github.ykrasik.jaci.command.CommandExecutor;
 import com.github.ykrasik.jaci.param.ParamDef;
-import lombok.AccessLevel;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A CLI implementation of a command.
  *
  * @author Yevgeny Krasik
  */
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class CliCommand implements Identifiable, CliParamManager, CommandExecutor {
     private final Identifier identifier;
     private final CliParamManager paramManager;
     private final CommandExecutor executor;
+
+    private CliCommand(Identifier identifier, CliParamManager paramManager, CommandExecutor executor) {
+        this.identifier = Objects.requireNonNull(identifier, "identifier");
+        this.paramManager = Objects.requireNonNull(paramManager, "paramManager");
+        this.executor = Objects.requireNonNull(executor, "executor");
+    }
 
     @Override
     public Identifier getIdentifier() {
@@ -97,7 +100,7 @@ public class CliCommand implements Identifiable, CliParamManager, CommandExecuto
      * @param def CommandDef to construct a CLI command from.
      * @return A CLI command constructed from the CommandDef.
      */
-    public static CliCommand fromDef(@NonNull CommandDef def) {
+    public static CliCommand fromDef(CommandDef def) {
         final Identifier identifier = def.getIdentifier();
         final List<CliParam> params = createParams(def.getParamDefs());
         final CommandExecutor executor = def.getExecutor();
@@ -112,7 +115,7 @@ public class CliCommand implements Identifiable, CliParamManager, CommandExecuto
      * @param executor Command executor.
      * @return A CLI command constructed from the given parameters.
      */
-    public static CliCommand from(@NonNull Identifier identifier, @NonNull List<CliParam> params, @NonNull CommandExecutor executor) {
+    public static CliCommand from(Identifier identifier, List<CliParam> params, CommandExecutor executor) {
         final CliParamManager paramManager = new CliParamManagerImpl(params);
         return new CliCommand(identifier, paramManager, executor);
     }

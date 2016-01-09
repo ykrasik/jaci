@@ -20,7 +20,6 @@ import com.github.ykrasik.jaci.api.IntParam;
 import com.github.ykrasik.jaci.param.IntParamDef;
 import com.github.ykrasik.jaci.util.function.MoreSuppliers;
 import com.github.ykrasik.jaci.util.opt.Opt;
-import lombok.ToString;
 
 import static com.github.ykrasik.jaci.util.string.StringUtils.getNonEmptyString;
 
@@ -30,7 +29,6 @@ import static com.github.ykrasik.jaci.util.string.StringUtils.getNonEmptyString;
  *
  * @author Yevgeny Krasik
  */
-@ToString
 public class IntAnnotationParamFactory extends AnnotationMethodParamFactory<IntParamDef, IntParam> {
     public IntAnnotationParamFactory() {
         super(IntParam.class, Integer.class, Integer.TYPE);

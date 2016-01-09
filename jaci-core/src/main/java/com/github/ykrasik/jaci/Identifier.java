@@ -16,10 +16,8 @@
 
 package com.github.ykrasik.jaci;
 
-import lombok.EqualsAndHashCode;
-import lombok.NonNull;
-
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,7 +26,6 @@ import java.util.regex.Pattern;
  *
  * @author Yevgeny Krasik
  */
-@EqualsAndHashCode
 public final class Identifier {
     /**
      * A pattern that matches any strings that start with a letter and are alphanumeric.
@@ -38,9 +35,9 @@ public final class Identifier {
     private final String name;
     private final String description;
 
-    public Identifier(@NonNull String name, @NonNull String description) {
-        this.name = name;
-        this.description = description;
+    public Identifier(String name, String description) {
+        this.name = Objects.requireNonNull(name, "name");
+        this.description = Objects.requireNonNull(description, "description");
         assertValidName();
     }
 
@@ -48,7 +45,7 @@ public final class Identifier {
         final Matcher matcher = LEGAL_NAME_PATTERN.matcher(name);
         if (!matcher.matches()) {
             final int index = matcher.regionStart();
-            throw new IllegalArgumentException(String.format("Names must be alphanumeric and start with a letter: name='%s', index=%d", name, index));
+            throw new IllegalArgumentException("Names must be alphanumeric and start with a letter: name='"+name+"', index=" + index);
         }
     }
 
@@ -64,6 +61,31 @@ public final class Identifier {
      */
     public String getDescription() {
         return description;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        final Identifier that = (Identifier) o;
+
+        if (!name.equals(that.name)) {
+            return false;
+        }
+        return description.equals(that.description);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = name.hashCode();
+        result = 31 * result + description.hashCode();
+        return result;
     }
 
     @Override

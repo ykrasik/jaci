@@ -20,11 +20,10 @@ import com.github.ykrasik.jaci.param.ParamDef;
 import com.github.ykrasik.jaci.reflection.param.factory.*;
 import com.github.ykrasik.jaci.util.opt.Opt;
 import com.github.ykrasik.jaci.util.reflection.ReflectionParameter;
-import lombok.NonNull;
-import lombok.SneakyThrows;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Creates {@link ParamDef}s out of {@link ReflectionParameter}s if they are accepted by one of the {@link MethodParamFactory}s.
@@ -50,7 +49,7 @@ public class ReflectionParamProcessor {
     /**
      * Package-protected for testing.
      */
-    ReflectionParamProcessor(@NonNull MethodParamFactory<?>... factories) {
+    ReflectionParamProcessor(MethodParamFactory<?>... factories) {
         this.factories = Arrays.asList(factories);
     }
 
@@ -65,16 +64,21 @@ public class ReflectionParamProcessor {
      * @throws IllegalArgumentException If the parameter wasn't accepted by any of the {@link MethodParamFactory}s.
      *                                  This means the parameter is of an incompatible type.
      */
-    @SneakyThrows
-    public ParamDef<?> createParam(@NonNull Object instance, @NonNull ReflectionParameter param) {
-        for (MethodParamFactory<?> factory : factories) {
-            final Opt<? extends ParamDef<?>> def = factory.create(instance, param);
-            if (def.isPresent()) {
-                return def.get();
+    public ParamDef<?> createParam(Object instance, ReflectionParameter param) {
+        Objects.requireNonNull(instance, "instance");
+        Objects.requireNonNull(param, "param");
+        try {
+            for (MethodParamFactory<?> factory : factories) {
+                final Opt<? extends ParamDef<?>> def = factory.create(instance, param);
+                if (def.isPresent()) {
+                    return def.get();
+                }
             }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
 
         // No factory accepted this param.
-        throw new IllegalArgumentException(String.format("Invalid param: class=%s, param=%s", instance.getClass(), param));
+        throw new IllegalArgumentException("Invalid param: class="+instance.getClass()+", param=" + param);
     }
 }

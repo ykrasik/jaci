@@ -17,7 +17,8 @@
 package com.github.ykrasik.jaci.cli.assist;
 
 import com.github.ykrasik.jaci.util.function.Func;
-import lombok.NonNull;
+
+import java.util.Objects;
 
 /**
  * The different value types that exist in a CLI.
@@ -53,8 +54,8 @@ public enum CliValueType {
     public static class Mapper<T> implements Func<T, CliValueType> {
         private final CliValueType type;
 
-        public Mapper(@NonNull CliValueType type) {
-            this.type = type;
+        public Mapper(CliValueType type) {
+            this.type = Objects.requireNonNull(type, "type");
         }
 
         @Override

@@ -31,10 +31,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
-import lombok.NonNull;
-import lombok.SneakyThrows;
 
 import java.net.URL;
+import java.util.Objects;
 
 /**
  * A CLI builder for JavaFx.<br>
@@ -109,7 +108,7 @@ public class JavaFxCliBuilder {
      * @param fxmlPath Path to .fxml file containing the custom layout.
      * @return {@code this}, for chaining.
      */
-    public JavaFxCliBuilder setFxmlPath(@NonNull String fxmlPath) {
+    public JavaFxCliBuilder setFxmlPath(String fxmlPath) {
         return setFxmlUrl(Thread.currentThread().getContextClassLoader().getResource(fxmlPath));
     }
 
@@ -125,8 +124,8 @@ public class JavaFxCliBuilder {
      * @param fxmlUrl URL to a .fxml file containing the custom layout.
      * @return {@code this}, for chaining.
      */
-    public JavaFxCliBuilder setFxmlUrl(@NonNull URL fxmlUrl) {
-        this.fxmlUrl = fxmlUrl;
+    public JavaFxCliBuilder setFxmlUrl(URL fxmlUrl) {
+        this.fxmlUrl = Objects.requireNonNull(fxmlUrl, "fxmlUrl");
         return this;
     }
 
@@ -134,39 +133,42 @@ public class JavaFxCliBuilder {
      * @return A {@link Parent} that functions as a CLI built out of this builder's parameters.
      * @throws RuntimeException If an error occurs.
      */
-    @SneakyThrows
     public Parent build() {
-        final CliCommandHierarchy hierarchy = CliCommandHierarchyImpl.from(hierarchyBuilder.build());
+        try {
+            final CliCommandHierarchy hierarchy = CliCommandHierarchyImpl.from(hierarchyBuilder.build());
 
-        final URL fxmlUrl = getFxmlUrl();
-        final FXMLLoader loader = new FXMLLoader(fxmlUrl);
-        final Parent cliNode = (Parent) loader.load();
+            final URL fxmlUrl = getFxmlUrl();
+            final FXMLLoader loader = new FXMLLoader(fxmlUrl);
+            final Parent cliNode = (Parent) loader.load();
 
-        // Buffer for cli output.
-        final TextArea textArea = (TextArea) cliNode.lookup("#cliOutput");
-        textArea.setFocusTraversable(false);
+            // Buffer for cli output.
+            final TextArea textArea = (TextArea) cliNode.lookup("#cliOutput");
+            textArea.setFocusTraversable(false);
 
-        // Label for 'working directory'.
-        final Label workingDirectory = (Label) cliNode.lookup("#workingDirectory");
+            // Label for 'working directory'.
+            final Label workingDirectory = (Label) cliNode.lookup("#workingDirectory");
 
-        // The above combine into a CliOutput.
-        final CliOutput output = new JavaFxCliOutput(textArea, workingDirectory);
+            // The above combine into a CliOutput.
+            final CliOutput output = new JavaFxCliOutput(textArea, workingDirectory);
 
-        // TextField as command line.
-        final TextField commandLine = (TextField) cliNode.lookup("#commandLine");
-        final CommandLineManager commandLineManager = new JavaFxCommandLineManager(commandLine);
+            // TextField as command line.
+            final TextField commandLine = (TextField) cliNode.lookup("#commandLine");
+            final CommandLineManager commandLineManager = new JavaFxCommandLineManager(commandLine);
 
-        // Create the shell and the actual CLI.
-        final CliShell shell = new CliShell.Builder(hierarchy, output)
-            .setMaxCommandHistory(maxCommandHistory)
-            .build();
-        final Cli cli = new Cli(shell, commandLineManager);
+            // Create the shell and the actual CLI.
+            final CliShell shell = new CliShell.Builder(hierarchy, output)
+                .setMaxCommandHistory(maxCommandHistory)
+                .build();
+            final Cli cli = new Cli(shell, commandLineManager);
 
-        // Hook input events to CLI events.
-        commandLine.requestFocus();
-        commandLine.addEventFilter(KeyEvent.KEY_PRESSED, new JavaFxCliEventHandler(cli));
+            // Hook input events to CLI events.
+            commandLine.requestFocus();
+            commandLine.addEventFilter(KeyEvent.KEY_PRESSED, new JavaFxCliEventHandler(cli));
 
-        return cliNode;
+            return cliNode;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private URL getFxmlUrl() {

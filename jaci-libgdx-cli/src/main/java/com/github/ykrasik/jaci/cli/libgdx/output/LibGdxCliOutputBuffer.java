@@ -22,9 +22,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import lombok.NonNull;
 
 import java.util.ArrayDeque;
+import java.util.Objects;
 import java.util.Queue;
 
 /**
@@ -47,8 +47,8 @@ public class LibGdxCliOutputBuffer extends Table {
      *             Must contain a {@link LabelStyle} called 'outputEntry' that will be used to style the lines.
      * @param maxBufferEntries Maximum amount of lines to store.
      */
-    public LibGdxCliOutputBuffer(@NonNull Skin skin, int maxBufferEntries) {
-        this.skin = skin;
+    public LibGdxCliOutputBuffer(Skin skin, int maxBufferEntries) {
+        this.skin = Objects.requireNonNull(skin, "skin");
         this.maxBufferEntries = maxBufferEntries;
 
         // Create a buffer to hold out text labels.

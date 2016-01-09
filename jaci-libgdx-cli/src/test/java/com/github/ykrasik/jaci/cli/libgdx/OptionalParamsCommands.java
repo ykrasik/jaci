@@ -35,7 +35,7 @@ public class OptionalParamsCommands {
                                    @IntParam(value = "i", optional = true, defaultValue = 5) int i,
                                    @DoubleParam(value = "d", optional = true, defaultValue = 4.5) double d,
                                    @StringParam(value = "str", optional = true, defaultValue = "default") String str) {
-        output.message("defaultConstValues: b=%s, i=%s, d=%s, str=%s", b, i, d, str);
+        output.message("defaultConstValues: b="+b+", i="+i+", d="+d+", str="+str);
     }
 
     @Command(description = "All params are optional, with default value suppliers.")
@@ -43,7 +43,7 @@ public class OptionalParamsCommands {
                                       @IntParam(value = "i", optional = true, defaultValueSupplier = "intSupplier") int i,
                                       @DoubleParam(value = "d", optional = true, defaultValueSupplier = "doubleSupplier") double d,
                                       @StringParam(value = "str", optional = true, defaultValueSupplier = "stringSupplier") String str) {
-        output.message("defaultValueSuppliers: b=%s, i=%s, d=%s, str=%s", b, i, d, str);
+        output.message("defaultValueSuppliers: b="+b+", i="+i+", d="+d+", str="+str);
     }
 
     private Boolean booleanSupplier() {

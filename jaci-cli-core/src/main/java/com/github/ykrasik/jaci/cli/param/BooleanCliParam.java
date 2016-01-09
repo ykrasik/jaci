@@ -16,17 +16,16 @@
 
 package com.github.ykrasik.jaci.cli.param;
 
-import com.github.ykrasik.jaci.cli.exception.ParseException;
 import com.github.ykrasik.jaci.Identifier;
-import com.github.ykrasik.jaci.param.BooleanParamDef;
 import com.github.ykrasik.jaci.cli.assist.AutoComplete;
 import com.github.ykrasik.jaci.cli.assist.CliValueType;
-import com.github.ykrasik.jaci.util.function.Spplr;
+import com.github.ykrasik.jaci.cli.exception.ParseException;
+import com.github.ykrasik.jaci.param.BooleanParamDef;
 import com.github.ykrasik.jaci.util.function.MoreSuppliers;
+import com.github.ykrasik.jaci.util.function.Spplr;
 import com.github.ykrasik.jaci.util.opt.Opt;
 import com.github.ykrasik.jaci.util.trie.Trie;
 import com.github.ykrasik.jaci.util.trie.TrieBuilder;
-import lombok.NonNull;
 
 /**
  * A {@link CliParam} that parses boolean values.
@@ -67,7 +66,7 @@ public class BooleanCliParam extends AbstractCliParam<Boolean> {
     }
 
     @Override
-    public Boolean parse(@NonNull String arg) throws ParseException {
+    public Boolean parse(String arg) throws ParseException {
         if (!VALUES.contains(arg.toLowerCase())) {
             throw invalidParamValue(arg);
         }
@@ -75,7 +74,7 @@ public class BooleanCliParam extends AbstractCliParam<Boolean> {
     }
 
     @Override
-    public AutoComplete autoComplete(@NonNull String prefix) throws ParseException {
+    public AutoComplete autoComplete(String prefix) throws ParseException {
         final Trie<CliValueType> possibilities = VALUES.subTrie(prefix.toLowerCase());
         return new AutoComplete(prefix, possibilities);
     }
@@ -86,7 +85,7 @@ public class BooleanCliParam extends AbstractCliParam<Boolean> {
      * @param def BooleanParamDef to construct a CLI boolean parameter from.
      * @return A CLI boolean parameter constructed from the BooleanParamDef.
      */
-    public static BooleanCliParam fromDef(@NonNull BooleanParamDef def) {
+    public static BooleanCliParam fromDef(BooleanParamDef def) {
         return new BooleanCliParam(def.getIdentifier(), def.getDefaultValueSupplier());
     }
 

@@ -33,25 +33,9 @@ public interface CommandOutput {
     void message(String text);
 
     /**
-     * Display a message. Message will be formatted with {@link String#format(String, Object...)}.
-     *
-     * @param format String format.
-     * @param args Args for the format.
-     */
-    void message(String format, Object... args);
-
-    /**
      * Display an error message.
      *
      * @param text Error message to display.
      */
     void error(String text);
-
-    /**
-     * Display an error message. Message will be formatted with {@link String#format(String, Object...)}.
-     *
-     * @param format String format.
-     * @param args Args for the format.
-     */
-    void error(String format, Object... args);
 }
