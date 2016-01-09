@@ -23,7 +23,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 
-import java.util.ArrayDeque;
+import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Queue;
 
@@ -37,6 +37,7 @@ import java.util.Queue;
 public class LibGdxCliOutputBuffer extends Table {
     private final Skin skin;
     private final int maxBufferEntries;
+    private int numBufferEntries;       // To avoid calling size() on a LinkedList, which is O(n).
 
     private final Table buffer;
     private final ScrollPane scrollPane;
@@ -65,7 +66,7 @@ public class LibGdxCliOutputBuffer extends Table {
         updateScroll();
 
         // Buffer history.
-        this.bufferEntries = new ArrayDeque<>(maxBufferEntries);
+        this.bufferEntries = new LinkedList<>();
 
         add(scrollPane);
     }
@@ -85,12 +86,14 @@ public class LibGdxCliOutputBuffer extends Table {
     }
 
     private void addLabel(Label newEntry) {
-        if (bufferEntries.size() == maxBufferEntries) {
+        if (numBufferEntries == maxBufferEntries) {
             final Label lastEntry = bufferEntries.poll();
             buffer.removeActor(lastEntry);
+            numBufferEntries--;
         }
 
         bufferEntries.add(newEntry);
+        numBufferEntries++;
         buffer.add(newEntry).left().row();
 
         updateScroll();

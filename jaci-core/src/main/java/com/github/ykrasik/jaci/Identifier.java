@@ -18,8 +18,6 @@ package com.github.ykrasik.jaci;
 
 import java.util.Comparator;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * An identifier for an entity - it's name and description.
@@ -27,26 +25,28 @@ import java.util.regex.Pattern;
  * @author Yevgeny Krasik
  */
 public final class Identifier {
-    /**
-     * A pattern that matches any strings that start with a letter and are alphanumeric.
-     */
-    private static final Pattern LEGAL_NAME_PATTERN = Pattern.compile("[a-zA-Z][\\w]*");
-
     private final String name;
     private final String description;
 
     public Identifier(String name, String description) {
-        this.name = Objects.requireNonNull(name, "name");
+        this.name = assertValidName(name);
         this.description = Objects.requireNonNull(description, "description");
-        assertValidName();
     }
 
-    private void assertValidName() {
-        final Matcher matcher = LEGAL_NAME_PATTERN.matcher(name);
-        if (!matcher.matches()) {
-            final int index = matcher.regionStart();
-            throw new IllegalArgumentException("Names must be alphanumeric and start with a letter: name='"+name+"', index=" + index);
+    private String assertValidName(String name) {
+        Objects.requireNonNull(name, "name");
+        if (name.isEmpty()) {
+            throw new IllegalArgumentException("Invalid name: Names cannot be empty!");
         }
+        if (!Character.isLetter(name.charAt(0))) {
+            throw new IllegalArgumentException("Invalid name: Names must start with a letter: " + name);
+        }
+        for (int i = 1; i < name.length(); i++) {
+            if (!Character.isLetterOrDigit(name.charAt(i))) {
+                throw new IllegalArgumentException("Invalid name: Names must be alpha-number: " + name);
+            }
+        }
+        return name;
     }
 
     /**

@@ -1,12 +1,12 @@
 /******************************************************************************
  * Copyright (C) 2015 Yevgeny Krasik                                          *
- *                                                                            *
+ * *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
  * You may obtain a copy of the License at                                    *
- *                                                                            *
+ * *
  * http://www.apache.org/licenses/LICENSE-2.0                                 *
- *                                                                            *
+ * *
  * Unless required by applicable law or agreed to in writing, software        *
  * distributed under the License is distributed on an "AS IS" BASIS,          *
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   *
@@ -19,10 +19,9 @@ package com.github.ykrasik.jaci.cli.commandline;
 import com.github.ykrasik.jaci.util.string.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Represents a command line.
@@ -113,28 +112,32 @@ public class CommandLine {
 
     // FIXME: This pattern doesn't support named parameter calling with strings with whitespace (param="long string")
     // FIXME: Maybe the fix should not be in the pattern. Either way, calling long strings by name doesn't work.
-    /**
-     * A pattern that matches spaces that aren't surrounded by single or double quotes.
-     */
-    private static final Pattern PATTERN = Pattern.compile("[^\\s\"']+|\"([^\"]*)\"|'([^']*)'");
-
     private static List<String> splitCommandLine(String commandLine) {
         // Split the commandLine by whitespace.
         // Allow escaping single and double quoted strings.
-        final List<String> matchList = new ArrayList<>();
-        final Matcher matcher = PATTERN.matcher(Objects.requireNonNull(commandLine, "commandLine"));
-        while (matcher.find()) {
-            if (matcher.group(1) != null) {
-                // Add double-quoted string without the quotes.
-                matchList.add(matcher.group(1));
-            } else if (matcher.group(2) != null) {
-                // Add single-quoted string without the quotes.
-                matchList.add(matcher.group(2));
-            } else {
-                // Add unquoted word.
-                matchList.add(matcher.group());
+        if (Objects.requireNonNull(commandLine, "commandLine").isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // Special thanks to David Park (https://github.com/bornskilled200) for this code snippet.
+        final List<String> elements = new ArrayList<>();
+        char c = commandLine.charAt(0);
+        char terminatingCharacter = (c == '\'' || c == '\"') ? c : ' ';
+        int start = 0;
+        for (int i = 1; i < commandLine.length(); i++) {
+            c = commandLine.charAt(i);
+            if (terminatingCharacter == '\0' && (c == '\'' || c == '\"' || c == ' ')) {
+                terminatingCharacter = c;
+                start = i + 1;
+            } else if (c == terminatingCharacter) {
+                terminatingCharacter = '\0';
+                elements.add(commandLine.substring(start, i));
             }
         }
-        return matchList;
+        if (terminatingCharacter == ' ') {
+            elements.add(commandLine.substring(start, commandLine.length()));
+        }
+        return elements;
+
     }
 }
