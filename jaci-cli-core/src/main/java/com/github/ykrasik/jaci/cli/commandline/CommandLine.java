@@ -19,7 +19,7 @@ package com.github.ykrasik.jaci.cli.commandline;
 import com.github.ykrasik.jaci.util.string.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
@@ -112,32 +112,97 @@ public class CommandLine {
 
     // FIXME: This pattern doesn't support named parameter calling with strings with whitespace (param="long string")
     // FIXME: Maybe the fix should not be in the pattern. Either way, calling long strings by name doesn't work.
-    private static List<String> splitCommandLine(String commandLine) {
+
+    /**
+     * Package-protected for testing
+     */
+    static List<String> splitCommandLine(String commandLine) {
         // Split the commandLine by whitespace.
         // Allow escaping single and double quoted strings.
         if (Objects.requireNonNull(commandLine, "commandLine").isEmpty()) {
-            return Collections.emptyList();
+            return new LinkedList<>();
         }
 
-        // Special thanks to David Park (https://github.com/bornskilled200) for this code snippet.
         final List<String> elements = new ArrayList<>();
+        final QuoteStack quoteStack = new QuoteStack();
         char c = commandLine.charAt(0);
-        char terminatingCharacter = (c == '\'' || c == '\"') ? c : ' ';
-        int start = 0;
+        boolean matching = !isWhitespace(c);
+        int matchStart = 0;
+        if (isQuote(c)) {
+            quoteStack.push(c);
+            matchStart = 1;
+        }
         for (int i = 1; i < commandLine.length(); i++) {
             c = commandLine.charAt(i);
-            if (terminatingCharacter == '\0' && (c == '\'' || c == '\"' || c == ' ')) {
-                terminatingCharacter = c;
-                start = i + 1;
-            } else if (c == terminatingCharacter) {
-                terminatingCharacter = '\0';
-                elements.add(commandLine.substring(start, i));
+            if (matching) {
+                if (isWhitespace(c) && quoteStack.isEmpty()) {
+                    // Detected a whitespace after matching, and we're not in a quote -
+                    // this is a word boundary.
+                    elements.add(commandLine.substring(matchStart, i));
+                    matching = false;
+                } else if (isQuote(c) && quoteStack.quoteMatches(c)) {
+                    // Quote closes a previous section of quoted text.
+                    elements.add(commandLine.substring(matchStart, i));
+                    quoteStack.pop();
+                    matching = false;
+                }
+            } else if (isQuote(c)) {
+                // We're not matching - Quote opens a new section of quoted text.
+                quoteStack.push(c);
+                matchStart = i + 1;
+                matching = true;
+            } else if (!isWhitespace(c)) {
+                // Done slurping whitespaces - non-whitespace detected, start matching.
+                matching = true;
+                matchStart = i;
             }
         }
-        if (terminatingCharacter == ' ') {
-            elements.add(commandLine.substring(start, commandLine.length()));
+        if (matching) {
+            // Finished processing commandLine, but we're still matching - add the last word.
+            elements.add(commandLine.substring(matchStart, commandLine.length()));
         }
-        return elements;
 
+        return elements;
+    }
+
+    private static boolean isWhitespace(char c) {
+        return c == ' ';
+    }
+
+    private static boolean isQuote(char c) {
+        return c == '\'' || c == '\"';
+    }
+
+    /**
+     * Implemented due to lack of support for Deque in GWT.
+     */
+    private static class QuoteStack {
+        private static final int MAX_QUOTE_DEPTH = 2;
+        private final Character[] stack = new Character[MAX_QUOTE_DEPTH];
+        private int index = -1;
+
+        public boolean isEmpty() {
+            return index == -1;
+        }
+
+        public boolean quoteMatches(char quote) {
+            return !isEmpty() && stack[index] == quote;
+        }
+
+        public void push(char c) {
+            if (index == MAX_QUOTE_DEPTH - 1) {
+                throw new IllegalStateException("Stack is full: quote nesting depth cannot go beyond 2!");
+            }
+            index++;
+            stack[index] = c;
+        }
+
+        public void pop() {
+            if (index == -1) {
+                throw new IllegalStateException("Trying to pop an empty stack!");
+            }
+            stack[index] = null;
+            index--;
+        }
     }
 }

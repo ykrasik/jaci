@@ -47,10 +47,27 @@ project("jaci-utils") {
     description "Jaci utils"
 }
 
+project("jaci-reflection-api") {
+    description "Jaci reflection API"
+
+    dependencies {
+        compile project(":jaci-utils")
+    }
+}
+
+project("jaci-reflection-java") {
+    description "Jaci reflection API Java implementation"
+
+    dependencies {
+        compile project(":jaci-reflection-api")
+    }
+}
+
 project("jaci-core") {
     description "Jaci API and Core implementation"
 
     dependencies {
+        compile project(":jaci-reflection-api")
         compile project(":jaci-utils")
     }
 }
@@ -68,6 +85,7 @@ project("jaci-javafx-cli") {
 
     dependencies {
         compile project(":jaci-cli-core")
+        compile project(":jaci-reflection-java")
     }
 }
 

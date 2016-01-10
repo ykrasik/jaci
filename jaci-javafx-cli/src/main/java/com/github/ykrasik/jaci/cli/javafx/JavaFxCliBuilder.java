@@ -25,6 +25,7 @@ import com.github.ykrasik.jaci.cli.javafx.commandline.JavaFxCommandLineManager;
 import com.github.ykrasik.jaci.cli.javafx.output.JavaFxCliOutput;
 import com.github.ykrasik.jaci.cli.output.CliOutput;
 import com.github.ykrasik.jaci.hierarchy.CommandHierarchyDef;
+import com.github.ykrasik.jaci.reflection.JavaReflectionAccessor;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
@@ -56,6 +57,11 @@ import java.util.Objects;
  * @author Yevgeny Krasik
  */
 public class JavaFxCliBuilder {
+    static {
+        // Set reflection to the Java API.
+        JavaReflectionAccessor.install();
+    }
+
     private final CommandHierarchyDef.Builder hierarchyBuilder = new CommandHierarchyDef.Builder();
 
     // TODO: Add Max textArea size.

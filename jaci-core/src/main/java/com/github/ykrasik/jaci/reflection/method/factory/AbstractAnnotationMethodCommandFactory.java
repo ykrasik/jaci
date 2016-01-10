@@ -17,14 +17,14 @@
 package com.github.ykrasik.jaci.reflection.method.factory;
 
 import com.github.ykrasik.jaci.command.CommandDef;
+import com.github.ykrasik.jaci.reflection.ReflectionMethod;
 import com.github.ykrasik.jaci.util.opt.Opt;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.util.Objects;
 
 /**
- * A {@link MethodCommandFactory} that can create {@link CommandDef}s out of {@link Method}s that are annotated with
+ * A {@link MethodCommandFactory} that can create {@link CommandDef}s out of {@link ReflectionMethod}s that are annotated with
  * a single annotation.
  *
  * @author Yevgeny Krasik
@@ -40,7 +40,7 @@ public abstract class AbstractAnnotationMethodCommandFactory<T extends Annotatio
     }
 
     @Override
-    public Opt<CommandDef> create(Object instance, Method method) throws Exception {
+    public Opt<CommandDef> create(Object instance, ReflectionMethod method) throws Exception {
         final T annotation = method.getAnnotation(annotationClass);
         if (annotation == null) {
             // Method isn't annotated.
@@ -51,13 +51,13 @@ public abstract class AbstractAnnotationMethodCommandFactory<T extends Annotatio
     }
 
     /**
-     * Create a {@link CommandDef} out of the {@link Method} and its annotation.
+     * Create a {@link CommandDef} out of the {@link ReflectionMethod} and its annotation.
      *
      * @param instance Instance of a class to which this method belongs.
      * @param method Method to create a {@link CommandDef} out of.
      * @param annotation The method's annotation.
-     * @return A {@link CommandDef} created out of the {@link Method} and its annotation.
+     * @return A {@link CommandDef} created out of the {@link ReflectionMethod} and its annotation.
      * @throws Exception If any error occurs.
      */
-    protected abstract CommandDef doCreate(Object instance, Method method, T annotation) throws Exception;
+    protected abstract CommandDef doCreate(Object instance, ReflectionMethod method, T annotation) throws Exception;
 }

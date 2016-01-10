@@ -18,7 +18,7 @@ package com.github.ykrasik.jaci.reflection.param.factory;
 
 import com.github.ykrasik.jaci.api.StringParam;
 import com.github.ykrasik.jaci.param.StringParamDef;
-import com.github.ykrasik.jaci.util.function.MoreSuppliers;
+import com.github.ykrasik.jaci.reflection.ReflectionSuppliers;
 import com.github.ykrasik.jaci.util.opt.Opt;
 
 import static com.github.ykrasik.jaci.util.string.StringUtils.getNonEmptyString;
@@ -48,7 +48,7 @@ public class StringAnnotationParamFactory extends AnnotationMethodParamFactory<S
             // Otherwise, use the value supplied by 'defaultValue'.
             final Opt<String> defaultValueSupplierName = getNonEmptyString(annotation.defaultValueSupplier());
             if (defaultValueSupplierName.isPresent()) {
-                builder.setOptional(MoreSuppliers.reflectionSupplier(instance, defaultValueSupplierName.get(), String.class));
+                builder.setOptional(ReflectionSuppliers.reflectionSupplier(instance, defaultValueSupplierName.get(), String.class));
             } else {
                 builder.setOptional(annotation.defaultValue());
             }
@@ -58,7 +58,7 @@ public class StringAnnotationParamFactory extends AnnotationMethodParamFactory<S
         // Otherwise, use the values supplied by 'accepts'.
         final Opt<String> valuesSupplierName = getNonEmptyString(annotation.acceptsSupplier());
         if (valuesSupplierName.isPresent()) {
-            builder.setDynamicValues(MoreSuppliers.reflectionListSupplier(instance, valuesSupplierName.get(), String[].class));
+            builder.setDynamicValues(ReflectionSuppliers.reflectionListSupplier(instance, valuesSupplierName.get(), String[].class));
         } else {
             builder.setStaticValues(annotation.accepts());
         }

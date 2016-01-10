@@ -18,7 +18,7 @@ package com.github.ykrasik.jaci.reflection.param.factory;
 
 import com.github.ykrasik.jaci.api.DoubleParam;
 import com.github.ykrasik.jaci.param.DoubleParamDef;
-import com.github.ykrasik.jaci.util.function.MoreSuppliers;
+import com.github.ykrasik.jaci.reflection.ReflectionSuppliers;
 import com.github.ykrasik.jaci.util.opt.Opt;
 
 import static com.github.ykrasik.jaci.util.string.StringUtils.getNonEmptyString;
@@ -49,7 +49,7 @@ public class DoubleAnnotationParamFactory extends AnnotationMethodParamFactory<D
             final Opt<String> defaultValueSupplierName = getNonEmptyString(annotation.defaultValueSupplier());
             if (defaultValueSupplierName.isPresent()) {
                 // FIXME: Test that this works when the supplier returns primitive (Double.TYPE)
-                builder.setOptional(MoreSuppliers.reflectionSupplier(instance, defaultValueSupplierName.get(), Double.TYPE, Double.class));
+                builder.setOptional(ReflectionSuppliers.reflectionSupplier(instance, defaultValueSupplierName.get(), Double.TYPE, Double.class));
             } else {
                 builder.setOptional(annotation.defaultValue());
             }

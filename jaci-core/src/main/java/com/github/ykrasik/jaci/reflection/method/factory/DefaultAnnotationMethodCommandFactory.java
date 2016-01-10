@@ -20,20 +20,19 @@ import com.github.ykrasik.jaci.api.Command;
 import com.github.ykrasik.jaci.command.CommandDef;
 import com.github.ykrasik.jaci.command.CommandOutputPromise;
 import com.github.ykrasik.jaci.param.ParamDef;
+import com.github.ykrasik.jaci.reflection.ReflectionMethod;
+import com.github.ykrasik.jaci.reflection.ReflectionParameter;
 import com.github.ykrasik.jaci.reflection.method.ReflectionCommandExecutor;
 import com.github.ykrasik.jaci.reflection.param.ReflectionParamProcessor;
 import com.github.ykrasik.jaci.util.opt.Opt;
-import com.github.ykrasik.jaci.util.reflection.ReflectionParameter;
-import com.github.ykrasik.jaci.util.reflection.ReflectionUtils;
 
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Objects;
 
 import static com.github.ykrasik.jaci.util.string.StringUtils.getNonEmptyString;
 
 /**
- * Creates {@link CommandDef}s out of {@link Method}s annotated with {@link Command}.
+ * Creates {@link CommandDef}s out of {@link ReflectionMethod}s annotated with {@link Command}.
  * Empty names will be replaced with a the method's name, and empty descriptions will use default values.<br>
  *
  * @author Yevgeny Krasik
@@ -60,9 +59,9 @@ public class DefaultAnnotationMethodCommandFactory extends AbstractAnnotationMet
     }
 
     @Override
-    protected CommandDef doCreate(Object instance, Method method, Command annotation) throws Exception {
+    protected CommandDef doCreate(Object instance, ReflectionMethod method, Command annotation) throws Exception {
         // Reflect method params.
-        final List<ReflectionParameter> params = ReflectionUtils.reflectMethodParameters(method);
+        final List<ReflectionParameter> params = method.getParameters();
 
         final String name = getNonEmptyString(annotation.value()).getOrElse(method.getName());
         final CommandDef.Builder builder = new CommandDef.Builder(name, new ReflectionCommandExecutor(outputPromise, instance, method));

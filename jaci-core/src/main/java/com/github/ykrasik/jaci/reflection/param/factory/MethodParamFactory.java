@@ -17,8 +17,8 @@
 package com.github.ykrasik.jaci.reflection.param.factory;
 
 import com.github.ykrasik.jaci.param.ParamDef;
+import com.github.ykrasik.jaci.reflection.ReflectionParameter;
 import com.github.ykrasik.jaci.util.opt.Opt;
-import com.github.ykrasik.jaci.util.reflection.ReflectionParameter;
 
 /**
  * Creates {@link ParamDef}s out of {@link ReflectionParameter}s.

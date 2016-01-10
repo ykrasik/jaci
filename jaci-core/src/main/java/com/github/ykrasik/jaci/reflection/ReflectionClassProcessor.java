@@ -24,8 +24,6 @@ import com.github.ykrasik.jaci.path.ParsedPath;
 import com.github.ykrasik.jaci.reflection.method.ReflectionMethodProcessor;
 import com.github.ykrasik.jaci.util.opt.Opt;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.*;
 
 /**
@@ -82,8 +80,8 @@ public class ReflectionClassProcessor {
         final ClassContext context = new ClassContext(topLevelPath);
 
         // Create commands from all qualifying methods..
-        final Method[] methods = clazz.getMethods();
-        for (Method method : methods) {
+        final ReflectionMethod[] methods = ReflectionUtils.getMethods(clazz);
+        for (ReflectionMethod method : methods) {
             processMethod(context, instance, method);
         }
 
@@ -92,11 +90,10 @@ public class ReflectionClassProcessor {
 
     private void injectOutputPromise(Object instance, Class<?> clazz) {
         try {
-            for (Field field : clazz.getDeclaredFields()) {
+            final ReflectionField[] fields = ReflectionUtils.getDeclaredFields(clazz);
+            for (ReflectionField field : fields) {
                 if (field.getType() == CommandOutput.class) {
-                    if (!field.isAccessible()) {
-                        field.setAccessible(true);
-                    }
+                    field.setAccessible(true);
                     field.set(instance, outputPromise);
                 }
             }
@@ -105,7 +102,7 @@ public class ReflectionClassProcessor {
         }
     }
 
-    private void processMethod(ClassContext context, Object instance, Method method) {
+    private void processMethod(ClassContext context, Object instance, ReflectionMethod method) {
         // Commands can only be created from qualifying methods.
         final Opt<CommandDef> commandDef = methodProcessor.process(instance, method);
         if (!commandDef.isPresent()) {
@@ -117,10 +114,10 @@ public class ReflectionClassProcessor {
     }
 
     private ParsedPath getTopLevelPath(Class<?> clazz) {
-        return getPathFromAnnotation(clazz.getAnnotation(CommandPath.class));
+        return getPathFromAnnotation(ReflectionUtils.getAnnotation(clazz, CommandPath.class));
     }
 
-    private ParsedPath getCommandPath(Method method) {
+    private ParsedPath getCommandPath(ReflectionMethod method) {
         return getPathFromAnnotation(method.getAnnotation(CommandPath.class));
     }
 

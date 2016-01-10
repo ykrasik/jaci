@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2015 Yevgeny Krasik                                          *
+ * Copyright (C) 2016 Yevgeny Krasik                                          *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -14,26 +14,31 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jaci.reflection.method.factory;
+package com.github.ykrasik.jaci.cli.libgdx.reflection;
 
-import com.github.ykrasik.jaci.command.CommandDef;
-import com.github.ykrasik.jaci.reflection.ReflectionMethod;
-import com.github.ykrasik.jaci.util.opt.Opt;
+import com.badlogic.gdx.utils.reflect.Field;
+import com.github.ykrasik.jaci.reflection.ReflectionField;
+
+import java.util.Objects;
 
 /**
- * Creates {@link CommandDef}s out of {@link ReflectionMethod}s. Is not required to support all methods, may signal that a method
- * is not supported by returning an {@code absent} value from {@link #create(Object, ReflectionMethod)}.
+ * Reflection information about a field, through the libGdx reflection API.
  *
  * @author Yevgeny Krasik
  */
-public interface MethodCommandFactory {
-    /**
-     * Process the method and create a {@link CommandDef} out of it, if this factory can accept this method.
-     *
-     * @param instance Instance of a class to which this method belongs.
-     * @param method Method to be processed.
-     * @return A {@code present} {@link CommandDef} if the method is accepted by this factory.
-     * @throws Exception If any error occurs.
-     */
-    Opt<CommandDef> create(Object instance, ReflectionMethod method) throws Exception;
+public class LibGdxReflectionField implements ReflectionField {
+    private final Field field;
+
+    public LibGdxReflectionField(Field field) {
+        this.field = Objects.requireNonNull(field, "field");
+    }
+
+    @Override
+    public Class<?> getType() { return field.getType(); }
+
+    @Override
+    public void setAccessible(boolean flag) { field.setAccessible(flag); }
+
+    @Override
+    public void set(Object obj, Object value) throws Exception { field.set(obj, value); }
 }

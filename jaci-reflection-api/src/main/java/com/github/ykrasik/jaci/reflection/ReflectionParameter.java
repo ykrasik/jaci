@@ -14,7 +14,7 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jaci.util.reflection;
+package com.github.ykrasik.jaci.reflection;
 
 import com.github.ykrasik.jaci.util.opt.Opt;
 

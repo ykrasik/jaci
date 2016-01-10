@@ -20,7 +20,7 @@ import com.github.ykrasik.jaci.command.CommandDef;
 import com.github.ykrasik.jaci.directory.CommandDirectoryDef;
 import com.github.ykrasik.jaci.path.ParsedPath;
 import com.github.ykrasik.jaci.reflection.ReflectionClassProcessor;
-import com.github.ykrasik.jaci.util.reflection.ReflectionUtils;
+import com.github.ykrasik.jaci.reflection.ReflectionUtils;
 
 import java.util.List;
 import java.util.Map;

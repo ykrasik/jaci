@@ -33,6 +33,7 @@ import com.github.ykrasik.jaci.cli.hierarchy.CliCommandHierarchyImpl;
 import com.github.ykrasik.jaci.cli.libgdx.commandline.LibGdxCommandLineManager;
 import com.github.ykrasik.jaci.cli.libgdx.output.LibGdxCliOutput;
 import com.github.ykrasik.jaci.cli.libgdx.output.LibGdxCliOutputBuffer;
+import com.github.ykrasik.jaci.cli.libgdx.reflection.LibGdxReflectionAccessor;
 import com.github.ykrasik.jaci.cli.output.CliOutput;
 import com.github.ykrasik.jaci.cli.output.CliSerializer;
 import com.github.ykrasik.jaci.cli.output.DefaultCliSerializer;
@@ -230,6 +231,11 @@ public class LibGdxCli extends Table {
      * a class and add any annotated methods as commands to this builder.
      */
     public static class Builder {
+        static {
+            // Set reflection to the libGdx API.
+            LibGdxReflectionAccessor.install();
+        }
+
         private final CommandHierarchyDef.Builder hierarchyBuilder = new CommandHierarchyDef.Builder();
 
         private Skin skin;

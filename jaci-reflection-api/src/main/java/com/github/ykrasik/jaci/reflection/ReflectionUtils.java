@@ -14,12 +14,11 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jaci.util.reflection;
+package com.github.ykrasik.jaci.reflection;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Utilities for dealing with reflection.
@@ -32,6 +31,18 @@ public final class ReflectionUtils {
 
     private ReflectionUtils() { }
 
+    private static ReflectionAccessor accessor;
+
+    /**
+     * Set the current instance of a {@link ReflectionAccessor} to be used for all reflection calls.
+     * Must be called for any reflection operations to become possible.
+     *
+     * @param accessor {@link ReflectionAccessor} to be used.
+     */
+    public static void setReflectionAccessor(ReflectionAccessor accessor) {
+        ReflectionUtils.accessor = Objects.requireNonNull(accessor, "accessor");
+    }
+
     /**
      * Creates an instance of this class through reflection. Class must have a no-args constructor.
      * Bypasses any checked exceptions that could be throw and throws them at runtime.
@@ -42,8 +53,9 @@ public final class ReflectionUtils {
      *                          class doesn't have a no-args constructor).
      */
     public static Object createInstanceNoArgs(Class<?> clazz) {
+        assertReflectionAccessor();
         try {
-            return clazz.newInstance();
+            return accessor.newInstance(clazz);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -57,31 +69,62 @@ public final class ReflectionUtils {
      * @return A method with the provided name that takes no-args.
      * @throws RuntimeException If the class doesn't contain a no-args method with the given name.
      */
-    public static Method getNoArgsMethod(Class<?> clazz, String methodName) {
+    public static ReflectionMethod getNoArgsMethod(Class<?> clazz, String methodName) {
+        assertReflectionAccessor();
         try {
             // TODO: Support inheritance?
-            return clazz.getDeclaredMethod(methodName, NO_ARGS_TYPE);
-        } catch (NoSuchMethodException e) {
+            return accessor.getDeclaredMethod(clazz, methodName, NO_ARGS_TYPE);
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     /**
-     * Find the first encountered method with the provided name. Doesn't take parameters into account.
-     * Includes inherited methods.
+     * Returns an array containing {@code ReflectionMethod} objects reflecting all the
+     * public methods of the class or interface represented by this {@code
+     * Class} object, including those declared by the class or interface and
+     * those inherited from superclasses and superinterfaces.
      *
-     * @param clazz Class to search.
-     * @param methodName Method name.
-     * @return First encountered method with the provided name.
-     * @throws IllegalArgumentException If the class doesn't contain a method with the provided name.
+     * @param clazz Class to get methods from
+     * @return the array of {@code ReflectionMethod} objects representing the
+     *         public methods of this class
      */
-    public static Method lookupMethod(Class<?> clazz, String methodName) {
-        for (Method method : clazz.getMethods()) {
-            if (method.getName().equals(methodName)) {
-                return method;
-            }
-        }
-        throw new IllegalArgumentException("Class '"+clazz+"' doesn't have method: '"+methodName+'\'');
+    public static ReflectionMethod[] getMethods(Class<?> clazz) {
+        assertReflectionAccessor();
+        return accessor.getMethods(clazz);
+    }
+
+    /**
+     * Returns an array of {@code Field} objects reflecting all the fields
+     * declared by the class or interface represented by this
+     * {@code Class} object. This includes public, protected, default
+     * (package) access, and private fields, but excludes inherited fields.
+     *
+     * @param clazz Class to get fields from
+     * @return  the array of {@code Field} objects representing all the
+     *          declared fields of this class
+     */
+    public static ReflectionField[] getDeclaredFields(Class<?> clazz) {
+        assertReflectionAccessor();
+        return accessor.getDeclaredFields(clazz);
+    }
+
+    /**
+     * Returns this element's annotation for the specified type if
+     * such an annotation is <em>present</em>, else null.
+     *
+     * @param <T> the type of the annotation to query for and return if present
+     * @param clazz Class to get annotation from
+     * @param annotationClass the Class object corresponding to the
+     *        annotation type
+     * @return this element's annotation for the specified annotation type if
+     *     present on this element, else null
+     * @throws NullPointerException if the given annotation class is null
+     * @since 1.5
+     */
+    public static <T extends Annotation> T getAnnotation(Class<?> clazz, Class<T> annotationClass) {
+        assertReflectionAccessor();
+        return accessor.getAnnotation(clazz, annotationClass);
     }
 
     /**
@@ -96,10 +139,8 @@ public final class ReflectionUtils {
      * @throws RuntimeException If an error occurred invoking the method.
      */
     @SuppressWarnings("unchecked")
-    public static <T> T invokeNoArgs(Object instance, Method method) {
-        if (!method.isAccessible()) {
-            method.setAccessible(true);
-        }
+    public static <T> T invokeNoArgs(Object instance, ReflectionMethod method) {
+        method.setAccessible(true);
         try {
             return (T) method.invoke(instance, NO_ARGS);
         } catch (Exception e) {
@@ -114,7 +155,7 @@ public final class ReflectionUtils {
      * @param expectedReturnType Expected return type of the method.
      * @throws IllegalArgumentException If the method's return type doesn't match the expected type.
      */
-    public static void assertReturnValue(Method method, Class<?> expectedReturnType) {
+    public static void assertReturnValue(ReflectionMethod method, Class<?> expectedReturnType) {
         final Class<?> returnType = method.getReturnType();
         if (returnType != expectedReturnType) {
             final String message = "Class='"+method.getDeclaringClass()+"', method='"+method.getName()+"': Must return a value of type '"+expectedReturnType+"'!";
@@ -128,30 +169,15 @@ public final class ReflectionUtils {
      * @param method Method to assert.
      * @throws IllegalArgumentException If the method takes any parameters.
      */
-    public static void assertNoParameters(Method method) {
-        final Class<?>[] parameterTypes = method.getParameterTypes();
-        if (parameterTypes.length > 0) {
+    public static void assertNoParameters(ReflectionMethod method) {
+        final List<ReflectionParameter> parameters = method.getParameters();
+        if (!parameters.isEmpty()) {
             final String message = "Class='"+method.getDeclaringClass()+"', method='"+method.getName()+"': Must take no parameters!";
             throw new IllegalArgumentException(message);
         }
     }
 
-    /**
-     * Returns basic information about a method's parameters obtained via reflection.
-     *
-     * @param method Method to reflect parameters for.
-     * @return The method's parameter information obtained via reflection.
-     */
-    public static List<ReflectionParameter> reflectMethodParameters(Method method) {
-        final Class<?>[] parameterTypes = method.getParameterTypes();
-        final Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-
-        final List<ReflectionParameter> params = new ArrayList<>(parameterTypes.length);
-        for (int i = 0; i < parameterTypes.length; i++) {
-            final Class<?> parameterType = parameterTypes[i];
-            final Annotation[] annotations = parameterAnnotations[i];
-            params.add(new ReflectionParameter(parameterType, annotations, i));
-        }
-        return params;
+    private static void assertReflectionAccessor() {
+        Objects.requireNonNull(accessor, "ReflectionAccessor hasn't been set!");
     }
 }

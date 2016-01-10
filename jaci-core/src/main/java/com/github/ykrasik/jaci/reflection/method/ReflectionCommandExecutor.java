@@ -20,12 +20,12 @@ import com.github.ykrasik.jaci.api.CommandOutput;
 import com.github.ykrasik.jaci.command.CommandArgs;
 import com.github.ykrasik.jaci.command.CommandExecutor;
 import com.github.ykrasik.jaci.command.CommandOutputPromise;
+import com.github.ykrasik.jaci.reflection.ReflectionMethod;
 
-import java.lang.reflect.Method;
 import java.util.Objects;
 
 /**
- * A {@link CommandExecutor} that calls the underlying {@link Method} via reflection.
+ * A {@link CommandExecutor} that calls the underlying {@link ReflectionMethod} via reflection.
  * Keeps an instance of a  {@link CommandOutputPromise}, which the method may call in it's implementation.
  *
  * @author Yevgeny Krasik
@@ -33,9 +33,9 @@ import java.util.Objects;
 public class ReflectionCommandExecutor implements CommandExecutor {
     private final CommandOutputPromise outputPromise;
     private final Object instance;
-    private final Method method;
+    private final ReflectionMethod method;
 
-    public ReflectionCommandExecutor(CommandOutputPromise outputPromise, Object instance, Method method) {
+    public ReflectionCommandExecutor(CommandOutputPromise outputPromise, Object instance, ReflectionMethod method) {
         this.outputPromise = Objects.requireNonNull(outputPromise, "outputPromise");
         this.instance = Objects.requireNonNull(instance, "instance");
         this.method = Objects.requireNonNull(method, "method");

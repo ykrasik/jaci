@@ -20,15 +20,14 @@ import com.github.ykrasik.jaci.api.ToggleCommand;
 import com.github.ykrasik.jaci.api.ToggleCommandStateAccessor;
 import com.github.ykrasik.jaci.command.CommandDef;
 import com.github.ykrasik.jaci.command.toggle.ToggleCommandDefBuilder;
+import com.github.ykrasik.jaci.reflection.ReflectionMethod;
+import com.github.ykrasik.jaci.reflection.ReflectionUtils;
 import com.github.ykrasik.jaci.util.opt.Opt;
-import com.github.ykrasik.jaci.util.reflection.ReflectionUtils;
-
-import java.lang.reflect.Method;
 
 import static com.github.ykrasik.jaci.util.string.StringUtils.getNonEmptyString;
 
 /**
- * Creates {@link CommandDef}s out of {@link Method}s annotated with {@link ToggleCommand}.
+ * Creates {@link CommandDef}s out of {@link ReflectionMethod}s annotated with {@link ToggleCommand}.
  * Empty names will be replaced with a the method's name, and empty descriptions will use default values.<br>
  *
  * @author Yevgeny Krasik
@@ -39,7 +38,7 @@ public class ToggleAnnotationMethodCommandFactory extends AbstractAnnotationMeth
     }
 
     @Override
-    protected CommandDef doCreate(Object instance, Method method, ToggleCommand annotation) throws Exception {
+    protected CommandDef doCreate(Object instance, ReflectionMethod method, ToggleCommand annotation) throws Exception {
         ReflectionUtils.assertReturnValue(method, ToggleCommandStateAccessor.class);
         ReflectionUtils.assertNoParameters(method);
         final ToggleCommandStateAccessor accessor = ReflectionUtils.invokeNoArgs(instance, method);
