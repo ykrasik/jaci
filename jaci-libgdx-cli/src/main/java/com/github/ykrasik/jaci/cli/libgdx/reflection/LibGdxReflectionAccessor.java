@@ -60,7 +60,7 @@ public final class LibGdxReflectionAccessor implements ReflectionAccessor {
 
     @Override
     public ReflectionField[] getDeclaredFields(Class<?> clazz) throws SecurityException {
-        final Field[] fields = ClassReflection.getFields(clazz);
+        final Field[] fields = ClassReflection.getDeclaredFields(clazz);
         final ReflectionField[] reflectionFields = new ReflectionField[fields.length];
         for (int i = 0; i < fields.length; i++) {
             reflectionFields[i] = new LibGdxReflectionField(fields[i]);

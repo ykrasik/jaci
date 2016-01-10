@@ -30,7 +30,6 @@ import java.util.Objects;
 public final class ReflectionSuppliers {
     private ReflectionSuppliers() { }
 
-
     /**
      * Create a supplier that will invoke the method specified by the give method name
      * on the given object instance through reflection.
