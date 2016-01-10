@@ -42,7 +42,8 @@ Let's explain what's going on here:
   3. A mandatory int called `int`.
   4. An optional double called `double`. If the parameter doesn't receive a value, it will have a value of `3.5` (supplied by a supplier method).
   5. An optional boolean called `flag`.
-* The command then just sends the parameter values to the output.
+* The command then just sends the parameter values to the output (The output instance itself will be injected by the library
+  when it processes the class: [Wiki](https://github.com/ykrasik/jaci/wiki/Annotation-API))  
 
 Here is how this looks on a LibGdx CLI implementation:  
 ![alt text](https://github.com/ykrasik/jaci/wiki/images/fullExample.PNG)
