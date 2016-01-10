@@ -60,7 +60,10 @@ public class ReflectionMethodProcessor {
         try {
             return doCreateCommand(instance, method);
         } catch (Exception e) {
-            throw new IllegalArgumentException("Error creating command: class="+method.getDeclaringClass()+", method=" + method.getName(), e);
+            // Unfortunately, this happens in GWT and kills the whole application if the exception is thrown.
+            System.err.println("Error creating command: class="+method.getDeclaringClass()+", method=" + method.getName());
+            e.printStackTrace(System.err);
+            return Opt.absent();
         }
     }
 
