@@ -13,3 +13,8 @@ include "jaci-javafx-cli"
 include "jaci-libgdx-cli"
 include "jaci-libgdx-cli-java"
 include "jaci-libgdx-cli-gwt"
+
+// Add all sub-projects ABOVE this line.
+rootProject.children.each { project ->
+    project.buildFileName = project.name + ".gradle"
+}

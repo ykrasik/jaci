@@ -1,0 +1,7 @@
+description "Jaci LibGdx command-line-interface implementation"
+
+dependencies {
+    compile project(":jaci-cli-core")
+
+    compile "com.badlogicgames.gdx:gdx:$gdxVersion"
+}

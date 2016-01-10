@@ -1,0 +1,5 @@
+description "Jaci reflection API Java implementation"
+
+dependencies {
+    compile project(":jaci-reflection-api")
+}

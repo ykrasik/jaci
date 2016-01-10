@@ -1,0 +1,5 @@
+description "Jaci command-line-interface core implementation"
+
+dependencies {
+    compile project(":jaci-core")
+}

@@ -1,0 +1,6 @@
+description "Jaci JavaFX command-line-interface implementation"
+
+dependencies {
+    compile project(":jaci-cli-core")
+    compile project(":jaci-reflection-java")
+}

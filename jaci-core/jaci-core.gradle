@@ -1,0 +1,6 @@
+description "Jaci API and Core implementation"
+
+dependencies {
+    compile project(":jaci-reflection-api")
+    compile project(":jaci-utils")
+}

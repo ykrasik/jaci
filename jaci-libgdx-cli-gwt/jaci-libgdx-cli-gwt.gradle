@@ -1,0 +1,9 @@
+description "Jaci LibGdx command-line-interface using libGdx reflection - " +
+    "does not support parameter annotations, but will work with GWT"
+
+dependencies {
+    compile project(":jaci-libgdx-cli")
+
+    testCompile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
+    testCompile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+}
