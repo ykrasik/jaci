@@ -20,7 +20,7 @@ public class Example {
                               @IntParam("int") int i,
                               @DoubleParam(value = "double", optional = true, defaultValueSupplier = "doubleSupplier") double d,
                               @BoolParam(value = "flag", optional = true) boolean flag) {
-        output.message("str1=%s, str2=%s, i=%d, d=%s, flag=%s", str1, str2, i, d, flag);
+        output.message("str1=" + str1 + ", str2=" + str2 + ", i=" + i + ", d=" + d + ", flag=" + flag);
     }
 }
 
