@@ -80,6 +80,13 @@ Use this if you use GWT as a backend.
 </dependency>
 ```
 
+In your .gwt.xml file, add the following:
+```
+<inherits name='com.github.ykrasik.jaci' />
+```
+
+All jars come with source code packaged in the jar, so no other dependencies are required.
+
 # Change log
 See [Change Log](https://github.com/ykrasik/jaci/blob/master/CHANGELOG.md)
 

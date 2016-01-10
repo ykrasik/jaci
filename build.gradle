@@ -37,4 +37,10 @@ subprojects {
         testCompile "junit:junit:$junitVersion"
         testCompile "org.mockito:mockito-all:$mockitoVersion"
     }
+
+    // Include all sources in the jar by default, for GWT.
+    // Since we have a few jars, requiring the user to explicitly depend on the sources of all these jars was uncomfortable.
+    jar {
+        from sourceSets.main.allJava
+    }
 }
