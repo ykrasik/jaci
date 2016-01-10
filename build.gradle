@@ -96,6 +96,28 @@ project("jaci-libgdx-cli") {
         compile project(":jaci-cli-core")
 
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"
+    }
+}
+
+project("jaci-libgdx-cli-java") {
+    description "Jaci LibGdx command-line-interface using Java reflection - " +
+                "provides full reflection capabilities, but will not work with GWT"
+
+    dependencies {
+        compile project(":jaci-libgdx-cli")
+        compile project(":jaci-reflection-java")
+
+        testCompile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
+        testCompile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+    }
+}
+
+project("jaci-libgdx-cli-gwt") {
+    description "Jaci LibGdx command-line-interface using libGdx reflection - " +
+                "does not support parameter annotations, but will work with GWT"
+
+    dependencies {
+        compile project(":jaci-libgdx-cli")
 
         testCompile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
         testCompile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"

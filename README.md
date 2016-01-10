@@ -52,12 +52,31 @@ See the [Wiki](https://github.com/ykrasik/jaci/wiki) for full documentation.
 
 # Binaries
 The binaries depend on your choice of UI-platform:
-* LibGdx CLI:
+
+### LibGdx CLI:
+Unfortunately, at present (libGdx 1.8), the libGdx reflection API does not support parameter annotations.  
+This only potentially affects GWT, and since parameter annotations are a big part of Jaci, it was decided to create 
+2 jaci-libgdx distributions:
+
+#### jaci-libgdx-cli-java
+Uses the Java reflection API. Supports full reflection capabilities (including parameter annotations), but does not compile with GWT. 
+Use this if you want full support for Jaci's capabilities and aren't using GWT backend.
 ```
 <dependency>
     <groupId>com.github.ykrasik</groupId>
-    <artifactId>jaci-libgdx-cli</artifactId>
-    <version>0.2.0</version>
+    <artifactId>jaci-libgdx-cli-java</artifactId>
+    <version>0.3.0</version>
+</dependency>
+```
+
+#### jaci-libgdx-cli-gwt
+Uses the libGdx reflection API. Does not support parameter annotations (they will be ignored), but compiles with GWT. 
+Use this if you use GWT as a backend.
+```
+<dependency>
+    <groupId>com.github.ykrasik</groupId>
+    <artifactId>jaci-libgdx-cli-gwt</artifactId>
+    <version>0.3.0</version>
 </dependency>
 ```
 

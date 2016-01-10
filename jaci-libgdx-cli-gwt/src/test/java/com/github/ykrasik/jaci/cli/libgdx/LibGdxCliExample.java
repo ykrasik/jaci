@@ -45,7 +45,7 @@ public class LibGdxCliExample extends ApplicationAdapter {
 
     @Override
     public void create() {
-        final LibGdxCli cli = new LibGdxCli.Builder()
+        final LibGdxCli cli = new LibGdxCliBuilder()
             .processClasses(BasicCommands.class, PathCommands1.class, PathCommands2.class, MandatoryParamsCommands.class)
             .process(new OptionalParamsCommands(), new StringParamCommands(), new ToggleCommands())  // Just to show that this is also possible.
             .build();

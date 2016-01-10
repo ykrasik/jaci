@@ -33,7 +33,6 @@ import com.github.ykrasik.jaci.cli.hierarchy.CliCommandHierarchyImpl;
 import com.github.ykrasik.jaci.cli.libgdx.commandline.LibGdxCommandLineManager;
 import com.github.ykrasik.jaci.cli.libgdx.output.LibGdxCliOutput;
 import com.github.ykrasik.jaci.cli.libgdx.output.LibGdxCliOutputBuffer;
-import com.github.ykrasik.jaci.cli.libgdx.reflection.LibGdxReflectionAccessor;
 import com.github.ykrasik.jaci.cli.output.CliOutput;
 import com.github.ykrasik.jaci.cli.output.CliSerializer;
 import com.github.ykrasik.jaci.cli.output.DefaultCliSerializer;
@@ -76,7 +75,7 @@ import java.util.Objects;
  *     </li>
  * </ul>
  *
- * Built through the {@link LibGdxCli.Builder} builder.
+ * Built through a concrete implementation of {@link AbstractBuilder}.
  *
  * @author Yevgeny Krasik
  */
@@ -230,12 +229,7 @@ public class LibGdxCli extends Table {
      * The main methods to use are {@link #processClasses(Class[])} and {@link #process(Object[])} which process
      * a class and add any annotated methods as commands to this builder.
      */
-    public static class Builder {
-        static {
-            // Set reflection to the libGdx API.
-            LibGdxReflectionAccessor.install();
-        }
-
+    public abstract static class AbstractBuilder {
         private final CommandHierarchyDef.Builder hierarchyBuilder = new CommandHierarchyDef.Builder();
 
         private Skin skin;
@@ -249,7 +243,7 @@ public class LibGdxCli extends Table {
          * @param classes Classes to process.
          * @return {@code this}, for chaining.
          */
-        public Builder processClasses(Class<?>... classes) {
+        public AbstractBuilder processClasses(Class<?>... classes) {
             hierarchyBuilder.processClasses(classes);
             return this;
         }
@@ -260,7 +254,7 @@ public class LibGdxCli extends Table {
          * @param instances Objects whose classes to process.
          * @return {@code this}, for chaining.
          */
-        public Builder process(Object... instances) {
+        public AbstractBuilder process(Object... instances) {
             hierarchyBuilder.process(instances);
             return this;
         }
@@ -271,7 +265,7 @@ public class LibGdxCli extends Table {
          * @param maxBufferEntries Max output buffer entries to keep.
          * @return {@code this}, for chaining.
          */
-        public Builder setMaxBufferEntries(int maxBufferEntries) {
+        public AbstractBuilder setMaxBufferEntries(int maxBufferEntries) {
             this.maxBufferEntries = maxBufferEntries;
             return this;
         }
@@ -282,7 +276,7 @@ public class LibGdxCli extends Table {
          * @param maxCommandHistory Max command history entries to keep.
          * @return {@code this}, for chaining.
          */
-        public Builder setMaxCommandHistory(int maxCommandHistory) {
+        public AbstractBuilder setMaxCommandHistory(int maxCommandHistory) {
             this.maxCommandHistory = maxCommandHistory;
             return this;
         }
@@ -320,7 +314,7 @@ public class LibGdxCli extends Table {
          * @param skin Skin to use.
          * @return {@code this}, for chaining.
          */
-        public Builder setSkin(Skin skin) {
+        public AbstractBuilder setSkin(Skin skin) {
             this.skin = skin;
             return this;
         }

@@ -9,4 +9,7 @@ include "jaci-reflection-api"
 include "jaci-reflection-java"
 
 include "jaci-javafx-cli"
+
 include "jaci-libgdx-cli"
+include "jaci-libgdx-cli-java"
+include "jaci-libgdx-cli-gwt"
