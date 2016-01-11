@@ -34,7 +34,17 @@ public class LibGdxReflectionField implements ReflectionField {
     }
 
     @Override
-    public Class<?> getType() { return field.getType(); }
+    public Class<?> getType() {
+        try {
+            return field.getType();
+        } catch (Exception e) {
+            // Thrown by GWT when trying to get the type of a field for a class not in the reflection cache.
+            // It's relatively safe to return null here, because the classes we're interested in are always in the
+            // reflection cache, so this should just be ignored.
+            e.printStackTrace(System.err);
+            return null;
+        }
+    }
 
     @Override
     public void setAccessible(boolean flag) { field.setAccessible(flag); }

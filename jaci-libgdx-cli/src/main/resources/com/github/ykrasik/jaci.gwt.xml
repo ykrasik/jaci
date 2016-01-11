@@ -9,5 +9,4 @@
     <extend-configuration-property name="gdx.files.classpath" value="com/github/ykrasik/jaci/cli/libgdx/default_cli.png" />
 
     <extend-configuration-property name="gdx.reflect.include" value="com.github.ykrasik.jaci.api" />
-    <extend-configuration-property name="gdx.reflect.include" value="com.github.ykrasik.jaci.cli.libgdx.LibGdxCli" />
 </module>

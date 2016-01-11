@@ -66,7 +66,7 @@ Use this if you want full support for Jaci's capabilities and aren't using GWT b
 <dependency>
     <groupId>com.github.ykrasik</groupId>
     <artifactId>jaci-libgdx-cli-java</artifactId>
-    <version>0.3.0</version>
+    <version>0.3.2</version>
 </dependency>
 ```
 
@@ -77,7 +77,7 @@ Use this if you use GWT as a backend.
 <dependency>
     <groupId>com.github.ykrasik</groupId>
     <artifactId>jaci-libgdx-cli-gwt</artifactId>
-    <version>0.3.0</version>
+    <version>0.3.2</version>
 </dependency>
 ```
 

@@ -95,6 +95,9 @@ public class ReflectionClassProcessor {
                 if (field.getType() == CommandOutput.class) {
                     field.setAccessible(true);
                     field.set(instance, outputPromise);
+
+                    // Only inject the first CommandOutput - class shouldn't have more then 1 anyway.
+                    break;
                 }
             }
         } catch (Exception e) {
