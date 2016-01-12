@@ -63,22 +63,14 @@ Since parameter annotations are a big part of the library, and this only potenti
 Uses the Java reflection API. Supports full reflection capabilities (including parameter annotations), but does not compile with GWT. 
 Use this if you want full support for Jaci's capabilities and aren't using GWT backend.
 ```
-<dependency>
-    <groupId>com.github.ykrasik</groupId>
-    <artifactId>jaci-libgdx-cli-java</artifactId>
-    <version>0.3.2</version>
-</dependency>
+compile "com.github.ykrasik:jaci-libgdx-cli-java:0.3.2"
 ```
 
 #### jaci-libgdx-cli-gwt
 Uses the libGdx reflection API. Does not support parameter annotations (they will be ignored), but compiles with GWT. 
 Use this if you use GWT as a backend.
 ```
-<dependency>
-    <groupId>com.github.ykrasik</groupId>
-    <artifactId>jaci-libgdx-cli-gwt</artifactId>
-    <version>0.3.2</version>
-</dependency>
+compile "com.github.ykrasik:jaci-libgdx-cli-gwt:0.3.2"
 ```
 
 In your .gwt.xml file, add the following:
