@@ -120,7 +120,7 @@ public class CliDirectory implements Identifiable {
      * @return Auto complete for child {@link CliDirectory}s that starts with the given prefix. Case insensitive.
      */
     public AutoComplete autoCompleteDirectory(String prefix) {
-        final Trie<CliValueType> possibilities = childDirectories.subTrie(prefix).mapValues(DIRECTORY_VALUE_MAPPER);
+        final Trie<CliValueType> possibilities = childDirectories.subTrie(prefix).mapValues(CliValueType.DIRECTORY.<CliDirectory>getMapper());
         return new AutoComplete(prefix, possibilities);
     }
 
@@ -131,7 +131,7 @@ public class CliDirectory implements Identifiable {
      * @return Auto complete for the child {@link CliCommand}s that starts with the given prefix. Case insensitive.
      */
     public AutoComplete autoCompleteCommand(String prefix) {
-        final Trie<CliValueType> possibilities = childCommands.subTrie(prefix).mapValues(COMMAND_VALUE_MAPPER);
+        final Trie<CliValueType> possibilities = childCommands.subTrie(prefix).mapValues(CliValueType.COMMAND.<CliCommand>getMapper());
         return new AutoComplete(prefix, possibilities);
     }
 
@@ -220,7 +220,4 @@ public class CliDirectory implements Identifiable {
         }
         return builder.build();
     }
-
-    private static final CliValueType.Mapper<CliDirectory> DIRECTORY_VALUE_MAPPER = new CliValueType.Mapper<>(CliValueType.DIRECTORY);
-    private static final CliValueType.Mapper<CliCommand> COMMAND_VALUE_MAPPER = new CliValueType.Mapper<>(CliValueType.COMMAND);
 }

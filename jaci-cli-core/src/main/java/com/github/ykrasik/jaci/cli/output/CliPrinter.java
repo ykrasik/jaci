@@ -120,7 +120,7 @@ public class CliPrinter {
      * @param e Exception to print.
      */
     public void printException(Exception e) {
-        final Serialization serialization = serializer.serializeException(e);
+        final Serialization serialization = serializer.serializeThrowable(e);
         for (String line : serialization) {
             errorPrintln(line);
         }

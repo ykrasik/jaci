@@ -38,8 +38,6 @@ import java.util.*;
  * @author Yevgeny Krasik
  */
 public class CliParamParseContext {
-    private static final CliValueType.Mapper<CliParam> PARAM_NAME_MAPPER = new CliValueType.Mapper<>(CliValueType.COMMAND_PARAM_NAME);
-
     private final List<CliParam> params;
     private final Trie<CliParam> paramsTrie;
 
@@ -251,7 +249,7 @@ public class CliParamParseContext {
                 return !parsedValues.containsKey(value);
             }
         });
-        final Trie<CliValueType> paramNamePossibilities = unboundPrefixParams.mapValues(PARAM_NAME_MAPPER);
+        final Trie<CliValueType> paramNamePossibilities = unboundPrefixParams.mapValues(CliValueType.COMMAND_PARAM_NAME.<CliParam>getMapper());
         return new AutoComplete(prefix, paramNamePossibilities);
     }
 

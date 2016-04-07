@@ -70,7 +70,7 @@ public abstract class AbstractCliParam<T> implements CliParam {
     public abstract T parse(String arg) throws ParseException;
 
     @Override
-    public Object noValue() throws ParseException {
+    public T noValue() throws ParseException {
         throw missingParamValue();
     }
 

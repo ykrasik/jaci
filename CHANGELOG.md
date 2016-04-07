@@ -1,5 +1,8 @@
 # Jaci Releases
 
+### 0.4.0
+
+
 ### 0.3.0
 GWT compatibility:
 * Removed Lombok

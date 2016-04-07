@@ -65,12 +65,12 @@ public interface CliSerializer {
     Serialization serializeCommand(CliCommand command);
 
     /**
-     * Serialize an exception.
+     * Serialize a throwable.
      *
-     * @param e Exception to serialize.
+     * @param e Throwable to serialize.
      * @return A serialized representation of the exception.
      */
-    Serialization serializeException(Exception e);
+    Serialization serializeThrowable(Throwable e);
 
     /**
      * Serialize information about a command. Called to display assistance information about a command, or if a parse

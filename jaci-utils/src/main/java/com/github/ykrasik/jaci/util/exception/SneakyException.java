@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2015 Yevgeny Krasik                                          *
+ * Copyright (c) 2016 Yevgeny Krasik.                                         *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -14,38 +14,23 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jaci.command;
-
-import com.github.ykrasik.jaci.api.CommandOutput;
-
-import java.util.Objects;
+package com.github.ykrasik.jaci.util.exception;
 
 /**
- * A {@link CommandOutput} that promises to eventually contain a concrete implementation.
- * Delegates all calls to that concrete implementation.
- * This will be injected into objects expecting a {@link CommandOutput}, for the Annotation API.
- *
- * @author Yevgeny Krasik
+ * Taken from http://proofbyexample.com/sneakythrow-avoid-checked-exceptions.html
  */
-public class CommandOutputPromise implements CommandOutput {
-    private CommandOutput output;
-
+public class SneakyException {
     /**
-     * Set the concrete {@link CommandOutput} implementation to delegate to.
-     *
-     * @param output Concrete implementation to delegate to.
+     * Throws {@code t}, even if the declared throws clause doesn't permit it.
+     * This is a terrible – but terribly convenient – hack that makes it easy to
+     * catch and rethrow exceptions after cleanup. See Java Puzzlers #43.
      */
-    public void setOutput(CommandOutput output) {
-        this.output = Objects.requireNonNull(output, "output");
+    public static RuntimeException sneakyThrow(Throwable t) {
+        return SneakyException.<Error>doSneakyThrow(t);
     }
 
-    @Override
-    public void message(String text) {
-        output.message(text);
-    }
-
-    @Override
-    public void error(String text) {
-        output.error(text);
+    @SuppressWarnings("unchecked")
+    private static <T extends Throwable> RuntimeException doSneakyThrow(Throwable t) throws T {
+        throw (T) t;
     }
 }

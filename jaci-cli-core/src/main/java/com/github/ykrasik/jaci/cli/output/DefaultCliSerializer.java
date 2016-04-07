@@ -78,11 +78,7 @@ public class DefaultCliSerializer implements CliSerializer {
 
     private void serializeDirectory(Serialization serialization, CliDirectory directory, boolean recursive) {
         // Serialize root directory name.
-        serialization
-            .append('[')
-            .append(directory.getName())
-            .append(']')
-            .newLine();
+        serializeIdentifiable(serialization, directory);
 
         // Serialize child commands.
         final List<CliCommand> commands = new ArrayList<>(directory.getChildCommands());
@@ -129,17 +125,40 @@ public class DefaultCliSerializer implements CliSerializer {
 
     private void serializeIdentifiable(Serialization serialization, Identifiable identifiable) {
         final Identifier identifier = identifiable.getIdentifier();
-        serialization
-            .append(identifier.getName())
-            .append(" : ")
-            .append(identifier.getDescription())
-            .newLine();
+        final boolean directory = identifiable instanceof CliDirectory;
+        if (directory) {
+            serialization.append('[');
+        }
+        serialization.append(identifier.getName());
+        if (!directory) {
+            serialization
+                .append(" : ")
+                .append(identifier.getDescription());
+        }
+        if (directory) {
+            serialization.append(']');
+        }
+        serialization.newLine();
     }
 
     @Override
-    public Serialization serializeException(Exception e) {
+    public Serialization serializeThrowable(Throwable e) {
         final Serialization serialization = createSerialization();
 
+        Throwable currentException = e;
+        while (true) {
+            doSerializeException(serialization, currentException);
+            final Throwable nextException = currentException.getCause();
+            if (currentException != nextException && nextException != null) {
+                currentException = nextException;
+            } else {
+                break;
+            }
+        }
+        return serialization;
+    }
+
+    private void doSerializeException(Serialization serialization, Throwable e) {
         serialization.append(e.toString())
             .newLine();
 
@@ -148,7 +167,7 @@ public class DefaultCliSerializer implements CliSerializer {
             serialization.append(stackTraceElement.toString())
                 .newLine();
         }
-        return serialization;
+        serialization.decIndent();
     }
 
     @Override

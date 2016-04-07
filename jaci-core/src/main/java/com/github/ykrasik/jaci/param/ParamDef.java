@@ -32,6 +32,8 @@ import com.github.ykrasik.jaci.util.opt.Opt;
  * Any parameter can be optional. A parameter will be considered optional if {@link #getDefaultValueSupplier()} returns
  * a {@code present} value.<br>
  *
+ * @param <T> Parameter value type.
+ *
  * @author Yevgeny Krasik
  */
 public interface ParamDef<T> extends Identifiable {

@@ -59,7 +59,7 @@ public class BooleanCliParam extends AbstractCliParam<Boolean> {
     }
 
     @Override
-    public Object noValue() throws ParseException {
+    public Boolean noValue() throws ParseException {
         // If this boolean parameter is optional, we can treat this case as if it is a flag -
         // return the inverse of the default value.
         return !unbound();
