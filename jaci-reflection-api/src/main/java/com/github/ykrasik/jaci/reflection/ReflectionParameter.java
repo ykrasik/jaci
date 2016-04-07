@@ -80,7 +80,7 @@ public class ReflectionParameter {
      * @return A default-generated parameter name, of the form: "${type}Param${index}"
      */
     public String getDefaultName() {
-        final String type = parameterType.getSimpleName().toLowerCase();
+        final String type = Enum.class.isAssignableFrom(parameterType) ? "enum" : parameterType.getSimpleName().toLowerCase();
         return type + "Param" + index;
     }
 
