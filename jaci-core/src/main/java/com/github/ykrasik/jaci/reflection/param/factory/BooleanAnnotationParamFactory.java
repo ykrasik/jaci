@@ -35,7 +35,10 @@ public class BooleanAnnotationParamFactory extends AnnotationMethodParamFactory<
     }
 
     @Override
-    protected BooleanParamDef createFromAnnotation(Object instance, String defaultParamName, BoolParam annotation) throws Exception {
+    protected BooleanParamDef createFromAnnotation(Object instance,
+                                                   String defaultParamName,
+                                                   BoolParam annotation,
+                                                   Class<?> type) throws Exception {
         final BooleanParamDef.Builder builder = new BooleanParamDef.Builder(getNonEmptyString(annotation.value()).getOrElse(defaultParamName));
 
         final Opt<String> description = getNonEmptyString(annotation.description());
@@ -48,7 +51,6 @@ public class BooleanAnnotationParamFactory extends AnnotationMethodParamFactory<
             // Otherwise, use the value supplied by 'defaultValue'.
             final Opt<String> defaultValueSupplierName = getNonEmptyString(annotation.defaultValueSupplier());
             if (defaultValueSupplierName.isPresent()) {
-                // FIXME: Test that this works when the supplier returns primitive (Boolean.TYPE)
                 builder.setOptional(ReflectionSuppliers.reflectionSupplier(instance, defaultValueSupplierName.get(), Boolean.TYPE, Boolean.class));
             } else {
                 builder.setOptional(annotation.defaultValue());
@@ -59,7 +61,7 @@ public class BooleanAnnotationParamFactory extends AnnotationMethodParamFactory<
     }
 
     @Override
-    protected BooleanParamDef createDefault(String defaultParamName) throws Exception {
+    protected BooleanParamDef createDefault(String defaultParamName, Class<?> type) throws Exception {
         return new BooleanParamDef.Builder(defaultParamName).build();
     }
 }

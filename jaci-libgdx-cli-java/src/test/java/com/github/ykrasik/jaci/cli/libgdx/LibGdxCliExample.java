@@ -31,7 +31,7 @@ public class LibGdxCliExample extends ApplicationAdapter {
 
     public static void main(String[] args) {
         final LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-        config.title = "Jerminal";
+        config.title = "Jaci";
         config.setFromDisplayMode(LwjglApplicationConfiguration.getDesktopDisplayMode());
         config.fullscreen = false;
         config.height -= 150;
@@ -48,6 +48,7 @@ public class LibGdxCliExample extends ApplicationAdapter {
         final LibGdxCli cli = new LibGdxCliBuilder()
             .processClasses(BasicCommands.class, PathCommands1.class, PathCommands2.class, MandatoryParamsCommands.class)
             .process(new OptionalParamsCommands(), new StringParamCommands(), new ToggleCommands())  // Just to show that this is also possible.
+            .processClasses(EnumCommands.class)
             .build();
 
         stage = new Stage();

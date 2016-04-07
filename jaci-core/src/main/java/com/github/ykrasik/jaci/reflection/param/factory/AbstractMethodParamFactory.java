@@ -20,9 +20,9 @@ import com.github.ykrasik.jaci.param.ParamDef;
 import com.github.ykrasik.jaci.reflection.ReflectionParameter;
 import com.github.ykrasik.jaci.util.opt.Opt;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * A {@link MethodParamFactory} that can create {@link ParamDef}s out of {@link ReflectionParameter}s
@@ -34,24 +34,33 @@ public abstract class AbstractMethodParamFactory<T extends ParamDef<?>> implemen
     private final List<Class<?>> acceptedParameterTypes;
 
     /**
-     * @param acceptedParameterTypes Types of parameter this factory can accept.
+     * @param acceptedParameterType First type of parameters this factory can accept.
+     * @param moreAcceptedParameterTypes Additional types of parameter this factory can accept.
      */
-    protected AbstractMethodParamFactory(Class<?>... acceptedParameterTypes) {
-        if (Objects.requireNonNull(acceptedParameterTypes, "acceptedParameterTypes").length == 0) {
-            throw new IllegalArgumentException("AbstractMethodParamFactory must process at least 1 parameter type!");
-        }
-        this.acceptedParameterTypes = Arrays.asList(acceptedParameterTypes);
+    protected AbstractMethodParamFactory(Class<?> acceptedParameterType, Class<?>... moreAcceptedParameterTypes) {
+        this.acceptedParameterTypes = new ArrayList<>(moreAcceptedParameterTypes.length + 1);
+        this.acceptedParameterTypes.add(acceptedParameterType);
+        this.acceptedParameterTypes.addAll(Arrays.asList(moreAcceptedParameterTypes));
     }
 
     @Override
     public Opt<T> create(Object instance, ReflectionParameter param) throws Exception {
         final Class<?> parameterType = param.getParameterType();
-        if (!acceptedParameterTypes.contains(parameterType)) {
-            // This factory doesn't accept parameter type.
+        if (!isClassAccepted(parameterType)) {
+            // This factory doesn't accept parameter this type.
             return Opt.absent();
         }
 
         return Opt.of(doCreate(instance, param));
+    }
+
+    private boolean isClassAccepted(Class<?> type) {
+        for (Class<?> parameterType : acceptedParameterTypes) {
+            if (parameterType.isAssignableFrom(type)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

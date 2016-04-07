@@ -63,4 +63,19 @@ public final class Tries {
         }
         return builder.build();
     }
+
+    /**
+     * Create a Trie containing the enum constants of an {@code Enum}.
+     *
+     * @param enumClass Enum class to create Trie for.
+     * @param <E> Actual Enum type.
+     * @return A Trie containing the enum constants of the given {@code Enum}.
+     */
+    public static <E extends Enum<E>> Trie<E> enumTrie(Class<E> enumClass) {
+        final TrieBuilder<E> builder = new TrieBuilder<>();
+        for (E value : enumClass.getEnumConstants()) {
+            builder.add(value.toString(), value);
+        }
+        return builder.build();
+    }
 }

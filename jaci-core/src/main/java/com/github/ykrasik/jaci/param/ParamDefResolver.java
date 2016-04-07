@@ -18,21 +18,21 @@ package com.github.ykrasik.jaci.param;
 
 /**
  * A {@link ParamDef} is just a definition for a set of properties about a parameter, without an actual implementation.
- * This class is used to translate a {@link ParamDef} to its concrete implementation of type {@code E}.
- * It is assumed that all parameters of an implementations have a common super-type: {@code E}.
+ * This class is used to translate a {@link ParamDef} to its concrete implementation of type {@code T}.
+ * It is assumed that all parameters of an implementations have a common super-type: {@code T}.
  *
- * @param <E> Concrete paramDef implementation super-type.
+ * @param <T> Concrete paramDef implementation super-type.
  *
  * @author Yevgeny Krasik
  */
-public interface ParamDefResolver<E> {
+public interface ParamDefResolver<T> {
     /**
      * Translate a {@link StringParamDef} to a concrete implementation of a string parameter.
      *
      * @param def ParamDef to translate.
      * @return An implementation-specific string parameter.
      */
-    E stringParam(StringParamDef def);
+    T stringParam(StringParamDef def);
 
     /**
      * Translate a {@link BooleanParamDef} to a concrete implementation of a boolean parameter.
@@ -40,7 +40,7 @@ public interface ParamDefResolver<E> {
      * @param def ParamDef to translate.
      * @return An implementation-specific boolean parameter.
      */
-    E booleanParam(BooleanParamDef def);
+    T booleanParam(BooleanParamDef def);
 
     /**
      * Translate an {@link IntParamDef} to a concrete implementation of an integer parameter.
@@ -48,7 +48,7 @@ public interface ParamDefResolver<E> {
      * @param def ParamDef to translate.
      * @return An implementation-specific integer parameter.
      */
-    E intParam(IntParamDef def);
+    T intParam(IntParamDef def);
 
     /**
      * Translate an {@link DoubleParamDef} to a concrete implementation of a double parameter.
@@ -56,5 +56,13 @@ public interface ParamDefResolver<E> {
      * @param def ParamDef to translate.
      * @return An implementation-specific double parameter.
      */
-    E doubleParam(DoubleParamDef def);
+    T doubleParam(DoubleParamDef def);
+
+    /**
+     * Translate an {@link EnumParamDef} to a concrete implementation of an enum parameter.
+     *
+     * @param def ParamDef to translate.
+     * @return An implementation-specific enum parameter.
+     */
+    <E extends Enum<E>> T enumParam(EnumParamDef<E> def);
 }

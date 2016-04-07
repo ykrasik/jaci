@@ -19,6 +19,7 @@ package com.github.ykrasik.jaci.reflection.param;
 import com.github.ykrasik.jaci.param.ParamDef;
 import com.github.ykrasik.jaci.reflection.ReflectionParameter;
 import com.github.ykrasik.jaci.reflection.param.factory.*;
+import com.github.ykrasik.jaci.util.exception.SneakyException;
 import com.github.ykrasik.jaci.util.opt.Opt;
 
 import java.util.Arrays;
@@ -35,14 +36,15 @@ public class ReflectionParamProcessor {
 
     /**
      * Create a processor that will accept both annotated and non-annotated parameters of the types
-     * {boolean, int, double} (and their boxed versions) and String.
+     * {boolean, int, double} (and their boxed versions), String and Enum.
      */
     public ReflectionParamProcessor() {
         this(
             new StringAnnotationParamFactory(),
             new BooleanAnnotationParamFactory(),
             new IntAnnotationParamFactory(),
-            new DoubleAnnotationParamFactory()
+            new DoubleAnnotationParamFactory(),
+            new EnumAnnotationParamFactory()
         );
     }
 
@@ -75,7 +77,7 @@ public class ReflectionParamProcessor {
                 }
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw SneakyException.sneakyThrow(e);
         }
 
         // No factory accepted this param.

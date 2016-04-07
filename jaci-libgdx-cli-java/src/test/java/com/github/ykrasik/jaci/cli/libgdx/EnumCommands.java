@@ -14,38 +14,37 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jaci.cli.param;
+package com.github.ykrasik.jaci.cli.libgdx;
 
-import com.github.ykrasik.jaci.param.*;
+import com.github.ykrasik.jaci.api.Command;
+import com.github.ykrasik.jaci.api.CommandOutput;
+import com.github.ykrasik.jaci.api.CommandPath;
+import com.github.ykrasik.jaci.api.EnumParam;
 
 /**
- * A {@link ParamDefResolver} that translates ParamDefs into CLI parameters.
- *
  * @author Yevgeny Krasik
  */
-public class CliParamResolver implements ParamDefResolver<CliParam> {
-    @Override
-    public StringCliParam stringParam(StringParamDef def) {
-        return StringCliParam.fromDef(def);
+@CommandPath("enum")
+public class EnumCommands {
+    private CommandOutput output;
+
+    @Command
+    public void paramExample(@EnumParam("first") Enum1 first,
+                             @EnumParam(value = "second", optional = true, defaultValue = "Dummy") Enum1 second,
+                             @EnumParam(value = "third", optional = true, defaultValueSupplier = "supply") Enum2 third,
+                             Enum2 fourth) {
+        output.message("first="+first+", second="+second+", third=" + third + ", fourth=" + fourth);
     }
 
-    @Override
-    public BooleanCliParam booleanParam(BooleanParamDef def) {
-        return BooleanCliParam.fromDef(def);
+    private Enum2 supply() {
+        return Enum2.var;
     }
 
-    @Override
-    public IntCliParam intParam(IntParamDef def) {
-        return IntCliParam.fromDef(def);
+    public enum Enum1 {
+        value, ANOTHER_VALUE, CASEcheck, Dummy
     }
 
-    @Override
-    public DoubleCliParam doubleParam(DoubleParamDef def) {
-        return DoubleCliParam.fromDef(def);
-    }
-
-    @Override
-    public <E extends Enum<E>> CliParam enumParam(EnumParamDef<E> def) {
-        return EnumCliParam.fromDef(def);
+    public enum Enum2 {
+        val, var
     }
 }

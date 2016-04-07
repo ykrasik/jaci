@@ -35,7 +35,10 @@ public class StringAnnotationParamFactory extends AnnotationMethodParamFactory<S
     }
 
     @Override
-    protected StringParamDef createFromAnnotation(Object instance, String defaultParamName, StringParam annotation) throws Exception {
+    protected StringParamDef createFromAnnotation(Object instance,
+                                                  String defaultParamName,
+                                                  StringParam annotation,
+                                                  Class<?> type) throws Exception {
         final StringParamDef.Builder builder = new StringParamDef.Builder(getNonEmptyString(annotation.value()).getOrElse(defaultParamName));
 
         final Opt<String> description = getNonEmptyString(annotation.description());
@@ -67,7 +70,7 @@ public class StringAnnotationParamFactory extends AnnotationMethodParamFactory<S
     }
 
     @Override
-    protected StringParamDef createDefault(String defaultParamName) throws Exception {
+    protected StringParamDef createDefault(String defaultParamName, Class<?> type) throws Exception {
         return new StringParamDef.Builder(defaultParamName).build();
     }
 }

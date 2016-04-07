@@ -1,12 +1,12 @@
 /******************************************************************************
- * Copyright (C) 2015 Yevgeny Krasik                                          *
- *                                                                            *
+ * Copyright (C) 2016 Yevgeny Krasik                                          *
+ * *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
  * You may obtain a copy of the License at                                    *
- *                                                                            *
+ * *
  * http://www.apache.org/licenses/LICENSE-2.0                                 *
- *                                                                            *
+ * *
  * Unless required by applicable law or agreed to in writing, software        *
  * distributed under the License is distributed on an "AS IS" BASIS,          *
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   *
@@ -16,30 +16,38 @@
 
 package com.github.ykrasik.jaci.reflection.param.factory;
 
-import com.github.ykrasik.jaci.api.IntParam;
-import com.github.ykrasik.jaci.param.IntParamDef;
+import com.github.ykrasik.jaci.api.EnumParam;
+import com.github.ykrasik.jaci.param.EnumParamDef;
 import com.github.ykrasik.jaci.reflection.ReflectionSuppliers;
 import com.github.ykrasik.jaci.util.opt.Opt;
 
 import static com.github.ykrasik.jaci.util.string.StringUtils.getNonEmptyString;
 
 /**
- * Creates {@link IntParamDef}s out of {@link Integer} or {@code int} parameters annotated with {@link IntParam}.
+ * Creates {@link EnumParamDef}s out of {@link Enum} parameters annotated with {@link EnumParam}.
  * Empty names will be replaced with a generated name, and empty descriptions will use default values.
  *
  * @author Yevgeny Krasik
  */
-public class IntAnnotationParamFactory extends AnnotationMethodParamFactory<IntParamDef, IntParam> {
-    public IntAnnotationParamFactory() {
-        super(IntParam.class, Integer.class, Integer.TYPE);
+public class EnumAnnotationParamFactory<E extends Enum<E>> extends AnnotationMethodParamFactory<EnumParamDef<E>, EnumParam> {
+    public EnumAnnotationParamFactory() {
+        super(EnumParam.class, Enum.class);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    protected IntParamDef createFromAnnotation(Object instance,
-                                               String defaultParamName,
-                                               IntParam annotation,
-                                               Class<?> type) throws Exception {
-        final IntParamDef.Builder builder = new IntParamDef.Builder(getNonEmptyString(annotation.value()).getOrElse(defaultParamName));
+    protected EnumParamDef<E> createFromAnnotation(Object instance,
+                                                   String defaultParamName,
+                                                   EnumParam annotation,
+                                                   Class<?> type) throws Exception {
+        return doCreateFromAnnotation(instance, defaultParamName, annotation, (Class<E>) type);
+    }
+
+    private EnumParamDef<E> doCreateFromAnnotation(Object instance,
+                                                   String defaultParamName,
+                                                   EnumParam annotation,
+                                                   Class<E> enumClass) throws Exception {
+        final EnumParamDef.Builder<E> builder = new EnumParamDef.Builder<>(enumClass, getNonEmptyString(annotation.value()).getOrElse(defaultParamName));
 
         final Opt<String> description = getNonEmptyString(annotation.description());
         if (description.isPresent()) {
@@ -51,17 +59,18 @@ public class IntAnnotationParamFactory extends AnnotationMethodParamFactory<IntP
             // Otherwise, use the value supplied by 'defaultValue'.
             final Opt<String> defaultValueSupplierName = getNonEmptyString(annotation.defaultValueSupplier());
             if (defaultValueSupplierName.isPresent()) {
-                builder.setOptional(ReflectionSuppliers.reflectionSupplier(instance, defaultValueSupplierName.get(), Integer.TYPE, Integer.class));
+                builder.setOptional(ReflectionSuppliers.reflectionSupplier(instance, defaultValueSupplierName.get(), enumClass));
             } else {
-                builder.setOptional(annotation.defaultValue());
+                builder.setOptional(Enum.valueOf(enumClass, annotation.defaultValue()));
             }
         }
 
         return builder.build();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    protected IntParamDef createDefault(String defaultParamName, Class<?> type) throws Exception {
-        return new IntParamDef.Builder(defaultParamName).build();
+    protected EnumParamDef<E> createDefault(String defaultParamName, Class<?> type) throws Exception {
+        return new EnumParamDef.Builder<>((Class<E>) type, defaultParamName).build();
     }
 }

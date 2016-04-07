@@ -64,7 +64,7 @@ public class BooleanParamDef extends AbstractParamDef<Boolean> {
         }
 
         /**
-         * Set this parameter to be optional, and return the given constant value if it is not passed.
+         * Set this parameter to be optional with the given default value.
          *
          * @param defaultValue Constant value to return if the parameter isn't passed.
          * @return {@code this}, for chaining.
@@ -74,7 +74,7 @@ public class BooleanParamDef extends AbstractParamDef<Boolean> {
         }
 
         /**
-         * Set this parameter to be optional, and invoke the given {@link Spplr} for a default value if it is not passed.
+         * Set this parameter to be optional with a default value supplied by then given {@link Spplr}.
          *
          * @param defaultValueSupplier Supplier to invoke if the parameter isn't passed.
          * @return {@code this}, for chaining.

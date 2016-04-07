@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2015 Yevgeny Krasik                                          *
+ * Copyright (C) 2016 Yevgeny Krasik                                          *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -24,33 +24,47 @@ import com.github.ykrasik.jaci.util.opt.Opt;
 import java.util.Objects;
 
 /**
- * A double parameter definition.
- * Built through the {@link IntParamDef.Builder} builder.
+ * An enum parameter definition.
+ * Built through the {@link EnumParamDef.Builder} builder.
  *
  * @author Yevgeny Krasik
  */
-public class IntParamDef extends AbstractParamDef<Integer> {
-    private IntParamDef(Identifier identifier, Opt<Spplr<Integer>> defaultValueSupplier) {
+public class EnumParamDef<E extends Enum<E>> extends AbstractParamDef<E> {
+    private final Class<E> enumClass;
+
+    private EnumParamDef(Identifier identifier, Opt<Spplr<E>> defaultValueSupplier, Class<E> enumClass) {
         super(identifier, defaultValueSupplier);
+        this.enumClass = Objects.requireNonNull(enumClass, "enumClass");
     }
 
     @Override
-    public <E> E resolve(ParamDefResolver<E> resolver) {
-        return resolver.intParam(this);
+    public <T> T resolve(ParamDefResolver<T> resolver) {
+        return resolver.enumParam(this);
     }
 
     /**
-     * A builder for a {@link IntParamDef}.
+     * @return The {@code class} of the enum this paramDef represents.
      */
-    public static class Builder {
+    public Class<E> getEnumClass() {
+        return enumClass;
+    }
+
+    /**
+     * A builder for a {@link EnumParamDef}.
+     */
+    public static class Builder<E extends Enum<E>> {
+        private final Class<E> enumClass;
         private final String name;
-        private String description = "int";
-        private Opt<Spplr<Integer>> defaultValueSupplier = Opt.absent();
+
+        private String description = "enum";
+        private Opt<Spplr<E>> defaultValueSupplier = Opt.absent();
 
         /**
+         * @param enumClass Enum type.
          * @param name Parameter name.
          */
-        public Builder(String name) {
+        public Builder(Class<E> enumClass, String name) {
+            this.enumClass = Objects.requireNonNull(enumClass, "enumClass");
             this.name = Objects.requireNonNull(name, "name");
         }
 
@@ -58,7 +72,7 @@ public class IntParamDef extends AbstractParamDef<Integer> {
          * @param description Parameter description.
          * @return {@code this}, for chaining.
          */
-        public Builder setDescription(String description) {
+        public Builder<E> setDescription(String description) {
             this.description = Objects.requireNonNull(description, "description");
             return this;
         }
@@ -69,7 +83,7 @@ public class IntParamDef extends AbstractParamDef<Integer> {
          * @param defaultValue Constant value to return if the parameter isn't passed.
          * @return {@code this}, for chaining.
          */
-        public Builder setOptional(int defaultValue) {
+        public Builder<E> setOptional(E defaultValue) {
             return setOptional(MoreSuppliers.of(defaultValue));
         }
 
@@ -79,23 +93,24 @@ public class IntParamDef extends AbstractParamDef<Integer> {
          * @param defaultValueSupplier Supplier to invoke if the parameter isn't passed.
          * @return {@code this}, for chaining.
          */
-        public Builder setOptional(Spplr<Integer> defaultValueSupplier) {
+        public Builder<E> setOptional(Spplr<E> defaultValueSupplier) {
             this.defaultValueSupplier = Opt.of(defaultValueSupplier);
             return this;
         }
 
         /**
-         * @return An {@link IntParamDef} built out of this builder's parameters.
+         * @return An {@link EnumParamDef} built out of this builder's parameters.
          */
-        public IntParamDef build() {
+        public EnumParamDef<E> build() {
             final Identifier identifier = new Identifier(name, description);
-            return new IntParamDef(identifier, defaultValueSupplier);
+            return new EnumParamDef<>(identifier, defaultValueSupplier, enumClass);
         }
 
         @Override
         public String toString() {
             final StringBuilder sb = new StringBuilder("Builder{");
-            sb.append("name='").append(name).append('\'');
+            sb.append("enumClass=").append(enumClass);
+            sb.append(", name='").append(name).append('\'');
             sb.append(", description='").append(description).append('\'');
             sb.append(", defaultValueSupplier=").append(defaultValueSupplier);
             sb.append('}');
