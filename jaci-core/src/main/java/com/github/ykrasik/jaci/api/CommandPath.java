@@ -31,6 +31,12 @@ import java.lang.annotation.Target;
  * When a class is annotated, the path is referred to as the 'top level path'.
  * All the class's methods annotated with {@link Command} will inherit its 'top level path'.
  * <br>
+ * Annotated inner classes can also specify their own path, in which case it will be appended
+ * to the class's 'top level path'.
+ * If An inner class does not specify a path through this annotation, the 'top level path' for all it's commands
+ * will be the 'top level path' of it's outer class.
+ * Only inner classes with the default constructor (no args) will be processed, others will be ignored.
+ * <br>
  * Each method annotated with {@link Command} can also specify it's own path, in which case it will be appended
  * to the class's 'top level path'.
  * <br>

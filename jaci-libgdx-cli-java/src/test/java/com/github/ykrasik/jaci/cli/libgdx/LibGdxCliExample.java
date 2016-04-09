@@ -48,7 +48,7 @@ public class LibGdxCliExample extends ApplicationAdapter {
         final LibGdxCli cli = new LibGdxCliBuilder()
             .processClasses(BasicCommands.class, PathCommands1.class, PathCommands2.class, MandatoryParamsCommands.class)
             .process(new OptionalParamsCommands(), new StringParamCommands(), new ToggleCommands())  // Just to show that this is also possible.
-            .processClasses(EnumCommands.class)
+            .processClasses(EnumCommands.class, InnerClassCommands.class)
             .build();
 
         stage = new Stage();

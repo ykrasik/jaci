@@ -19,10 +19,7 @@ package com.github.ykrasik.jaci.cli.libgdx.reflection;
 import com.badlogic.gdx.utils.reflect.ClassReflection;
 import com.badlogic.gdx.utils.reflect.Field;
 import com.badlogic.gdx.utils.reflect.Method;
-import com.github.ykrasik.jaci.reflection.ReflectionAccessor;
-import com.github.ykrasik.jaci.reflection.ReflectionField;
-import com.github.ykrasik.jaci.reflection.ReflectionMethod;
-import com.github.ykrasik.jaci.reflection.ReflectionUtils;
+import com.github.ykrasik.jaci.reflection.*;
 
 import java.lang.annotation.Annotation;
 
@@ -35,6 +32,7 @@ public final class LibGdxReflectionAccessor implements ReflectionAccessor {
     private LibGdxReflectionAccessor() { }
 
     private static final ReflectionAccessor INSTANCE = new LibGdxReflectionAccessor();
+    private static final Class<?>[] EMPTY_CLASSES = { };
 
     /**
      * Install this {@code ReflectionAccessor} to be used by the reflection API.
@@ -77,5 +75,17 @@ public final class LibGdxReflectionAccessor implements ReflectionAccessor {
     @Override
     public <T> T newInstance(Class<T> clazz) throws Exception {
         return ClassReflection.newInstance(clazz);
+    }
+
+    @Override
+    public Class<?>[] getDeclaredClasses(Class<?> clazz) throws Exception {
+        // FIXME: Inner class-reflection is unsupported by libGdx :(
+        return EMPTY_CLASSES;
+    }
+
+    @Override
+    public <T> ReflectionConstructor<T> getDeclaredConstructor(Class<T> clazz,
+                                                               Class<?>... parameterTypes) throws Exception {
+        return new LibGdxReflectionConstructor<>(ClassReflection.getDeclaredConstructor(clazz, parameterTypes));
     }
 }

@@ -222,4 +222,81 @@ public interface ReflectionAccessor {
      *          of this class.
      */
     <T> T newInstance(Class<T> clazz) throws Exception;
+
+    /**
+     * Returns an array of {@code Class} objects reflecting all the
+     * classes and interfaces declared as members of the class represented by
+     * this {@code Class} object. This includes public, protected, default
+     * (package) access, and private classes and interfaces declared by the
+     * class, but excludes inherited classes and interfaces.  This method
+     * returns an array of length 0 if the class declares no classes or
+     * interfaces as members, or if this {@code Class} object represents a
+     * primitive type, an array class, or void.
+     *
+     * @return the array of {@code Class} objects representing all the
+     *         declared members of this class
+     * @throws SecurityException
+     *         If a security manager, <i>s</i>, is present and any of the
+     *         following conditions is met:
+     *
+     *         <ul>
+     *
+     *         <li> the caller's class loader is not the same as the
+     *         class loader of this class and invocation of
+     *         {@link SecurityManager#checkPermission
+     *         s.checkPermission} method with
+     *         {@code RuntimePermission("accessDeclaredMembers")}
+     *         denies access to the declared classes within this class
+     *
+     *         <li> the caller's class loader is not the same as or an
+     *         ancestor of the class loader for the current class and
+     *         invocation of {@link SecurityManager#checkPackageAccess
+     *         s.checkPackageAccess()} denies access to the package
+     *         of this class
+     *
+     *         </ul>
+     *
+     * @since JDK1.1
+     */
+    Class<?>[] getDeclaredClasses(Class<?> clazz) throws Exception;
+
+    /**
+     * Returns a {@code Constructor} object that reflects the specified
+     * constructor of the class or interface represented by this
+     * {@code Class} object.  The {@code parameterTypes} parameter is
+     * an array of {@code Class} objects that identify the constructor's
+     * formal parameter types, in declared order.
+     *
+     * If this {@code Class} object represents an inner class
+     * declared in a non-static context, the formal parameter types
+     * include the explicit enclosing instance as the first parameter.
+     *
+     * @param parameterTypes the parameter array
+     * @return  The {@code Constructor} object for the constructor with the
+     *          specified parameter list
+     * @throws  NoSuchMethodException if a matching method is not found.
+     * @throws  SecurityException
+     *          If a security manager, <i>s</i>, is present and any of the
+     *          following conditions is met:
+     *
+     *          <ul>
+     *
+     *          <li> the caller's class loader is not the same as the
+     *          class loader of this class and invocation of
+     *          {@link SecurityManager#checkPermission
+     *          s.checkPermission} method with
+     *          {@code RuntimePermission("accessDeclaredMembers")}
+     *          denies access to the declared constructor
+     *
+     *          <li> the caller's class loader is not the same as or an
+     *          ancestor of the class loader for the current class and
+     *          invocation of {@link SecurityManager#checkPackageAccess
+     *          s.checkPackageAccess()} denies access to the package
+     *          of this class
+     *
+     *          </ul>
+     *
+     * @since JDK1.1
+     */
+    <T> ReflectionConstructor<T> getDeclaredConstructor(Class<T> clazz, Class<?>... parameterTypes) throws Exception;
 }

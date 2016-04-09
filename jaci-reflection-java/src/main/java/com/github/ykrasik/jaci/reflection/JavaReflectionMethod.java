@@ -70,4 +70,13 @@ public class JavaReflectionMethod implements ReflectionMethod {
 
     @Override
     public Class<?> getReturnType() { return method.getReturnType(); }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("JavaReflectionMethod{");
+        sb.append("method=").append(method);
+        sb.append(", parameters=").append(parameters);
+        sb.append('}');
+        return sb.toString();
+    }
 }

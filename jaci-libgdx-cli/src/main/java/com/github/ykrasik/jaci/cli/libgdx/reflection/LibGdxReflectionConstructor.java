@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2016 Yevgeny Krasik                                          *
+ * Copyright (c) 2016 Yevgeny Krasik.                                         *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -16,46 +16,38 @@
 
 package com.github.ykrasik.jaci.cli.libgdx.reflection;
 
-import com.badlogic.gdx.utils.reflect.Field;
-import com.github.ykrasik.jaci.reflection.ReflectionField;
+import com.badlogic.gdx.utils.reflect.Constructor;
+import com.github.ykrasik.jaci.reflection.ReflectionConstructor;
+import com.github.ykrasik.jaci.util.exception.SneakyException;
 
 import java.util.Objects;
 
 /**
- * Reflection information about a field, through the libGdx reflection API.
+ * Reflection information about a constructor, through the libGdx reflection API.
  *
  * @author Yevgeny Krasik
  */
-public class LibGdxReflectionField implements ReflectionField {
-    private final Field field;
+public class LibGdxReflectionConstructor<T> implements ReflectionConstructor<T> {
+    private final Constructor constructor;
 
-    public LibGdxReflectionField(Field field) {
-        this.field = Objects.requireNonNull(field, "field");
+    public LibGdxReflectionConstructor(Constructor constructor) {
+        this.constructor = Objects.requireNonNull(constructor);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public Class<?> getType() {
+    public T newInstance(Object... args) {
         try {
-            return field.getType();
+            return (T) constructor.newInstance(args);
         } catch (Exception e) {
-            // Thrown by GWT when trying to get the type of a field for a class not in the reflection cache.
-            // It's relatively safe to return null here, because the classes we're interested in are always in the
-            // reflection cache, so this should just be ignored.
-            e.printStackTrace(System.err);
-            return null;
+            throw SneakyException.sneakyThrow(e);
         }
     }
 
     @Override
-    public void setAccessible(boolean flag) { field.setAccessible(flag); }
-
-    @Override
-    public void set(Object obj, Object value) throws Exception { field.set(obj, value); }
-
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("LibGdxReflectionField{");
-        sb.append("field=").append(field);
+        final StringBuilder sb = new StringBuilder("LibGdxReflectionConstructor{");
+        sb.append("constructor=").append(constructor);
         sb.append('}');
         return sb.toString();
     }

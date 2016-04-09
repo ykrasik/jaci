@@ -22,19 +22,18 @@ import com.github.ykrasik.jaci.command.CommandDef;
 import com.github.ykrasik.jaci.command.CommandOutputPromise;
 import com.github.ykrasik.jaci.path.ParsedPath;
 import com.github.ykrasik.jaci.reflection.method.ReflectionMethodProcessor;
+import com.github.ykrasik.jaci.util.exception.SneakyException;
 import com.github.ykrasik.jaci.util.opt.Opt;
 
 import java.util.*;
 
 /**
- * Processes a class and creates {@link CommandDef}s from qualifying methods.
+ * Processes a class and it's inner classes and creates {@link CommandDef}s from qualifying methods.
  *
  * @author Yevgeny Krasik
  */
 public class ReflectionClassProcessor {
-    /**
-     * Will be injected into all processed instances.
-     */
+    /** Will be injected into all processed instances. */
     private final CommandOutputPromise outputPromise;
 
     private final ReflectionMethodProcessor methodProcessor;
@@ -59,33 +58,61 @@ public class ReflectionClassProcessor {
     }
 
     /**
-     * Process the object and return a {@link Map} from a {@link ParsedPath} to a {@link List} of {@link CommandDef}s
-     * that were defined for that path.
+     * Process the object's class and all declared inner classes
+     * and return all parsed commands with their paths.
      *
      * @param instance Object to process.
      * @return The {@link CommandDef}s that were extracted out of the object.
      * @throws RuntimeException If any error occurs.
      */
     public Map<ParsedPath, List<CommandDef>> processObject(Object instance) {
+        final ClassContext context = new ClassContext();
+        doProcess(instance, context);
+        return context.commandPaths;
+    }
+
+    private void doProcess(Object instance, ClassContext initialContext) {
         final Class<?> clazz = instance.getClass();
 
+        // All method paths will be appended to the class's top level path.
+        final ParsedPath topLevelPath = getTopLevelPath(clazz);
+
+        final ClassContext context = initialContext.appendPath(topLevelPath);
+
+        // Process the object / class we were called with.
+        processClass(instance, clazz, context);
+
+        // Process any inner classes this class declares.
+        final Class<?>[] declaredClasses = ReflectionUtils.getDeclaredClasses(clazz);
+        for (Class<?> innerClass : declaredClasses) {
+            // Only process inner classes that have a single arg ctor that takes the outer class as a param.
+            final ReflectionConstructor<?> constructor = getInnerClassConstructor(innerClass, clazz);
+            if (constructor != null) {
+                final Object innerInstance = constructor.newInstance(instance);
+                doProcess(innerInstance, context);
+            }
+        }
+    }
+
+    private ReflectionConstructor<?> getInnerClassConstructor(Class<?> innerClass, Class<?> outerClass) {
+        try {
+            return ReflectionUtils.getDeclaredConstructor(innerClass, outerClass);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private void processClass(Object instance, Class<?> clazz, ClassContext context) {
         // Inject our outputPromise into the processed instance.
         // Any commands declared in the instance will reference this outputPromise, which will eventually
         // contain a concrete implementation of a CommandOutput.
         injectOutputPromise(instance, clazz);
 
-        // All method paths will be appended to the class's top level path.
-        final ParsedPath topLevelPath = getTopLevelPath(clazz);
-
-        final ClassContext context = new ClassContext(topLevelPath);
-
-        // Create commands from all qualifying methods..
+        // Create commands from all qualifying methods.
         final ReflectionMethod[] methods = ReflectionUtils.getMethods(clazz);
         for (ReflectionMethod method : methods) {
             processMethod(context, instance, method);
         }
-
-        return context.commandPaths;
     }
 
     private void injectOutputPromise(Object instance, Class<?> clazz) {
@@ -101,7 +128,7 @@ public class ReflectionClassProcessor {
                 }
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw SneakyException.sneakyThrow(e);
         }
     }
 
@@ -140,10 +167,27 @@ public class ReflectionClassProcessor {
     private static class ClassContext {
         private final ParsedPath topLevelPath;
 
-        private final Map<ParsedPath, List<CommandDef>> commandPaths = new HashMap<>();
+        private final Map<ParsedPath, List<CommandDef>> commandPaths;
 
-        private ClassContext(ParsedPath topLevelPath) {
+        public ClassContext() {
+            this(ParsedPath.root(), new HashMap<ParsedPath, List<CommandDef>>());
+        }
+
+        private ClassContext(ParsedPath topLevelPath, Map<ParsedPath, List<CommandDef>> commandPaths) {
             this.topLevelPath = topLevelPath;
+            this.commandPaths = commandPaths;
+        }
+
+        /**
+         * Create a new context in which new commands will be added to the given path appended
+         * to this context's path.
+         *
+         * @param path Path to append to this context's path.
+         * @return A context in which new commands will be added to the given path appended to this context's path.
+         */
+        public ClassContext appendPath(ParsedPath path) {
+            final ParsedPath appendedPath = topLevelPath.append(path);
+            return new ClassContext(appendedPath, commandPaths);
         }
 
         /**
