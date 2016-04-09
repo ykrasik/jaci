@@ -233,9 +233,10 @@ public interface ReflectionAccessor {
      * interfaces as members, or if this {@code Class} object represents a
      * primitive type, an array class, or void.
      *
+     * @param clazz Class to reflect inner classes from.
      * @return the array of {@code Class} objects representing all the
      *         declared members of this class
-     * @throws SecurityException
+     * @throws Exception
      *         If a security manager, <i>s</i>, is present and any of the
      *         following conditions is met:
      *
@@ -271,11 +272,13 @@ public interface ReflectionAccessor {
      * declared in a non-static context, the formal parameter types
      * include the explicit enclosing instance as the first parameter.
      *
+     * @param clazz Class to reflect constructor from.
      * @param parameterTypes the parameter array
+     * @param <T> Class type
      * @return  The {@code Constructor} object for the constructor with the
      *          specified parameter list
      * @throws  NoSuchMethodException if a matching method is not found.
-     * @throws  SecurityException
+     * @throws  Exception
      *          If a security manager, <i>s</i>, is present and any of the
      *          following conditions is met:
      *

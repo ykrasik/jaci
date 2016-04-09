@@ -65,6 +65,7 @@ public class EnumCliParam<E extends Enum<E>> extends AbstractCliParam<E> {
      * Construct a CLI enum parameter from an {@link EnumParamDef}.
      *
      * @param def EnumParamDef to construct a CLI enum parameter from.
+     * @param <E> Enum type.
      * @return A CLI {@code Enum} parameter constructed from the EnumParamDef.
      */
     public static <E extends Enum<E>> EnumCliParam<E> fromDef(EnumParamDef<E> def) {

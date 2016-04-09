@@ -169,7 +169,7 @@ public final class ReflectionUtils {
      *
      * @param c1 Class to check.
      * @param c2 Class to check against.
-     * @return @{code true} if the first class parameter is either the same as or a superinterface of the second class parameter.
+     * @return {@code true} if the first class parameter is either the same as or a superinterface of the second class parameter.
      */
     public static boolean isAssignableFrom(Class<?> c1, Class<?> c2) {
         assertReflectionAccessor();

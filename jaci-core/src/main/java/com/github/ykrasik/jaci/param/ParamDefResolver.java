@@ -62,6 +62,7 @@ public interface ParamDefResolver<T> {
      * Translate an {@link EnumParamDef} to a concrete implementation of an enum parameter.
      *
      * @param def ParamDef to translate.
+     * @param <E> Enum type.
      * @return An implementation-specific enum parameter.
      */
     <E extends Enum<E>> T enumParam(EnumParamDef<E> def);
