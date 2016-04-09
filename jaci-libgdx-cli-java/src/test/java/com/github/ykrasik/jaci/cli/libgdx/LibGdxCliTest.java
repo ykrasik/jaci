@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2014 Yevgeny Krasik                                          *
+ * Copyright (c) 2016 Yevgeny Krasik.                                         *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -22,11 +22,12 @@ import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.github.ykrasik.jaci.commands.*;
 
 /**
  * @author Yevgeny Krasik
  */
-public class LibGdxCliExample extends ApplicationAdapter {
+public class LibGdxCliTest extends ApplicationAdapter {
     private Stage stage;
 
     public static void main(String[] args) {
@@ -40,22 +41,22 @@ public class LibGdxCliExample extends ApplicationAdapter {
         config.x = 50;
         config.y = 50;
 
-        new LwjglApplication(new LibGdxCliExample(), config);
+        new LwjglApplication(new LibGdxCliTest(), config);
     }
 
     @Override
     public void create() {
         final LibGdxCli cli = new LibGdxCliBuilder()
-            .processClasses(BasicCommands.class, PathCommands1.class, PathCommands2.class, MandatoryParamsCommands.class)
-            .process(new OptionalParamsCommands(), new StringParamCommands(), new ToggleCommands())  // Just to show that this is also possible.
+            .processClasses(BasicCommands.class, PathCommands1.class, PathCommands2.class)
+            // Can also process objects instead of classes.
+            .process(new MandatoryParamsCommands(), new OptionalParamsCommands(), new StringParamCommands())
             .processClasses(EnumCommands.class, InnerClassCommands.class)
             .build();
 
         stage = new Stage();
         stage.addActor(cli);
 
-        // Add an InputListener that will toggle the CLI's visibility on and off
-        // on the default Ctrl+` key-combination.
+        // Add an InputListener that will toggle the CLI's visibility on and off on the default ` key.
         stage.addListener(new LibGdxVisibilityToggler(cli));
 
         Gdx.input.setInputProcessor(stage);

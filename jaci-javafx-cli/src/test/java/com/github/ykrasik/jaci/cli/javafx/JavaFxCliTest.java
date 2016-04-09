@@ -16,6 +16,7 @@
 
 package com.github.ykrasik.jaci.cli.javafx;
 
+import com.github.ykrasik.jaci.commands.*;
 import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -26,8 +27,7 @@ import javafx.stage.Stage;
 /**
  * @author Yevgeny Krasik
  */
-// FIXME: JavaDoc
-public class JavaFxCliExample extends Application {
+public class JavaFxCliTest extends Application {
     public static void main(String[] args) {
         launch(args);
     }
@@ -39,11 +39,14 @@ public class JavaFxCliExample extends Application {
 
         // Create a CLI.
         final Parent cli = new JavaFxCliBuilder()
-            .processClasses(AnnotationExample.class)  // This is the place to process more classes.
+            .processClasses(BasicCommands.class, PathCommands1.class, PathCommands2.class)
+            // Can also process objects instead of classes.
+            .process(new MandatoryParamsCommands(), new OptionalParamsCommands(), new StringParamCommands())
+            .processClasses(EnumCommands.class, InnerClassCommands.class)
             .build();
 
         // Add a scene toggler.
-        // The toggler will switch between the main scene and the CLI scene on a key combination (default Ctrl+`).
+        // The toggler will switch between the main scene and the CLI scene on a key combination (default `).
         SceneToggler.register(stage, cli);
 
         // Create a boring main scene.
@@ -53,7 +56,7 @@ public class JavaFxCliExample extends Application {
 
         stage.setScene(scene);
 
-        // The CLI will be hidden initially, press Ctrl+` to show it.
+        // The CLI will be hidden initially, press ` to show it.
         stage.show();
     }
 

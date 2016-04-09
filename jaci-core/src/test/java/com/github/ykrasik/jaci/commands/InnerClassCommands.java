@@ -14,13 +14,15 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jaci.cli.libgdx;
+package com.github.ykrasik.jaci.commands;
 
 import com.github.ykrasik.jaci.api.Command;
 import com.github.ykrasik.jaci.api.CommandOutput;
 import com.github.ykrasik.jaci.api.CommandPath;
 
 /**
+ * Examples of class nesting.
+ *
  * @author Yevgeny Krasik
  */
 @CommandPath("innerClass")
