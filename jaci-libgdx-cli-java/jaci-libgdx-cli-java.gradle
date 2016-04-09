@@ -5,6 +5,8 @@ dependencies {
     compile project(":jaci-libgdx-cli")
     compile project(":jaci-reflection-java")
 
+    testCompile project(path: ':jaci-core', configuration: 'testArtifacts')
+
     testCompile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
     testCompile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
 }

@@ -1,8 +1,0 @@
-dependencies {
-    compile project(":jaci-examples")
-
-    compile project(":jaci-libgdx-cli-java")    // FIXME: Replace with maven artifact dependency.
-
-    compile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
-    compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
-}

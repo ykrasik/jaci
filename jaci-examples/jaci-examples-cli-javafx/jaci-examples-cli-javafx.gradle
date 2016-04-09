@@ -1,4 +1,0 @@
-dependencies {
-    compile project(":jaci-examples")
-    compile project(":jaci-javafx-cli")
-}
