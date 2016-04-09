@@ -299,4 +299,29 @@ public interface ReflectionAccessor {
      * @since JDK1.1
      */
     <T> ReflectionConstructor<T> getDeclaredConstructor(Class<T> clazz, Class<?>... parameterTypes) throws Exception;
+
+    /**
+     * Determines if the class or interface represented by this
+     * {@code Class} object is either the same as, or is a superclass or
+     * superinterface of, the class or interface represented by the specified
+     * {@code Class} parameter. It returns {@code true} if so;
+     * otherwise it returns {@code false}. If this {@code Class}
+     * object represents a primitive type, this method returns
+     * {@code true} if the specified {@code Class} parameter is
+     * exactly this {@code Class} object; otherwise it returns
+     * {@code false}.
+     *
+     * <p> Specifically, this method tests whether the type represented by the
+     * specified {@code Class} parameter can be converted to the type
+     * represented by this {@code Class} object via an identity conversion
+     * or via a widening reference conversion. See <em>The Java Language
+     * Specification</em>, sections 5.1.1 and 5.1.4 , for details.
+     *
+     * @param c1 the {@code Class} object to be checked
+     * @param c2 the {@code Class} object to be checked
+     * @return the {@code boolean} value indicating whether objects of the
+     * type {@code cls} can be assigned to objects of this class
+     * @since JDK1.1
+     */
+    boolean isAssignableFrom(Class<?> c1, Class<?> c2);
 }

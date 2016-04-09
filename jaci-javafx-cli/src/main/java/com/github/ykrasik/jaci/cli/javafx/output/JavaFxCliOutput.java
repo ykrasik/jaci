@@ -17,49 +17,25 @@
 package com.github.ykrasik.jaci.cli.javafx.output;
 
 import com.github.ykrasik.jaci.cli.output.CliOutput;
-import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 
 import java.util.Objects;
 
 /**
- * A {@link CliOutput} implemented as as a JavaFx {@link TextArea}.
+ * A {@link CliOutput} that writes to a JavaFx {@link TextArea}.
  *
  * @author Yevgeny Krasik
  */
 public class JavaFxCliOutput implements CliOutput {
     private final TextArea textArea;
-    private final Label workingDirectory;
 
-    public JavaFxCliOutput(TextArea textArea, Label workingDirectory) {
+    public JavaFxCliOutput(TextArea textArea) {
         this.textArea = Objects.requireNonNull(textArea, "textArea");
-        this.workingDirectory = Objects.requireNonNull(workingDirectory, "workingDirectory");
-    }
-
-    @Override
-    public void begin() {
-        // Nothing to do here.
-    }
-
-    @Override
-    public void end() {
-        // Nothing to do here.
     }
 
     @Override
     public void println(String text) {
         textArea.appendText(text);
         textArea.appendText("\n");
-    }
-
-    @Override
-    public void errorPrintln(String text) {
-        // Same as regular println, for now.
-        println(text);
-    }
-
-    @Override
-    public void setWorkingDirectory(String workingDirectory) {
-        this.workingDirectory.setText(workingDirectory);
     }
 }

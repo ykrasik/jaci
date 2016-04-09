@@ -81,4 +81,9 @@ public final class JavaReflectionAccessor implements ReflectionAccessor {
     public <T> ReflectionConstructor<T> getDeclaredConstructor(Class<T> clazz, Class<?>... parameterTypes) throws Exception {
         return new JavaReflectionConstructor<>(clazz.getDeclaredConstructor(parameterTypes));
     }
+
+    @Override
+    public boolean isAssignableFrom(Class<?> c1, Class<?> c2) {
+        return c1.isAssignableFrom(c2);
+    }
 }

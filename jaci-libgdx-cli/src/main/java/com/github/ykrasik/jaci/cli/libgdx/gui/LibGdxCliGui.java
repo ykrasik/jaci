@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2015 Yevgeny Krasik                                          *
+ * Copyright (c) 2016 Yevgeny Krasik.                                         *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -14,21 +14,28 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jaci.cli.output;
+package com.github.ykrasik.jaci.cli.libgdx.gui;
+
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.github.ykrasik.jaci.cli.directory.CliDirectory;
+import com.github.ykrasik.jaci.cli.gui.CliGui;
+
+import java.util.Objects;
 
 /**
- * Output source of the CLI to which text can be printed.
- * A CLI always has 2 of these - one for stdOut and one for stdErr.
- * I really wanted this to just be a java {@code Writer}, but GWT isn't compatible with anything under java.io :(
+ * A LibGdx implementation of a {@link CliGui}.
  *
  * @author Yevgeny Krasik
  */
-public interface CliOutput {
-    /**
-     * Print a single line to the output.
-     * A new line is expected to be added after the text by the output implementation.
-     *
-     * @param text Text to print.
-     */
-    void println(String text);
+public class LibGdxCliGui implements CliGui {
+    private final Label workingDirectory;
+
+    public LibGdxCliGui(Label workingDirectory) {
+        this.workingDirectory = Objects.requireNonNull(workingDirectory);
+    }
+
+    @Override
+    public void setWorkingDirectory(CliDirectory workingDirectory) {
+        this.workingDirectory.setText(workingDirectory.toPath());
+    }
 }

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2015 Yevgeny Krasik                                          *
+ * Copyright (c) 2016 Yevgeny Krasik.                                         *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -14,21 +14,22 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jaci.cli.output;
+package com.github.ykrasik.jaci.cli.gui;
+
+import com.github.ykrasik.jaci.cli.directory.CliDirectory;
 
 /**
- * Output source of the CLI to which text can be printed.
- * A CLI always has 2 of these - one for stdOut and one for stdErr.
- * I really wanted this to just be a java {@code Writer}, but GWT isn't compatible with anything under java.io :(
+ * The GUI controller of a CLI, the GUI being everything around the 'terminal' screen.
  *
  * @author Yevgeny Krasik
  */
-public interface CliOutput {
+// TODO: In the future, this class should receive click events to display contextual information.
+public interface CliGui {
     /**
-     * Print a single line to the output.
-     * A new line is expected to be added after the text by the output implementation.
+     * Set the 'working directory'.
+     * This is a visual detail that simply displays what the current 'working directory' is.
      *
-     * @param text Text to print.
+     * @param workingDirectory Working directory to set.
      */
-    void println(String text);
+    void setWorkingDirectory(CliDirectory workingDirectory);
 }

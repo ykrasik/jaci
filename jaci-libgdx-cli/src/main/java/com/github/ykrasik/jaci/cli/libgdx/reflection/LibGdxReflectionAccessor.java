@@ -88,4 +88,9 @@ public final class LibGdxReflectionAccessor implements ReflectionAccessor {
                                                                Class<?>... parameterTypes) throws Exception {
         return new LibGdxReflectionConstructor<>(ClassReflection.getDeclaredConstructor(clazz, parameterTypes));
     }
+
+    @Override
+    public boolean isAssignableFrom(Class<?> c1, Class<?> c2) {
+        return ClassReflection.isAssignableFrom(c1, c2);
+    }
 }

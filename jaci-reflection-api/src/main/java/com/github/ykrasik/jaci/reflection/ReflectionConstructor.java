@@ -16,8 +16,6 @@
 
 package com.github.ykrasik.jaci.reflection;
 
-import java.lang.reflect.InvocationTargetException;
-
 /**
  * Reflection information about a constructor.
  * Used due to lack of support for java.lang.reflect classes in GWT.
@@ -56,22 +54,7 @@ public interface ReflectionConstructor<T> {
      * @return a new object created by calling the constructor
      * this object represents
      *
-     * @exception IllegalAccessException    if this {@code Constructor} object
-     *              is enforcing Java language access control and the underlying
-     *              constructor is inaccessible.
-     * @exception IllegalArgumentException  if the number of actual
-     *              and formal parameters differ; if an unwrapping
-     *              conversion for primitive arguments fails; or if,
-     *              after possible unwrapping, a parameter value
-     *              cannot be converted to the corresponding formal
-     *              parameter type by a method invocation conversion; if
-     *              this constructor pertains to an enum type.
-     * @exception InstantiationException    if the class that declares the
-     *              underlying constructor represents an abstract class.
-     * @exception InvocationTargetException if the underlying constructor
-     *              throws an exception.
-     * @exception ExceptionInInitializerError if the initialization provoked
-     *              by this method fails.
+     * @exception RuntimeException If any error occurs.
      */
     T newInstance(Object... args);
 }

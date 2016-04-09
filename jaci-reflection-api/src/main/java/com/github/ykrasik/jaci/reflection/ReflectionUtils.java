@@ -164,6 +164,19 @@ public final class ReflectionUtils {
     }
 
     /**
+     * Determines if the class or interface represented by first Class parameter is either the same as, or is a superclass or
+     * superinterface of, the class or interface represented by the second Class parameter.
+     *
+     * @param c1 Class to check.
+     * @param c2 Class to check against.
+     * @return @{code true} if the first class parameter is either the same as or a superinterface of the second class parameter.
+     */
+    public static boolean isAssignableFrom(Class<?> c1, Class<?> c2) {
+        assertReflectionAccessor();
+        return accessor.isAssignableFrom(c1, c2);
+    }
+
+    /**
      * Invokes the method, using the provided instance as 'this'.
      * Method must be no-args and have a return value of type {@code T}.
      * If the method is private, it will be made accessible outside of it's class.
