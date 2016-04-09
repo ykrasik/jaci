@@ -1,0 +1,50 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+        jcenter()
+    }
+    dependencies {
+        classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.6'
+    }
+}
+
+allprojects {
+    apply plugin: "eclipse"
+    apply plugin: "idea"
+
+    ext {
+        appName = "LibGdxCliExample"
+    }
+
+    repositories {
+        mavenCentral()
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+        maven { url "https://oss.sonatype.org/content/repositories/releases/" }
+    }
+}
+
+project(":jaci-examples:jaci-examples-cli-libgdx-gwt:html") {
+    apply plugin: "gwt"
+    apply plugin: "war"
+
+    dependencies {
+        compile project(":jaci-examples:jaci-examples-cli-libgdx-gwt:core")
+        compile "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion"
+        compile "com.badlogicgames.gdx:gdx:$gdxVersion:sources"
+        compile "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion:sources"
+    }
+}
+
+project(":jaci-examples:jaci-examples-cli-libgdx-gwt:core") {
+    apply plugin: "java"
+
+
+    dependencies {
+        compile "com.badlogicgames.gdx:gdx:$gdxVersion"
+    }
+}
+
+tasks.eclipse.doLast {
+    delete ".project"
+}

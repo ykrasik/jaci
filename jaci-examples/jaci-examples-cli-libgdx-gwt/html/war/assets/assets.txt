@@ -1,0 +1,14 @@
+d:assets:0:application/unknown
+i:badlogic.jpg:68465:image/jpeg
+t:com/badlogic/gdx/graphics/g3d/particles/particles.fragment.glsl:770:application/unknown
+t:com/badlogic/gdx/graphics/g3d/particles/particles.vertex.glsl:2886:application/unknown
+t:com/badlogic/gdx/graphics/g3d/shaders/default.fragment.glsl:5163:application/unknown
+t:com/badlogic/gdx/graphics/g3d/shaders/default.vertex.glsl:8948:application/unknown
+t:com/badlogic/gdx/graphics/g3d/shaders/depth.fragment.glsl:870:application/unknown
+t:com/badlogic/gdx/graphics/g3d/shaders/depth.vertex.glsl:2923:application/unknown
+t:com/badlogic/gdx/utils/arial-15.fnt:21743:application/unknown
+i:com/badlogic/gdx/utils/arial-15.png:21814:image/png
+t:com/github/ykrasik/jaci/cli/libgdx/default.fnt:11626:application/unknown
+t:com/github/ykrasik/jaci/cli/libgdx/default_cli.atlas:1149:application/unknown
+b:com/github/ykrasik/jaci/cli/libgdx/default_cli.cfg:1458:application/unknown
+i:com/github/ykrasik/jaci/cli/libgdx/default_cli.png:23001:image/png

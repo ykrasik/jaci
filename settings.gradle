@@ -14,7 +14,20 @@ include "jaci-libgdx-cli"
 include "jaci-libgdx-cli-java"
 include "jaci-libgdx-cli-gwt"
 
+include "jaci-examples"
+include "jaci-examples:jaci-examples-cli-libgdx-java"
+include "jaci-examples:jaci-examples-cli-libgdx-gwt"
+include "jaci-examples:jaci-examples-cli-libgdx-gwt:html"
+include "jaci-examples:jaci-examples-cli-libgdx-gwt:core"
+include "jaci-examples:jaci-examples-cli-javafx"
+
 // Add all sub-projects ABOVE this line.
-rootProject.children.each { project ->
-    project.buildFileName = project.name + ".gradle"
+rootProject.children.each { setProjectName(it) }
+
+def setProjectName(def project) {
+    def projectFileName = project.name + ".gradle"
+    if (file("${project.dir}/$projectFileName").exists()) {
+        project.buildFileName = projectFileName
+    }
+    project.children.each { setProjectName(it) }
 }
