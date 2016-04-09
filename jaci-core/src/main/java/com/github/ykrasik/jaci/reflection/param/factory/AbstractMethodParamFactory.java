@@ -18,6 +18,7 @@ package com.github.ykrasik.jaci.reflection.param.factory;
 
 import com.github.ykrasik.jaci.param.ParamDef;
 import com.github.ykrasik.jaci.reflection.ReflectionParameter;
+import com.github.ykrasik.jaci.reflection.ReflectionUtils;
 import com.github.ykrasik.jaci.util.opt.Opt;
 
 import java.util.ArrayList;
@@ -56,7 +57,7 @@ public abstract class AbstractMethodParamFactory<T extends ParamDef<?>> implemen
 
     private boolean isClassAccepted(Class<?> type) {
         for (Class<?> parameterType : acceptedParameterTypes) {
-            if (parameterType.isAssignableFrom(type)) {
+            if (ReflectionUtils.isAssignableFrom(parameterType, type)) {
                 return true;
             }
         }

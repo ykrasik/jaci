@@ -30,14 +30,10 @@ import java.util.List;
  * @author Yevgeny Krasik
  */
 public class CommandLineHistory {
-    /**
-     * Max amount of history entries to keep.
-     */
+    /**  Max amount of history entries to keep. */
     private final int maxHistory;
 
-    /**
-     * History buffer.
-     */
+    /** History buffer. */
     private final List<String> history = new LinkedList<>();
 
     /**
@@ -47,6 +43,9 @@ public class CommandLineHistory {
      */
     private int currentIndex;
 
+    /**
+     * @param maxHistory Max amount of history entries to keep.
+     */
     public CommandLineHistory(int maxHistory) {
         this.maxHistory = maxHistory;
         resetCurrentIndex();

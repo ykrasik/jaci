@@ -24,13 +24,17 @@ public class SneakyException {
      * Throws {@code t}, even if the declared throws clause doesn't permit it.
      * This is a terrible – but terribly convenient – hack that makes it easy to
      * catch and rethrow exceptions after cleanup. See Java Puzzlers #43.
+     *
+     * @param t Throwable to sneakily-throw.
+     * @return Doesn't really return, use in order to tell the compiler that this method doesn't return:
+     *         <pre>throw SneakException.sneakyThrow(e)</pre>
      */
     public static RuntimeException sneakyThrow(Throwable t) {
-        return SneakyException.<Error>doSneakyThrow(t);
+        return SneakyException.<Error>sneakyThrow0(t);
     }
 
     @SuppressWarnings("unchecked")
-    private static <T extends Throwable> RuntimeException doSneakyThrow(Throwable t) throws T {
+    private static <T extends Throwable> RuntimeException sneakyThrow0(Throwable t) throws T {
         throw (T) t;
     }
 }

@@ -25,11 +25,10 @@ import com.github.ykrasik.jaci.cli.command.CliCommandOutput;
 import com.github.ykrasik.jaci.cli.commandline.CommandLine;
 import com.github.ykrasik.jaci.cli.commandline.CommandLineHistory;
 import com.github.ykrasik.jaci.cli.exception.ParseException;
+import com.github.ykrasik.jaci.cli.gui.CliGui;
 import com.github.ykrasik.jaci.cli.hierarchy.CliCommandHierarchy;
 import com.github.ykrasik.jaci.cli.output.CliOutput;
 import com.github.ykrasik.jaci.cli.output.CliPrinter;
-import com.github.ykrasik.jaci.cli.output.CliSerializer;
-import com.github.ykrasik.jaci.cli.output.DefaultCliSerializer;
 import com.github.ykrasik.jaci.command.CommandArgs;
 import com.github.ykrasik.jaci.util.opt.Opt;
 
@@ -39,16 +38,17 @@ import java.util.Objects;
 /**
  * A shell usually refers to the program logic running within a CLI.
  * A CliShell is a component responsible for parsing and executing command lines.
- * The shell has no control over the command line itself, which is passed to it as a parameter.
- * Thus, in turn, any manipulations of the command line are left for the caller.
+ * The shell has no control over the command line itself, which it receives as a parameter.
+ * Which means that any manipulations of the command line are left to the caller.
  * The shell simply returns values that should be appended to the command line.
  *
- * The shell requires 2 things to be built:
+ * The shell requires a couple of things to be built:
  *   1. A {@link CliCommandHierarchy}: This is the shell's 'file-system'.
- *   2. A {@link CliOutput}: This is the shell's output - the screen.
+ *   2. A {@link CliGui}: A GUI controller, the GUI being everything except the 'terminal screen'.
+ *   3. {@link CliPrinter}s for stdOut and stdErr, to which the shell will print.
  *
  * The shell's API methods that print values ({@link #assist(String)}, {@link #execute(String)}) do so
- * as a side effect, by calling the {@link CliOutput} the shell was built with.
+ * as a side effect, by calling the {@link CliPrinter}s the shell was built with.
  *
  * Built through the {@link CliShell.Builder} builder.
  *
@@ -56,23 +56,45 @@ import java.util.Objects;
  */
 public class CliShell {
     private final CliCommandHierarchy hierarchy;
-    private final CliPrinter printer;
+    private final CliGui gui;
+    private final CliPrinter out;
+    private final CliPrinter err;
     private final CommandLineHistory history;
 
     /**
      * Package-protected for testing.
      */
-    CliShell(CliCommandHierarchy hierarchy, CliPrinter printer, CommandLineHistory history) {
-        this.hierarchy = Objects.requireNonNull(hierarchy, "hierarchy");
-        this.printer = Objects.requireNonNull(printer, "printer");
-        this.history = Objects.requireNonNull(history, "history");
+    CliShell(CliCommandHierarchy hierarchy,
+             CliGui gui,
+             CliPrinter out,
+             CliPrinter err,
+             CommandLineHistory history) {
+        this.hierarchy = hierarchy;
+        this.gui = gui;
+        this.out = out;
+        this.err = err;
+        this.history = history;
+
+        // Set initial working directory.
+        gui.setWorkingDirectory(hierarchy.getWorkingDirectory());
 
         // Welcome message.
-        printer.begin();
-        printer.setWorkingDirectory(hierarchy.getWorkingDirectory());
-        printer.println("Welcome!");
-        printer.println("");
-        printer.end();
+        out.println("Welcome!");
+        out.println("");
+    }
+
+    /**
+     * @return CLI stdOut.
+     */
+    public CliPrinter getOut() {
+        return out;
+    }
+
+    /**
+     * @return CLI stdErr.
+     */
+    public CliPrinter getErr() {
+        return err;
     }
 
     /**
@@ -105,15 +127,12 @@ public class CliShell {
      * @return A value that should be appended to the command line as a result of the auto complete operation.
      */
     public Opt<String> assist(String commandLine) {
-        printer.begin();
         try {
             return doAssist(commandLine);
         } catch (ParseException e) {
             handleParseException(e);
         } catch (Exception e) {
-            printer.printException(e);
-        } finally {
-            printer.end();
+            err.printThrowable(e);
         }
         return Opt.absent();
     }
@@ -137,7 +156,7 @@ public class CliShell {
             final List<String> args = commandLine.getCommandArgs();
             final ParamAssistInfo assistInfo = command.assist(args);
             final CommandInfo commandInfo = new CommandInfo(command, assistInfo.getBoundParams());
-            printer.printCommandInfo(commandInfo);
+            out.printCommandInfo(commandInfo);
 
             autoComplete = assistInfo.getAutoComplete();
         } else {
@@ -147,7 +166,7 @@ public class CliShell {
 
         final Opt<Suggestions> suggestions = autoComplete.getSuggestions();
         if (suggestions.isPresent()) {
-            printer.printSuggestions(suggestions.get());
+            out.printSuggestions(suggestions.get());
         }
 
         // TODO: Print an error if no suggestions are available?
@@ -165,22 +184,19 @@ public class CliShell {
      * @return {@code true} if the command line was executed successfully.
      */
     public boolean execute(String commandLine) {
-        printer.begin();
         try {
             doExecute(commandLine);
             return true;
         } catch (ParseException e) {
             handleParseException(e);
         } catch (Exception e) {
-            printer.printException(e);
-        } finally {
-            printer.end();
+            err.printThrowable(e);
         }
         return false;
     }
 
     private void doExecute(String rawCommandLine) throws Exception {
-        printer.printCommandLine(hierarchy.getWorkingDirectory(), rawCommandLine);
+        out.printCommandLine(hierarchy.getWorkingDirectory(), rawCommandLine);
 
         final CommandLine commandLine = CommandLine.forExecute(rawCommandLine);
         if (commandLine.isEmpty()) {
@@ -199,46 +215,39 @@ public class CliShell {
         final CommandArgs args = command.parse(rawArgs);
 
         // Execute the command.
-        final CliCommandOutput commandOutput = new CliCommandOutput(printer);
+        final CliCommandOutput commandOutput = new CliCommandOutput(gui, out, err);
         command.execute(commandOutput, args);
 
         if (commandOutput.isPrintDefaultExecutionMessage()) {
-            printer.println("Command '"+command.getName()+"' executed successfully.");
+            out.println("Command '"+command.getName()+"' executed successfully.");
         }
     }
 
     private void handleParseException(ParseException e) {
         final Opt<CommandInfo> commandInfo = e.getCommandInfo();
         if (commandInfo.isPresent()) {
-            printer.printCommandInfo(commandInfo.get());
+            out.printCommandInfo(commandInfo.get());
         }
 
-        printer.errorPrintln("Parse Error: " + e.getMessage());
+        err.println("Parse Error: " + e.getMessage());
     }
 
     /**
      * A builder for a {@link CliShell}.
      */
+    // TODO: This is a really useless builder.
     public static class Builder {
         private final CliCommandHierarchy hierarchy;
-        private final CliOutput output;
-        private CliSerializer serializer = new DefaultCliSerializer();
+        private final CliGui gui;
+        private final CliPrinter out;
+        private final CliPrinter err;
         private int maxCommandHistory = 30;
 
-        public Builder(CliCommandHierarchy hierarchy, CliOutput output) {
+        public Builder(CliCommandHierarchy hierarchy, CliGui gui, CliPrinter out, CliPrinter err) {
             this.hierarchy = Objects.requireNonNull(hierarchy, "hierarchy");
-            this.output = Objects.requireNonNull(output, "output");
-        }
-
-        /**
-         * Set a custom {@link CliSerializer}.
-         *
-         * @param serializer Serializer to use.
-         * @return {@code this}, for chaining.
-         */
-        public Builder setSerializer(CliSerializer serializer) {
-            this.serializer = serializer;
-            return this;
+            this.gui = Objects.requireNonNull(gui, "gui");
+            this.out = Objects.requireNonNull(out, "out");
+            this.err = Objects.requireNonNull(err, "err");
         }
 
         /**
@@ -256,9 +265,8 @@ public class CliShell {
          * @return A {@link CliShell} built out of this builder's parameters.
          */
         public CliShell build() {
-            final CliPrinter printer = new CliPrinter(output, serializer);
             final CommandLineHistory history = new CommandLineHistory(maxCommandHistory);
-            return new CliShell(hierarchy, printer, history);
+            return new CliShell(hierarchy, gui, out, err, history);
         }
     }
 }

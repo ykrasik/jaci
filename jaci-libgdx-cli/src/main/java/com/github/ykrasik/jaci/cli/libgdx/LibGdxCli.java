@@ -16,7 +16,9 @@
 
 package com.github.ykrasik.jaci.cli.libgdx;
 
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
@@ -28,14 +30,15 @@ import com.badlogic.gdx.utils.Array;
 import com.github.ykrasik.jaci.cli.Cli;
 import com.github.ykrasik.jaci.cli.CliShell;
 import com.github.ykrasik.jaci.cli.commandline.CommandLineManager;
+import com.github.ykrasik.jaci.cli.gui.CliGui;
 import com.github.ykrasik.jaci.cli.hierarchy.CliCommandHierarchy;
 import com.github.ykrasik.jaci.cli.hierarchy.CliCommandHierarchyImpl;
 import com.github.ykrasik.jaci.cli.libgdx.commandline.LibGdxCommandLineManager;
+import com.github.ykrasik.jaci.cli.libgdx.gui.LibGdxCliGui;
+import com.github.ykrasik.jaci.cli.libgdx.log.ApplicationLoggingDecorator;
 import com.github.ykrasik.jaci.cli.libgdx.output.LibGdxCliOutput;
 import com.github.ykrasik.jaci.cli.libgdx.output.LibGdxCliOutputBuffer;
-import com.github.ykrasik.jaci.cli.output.CliOutput;
-import com.github.ykrasik.jaci.cli.output.CliSerializer;
-import com.github.ykrasik.jaci.cli.output.DefaultCliSerializer;
+import com.github.ykrasik.jaci.cli.output.CliPrinter;
 import com.github.ykrasik.jaci.hierarchy.CommandHierarchyDef;
 
 import java.util.Objects;
@@ -82,6 +85,8 @@ import java.util.Objects;
 public class LibGdxCli extends Table {
     private final Array<VisibleListener> visibleListeners = new Array<>(2);
 
+    private final Cli cli;
+
     /**
      * @param skin Skin to use.
      * @param hierarchy Command hierarchy.
@@ -91,32 +96,31 @@ public class LibGdxCli extends Table {
     private LibGdxCli(Skin skin, CliCommandHierarchy hierarchy, int maxBufferEntries, int maxCommandHistory) {
         super(Objects.requireNonNull(skin, "skin"));
 
+        // CLI GUI controller.
+        final Label workingDirectory = new Label("", skin, "workingDirectory");
+        workingDirectory.setName("workingDirectory");
+        final CliGui gui = new LibGdxCliGui(workingDirectory);
+
         // Buffer for cli output.
         final LibGdxCliOutputBuffer buffer = new LibGdxCliOutputBuffer(skin, maxBufferEntries);
         buffer.setName("buffer");
         buffer.bottom().left();
 
-        // Label for 'working directory'.
-        final Label workingDirectory = new Label("", skin, "workingDirectory");
-        workingDirectory.setName("workingDirectory");
-
-        // The above combine into a CliOutput.
-        final CliOutput output = new LibGdxCliOutput(buffer, workingDirectory);
+        // LibGdx doesn't like '\t', so we replace it with 4 spaces.
+        final String tab = "    ";
+        final CliPrinter out = new CliPrinter(new LibGdxCliOutput(buffer, Color.WHITE), tab);
+        final CliPrinter err = new CliPrinter(new LibGdxCliOutput(buffer, Color.SALMON), tab);
 
         // TextField as command line.
         final TextField commandLine = new TextField("", skin, "commandLine");
         commandLine.setName("commandLine");
         final CommandLineManager commandLineManager = new LibGdxCommandLineManager(commandLine);
 
-        // LibGdx seems to ignore leading \t
-        final CliSerializer serializer = new DefaultCliSerializer("    ");
-
         // Create the shell and the actual CLI.
-        final CliShell shell = new CliShell.Builder(hierarchy, output)
-            .setSerializer(serializer)
+        final CliShell shell = new CliShell.Builder(hierarchy, gui, out, err)
             .setMaxCommandHistory(maxCommandHistory)
             .build();
-        final Cli cli = new Cli(shell, commandLineManager);
+        cli = new Cli(shell, commandLineManager);
 
         // Hook input events to CLI events.
         this.addListener(new LibGdxCliInputListener(cli));
@@ -157,6 +161,8 @@ public class LibGdxCli extends Table {
             public void onVisibleChange(boolean wasVisible, boolean isVisible) {
                 if (!wasVisible && isVisible) {
                     setKeyboardFocus(commandLine);
+                } else {
+                    setKeyboardFocus(null);
                 }
             }
         });
@@ -224,6 +230,20 @@ public class LibGdxCli extends Table {
     }
 
     /**
+     * @return CLI stdOut.
+     */
+    public CliPrinter getOut() {
+        return cli.getOut();
+    }
+
+    /**
+     * @return CLI stdErr.
+     */
+    public CliPrinter getErr() {
+        return cli.getErr();
+    }
+
+    /**
      * A builder for a {@link LibGdxCli}.
      * Builds a CLI with a default skin, unless a custom skin is specified via {@link #setSkin(Skin)}.<br>
      * The main methods to use are {@link #processClasses(Class[])} and {@link #process(Object[])} which process
@@ -233,8 +253,9 @@ public class LibGdxCli extends Table {
         private final CommandHierarchyDef.Builder hierarchyBuilder = new CommandHierarchyDef.Builder();
 
         private Skin skin;
-        private int maxBufferEntries = 100;
+        private int maxBufferEntries = 1000;
         private int maxCommandHistory = 30;
+        private boolean decorateApplicationLog = false;
 
         /**
          * Process the classes and add any commands defined through annotations to this builder.
@@ -319,13 +340,23 @@ public class LibGdxCli extends Table {
             return this;
         }
 
+        // FIXME: JavaDoc - whether to log Gdx.App.log
+        public AbstractBuilder setDecorateApplicationLog(boolean decorateApplicationLog) {
+            this.decorateApplicationLog = decorateApplicationLog;
+            return this;
+        }
+
         /**
          * @return A {@link LibGdxCli} built out of this builder's parameters.
          */
         public LibGdxCli build() {
             final Skin skin = getSkin();
             final CliCommandHierarchy hierarchy = CliCommandHierarchyImpl.from(hierarchyBuilder.build());
-            return new LibGdxCli(skin, hierarchy, maxBufferEntries, maxCommandHistory);
+            final LibGdxCli cli = new LibGdxCli(skin, hierarchy, maxBufferEntries, maxCommandHistory);
+            if (decorateApplicationLog) {
+                decorateApplication(cli);
+            }
+            return cli;
         }
 
         private Skin getSkin() {
@@ -335,6 +366,14 @@ public class LibGdxCli extends Table {
 
             // Default skin.
             return new Skin(Gdx.files.classpath("com/github/ykrasik/jaci/cli/libgdx/default_cli.cfg"));
+        }
+
+        private void decorateApplication(LibGdxCli cli) {
+            final Application currentApplication = Objects.requireNonNull(Gdx.app, "Gdx.app is null?! This should not be called before onCreate()!");
+            if (currentApplication instanceof ApplicationLoggingDecorator) {
+                throw new IllegalStateException("Gdx.app is already decorated for logging!");
+            }
+            Gdx.app = new ApplicationLoggingDecorator(currentApplication, cli);
         }
     }
 }

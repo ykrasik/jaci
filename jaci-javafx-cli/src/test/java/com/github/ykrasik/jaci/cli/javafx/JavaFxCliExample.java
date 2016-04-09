@@ -39,7 +39,7 @@ public class JavaFxCliExample extends Application {
 
         // Create a CLI.
         final Parent cli = new JavaFxCliBuilder()
-            .processClass(AnnotationExample.class)  // This is the place to process more classes.
+            .processClasses(AnnotationExample.class)  // This is the place to process more classes.
             .build();
 
         // Add a scene toggler.
