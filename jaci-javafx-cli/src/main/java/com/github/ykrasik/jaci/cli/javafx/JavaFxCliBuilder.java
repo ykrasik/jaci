@@ -28,6 +28,7 @@ import com.github.ykrasik.jaci.cli.javafx.output.JavaFxCliOutput;
 import com.github.ykrasik.jaci.cli.output.CliPrinter;
 import com.github.ykrasik.jaci.hierarchy.CommandHierarchyDef;
 import com.github.ykrasik.jaci.reflection.JavaReflectionAccessor;
+import com.github.ykrasik.jaci.util.exception.SneakyException;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
@@ -175,7 +176,7 @@ public class JavaFxCliBuilder {
 
             return cliNode;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw SneakyException.sneakyThrow(e);
         }
     }
 
