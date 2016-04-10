@@ -44,13 +44,16 @@ import com.github.ykrasik.jaci.util.trie.TrieBuilder;
  * @author Yevgeny Krasik
  */
 public class BooleanCliParam extends AbstractCliParam<Boolean> {
-    private static final Trie<CliValueType> VALUES = new TrieBuilder<CliValueType>()
+    private static final Trie<CliValueType> NON_NULLABLE_VALUES = new TrieBuilder<CliValueType>()
         .add("true", CliValueType.COMMAND_PARAM_VALUE)
         .add("false", CliValueType.COMMAND_PARAM_VALUE)
         .build();
 
-    public BooleanCliParam(Identifier identifier, Opt<Spplr<Boolean>> defaultValueSupplier) {
-        super(identifier, defaultValueSupplier);
+    private static final Trie<CliValueType> NULLABLE_VALUES = NON_NULLABLE_VALUES
+        .add("null", CliValueType.COMMAND_PARAM_VALUE);
+
+    public BooleanCliParam(Identifier identifier, Opt<Spplr<Boolean>> defaultValueSupplier, boolean nullable) {
+        super(identifier, defaultValueSupplier, nullable);
     }
 
     @Override
@@ -66,8 +69,8 @@ public class BooleanCliParam extends AbstractCliParam<Boolean> {
     }
 
     @Override
-    public Boolean parse(String arg) throws ParseException {
-        if (!VALUES.contains(arg.toLowerCase())) {
+    public Boolean parseNonNull(String arg) throws ParseException {
+        if (!NON_NULLABLE_VALUES.contains(arg.toLowerCase())) {
             throw invalidParamValue(arg);
         }
         return Boolean.parseBoolean(arg);
@@ -75,7 +78,7 @@ public class BooleanCliParam extends AbstractCliParam<Boolean> {
 
     @Override
     public AutoComplete autoComplete(String prefix) throws ParseException {
-        final Trie<CliValueType> possibilities = VALUES.subTrie(prefix.toLowerCase());
+        final Trie<CliValueType> possibilities = (nullable ? NULLABLE_VALUES : NON_NULLABLE_VALUES).subTrie(prefix.toLowerCase());
         return new AutoComplete(prefix, possibilities);
     }
 
@@ -86,7 +89,7 @@ public class BooleanCliParam extends AbstractCliParam<Boolean> {
      * @return A CLI boolean parameter constructed from the BooleanParamDef.
      */
     public static BooleanCliParam fromDef(BooleanParamDef def) {
-        return new BooleanCliParam(def.getIdentifier(), def.getDefaultValueSupplier());
+        return new BooleanCliParam(def.getIdentifier(), def.getDefaultValueSupplier(), def.isNullable());
     }
 
     /**
@@ -94,9 +97,10 @@ public class BooleanCliParam extends AbstractCliParam<Boolean> {
      *
      * @param identifier Parameter identifier.
      * @param defaultValue Default value to be used by the parameter if it isn't explicitly bound.
+     * @param nullable Whether the parameter is nullable.
      * @return A CLI boolean parameter constructed from the given parameters.
      */
-    public static BooleanCliParam optional(Identifier identifier, boolean defaultValue) {
-        return new BooleanCliParam(identifier, Opt.of(MoreSuppliers.of(defaultValue)));
+    public static BooleanCliParam optional(Identifier identifier, boolean defaultValue, boolean nullable) {
+        return new BooleanCliParam(identifier, Opt.of(MoreSuppliers.of(defaultValue)), nullable);
     }
 }

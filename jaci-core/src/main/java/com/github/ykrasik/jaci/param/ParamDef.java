@@ -47,6 +47,11 @@ public interface ParamDef<T> extends Identifiable {
     Opt<Spplr<T>> getDefaultValueSupplier();
 
     /**
+     * @return {@code true} if the parameter can accept {@code null} as a value.
+     */
+    boolean isNullable();
+
+    /**
      * Resolve this paramDef into a concrete implementation using double-dispatch.
      * ParamDefs are implementation-independent, and usually come as a {@link java.util.List}, so the resolver can be
      * used to help get the actual paramDef type and translate it into the implementation-specific type.

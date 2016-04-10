@@ -57,6 +57,9 @@ public class DoubleAnnotationParamFactory extends AnnotationMethodParamFactory<D
             }
         }
 
+        // Ignore for primitives.
+        builder.setNullable(annotation.nullable() && type == Double.class);
+
         return builder.build();
     }
 

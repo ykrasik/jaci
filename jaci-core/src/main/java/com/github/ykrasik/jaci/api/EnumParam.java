@@ -68,6 +68,11 @@ public @interface EnumParam {
     boolean optional() default false;
 
     /**
+     * @return {@code true} if the parameter can accept {@code null} as a value. Defaults to {@code true}.
+     */
+    boolean nullable() default true;
+
+    /**
      * Constant default value - If this parameter isn't explicitly bound, this will be the default value.
      * Only taken into consideration if {@link #optional()} returns {@code true} and {@link #defaultValueSupplier()}
      * returns an empty {@code String}.

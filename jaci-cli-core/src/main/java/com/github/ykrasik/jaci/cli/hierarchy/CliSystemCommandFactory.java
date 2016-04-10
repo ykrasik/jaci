@@ -84,7 +84,7 @@ public class CliSystemCommandFactory {
                     }
                 })
                 .build(),
-            BooleanCliParam.optional(new Identifier("r", "Whether to recurse into sub-directories"), false)
+            BooleanCliParam.optional(new Identifier("r", "Whether to recurse into sub-directories"), false, false)
         );
         return CliCommand.from(identifier, params, new CommandExecutor() {
             @Override

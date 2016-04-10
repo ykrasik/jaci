@@ -30,8 +30,8 @@ import java.util.Objects;
  * @author Yevgeny Krasik
  */
 public class IntParamDef extends AbstractParamDef<Integer> {
-    private IntParamDef(Identifier identifier, Opt<Spplr<Integer>> defaultValueSupplier) {
-        super(identifier, defaultValueSupplier);
+    private IntParamDef(Identifier identifier, Opt<Spplr<Integer>> defaultValueSupplier, boolean nullable) {
+        super(identifier, defaultValueSupplier, nullable);
     }
 
     @Override
@@ -46,6 +46,7 @@ public class IntParamDef extends AbstractParamDef<Integer> {
         private final String name;
         private String description = "int";
         private Opt<Spplr<Integer>> defaultValueSupplier = Opt.absent();
+        private boolean nullable = false;
 
         /**
          * @param name Parameter name.
@@ -85,11 +86,20 @@ public class IntParamDef extends AbstractParamDef<Integer> {
         }
 
         /**
+         * @param nullable Whether this parameter accepts {@code null} values.
+         * @return {@code this}, for chaining.
+         */
+        public Builder setNullable(boolean nullable) {
+            this.nullable = nullable;
+            return this;
+        }
+
+        /**
          * @return An {@link IntParamDef} built out of this builder's parameters.
          */
         public IntParamDef build() {
             final Identifier identifier = new Identifier(name, description);
-            return new IntParamDef(identifier, defaultValueSupplier);
+            return new IntParamDef(identifier, defaultValueSupplier, nullable);
         }
 
         @Override
@@ -98,6 +108,7 @@ public class IntParamDef extends AbstractParamDef<Integer> {
             sb.append("name='").append(name).append('\'');
             sb.append(", description='").append(description).append('\'');
             sb.append(", defaultValueSupplier=").append(defaultValueSupplier);
+            sb.append(", nullable=").append(nullable);
             sb.append('}');
             return sb.toString();
         }

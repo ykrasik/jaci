@@ -177,7 +177,7 @@ public class CliParamParseContext {
         final List<Object> commandArgs = new ArrayList<>(params.size());
         for (CliParam param : params) {
             final Object parsedValue = parsedValues.get(param);
-            if (parsedValue == null) {
+            if (parsedValue == null && !param.isNullable()) {
                 // If there is a missing arg value at this point, this is an internal error.
                 throw new IllegalStateException("Internal Error: Not all params have been parsed! Missing=" + param);
             }
@@ -261,10 +261,10 @@ public class CliParamParseContext {
     }
 
     private void doAddArg(CliParam param, Object parsedValue) throws ParseException {
-        final Object prevArg = parsedValues.put(param, parsedValue);
-        if (prevArg != null) {
-            throw new ParseException(ParseError.PARAM_ALREADY_BOUND, "Parameter '"+param.getIdentifier().getName()+"' is already bound a value: '"+prevArg+'\'');
+        if (parsedValues.containsKey(param)) {
+            throw new ParseException(ParseError.PARAM_ALREADY_BOUND, "Parameter '"+param.getIdentifier().getName()+"' is already bound a value: '"+parsedValues.get(param)+'\'');
         }
+        parsedValues.put(param, parsedValue);
     }
 
     @Override

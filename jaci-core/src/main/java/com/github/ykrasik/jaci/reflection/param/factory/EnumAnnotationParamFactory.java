@@ -65,6 +65,8 @@ public class EnumAnnotationParamFactory<E extends Enum<E>> extends AnnotationMet
             }
         }
 
+        builder.setNullable(annotation.nullable());
+
         return builder.build();
     }
 

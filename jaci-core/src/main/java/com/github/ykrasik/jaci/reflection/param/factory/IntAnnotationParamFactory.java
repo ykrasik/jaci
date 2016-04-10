@@ -57,6 +57,9 @@ public class IntAnnotationParamFactory extends AnnotationMethodParamFactory<IntP
             }
         }
 
+        // Ignore for primitives.
+        builder.setNullable(annotation.nullable() && type == Integer.class);
+
         return builder.build();
     }
 

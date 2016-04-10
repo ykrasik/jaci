@@ -42,10 +42,10 @@ public class TrieBuilder<T> {
         assertNotEmptyWord(word);
 
         // Save the word-value pair in the map. The actual construction will be done later.
-        final T prevValue = map.put(word, value);
-        if (prevValue != null) {
-            throw new IllegalArgumentException("Trie already contains a value for '"+word+"': " + prevValue);
+        if (map.containsKey(word)) {
+            throw new IllegalArgumentException("Trie already contains a value for '"+word+"': " + map.get(word));
         }
+        map.put(word, value);
         return this;
     }
 

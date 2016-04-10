@@ -50,7 +50,7 @@ public class LibGdxCliTest extends ApplicationAdapter {
             .processClasses(BasicCommands.class, PathCommands1.class, PathCommands2.class)
             // Can also process objects instead of classes.
             .process(new MandatoryParamsCommands(), new OptionalParamsCommands(), new StringParamCommands())
-            .processClasses(EnumCommands.class, InnerClassCommands.class)
+            .processClasses(EnumCommands.class, InnerClassCommands.class, NullableParamsCommands.class)
             .build();
 
         stage = new Stage();

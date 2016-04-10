@@ -57,6 +57,9 @@ public class BooleanAnnotationParamFactory extends AnnotationMethodParamFactory<
             }
         }
 
+        // Ignore for primitives.
+        builder.setNullable(annotation.nullable() && type == Boolean.class);
+
         return builder.build();
     }
 

@@ -65,6 +65,13 @@ public @interface IntParam {
     boolean optional() default false;
 
     /**
+     * Only applicable to boxed {@code Integer} parameters, will be ignored for primitives.
+     *
+     * @return {@code true} if the parameter can accept {@code null} as a value. Defaults to {@code true}.
+     */
+    boolean nullable() default true;
+
+    /**
      * Constant default value - If this parameter isn't explicitly bound, this will be the default value.
      * Only taken into consideration if {@link #optional()} returns {@code true} and {@link #defaultValueSupplier()}
      * returns an empty {@code String}.

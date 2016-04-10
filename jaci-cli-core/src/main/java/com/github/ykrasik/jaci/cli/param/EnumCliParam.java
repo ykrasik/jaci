@@ -17,6 +17,7 @@
 package com.github.ykrasik.jaci.cli.param;
 
 import com.github.ykrasik.jaci.Identifier;
+import com.github.ykrasik.jaci.cli.CliConstants;
 import com.github.ykrasik.jaci.cli.assist.AutoComplete;
 import com.github.ykrasik.jaci.cli.assist.CliValueType;
 import com.github.ykrasik.jaci.cli.exception.ParseException;
@@ -24,7 +25,7 @@ import com.github.ykrasik.jaci.param.EnumParamDef;
 import com.github.ykrasik.jaci.util.function.Spplr;
 import com.github.ykrasik.jaci.util.opt.Opt;
 import com.github.ykrasik.jaci.util.trie.Trie;
-import com.github.ykrasik.jaci.util.trie.Tries;
+import com.github.ykrasik.jaci.util.trie.TrieBuilder;
 
 /**
  * A {@link CliParam} that parses enum values.
@@ -34,13 +35,30 @@ import com.github.ykrasik.jaci.util.trie.Tries;
 public class EnumCliParam<E extends Enum<E>> extends AbstractCliParam<E> {
     private final Trie<E> enumValues;
 
-    public EnumCliParam(Identifier identifier, Opt<Spplr<E>> defaultValueSupplier, Class<E> enumClass) {
-        super(identifier, defaultValueSupplier);
-        this.enumValues = Tries.enumTrie(enumClass);
+    public EnumCliParam(Identifier identifier, Opt<Spplr<E>> defaultValueSupplier, boolean nullable, Class<E> enumClass) {
+        super(identifier, defaultValueSupplier, nullable);
+        this.enumValues = createEnumValues(enumClass, nullable);
+    }
+
+    @SuppressWarnings("unchecked")
+    private Trie<E> createEnumValues(Class<E> enumClass, boolean nullable) {
+        final TrieBuilder<E> builder = new TrieBuilder<>();
+        for (E value : enumClass.getEnumConstants()) {
+            if (nullable && isNull(value.toString())) {
+                throw new IllegalArgumentException("A nullable param may not have a value called 'null': " + this);
+            }
+            builder.add(value.toString(), value);
+        }
+        if (nullable) {
+            // Slightly hacky, but we want auto-complete suggestions for 'null'.
+            // This object will never be parsed from the trie, but will be offered as auto complete.
+            builder.add(CliConstants.NULL, (E) NULL_REF);
+        }
+        return builder.build();
     }
 
     @Override
-    public E parse(String arg) throws ParseException {
+    public E parseNonNull(String arg) throws ParseException {
         // TODO: Handle case sensitivity?
         final Opt<E> value = enumValues.get(arg);
         if (value.isPresent()) {
@@ -69,6 +87,6 @@ public class EnumCliParam<E extends Enum<E>> extends AbstractCliParam<E> {
      * @return A CLI {@code Enum} parameter constructed from the EnumParamDef.
      */
     public static <E extends Enum<E>> EnumCliParam<E> fromDef(EnumParamDef<E> def) {
-        return new EnumCliParam<>(def.getIdentifier(), def.getDefaultValueSupplier(), def.getEnumClass());
+        return new EnumCliParam<>(def.getIdentifier(), def.getDefaultValueSupplier(), def.isNullable(), def.getEnumClass());
     }
 }

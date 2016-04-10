@@ -16,9 +16,9 @@
 
 package com.github.ykrasik.jaci.cli.param;
 
-import com.github.ykrasik.jaci.cli.exception.ParseException;
 import com.github.ykrasik.jaci.Identifiable;
 import com.github.ykrasik.jaci.cli.assist.AutoComplete;
+import com.github.ykrasik.jaci.cli.exception.ParseException;
 
 /**
  * A CLI implementation of a parameter.
@@ -61,6 +61,11 @@ public interface CliParam extends Identifiable {
      * @throws ParseException If this parameter must be explicitly bound.
      */
     Object noValue() throws ParseException;
+
+    /**
+     * @return Whether this parameter is nullable.
+     */
+    boolean isNullable();
 
     /**
      * Auto complete the given prefix.

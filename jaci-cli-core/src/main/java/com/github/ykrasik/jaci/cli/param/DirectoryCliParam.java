@@ -40,7 +40,7 @@ public class DirectoryCliParam extends AbstractCliParam<CliDirectory> {
     private DirectoryCliParam(Identifier identifier,
                               Opt<Spplr<CliDirectory>> defaultValueSupplier,
                               CliCommandHierarchy hierarchy) {
-        super(identifier, defaultValueSupplier);
+        super(identifier, defaultValueSupplier, false);
 
         this.hierarchy = Objects.requireNonNull(hierarchy, "hierarchy");
     }
@@ -51,7 +51,7 @@ public class DirectoryCliParam extends AbstractCliParam<CliDirectory> {
     }
 
     @Override
-    public CliDirectory parse(String arg) throws ParseException {
+    public CliDirectory parseNonNull(String arg) throws ParseException {
         return hierarchy.parsePathToDirectory(arg);
     }
 

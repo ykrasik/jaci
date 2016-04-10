@@ -32,8 +32,11 @@ import java.util.Objects;
 public class EnumParamDef<E extends Enum<E>> extends AbstractParamDef<E> {
     private final Class<E> enumClass;
 
-    private EnumParamDef(Identifier identifier, Opt<Spplr<E>> defaultValueSupplier, Class<E> enumClass) {
-        super(identifier, defaultValueSupplier);
+    private EnumParamDef(Identifier identifier,
+                         Opt<Spplr<E>> defaultValueSupplier,
+                         boolean nullable,
+                         Class<E> enumClass) {
+        super(identifier, defaultValueSupplier, nullable);
         this.enumClass = Objects.requireNonNull(enumClass, "enumClass");
     }
 
@@ -58,6 +61,7 @@ public class EnumParamDef<E extends Enum<E>> extends AbstractParamDef<E> {
 
         private String description = "enum";
         private Opt<Spplr<E>> defaultValueSupplier = Opt.absent();
+        private boolean nullable = false;
 
         /**
          * @param enumClass Enum type.
@@ -99,11 +103,20 @@ public class EnumParamDef<E extends Enum<E>> extends AbstractParamDef<E> {
         }
 
         /**
+         * @param nullable Whether this parameter accepts {@code null} values.
+         * @return {@code this}, for chaining.
+         */
+        public Builder<E> setNullable(boolean nullable) {
+            this.nullable = nullable;
+            return this;
+        }
+
+        /**
          * @return An {@link EnumParamDef} built out of this builder's parameters.
          */
         public EnumParamDef<E> build() {
             final Identifier identifier = new Identifier(name, description);
-            return new EnumParamDef<>(identifier, defaultValueSupplier, enumClass);
+            return new EnumParamDef<>(identifier, defaultValueSupplier, nullable, enumClass);
         }
 
         @Override
@@ -113,6 +126,7 @@ public class EnumParamDef<E extends Enum<E>> extends AbstractParamDef<E> {
             sb.append(", name='").append(name).append('\'');
             sb.append(", description='").append(description).append('\'');
             sb.append(", defaultValueSupplier=").append(defaultValueSupplier);
+            sb.append(", nullable=").append(nullable);
             sb.append('}');
             return sb.toString();
         }
