@@ -30,10 +30,12 @@ import java.util.Objects;
 public abstract class AbstractParamDef<T> implements ParamDef<T> {
     private final Identifier identifier;
     private final Opt<Spplr<T>> defaultValueSupplier;
+    private final boolean nullable;
 
-    protected AbstractParamDef(Identifier identifier, Opt<Spplr<T>> defaultValueSupplier) {
+    protected AbstractParamDef(Identifier identifier, Opt<Spplr<T>> defaultValueSupplier, boolean nullable) {
         this.identifier = Objects.requireNonNull(identifier, "identifier");
         this.defaultValueSupplier = Objects.requireNonNull(defaultValueSupplier, "defaultValueSupplier");
+        this.nullable = nullable;
     }
 
     @Override
@@ -47,6 +49,11 @@ public abstract class AbstractParamDef<T> implements ParamDef<T> {
     }
 
     @Override
+    public boolean isNullable() {
+        return nullable;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -57,6 +64,9 @@ public abstract class AbstractParamDef<T> implements ParamDef<T> {
 
         final AbstractParamDef<?> that = (AbstractParamDef<?>) o;
 
+        if (nullable != that.nullable) {
+            return false;
+        }
         if (!identifier.equals(that.identifier)) {
             return false;
         }
@@ -68,6 +78,7 @@ public abstract class AbstractParamDef<T> implements ParamDef<T> {
     public int hashCode() {
         int result = identifier.hashCode();
         result = 31 * result + defaultValueSupplier.hashCode();
+        result = 31 * result + (nullable ? 1 : 0);
         return result;
     }
 

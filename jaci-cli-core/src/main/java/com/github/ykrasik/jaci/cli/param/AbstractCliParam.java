@@ -17,6 +17,8 @@
 package com.github.ykrasik.jaci.cli.param;
 
 import com.github.ykrasik.jaci.Identifier;
+import com.github.ykrasik.jaci.cli.CliConstants;
+import com.github.ykrasik.jaci.cli.assist.CliValueType;
 import com.github.ykrasik.jaci.cli.exception.ParseError;
 import com.github.ykrasik.jaci.cli.exception.ParseException;
 import com.github.ykrasik.jaci.util.function.Spplr;
@@ -34,19 +36,21 @@ import java.util.Objects;
  * @author Yevgeny Krasik
  */
 public abstract class AbstractCliParam<T> implements CliParam {
-    /**
-     * This parameter's identifier.
-     */
+    protected static final CliValueType NULL_REF = CliValueType.COMMAND_PARAM_VALUE;
+
+    /** This parameter's identifier. */
     private final Identifier identifier;
 
-    /**
-     * If this value is present, this parameter is considered optional.
-     */
+    /** If this value is present, this parameter is considered optional. */
     private final Opt<Spplr<T>> defaultValueSupplier;
 
-    protected AbstractCliParam(Identifier identifier, Opt<Spplr<T>> defaultValueSupplier) {
+    /** Whether this parameter is nullable. */
+    protected final boolean nullable;
+
+    protected AbstractCliParam(Identifier identifier, Opt<Spplr<T>> defaultValueSupplier, boolean nullable) {
         this.identifier = Objects.requireNonNull(identifier, "identifier");
         this.defaultValueSupplier = Objects.requireNonNull(defaultValueSupplier, "defaultValueSupplier");
+        this.nullable = nullable;
     }
 
     @Override
@@ -67,12 +71,18 @@ public abstract class AbstractCliParam<T> implements CliParam {
 
     // Type specialization - subclasses must parse a value of type T.
     @Override
-    public abstract T parse(String arg) throws ParseException;
-
-    @Override
-    public Object noValue() throws ParseException {
-        throw missingParamValue();
+    public T parse(String arg) throws ParseException {
+        if (isNull(arg)) {
+            if (nullable) {
+                return null;
+            } else {
+                throw new ParseException(ParseError.INVALID_PARAM, "Parameter doesn't take 'null' values: " + getName());
+            }
+        }
+        return parseNonNull(arg);
     }
+
+    protected abstract T parseNonNull(String arg) throws ParseException;
 
     @Override
     public T unbound() throws ParseException {
@@ -80,6 +90,16 @@ public abstract class AbstractCliParam<T> implements CliParam {
             throw missingParamValue();
         }
         return defaultValueSupplier.get().get();
+    }
+
+    @Override
+    public T noValue() throws ParseException {
+        throw missingParamValue();
+    }
+
+    @Override
+    public boolean isNullable() {
+        return nullable;
     }
 
     private boolean isOptional() {
@@ -96,6 +116,10 @@ public abstract class AbstractCliParam<T> implements CliParam {
             ParseError.INVALID_PARAM_VALUE,
             "Invalid value for "+getValueTypeName()+" parameter '"+getName()+"': '"+value+'\''
         );
+    }
+
+    protected boolean isNull(String arg) {
+        return CliConstants.NULL.equals(arg.toLowerCase());
     }
 
     /**

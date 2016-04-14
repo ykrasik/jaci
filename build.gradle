@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        gdxVersion = '1.8.0'
+        gdxVersion = '1.9.2'
 
         junitVersion = '4.11'
         mockitoVersion = '1.9.5'
@@ -42,5 +42,21 @@ subprojects {
     // Since we have a few jars, requiring the user to explicitly depend on the sources of all these jars was uncomfortable.
     jar {
         from sourceSets.main.allJava
+    }
+
+
+    configurations {
+        testArtifacts {
+            extendsFrom testRuntime
+        }
+    }
+
+    task testsJar(type: Jar, dependsOn: testClasses) {
+        from sourceSets.test.output
+        classifier = 'tests'
+    }
+
+    artifacts {
+        testArtifacts testsJar
     }
 }

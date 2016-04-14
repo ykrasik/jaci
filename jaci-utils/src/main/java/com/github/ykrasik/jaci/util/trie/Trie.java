@@ -62,6 +62,15 @@ public interface Trie<T> {
     String getLongestPrefix();
 
     /**
+     * Return a new {@code Trie} with the word-value mapping added. Does not modify this Trie.
+     *
+     * @param word Word to add.
+     * @param value Value to add.
+     * @return A new {@code Trie} with the word-value mapping added.
+     */
+    Trie<T> add(String word, T value);
+
+    /**
      * @param prefix The prefix to get a subTrie for.
      * @return A {@link Trie} with words that start with the prefix.<br>
      *         If no such words exist in the Trie, an empty Trie is returned.<br>

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2015 Yevgeny Krasik                                          *
+ * Copyright (c) 2016 Yevgeny Krasik.                                         *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -14,36 +14,28 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jaci.cli.libgdx;
+package com.github.ykrasik.jaci.cli.javafx.gui;
 
-import com.github.ykrasik.jaci.api.CommandPath;
-import com.github.ykrasik.jaci.api.ToggleCommand;
-import com.github.ykrasik.jaci.api.ToggleCommandStateAccessor;
+import com.github.ykrasik.jaci.cli.directory.CliDirectory;
+import com.github.ykrasik.jaci.cli.gui.CliGui;
+import javafx.scene.control.Label;
+
+import java.util.Objects;
 
 /**
- * Toggle commands are special commands that take a single optional boolean parameter and toggle the state of some
- * component on or off.
- *
- * @see ToggleCommand
+ * A JavaFx implementation of a {@link CliGui}.
  *
  * @author Yevgeny Krasik
  */
-@CommandPath("toggle")
-public class ToggleCommands {
-    @ToggleCommand(description = "A toggle command")
-    public ToggleCommandStateAccessor toggle() {
-        return new ToggleCommandStateAccessor() {
-            private boolean state;
+public class JavaFxCliGui implements CliGui {
+    private final Label workingDirectory;
 
-            @Override
-            public void set(boolean value) {
-                state = value;
-            }
+    public JavaFxCliGui(Label workingDirectory) {
+        this.workingDirectory = Objects.requireNonNull(workingDirectory);
+    }
 
-            @Override
-            public boolean get() {
-                return state;
-            }
-        };
+    @Override
+    public void setWorkingDirectory(CliDirectory workingDirectory) {
+        this.workingDirectory.setText(workingDirectory.toPath());
     }
 }

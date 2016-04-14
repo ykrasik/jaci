@@ -17,49 +17,27 @@
 package com.github.ykrasik.jaci.cli.libgdx.output;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.github.ykrasik.jaci.cli.output.CliOutput;
 
 import java.util.Objects;
 
 /**
- * A LibGdx implementation of a {@link CliOutput}.
- * Redirects {@link #println(String)} and {@link #errorPrintln(String)} to a {@link LibGdxCliOutputBuffer},
- * and {@link #setWorkingDirectory(String)} to a {@link Label}.
+ * A {@link CliOutput} that writes to a {@link LibGdxCliOutputBuffer}
+ * with all text colored in a specific {@link Color}.
  *
  * @author Yevgeny Krasik
  */
 public class LibGdxCliOutput implements CliOutput {
     private final LibGdxCliOutputBuffer buffer;
-    private final Label workingDirectory;
+    private final Color color;
 
-    public LibGdxCliOutput(LibGdxCliOutputBuffer buffer, Label workingDirectory) {
-        this.buffer = Objects.requireNonNull(buffer, "buffer");
-        this.workingDirectory = Objects.requireNonNull(workingDirectory, "workingDirectory");
-    }
-
-    @Override
-    public void begin() {
-        // Nothing to do here.
-    }
-
-    @Override
-    public void end() {
-        // Nothing to do here.
+    public LibGdxCliOutput(LibGdxCliOutputBuffer buffer, Color color) {
+        this.buffer = Objects.requireNonNull(buffer);
+        this.color = Objects.requireNonNull(color);
     }
 
     @Override
     public void println(String text) {
-        buffer.println(text, Color.WHITE);
-    }
-
-    @Override
-    public void errorPrintln(String text) {
-        buffer.println(text, Color.SALMON);
-    }
-
-    @Override
-    public void setWorkingDirectory(String workingDirectory) {
-        this.workingDirectory.setText(workingDirectory);
+        buffer.println(text, color);
     }
 }

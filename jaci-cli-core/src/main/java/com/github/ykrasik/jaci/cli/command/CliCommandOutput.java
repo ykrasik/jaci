@@ -18,6 +18,7 @@ package com.github.ykrasik.jaci.cli.command;
 
 import com.github.ykrasik.jaci.api.CommandOutput;
 import com.github.ykrasik.jaci.cli.directory.CliDirectory;
+import com.github.ykrasik.jaci.cli.gui.CliGui;
 import com.github.ykrasik.jaci.cli.output.CliPrinter;
 
 import java.util.Objects;
@@ -29,26 +30,32 @@ import java.util.Objects;
  * @author Yevgeny Krasik
  */
 public class CliCommandOutput implements CommandOutput {
-    /**
-     * Cli-specific actions are delegated to this printer.
-     */
-    private final CliPrinter printer;
+    private final CliGui gui;
+    private final CliPrinter out;
+    private final CliPrinter err;
 
     private boolean printDefaultExecutionMessage = true;
 
-    public CliCommandOutput(CliPrinter printer) {
-        this.printer = Objects.requireNonNull(printer, "printer");
+    /**
+     * @param gui GUI controller.
+     * @param out stdOut.
+     * @param err stdErr.
+     */
+    public CliCommandOutput(CliGui gui, CliPrinter out, CliPrinter err) {
+        this.gui = Objects.requireNonNull(gui, "gui");
+        this.out = Objects.requireNonNull(out, "out");
+        this.err = Objects.requireNonNull(err, "err");
     }
 
     @Override
     public void message(String text) {
-        printer.println(text);
+        out.println(text);
         suppressDefaultExecutionMessage();
     }
 
     @Override
     public void error(String text) {
-        printer.errorPrintln(text);
+        err.println(text);
         suppressDefaultExecutionMessage();
     }
 
@@ -67,7 +74,7 @@ public class CliCommandOutput implements CommandOutput {
      * @param directory Directory to set as working directory.
      */
     public void setWorkingDirectory(CliDirectory directory) {
-        printer.setWorkingDirectory(directory);
+        gui.setWorkingDirectory(directory);
         suppressDefaultExecutionMessage();
     }
 
@@ -78,7 +85,7 @@ public class CliCommandOutput implements CommandOutput {
      * @param recursive Whether to recurse into sub-directories.
      */
     public void printDirectory(CliDirectory directory, boolean recursive) {
-        printer.printDirectory(directory, recursive);
+        out.printDirectory(directory, recursive);
         suppressDefaultExecutionMessage();
     }
 
@@ -88,7 +95,7 @@ public class CliCommandOutput implements CommandOutput {
      * @param command Command to describe.
      */
     public void printCommand(CliCommand command) {
-        printer.printCommand(command);
+        out.printCommand(command);
         suppressDefaultExecutionMessage();
     }
 

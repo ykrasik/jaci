@@ -16,6 +16,8 @@
 
 package com.github.ykrasik.jaci.reflection;
 
+import com.github.ykrasik.jaci.util.exception.SneakyException;
+
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Objects;
@@ -45,7 +47,7 @@ public final class ReflectionUtils {
 
     /**
      * Creates an instance of this class through reflection. Class must have a no-args constructor.
-     * Bypasses any checked exceptions that could be throw and throws them at runtime.
+     * Any exceptions thrown during the process will be re-thrown as unchecked.
      *
      * @param clazz Class to instantiate.
      * @return An instance of the provided class.
@@ -57,7 +59,41 @@ public final class ReflectionUtils {
         try {
             return accessor.newInstance(clazz);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw SneakyException.sneakyThrow(e);
+        }
+    }
+
+    /**
+     * Get all inner classes and interfaces declared by the given class.
+     *
+     * @param clazz Class to reflect inner classes from.
+     * @return An {@code Array} of inner classes and interfaces declared by the given class.
+     * @throws RuntimeException If any error occurs.
+     */
+    public static Class<?>[] getDeclaredClasses(Class<?> clazz) {
+        assertReflectionAccessor();
+        try {
+            return accessor.getDeclaredClasses(clazz);
+        } catch (Exception e) {
+            throw SneakyException.sneakyThrow(e);
+        }
+    }
+
+    /**
+     * Returns a constructor of the given class that takes the given parameter types.
+     *
+     * @param clazz Class to reflect constructor for.
+     * @param parameterTypes Parameter types of the constructor.
+     * @param <T> Class type.
+     * @return A constructor of the given class that takes the given parameter types.
+     * @throws RuntimeException If the class doesn't have a constructor with the given parameter types.
+     */
+    public static <T> ReflectionConstructor<T> getDeclaredConstructor(Class<T> clazz, Class<?>... parameterTypes) {
+        assertReflectionAccessor();
+        try {
+            return accessor.getDeclaredConstructor(clazz, parameterTypes);
+        } catch (Exception e) {
+            throw SneakyException.sneakyThrow(e);
         }
     }
 
@@ -75,7 +111,7 @@ public final class ReflectionUtils {
             // TODO: Support inheritance?
             return accessor.getDeclaredMethod(clazz, methodName, NO_ARGS_TYPE);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw SneakyException.sneakyThrow(e);
         }
     }
 
@@ -128,6 +164,19 @@ public final class ReflectionUtils {
     }
 
     /**
+     * Determines if the class or interface represented by first Class parameter is either the same as, or is a superclass or
+     * superinterface of, the class or interface represented by the second Class parameter.
+     *
+     * @param c1 Class to check.
+     * @param c2 Class to check against.
+     * @return {@code true} if the first class parameter is either the same as or a superinterface of the second class parameter.
+     */
+    public static boolean isAssignableFrom(Class<?> c1, Class<?> c2) {
+        assertReflectionAccessor();
+        return accessor.isAssignableFrom(c1, c2);
+    }
+
+    /**
      * Invokes the method, using the provided instance as 'this'.
      * Method must be no-args and have a return value of type {@code T}.
      * If the method is private, it will be made accessible outside of it's class.
@@ -144,7 +193,7 @@ public final class ReflectionUtils {
         try {
             return (T) method.invoke(instance, NO_ARGS);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw SneakyException.sneakyThrow(e);
         }
     }
 

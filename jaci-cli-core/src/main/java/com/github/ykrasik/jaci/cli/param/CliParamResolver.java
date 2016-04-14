@@ -43,4 +43,9 @@ public class CliParamResolver implements ParamDefResolver<CliParam> {
     public DoubleCliParam doubleParam(DoubleParamDef def) {
         return DoubleCliParam.fromDef(def);
     }
+
+    @Override
+    public <E extends Enum<E>> CliParam enumParam(EnumParamDef<E> def) {
+        return EnumCliParam.fromDef(def);
+    }
 }

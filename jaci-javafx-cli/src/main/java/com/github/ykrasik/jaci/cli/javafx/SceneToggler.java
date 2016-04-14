@@ -28,13 +28,13 @@ import java.util.Objects;
 /**
  * An {@link EventHandler} that toggles between the currently active scene and a different scene
  * when a key combination is pressed.
- * The default key combination is Ctrl+` (back tick, usually above tab).
+ * The default key combination is ` (back tick, usually above tab).
  *
  * @author Yevgeny Krasik
  */
 // FIXME: When doing a sceneToggle and the cursor is over the textArea, the cursor remains the text cursor.
 public class SceneToggler implements EventHandler<KeyEvent> {
-    private static final KeyCombination DEFAULT_KEY_COMBINATION = KeyCombination.keyCombination("Ctrl+`");
+    private static final KeyCombination DEFAULT_KEY_COMBINATION = KeyCombination.keyCombination("`");
 
     private final Stage stage;
     private final Scene scene;

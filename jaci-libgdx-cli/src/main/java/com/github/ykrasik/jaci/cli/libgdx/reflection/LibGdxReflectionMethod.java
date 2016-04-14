@@ -32,7 +32,7 @@ import java.util.Objects;
  * @author Yevgeny Krasik
  */
 public class LibGdxReflectionMethod implements ReflectionMethod {
-    private static final Annotation[] ANNOTATIONS = new Annotation[0];
+    private static final Annotation[] EMPTY_ANNOTATIONS = { };
 
     private final Method method;
     private final List<ReflectionParameter> parameters;
@@ -49,7 +49,7 @@ public class LibGdxReflectionMethod implements ReflectionMethod {
         for (int i = 0; i < parameterTypes.length; i++) {
             final Class<?> parameterType = parameterTypes[i];
             // FIXME: Parameter annotations are unsupported for the libGdx reflection API :(
-            params.add(new ReflectionParameter(parameterType, ANNOTATIONS, i));
+            params.add(new ReflectionParameter(parameterType, EMPTY_ANNOTATIONS, i));
         }
         return Collections.unmodifiableList(params);
     }
@@ -77,4 +77,13 @@ public class LibGdxReflectionMethod implements ReflectionMethod {
 
     @Override
     public Class<?> getReturnType() { return method.getReturnType(); }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("LibGdxReflectionMethod{");
+        sb.append("method=").append(method);
+        sb.append(", parameters=").append(parameters);
+        sb.append('}');
+        return sb.toString();
+    }
 }

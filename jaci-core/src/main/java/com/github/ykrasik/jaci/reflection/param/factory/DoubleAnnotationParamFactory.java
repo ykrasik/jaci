@@ -35,7 +35,10 @@ public class DoubleAnnotationParamFactory extends AnnotationMethodParamFactory<D
     }
 
     @Override
-    protected DoubleParamDef createFromAnnotation(Object instance, String defaultParamName, DoubleParam annotation) throws Exception {
+    protected DoubleParamDef createFromAnnotation(Object instance,
+                                                  String defaultParamName,
+                                                  DoubleParam annotation,
+                                                  Class<?> type) throws Exception {
         final DoubleParamDef.Builder builder = new DoubleParamDef.Builder(getNonEmptyString(annotation.value()).getOrElse(defaultParamName));
 
         final Opt<String> description = getNonEmptyString(annotation.description());
@@ -48,18 +51,20 @@ public class DoubleAnnotationParamFactory extends AnnotationMethodParamFactory<D
             // Otherwise, use the value supplied by 'defaultValue'.
             final Opt<String> defaultValueSupplierName = getNonEmptyString(annotation.defaultValueSupplier());
             if (defaultValueSupplierName.isPresent()) {
-                // FIXME: Test that this works when the supplier returns primitive (Double.TYPE)
                 builder.setOptional(ReflectionSuppliers.reflectionSupplier(instance, defaultValueSupplierName.get(), Double.TYPE, Double.class));
             } else {
                 builder.setOptional(annotation.defaultValue());
             }
         }
 
+        // Ignore for primitives.
+        builder.setNullable(annotation.nullable() && type == Double.class);
+
         return builder.build();
     }
 
     @Override
-    protected DoubleParamDef createDefault(String defaultParamName) throws Exception {
+    protected DoubleParamDef createDefault(String defaultParamName, Class<?> type) throws Exception {
         return new DoubleParamDef.Builder(defaultParamName).build();
     }
 }

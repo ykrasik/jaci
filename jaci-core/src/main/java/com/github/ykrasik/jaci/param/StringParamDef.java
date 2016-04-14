@@ -43,8 +43,11 @@ import java.util.Objects;
 public class StringParamDef extends AbstractParamDef<String> {
     private final Spplr<List<String>> valuesSupplier;
 
-    private StringParamDef(Identifier identifier, Opt<Spplr<String>> defaultValueSupplier, Spplr<List<String>> valuesSupplier) {
-        super(identifier, defaultValueSupplier);
+    private StringParamDef(Identifier identifier,
+                           Opt<Spplr<String>> defaultValueSupplier,
+                           boolean nullable,
+                           Spplr<List<String>> valuesSupplier) {
+        super(identifier, defaultValueSupplier, nullable);
         this.valuesSupplier = Objects.requireNonNull(valuesSupplier, "valuesSupplier");
     }
 
@@ -70,6 +73,7 @@ public class StringParamDef extends AbstractParamDef<String> {
         private final String name;
         private String description = "string";
         private Opt<Spplr<String>> defaultValueSupplier = Opt.absent();
+        private boolean nullable;
         private Spplr<List<String>> valuesSupplier = NO_VALUES_SUPPLIER;
 
         /**
@@ -89,7 +93,7 @@ public class StringParamDef extends AbstractParamDef<String> {
         }
 
         /**
-         * Set this parameter to be optional, and return the given constant value if it is not passed.
+         * Set this parameter to be optional with the given default value.
          *
          * @param defaultValue Constant value to return if the parameter isn't passed.
          * @return {@code this}, for chaining.
@@ -99,13 +103,22 @@ public class StringParamDef extends AbstractParamDef<String> {
         }
 
         /**
-         * Set this parameter to be optional, and invoke the given {@link Spplr} for a default value if it is not passed.
+         * Set this parameter to be optional with a default value supplied by then given {@link Spplr}.
          *
          * @param defaultValueSupplier Supplier to invoke if the parameter isn't passed.
          * @return {@code this}, for chaining.
          */
         public Builder setOptional(Spplr<String> defaultValueSupplier) {
             this.defaultValueSupplier = Opt.of(defaultValueSupplier);
+            return this;
+        }
+
+        /**
+         * @param nullable Whether this parameter accepts {@code null} values.
+         * @return {@code this}, for chaining.
+         */
+        public Builder setNullable(boolean nullable) {
+            this.nullable = nullable;
             return this;
         }
 
@@ -150,7 +163,7 @@ public class StringParamDef extends AbstractParamDef<String> {
          */
         public StringParamDef build() {
             final Identifier identifier = new Identifier(name, description);
-            return new StringParamDef(identifier, defaultValueSupplier, valuesSupplier);
+            return new StringParamDef(identifier, defaultValueSupplier, nullable, valuesSupplier);
         }
 
         @Override
@@ -159,6 +172,7 @@ public class StringParamDef extends AbstractParamDef<String> {
             sb.append("name='").append(name).append('\'');
             sb.append(", description='").append(description).append('\'');
             sb.append(", defaultValueSupplier=").append(defaultValueSupplier);
+            sb.append(", nullable=").append(nullable);
             sb.append(", valuesSupplier=").append(valuesSupplier);
             sb.append('}');
             return sb.toString();

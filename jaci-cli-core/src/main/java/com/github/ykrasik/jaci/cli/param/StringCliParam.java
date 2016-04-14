@@ -17,6 +17,7 @@
 package com.github.ykrasik.jaci.cli.param;
 
 import com.github.ykrasik.jaci.Identifier;
+import com.github.ykrasik.jaci.cli.CliConstants;
 import com.github.ykrasik.jaci.cli.assist.AutoComplete;
 import com.github.ykrasik.jaci.cli.assist.CliValueType;
 import com.github.ykrasik.jaci.cli.exception.ParseException;
@@ -41,23 +42,32 @@ public class StringCliParam extends AbstractCliParam<String> {
 
     public StringCliParam(Identifier identifier,
                           Opt<Spplr<String>> defaultValueSupplier,
+                          final boolean nullable,
                           Spplr<List<String>> valuesSupplier) {
-        super(identifier, defaultValueSupplier);
+        super(identifier, defaultValueSupplier, nullable);
 
         // If the supplier is a const supplier type (supplies a constant or cached value), the returned supplier
         // will also cache the result and not re-calculate it on every call.
         this.valuesSupplier = MoreSuppliers.map(Objects.requireNonNull(valuesSupplier, "valuesSupplier"), new Func<List<String>, Trie<CliValueType>>() {
             @Override
             public Trie<CliValueType> apply(List<String> values) {
-                return createValuesTrie(values);
+                return createValuesTrie(values, nullable);
             }
         });
     }
 
-    private Trie<CliValueType> createValuesTrie(List<String> values) {
+    private Trie<CliValueType> createValuesTrie(List<String> values, boolean nullable) {
         final TrieBuilder<CliValueType> builder = new TrieBuilder<>();
         for (String value : values) {
+            if (nullable && isNull(value)) {
+                throw new IllegalArgumentException("A nullable param may not have a value called 'null': " + this);
+            }
             builder.add(value, CliValueType.COMMAND_PARAM_VALUE);
+        }
+        if (nullable) {
+            // Slightly hacky, but we want auto-complete suggestions for 'null'.
+            // This object will never be parsed from the trie, but will be offered as auto complete.
+            builder.add(CliConstants.NULL, NULL_REF);
         }
         return builder.build();
     }
@@ -68,7 +78,7 @@ public class StringCliParam extends AbstractCliParam<String> {
     }
 
     @Override
-    public String parse(String arg) throws ParseException {
+    public String parseNonNull(String arg) throws ParseException {
         final Trie<CliValueType> values = getValues();
 
         // If the values trie is empty, all values are accepted.
@@ -101,6 +111,6 @@ public class StringCliParam extends AbstractCliParam<String> {
      * @return A CLI string parameter constructed from the StringParamDef.
      */
     public static StringCliParam fromDef(StringParamDef def) {
-        return new StringCliParam(def.getIdentifier(), def.getDefaultValueSupplier(), def.getValuesSupplier());
+        return new StringCliParam(def.getIdentifier(), def.getDefaultValueSupplier(), def.isNullable(), def.getValuesSupplier());
     }
 }

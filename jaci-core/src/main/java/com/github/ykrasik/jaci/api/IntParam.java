@@ -55,6 +55,13 @@ public @interface IntParam {
     String description() default "";
 
     /**
+     * Only applicable to boxed {@code Integer} parameters, will be ignored for primitives.
+     *
+     * @return {@code true} if the parameter can accept {@code null} as a value. Defaults to {@code true}.
+     */
+    boolean nullable() default true;
+
+    /**
      * If this returns {@code true}, the annotated parameter will be considered optional.<br>
      * The default value will be either the value returned by {@link #defaultValue()} or {@link #defaultValueSupplier()}.
      * If {@link #defaultValueSupplier()} returns a non-empty {@code String}, it overrides the value returned by {@link #defaultValue()}

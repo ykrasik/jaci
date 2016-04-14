@@ -28,8 +28,8 @@ import com.github.ykrasik.jaci.util.opt.Opt;
  * @author Yevgeny Krasik
  */
 public class IntCliParam extends AbstractNumericCliParam<Integer> {
-    public IntCliParam(Identifier identifier, Opt<Spplr<Integer>> defaultValueSupplier) {
-        super(identifier, defaultValueSupplier);
+    public IntCliParam(Identifier identifier, Opt<Spplr<Integer>> defaultValueSupplier, boolean nullable) {
+        super(identifier, defaultValueSupplier, nullable);
     }
 
     @Override
@@ -49,6 +49,6 @@ public class IntCliParam extends AbstractNumericCliParam<Integer> {
      * @return A CLI int parameter constructed from the IntParamDef.
      */
     public static IntCliParam fromDef(IntParamDef def) {
-        return new IntCliParam(def.getIdentifier(), def.getDefaultValueSupplier());
+        return new IntCliParam(def.getIdentifier(), def.getDefaultValueSupplier(), def.isNullable());
     }
 }

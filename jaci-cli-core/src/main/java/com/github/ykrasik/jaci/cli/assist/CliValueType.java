@@ -33,6 +33,8 @@ public enum CliValueType {
     COMMAND_PARAM_NAME(' '),
     COMMAND_PARAM_VALUE(' ');
 
+    private final Mapper<?> mapper = new Mapper<>(this);
+
     private final char suffix;
 
     CliValueType(char suffix) {
@@ -47,6 +49,15 @@ public enum CliValueType {
     }
 
     /**
+     * @param <T> Input parameter type.
+     * @return A {@link Func} that will always return this {@link CliValueType} for any input parameter.
+     */
+    @SuppressWarnings("unchecked")
+    public <T> Mapper<T> getMapper() {
+        return (Mapper<T>) mapper;
+    }
+
+    /**
      * A {@link Func} that returns a constant {@link CliValueType} for each input.
      *
      * @param <T> Source type of the function.
@@ -54,7 +65,7 @@ public enum CliValueType {
     public static class Mapper<T> implements Func<T, CliValueType> {
         private final CliValueType type;
 
-        public Mapper(CliValueType type) {
+        private Mapper(CliValueType type) {
             this.type = Objects.requireNonNull(type, "type");
         }
 

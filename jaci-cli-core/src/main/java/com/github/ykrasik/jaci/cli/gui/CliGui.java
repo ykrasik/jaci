@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2015 Yevgeny Krasik                                          *
+ * Copyright (c) 2016 Yevgeny Krasik.                                         *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -14,36 +14,22 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jaci.cli.libgdx;
+package com.github.ykrasik.jaci.cli.gui;
 
-import com.github.ykrasik.jaci.api.CommandPath;
-import com.github.ykrasik.jaci.api.ToggleCommand;
-import com.github.ykrasik.jaci.api.ToggleCommandStateAccessor;
+import com.github.ykrasik.jaci.cli.directory.CliDirectory;
 
 /**
- * Toggle commands are special commands that take a single optional boolean parameter and toggle the state of some
- * component on or off.
- *
- * @see ToggleCommand
+ * The GUI controller of a CLI, the GUI being everything around the 'terminal' screen.
  *
  * @author Yevgeny Krasik
  */
-@CommandPath("toggle")
-public class ToggleCommands {
-    @ToggleCommand(description = "A toggle command")
-    public ToggleCommandStateAccessor toggle() {
-        return new ToggleCommandStateAccessor() {
-            private boolean state;
-
-            @Override
-            public void set(boolean value) {
-                state = value;
-            }
-
-            @Override
-            public boolean get() {
-                return state;
-            }
-        };
-    }
+// TODO: In the future, this class should receive click events to display contextual information.
+public interface CliGui {
+    /**
+     * Set the 'working directory'.
+     * This is a visual detail that simply displays what the current 'working directory' is.
+     *
+     * @param workingDirectory Working directory to set.
+     */
+    void setWorkingDirectory(CliDirectory workingDirectory);
 }

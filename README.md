@@ -19,8 +19,9 @@ public class Example {
                               @StringParam(value = "str2", acceptsSupplier = "strSupplier", optional = true, defaultValue = "default") String str2,
                               @IntParam("int") int i,
                               @DoubleParam(value = "double", optional = true, defaultValueSupplier = "doubleSupplier") double d,
-                              @BoolParam(value = "flag", optional = true) boolean flag) {
-        output.message("str1=" + str1 + ", str2=" + str2 + ", i=" + i + ", d=" + d + ", flag=" + flag);
+                              @BoolParam(value = "flag", optional = true) boolean flag,
+                              @EnumParam(value = "enum", nullable=true) SomeEnum enumParam) {
+        output.message("str1=" + str1 + ", str2=" + str2 + ", i=" + i + ", d=" + d + ", flag=" + flag + ", enumParam=" + enumParam);
     }
 }
 
@@ -42,11 +43,15 @@ Let's explain what's going on here:
   3. A mandatory int called `int`.
   4. An optional double called `double`. If the parameter doesn't receive a value, it will have a value of `3.5` (supplied by a supplier method).
   5. An optional boolean called `flag`.
+  6. A mandatory Enum param called `enumParam`, which is nullable. This parameter must be passed an explicit value that is one of the enum param's legal values, or `null`.
 * The command then just sends the parameter values to the output (The output instance itself will be injected by the library
   when it processes the class: [Wiki](https://github.com/ykrasik/jaci/wiki/Annotation-API))  
 
 Here is how this looks on a LibGdx CLI implementation:  
 ![alt text](https://github.com/ykrasik/jaci/wiki/images/fullExample.PNG)
+
+# Examples
+See the [Examples project](https://github.com/ykrasik/jaci-examples) for examples.
 
 # Full Documentation
 See the [Wiki](https://github.com/ykrasik/jaci/wiki) for full documentation.
@@ -63,14 +68,14 @@ Since parameter annotations are a big part of the library, and this only potenti
 Uses the Java reflection API. Supports full reflection capabilities (including parameter annotations), but does not compile with GWT. 
 Use this if you want full support for Jaci's capabilities and aren't using GWT backend.
 ```
-compile "com.github.ykrasik:jaci-libgdx-cli-java:0.3.2"
+compile "com.github.ykrasik:jaci-libgdx-cli-java:0.4.0"
 ```
 
 #### jaci-libgdx-cli-gwt
 Uses the libGdx reflection API. Does not support parameter annotations (they will be ignored), but compiles with GWT. 
 Use this if you use GWT as a backend.
 ```
-compile "com.github.ykrasik:jaci-libgdx-cli-gwt:0.3.2"
+compile "com.github.ykrasik:jaci-libgdx-cli-gwt:0.4.0"
 ```
 
 In your .gwt.xml file, add the following:

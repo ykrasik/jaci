@@ -19,13 +19,16 @@ package com.github.ykrasik.jaci.cli.javafx;
 import com.github.ykrasik.jaci.cli.Cli;
 import com.github.ykrasik.jaci.cli.CliShell;
 import com.github.ykrasik.jaci.cli.commandline.CommandLineManager;
+import com.github.ykrasik.jaci.cli.gui.CliGui;
 import com.github.ykrasik.jaci.cli.hierarchy.CliCommandHierarchy;
 import com.github.ykrasik.jaci.cli.hierarchy.CliCommandHierarchyImpl;
 import com.github.ykrasik.jaci.cli.javafx.commandline.JavaFxCommandLineManager;
+import com.github.ykrasik.jaci.cli.javafx.gui.JavaFxCliGui;
 import com.github.ykrasik.jaci.cli.javafx.output.JavaFxCliOutput;
-import com.github.ykrasik.jaci.cli.output.CliOutput;
+import com.github.ykrasik.jaci.cli.output.CliPrinter;
 import com.github.ykrasik.jaci.hierarchy.CommandHierarchyDef;
 import com.github.ykrasik.jaci.reflection.JavaReflectionAccessor;
+import com.github.ykrasik.jaci.util.exception.SneakyException;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
@@ -75,7 +78,7 @@ public class JavaFxCliBuilder {
      * @param classes Classes to process.
      * @return {@code this}, for chaining.
      */
-    public JavaFxCliBuilder processClass(Class<?>... classes) {
+    public JavaFxCliBuilder processClasses(Class<?>... classes) {
         hierarchyBuilder.processClasses(classes);
         return this;
     }
@@ -147,22 +150,22 @@ public class JavaFxCliBuilder {
             final FXMLLoader loader = new FXMLLoader(fxmlUrl);
             final Parent cliNode = (Parent) loader.load();
 
-            // Buffer for cli output.
-            final TextArea textArea = (TextArea) cliNode.lookup("#cliOutput");
-            textArea.setFocusTraversable(false);
-
             // Label for 'working directory'.
             final Label workingDirectory = (Label) cliNode.lookup("#workingDirectory");
+            final CliGui gui = new JavaFxCliGui(workingDirectory);
 
-            // The above combine into a CliOutput.
-            final CliOutput output = new JavaFxCliOutput(textArea, workingDirectory);
+            // Printers for cli output.
+            final TextArea textArea = (TextArea) cliNode.lookup("#cliOutput");
+            textArea.setFocusTraversable(false);
+            final CliPrinter out = new CliPrinter(new JavaFxCliOutput(textArea));
+            final CliPrinter err = new CliPrinter(new JavaFxCliOutput(textArea));
 
             // TextField as command line.
             final TextField commandLine = (TextField) cliNode.lookup("#commandLine");
             final CommandLineManager commandLineManager = new JavaFxCommandLineManager(commandLine);
 
             // Create the shell and the actual CLI.
-            final CliShell shell = new CliShell.Builder(hierarchy, output)
+            final CliShell shell = new CliShell.Builder(hierarchy, gui, out, err)
                 .setMaxCommandHistory(maxCommandHistory)
                 .build();
             final Cli cli = new Cli(shell, commandLineManager);
@@ -173,7 +176,7 @@ public class JavaFxCliBuilder {
 
             return cliNode;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw SneakyException.sneakyThrow(e);
         }
     }
 

@@ -35,7 +35,10 @@ public class IntAnnotationParamFactory extends AnnotationMethodParamFactory<IntP
     }
 
     @Override
-    protected IntParamDef createFromAnnotation(Object instance, String defaultParamName, IntParam annotation) throws Exception {
+    protected IntParamDef createFromAnnotation(Object instance,
+                                               String defaultParamName,
+                                               IntParam annotation,
+                                               Class<?> type) throws Exception {
         final IntParamDef.Builder builder = new IntParamDef.Builder(getNonEmptyString(annotation.value()).getOrElse(defaultParamName));
 
         final Opt<String> description = getNonEmptyString(annotation.description());
@@ -48,18 +51,20 @@ public class IntAnnotationParamFactory extends AnnotationMethodParamFactory<IntP
             // Otherwise, use the value supplied by 'defaultValue'.
             final Opt<String> defaultValueSupplierName = getNonEmptyString(annotation.defaultValueSupplier());
             if (defaultValueSupplierName.isPresent()) {
-                // FIXME: Test that this works when the supplier returns primitive (Integer.TYPE)
                 builder.setOptional(ReflectionSuppliers.reflectionSupplier(instance, defaultValueSupplierName.get(), Integer.TYPE, Integer.class));
             } else {
                 builder.setOptional(annotation.defaultValue());
             }
         }
 
+        // Ignore for primitives.
+        builder.setNullable(annotation.nullable() && type == Integer.class);
+
         return builder.build();
     }
 
     @Override
-    protected IntParamDef createDefault(String defaultParamName) throws Exception {
+    protected IntParamDef createDefault(String defaultParamName, Class<?> type) throws Exception {
         return new IntParamDef.Builder(defaultParamName).build();
     }
 }

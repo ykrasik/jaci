@@ -18,6 +18,8 @@ package com.github.ykrasik.jaci.command;
 
 import com.github.ykrasik.jaci.api.CommandOutput;
 
+import java.util.Objects;
+
 /**
  * A {@link CommandOutput} that promises to eventually contain a concrete implementation.
  * Delegates all calls to that concrete implementation.
@@ -34,7 +36,7 @@ public class CommandOutputPromise implements CommandOutput {
      * @param output Concrete implementation to delegate to.
      */
     public void setOutput(CommandOutput output) {
-        this.output = output;
+        this.output = Objects.requireNonNull(output, "output");
     }
 
     @Override

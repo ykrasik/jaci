@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2015 Yevgeny Krasik                                          *
+ * Copyright (c) 2016 Yevgeny Krasik.                                         *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -14,39 +14,39 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package com.github.ykrasik.jaci.cli.libgdx;
+package com.github.ykrasik.jaci.commands;
 
 import com.github.ykrasik.jaci.api.Command;
 import com.github.ykrasik.jaci.api.CommandOutput;
 import com.github.ykrasik.jaci.api.CommandPath;
-import com.github.ykrasik.jaci.api.StringParam;
+import com.github.ykrasik.jaci.api.EnumParam;
 
 /**
- * A string param may be constrained to only accept a certain set of values.
- * These are either pre-determined (set in the annotation) or computed at runtime via a supplier.
+ * Examples with enum parameters.
  *
  * @author Yevgeny Krasik
  */
-@CommandPath("stringParam")
-public class StringParamCommands {
+@CommandPath("enum")
+public class EnumCommands {
     private CommandOutput output;
 
-    @Command(description = "String param that accepts all values")
-    public void unconstrainedString(@StringParam(accepts = {}) String str) {
-        output.message("unconstrainedString: str=" + str);
+    @Command
+    public void paramExample(@EnumParam("first") Enum1 first,
+                             @EnumParam(value = "second", optional = true, defaultValue = "Dummy") Enum1 second,
+                             @EnumParam(value = "third", optional = true, defaultValueSupplier = "supply") Enum2 third,
+                             Enum2 fourth) {
+        output.message("first="+first+", second="+second+", third=" + third + ", fourth=" + fourth);
     }
 
-    @Command(description = "String param that only accepts values stated in the annotation.")
-    public void staticConstrainedString(@StringParam(accepts = {"a", "b", "c"}) String str) {
-        output.message("staticConstrainedString: str=" + str);
+    private Enum2 supply() {
+        return Enum2.var;
     }
 
-    @Command(description = "String param that only accepts values supplied at runtime via a supplier.")
-    public void dynamicConstrainedString(@StringParam(acceptsSupplier = "stringSupplier") String str) {
-        output.message("dynamicConstrainedString: str=" + str);
+    public enum Enum1 {
+        value, ANOTHER_VALUE, CASEcheck, Dummy
     }
 
-    private String[] stringSupplier() {
-        return new String[]{ "d", "e", "f" };
+    public enum Enum2 {
+        val, var
     }
 }

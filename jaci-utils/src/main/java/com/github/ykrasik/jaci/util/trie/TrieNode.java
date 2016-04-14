@@ -131,6 +131,37 @@ public class TrieNode<T> implements Trie<T> {
     }
 
     @Override
+    public Trie<T> add(String word, T value) {
+        return getOrCreate(word, 0, value);
+    }
+
+    private TrieNode<T> getOrCreate(String word, int index, T value) {
+        // Recursive stop condition - end of string.
+        if (index == word.length()) {
+            final TrieNode<T> newNode = new TrieNode<>(c);
+            newNode.setValue(value);
+            return newNode;
+        }
+
+        final char nextChar = word.charAt(index);
+        final Opt<TrieNode<T>> child = getChild(nextChar);
+        final TrieNode<T> newChild;
+        if (child.isPresent()) {
+            newChild = child.get().getOrCreate(word, index + 1, value);
+        } else {
+            // TODO: As an optimization, can probably create the rest of the branch here without recursion.
+            newChild = new TrieNode<T>(nextChar).getOrCreate(word, index + 1, value);
+        }
+        return withChild(newChild);
+    }
+
+    private TrieNode<T> withChild(TrieNode<T> newChild) {
+        final Map<Character, TrieNode<T>> newChildren = new HashMap<>(children);
+        newChildren.put(newChild.c, newChild);
+        return new TrieNode<>(c, newChildren);
+    }
+
+    @Override
     public Trie<T> subTrie(String prefix) {
         if (prefix.isEmpty() || this.isEmpty()) {
             return this;

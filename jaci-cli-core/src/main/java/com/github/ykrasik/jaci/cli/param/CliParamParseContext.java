@@ -38,8 +38,6 @@ import java.util.*;
  * @author Yevgeny Krasik
  */
 public class CliParamParseContext {
-    private static final CliValueType.Mapper<CliParam> PARAM_NAME_MAPPER = new CliValueType.Mapper<>(CliValueType.COMMAND_PARAM_NAME);
-
     private final List<CliParam> params;
     private final Trie<CliParam> paramsTrie;
 
@@ -179,7 +177,7 @@ public class CliParamParseContext {
         final List<Object> commandArgs = new ArrayList<>(params.size());
         for (CliParam param : params) {
             final Object parsedValue = parsedValues.get(param);
-            if (parsedValue == null) {
+            if (parsedValue == null && !param.isNullable()) {
                 // If there is a missing arg value at this point, this is an internal error.
                 throw new IllegalStateException("Internal Error: Not all params have been parsed! Missing=" + param);
             }
@@ -251,7 +249,7 @@ public class CliParamParseContext {
                 return !parsedValues.containsKey(value);
             }
         });
-        final Trie<CliValueType> paramNamePossibilities = unboundPrefixParams.mapValues(PARAM_NAME_MAPPER);
+        final Trie<CliValueType> paramNamePossibilities = unboundPrefixParams.mapValues(CliValueType.COMMAND_PARAM_NAME.<CliParam>getMapper());
         return new AutoComplete(prefix, paramNamePossibilities);
     }
 
@@ -263,10 +261,10 @@ public class CliParamParseContext {
     }
 
     private void doAddArg(CliParam param, Object parsedValue) throws ParseException {
-        final Object prevArg = parsedValues.put(param, parsedValue);
-        if (prevArg != null) {
-            throw new ParseException(ParseError.PARAM_ALREADY_BOUND, "Parameter '"+param.getIdentifier().getName()+"' is already bound a value: '"+prevArg+'\'');
+        if (parsedValues.containsKey(param)) {
+            throw new ParseException(ParseError.PARAM_ALREADY_BOUND, "Parameter '"+param.getIdentifier().getName()+"' is already bound a value: '"+parsedValues.get(param)+'\'');
         }
+        parsedValues.put(param, parsedValue);
     }
 
     @Override

@@ -17,6 +17,7 @@
 package com.github.ykrasik.jaci.cli;
 
 import com.github.ykrasik.jaci.cli.commandline.CommandLineManager;
+import com.github.ykrasik.jaci.cli.output.CliPrinter;
 import com.github.ykrasik.jaci.util.opt.Opt;
 
 import java.util.Objects;
@@ -35,6 +36,20 @@ public class Cli {
     public Cli(CliShell shell, CommandLineManager commandLineManager) {
         this.shell = Objects.requireNonNull(shell, "shell");
         this.commandLineManager = Objects.requireNonNull(commandLineManager, "commandLineManager");
+    }
+
+    /**
+     * @return CLI stdOut.
+     */
+    public CliPrinter getOut() {
+        return shell.getOut();
+    }
+
+    /**
+     * @return CLI stdErr.
+     */
+    public CliPrinter getErr() {
+        return shell.getErr();
     }
 
     /**

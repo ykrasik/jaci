@@ -30,8 +30,8 @@ import java.util.Objects;
  * @author Yevgeny Krasik
  */
 public class BooleanParamDef extends AbstractParamDef<Boolean> {
-    private BooleanParamDef(Identifier identifier, Opt<Spplr<Boolean>> defaultValueSupplier) {
-        super(identifier, defaultValueSupplier);
+    private BooleanParamDef(Identifier identifier, Opt<Spplr<Boolean>> defaultValueSupplier, boolean nullable) {
+        super(identifier, defaultValueSupplier, nullable);
     }
 
     @Override
@@ -46,6 +46,7 @@ public class BooleanParamDef extends AbstractParamDef<Boolean> {
         private final String name;
         private String description = "boolean";
         private Opt<Spplr<Boolean>> defaultValueSupplier = Opt.absent();
+        private boolean nullable = false;
 
         /**
          * @param name Parameter name.
@@ -64,7 +65,7 @@ public class BooleanParamDef extends AbstractParamDef<Boolean> {
         }
 
         /**
-         * Set this parameter to be optional, and return the given constant value if it is not passed.
+         * Set this parameter to be optional with the given default value.
          *
          * @param defaultValue Constant value to return if the parameter isn't passed.
          * @return {@code this}, for chaining.
@@ -74,7 +75,7 @@ public class BooleanParamDef extends AbstractParamDef<Boolean> {
         }
 
         /**
-         * Set this parameter to be optional, and invoke the given {@link Spplr} for a default value if it is not passed.
+         * Set this parameter to be optional with a default value supplied by then given {@link Spplr}.
          *
          * @param defaultValueSupplier Supplier to invoke if the parameter isn't passed.
          * @return {@code this}, for chaining.
@@ -85,11 +86,20 @@ public class BooleanParamDef extends AbstractParamDef<Boolean> {
         }
 
         /**
+         * @param nullable Whether this parameter accepts {@code null} values.
+         * @return {@code this}, for chaining.
+         */
+        public Builder setNullable(boolean nullable) {
+            this.nullable = nullable;
+            return this;
+        }
+
+        /**
          * @return A {@link BooleanParamDef} built out of this builder's parameters.
          */
         public BooleanParamDef build() {
             final Identifier identifier = new Identifier(name, description);
-            return new BooleanParamDef(identifier, defaultValueSupplier);
+            return new BooleanParamDef(identifier, defaultValueSupplier, nullable);
         }
 
         @Override
@@ -98,6 +108,7 @@ public class BooleanParamDef extends AbstractParamDef<Boolean> {
             sb.append("name='").append(name).append('\'');
             sb.append(", description='").append(description).append('\'');
             sb.append(", defaultValueSupplier=").append(defaultValueSupplier);
+            sb.append(", nullable=").append(nullable);
             sb.append('}');
             return sb.toString();
         }

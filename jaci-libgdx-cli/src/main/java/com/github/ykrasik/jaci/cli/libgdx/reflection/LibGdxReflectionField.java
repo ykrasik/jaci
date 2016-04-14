@@ -51,4 +51,12 @@ public class LibGdxReflectionField implements ReflectionField {
 
     @Override
     public void set(Object obj, Object value) throws Exception { field.set(obj, value); }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("LibGdxReflectionField{");
+        sb.append("field=").append(field);
+        sb.append('}');
+        return sb.toString();
+    }
 }

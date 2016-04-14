@@ -7,3 +7,5 @@ dependencies {
     testCompile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
     testCompile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
 }
+
+// FIXME: This should be the only module containing all other module's sources for GWT.

@@ -32,6 +32,8 @@ import com.github.ykrasik.jaci.util.opt.Opt;
  * Any parameter can be optional. A parameter will be considered optional if {@link #getDefaultValueSupplier()} returns
  * a {@code present} value.<br>
  *
+ * @param <T> Parameter value type.
+ *
  * @author Yevgeny Krasik
  */
 public interface ParamDef<T> extends Identifiable {
@@ -43,6 +45,11 @@ public interface ParamDef<T> extends Identifiable {
      * @return A {@code present} {@link Spplr} if this parameter should be optional, or an {@code absent} one otherwise.
      */
     Opt<Spplr<T>> getDefaultValueSupplier();
+
+    /**
+     * @return {@code true} if the parameter can accept {@code null} as a value.
+     */
+    boolean isNullable();
 
     /**
      * Resolve this paramDef into a concrete implementation using double-dispatch.

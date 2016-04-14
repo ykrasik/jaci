@@ -16,7 +16,6 @@
 
 package com.github.ykrasik.jaci.cli.libgdx;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -28,12 +27,15 @@ import java.util.Objects;
  * An {@link InputListener} that should be registered with a {@link com.badlogic.gdx.scenes.scene2d.Stage} as a listener
  * {@link com.badlogic.gdx.scenes.scene2d.Stage#addListener(com.badlogic.gdx.scenes.scene2d.EventListener)}.
  * Will toggle an actor's visibility on and off according to {@link InputEvent}s.
- * By default, toggles on the default combination of Ctrl+` (aka tilda, back-tick, grave).
+ * By default, toggles on the default key of ` (aka tilda, back-tick, grave).
  * If a different toggle combination is desired, subclass this class and override {@link #shouldToggle(int)}.
+ *
+ * @deprecated Use {@link com.github.ykrasik.jaci.cli.libgdx.input.KeyCombinationProcessor} instead.
  *
  * @author Yevgeny Krasik
  */
 // TODO: Add A LibGdxCliScreenToggler
+@Deprecated
 public class LibGdxVisibilityToggler extends InputListener {
     private final Actor actor;
 
@@ -53,13 +55,13 @@ public class LibGdxVisibilityToggler extends InputListener {
     }
 
     /**
-     * The default toggle combination is Ctrl+` (back tick, usually above tab).
+     * The default toggle key is ` (back tick, usually above tab).
      * Can be overridden by subclasses that want to toggle on a different combination.
      *
      * @param keycode keycode that was pressed.
      * @return {@code true} if the actor's visibility should be toggled on this keycode.
      */
     protected boolean shouldToggle(int keycode) {
-        return keycode == Keys.GRAVE && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT);
+        return keycode == Keys.GRAVE;
     }
 }

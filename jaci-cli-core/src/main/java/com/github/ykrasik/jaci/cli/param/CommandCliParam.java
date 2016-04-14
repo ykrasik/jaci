@@ -40,7 +40,7 @@ public class CommandCliParam extends AbstractCliParam<CliCommand> {
     private CommandCliParam(Identifier identifier,
                             Opt<Spplr<CliCommand>> defaultValueSupplier,
                             CliCommandHierarchy hierarchy) {
-        super(identifier, defaultValueSupplier);
+        super(identifier, defaultValueSupplier, false);
 
         this.hierarchy = Objects.requireNonNull(hierarchy, "hierarchy");
     }
@@ -51,7 +51,7 @@ public class CommandCliParam extends AbstractCliParam<CliCommand> {
     }
 
     @Override
-    public CliCommand parse(String arg) throws ParseException {
+    public CliCommand parseNonNull(String arg) throws ParseException {
         return hierarchy.parsePathToCommand(arg);
     }
 

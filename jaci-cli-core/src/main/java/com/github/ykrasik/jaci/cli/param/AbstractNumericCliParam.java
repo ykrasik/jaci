@@ -32,12 +32,12 @@ import java.util.Objects;
  * @author Yevgeny Krasik
  */
 public abstract class AbstractNumericCliParam<T extends Number> extends AbstractCliParam<T> {
-    protected AbstractNumericCliParam(Identifier identifier, Opt<Spplr<T>> defaultValueSupplier) {
-        super(identifier, defaultValueSupplier);
+    protected AbstractNumericCliParam(Identifier identifier, Opt<Spplr<T>> defaultValueSupplier, boolean nullable) {
+        super(identifier, defaultValueSupplier, nullable);
     }
 
     @Override
-    public T parse(String arg) throws ParseException {
+    public T parseNonNull(String arg) throws ParseException {
         try {
             return parseNumber(Objects.requireNonNull(arg, "arg"));
         } catch (NumberFormatException ignored) {
@@ -56,6 +56,6 @@ public abstract class AbstractNumericCliParam<T extends Number> extends Abstract
 
     @Override
     public AutoComplete autoComplete(String prefix) throws ParseException {
-        throw new ParseException(ParseError.INVALID_PARAM_VALUE, "Cannot autoComplete "+getValueTypeName()+" parameter: '"+getIdentifier().getName()+"'!");
+        throw new ParseException(ParseError.INVALID_PARAM_VALUE, "Cannot autoComplete " + getValueTypeName() + " parameter: '" + getIdentifier().getName() + "'!");
     }
 }

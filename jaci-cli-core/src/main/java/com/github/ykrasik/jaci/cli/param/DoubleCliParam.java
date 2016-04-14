@@ -28,8 +28,8 @@ import com.github.ykrasik.jaci.util.opt.Opt;
  * @author Yevgeny Krasik
  */
 public class DoubleCliParam extends AbstractNumericCliParam<Double> {
-    public DoubleCliParam(Identifier identifier, Opt<Spplr<Double>> defaultValueSupplier) {
-        super(identifier, defaultValueSupplier);
+    public DoubleCliParam(Identifier identifier, Opt<Spplr<Double>> defaultValueSupplier, boolean nullable) {
+        super(identifier, defaultValueSupplier, nullable);
     }
 
     @Override
@@ -49,6 +49,6 @@ public class DoubleCliParam extends AbstractNumericCliParam<Double> {
      * @return A CLI double parameter constructed from the DoubleParamDef.
      */
     public static DoubleCliParam fromDef(DoubleParamDef def) {
-        return new DoubleCliParam(def.getIdentifier(), def.getDefaultValueSupplier());
+        return new DoubleCliParam(def.getIdentifier(), def.getDefaultValueSupplier(), def.isNullable());
     }
 }

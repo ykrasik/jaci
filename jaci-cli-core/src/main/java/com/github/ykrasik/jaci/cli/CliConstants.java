@@ -54,4 +54,6 @@ public final class CliConstants {
      * </ul>
      */
     public static final String NAMED_PARAM_PREFIX = "-";
+
+    public static final String NULL = "null";
 }
