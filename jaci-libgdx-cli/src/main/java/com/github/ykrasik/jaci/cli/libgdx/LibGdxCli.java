@@ -85,9 +85,6 @@ import java.util.Objects;
 public class LibGdxCli extends Table {
     private final Array<VisibleListener> visibleListeners = new Array<>(2);
 
-    private final TextField commandLine;
-    private boolean needKeyboardFocus;
-
     private final Cli cli;
 
     /**
@@ -115,7 +112,7 @@ public class LibGdxCli extends Table {
         final CliPrinter err = new CliPrinter(new LibGdxCliOutput(buffer, Color.SALMON), tab);
 
         // TextField as command line.
-        commandLine = new TextField("", skin, "commandLine");
+        final TextField commandLine = new TextField("", skin, "commandLine");
         commandLine.setName("commandLine");
         final CommandLineManager commandLineManager = new LibGdxCommandLineManager(commandLine);
 
@@ -163,9 +160,9 @@ public class LibGdxCli extends Table {
             @Override
             public void onVisibleChange(boolean wasVisible, boolean isVisible) {
                 if (!wasVisible && isVisible) {
-                    setNeedKeyboardFocus(true);
+                    setKeyboardFocus(commandLine);
                 } else {
-                    setNeedKeyboardFocus(false);
+                    setKeyboardFocus(null);
                 }
             }
         });
@@ -178,28 +175,11 @@ public class LibGdxCli extends Table {
         this.setFillParent(true);
     }
 
-    private void setNeedKeyboardFocus(boolean needKeyboardFocus) {
-        if (needKeyboardFocus) {
-            this.needKeyboardFocus = true;
-        } else {
-            final Stage stage = getStage();
-            if (stage != null) {
-                stage.setKeyboardFocus(null);
-            }
-            this.needKeyboardFocus = false;
+    private void setKeyboardFocus(TextField commandLine) {
+        final Stage stage = getStage();
+        if (stage != null) {
+            stage.setKeyboardFocus(commandLine);
         }
-    }
-
-    @Override
-    public void act(float delta) {
-        if (needKeyboardFocus) {
-            final Stage stage = getStage();
-            if (stage != null) {
-                stage.setKeyboardFocus(commandLine);
-                needKeyboardFocus = false;
-            }
-        }
-        super.act(delta);
     }
 
     /**

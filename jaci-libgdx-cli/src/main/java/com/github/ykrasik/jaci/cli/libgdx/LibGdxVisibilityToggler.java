@@ -30,9 +30,12 @@ import java.util.Objects;
  * By default, toggles on the default key of ` (aka tilda, back-tick, grave).
  * If a different toggle combination is desired, subclass this class and override {@link #shouldToggle(int)}.
  *
+ * @deprecated Use {@link com.github.ykrasik.jaci.cli.libgdx.input.KeyCombinationProcessor} instead.
+ *
  * @author Yevgeny Krasik
  */
 // TODO: Add A LibGdxCliScreenToggler
+@Deprecated
 public class LibGdxVisibilityToggler extends InputListener {
     private final Actor actor;
 

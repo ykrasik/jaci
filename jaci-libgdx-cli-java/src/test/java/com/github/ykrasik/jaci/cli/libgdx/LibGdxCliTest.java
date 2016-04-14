@@ -18,10 +18,13 @@ package com.github.ykrasik.jaci.cli.libgdx;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.github.ykrasik.jaci.cli.libgdx.input.KeyCombinationProcessor;
 import com.github.ykrasik.jaci.commands.*;
 
 /**
@@ -56,10 +59,18 @@ public class LibGdxCliTest extends ApplicationAdapter {
         stage = new Stage();
         stage.addActor(cli);
 
-        // Add an InputListener that will toggle the CLI's visibility on and off on the default ` key.
-        stage.addListener(new LibGdxVisibilityToggler(cli));
+        final InputMultiplexer multiplexer = new InputMultiplexer();
 
-        Gdx.input.setInputProcessor(stage);
+        // Add an InputListener that will toggle the CLI's visibility on and off on the ` key.
+        multiplexer.addProcessor(new KeyCombinationProcessor(Keys.GRAVE) {
+            @Override
+            protected void fire() {
+                cli.toggleVisibility();
+            }
+        });
+        multiplexer.addProcessor(stage);
+
+        Gdx.input.setInputProcessor(multiplexer);
     }
 
     @Override
