@@ -90,6 +90,11 @@ public @interface StringParam {
     String acceptsSupplier() default "";
 
     /**
+     * @return {@code true} if the parameter can accept {@code null} as a value. Defaults to {@code true}.
+     */
+    boolean nullable() default true;
+
+    /**
      * If this returns {@code true}, the annotated parameter will be considered optional.<br>
      * The default value will be either the value returned by {@link #defaultValue()} or {@link #defaultValueSupplier()}.
      * If {@link #defaultValueSupplier()} returns a non-empty {@code String}, it overrides the value returned by {@link #defaultValue()}
@@ -98,11 +103,6 @@ public @interface StringParam {
      * @return True if this parameter is optional.
      */
     boolean optional() default false;
-
-    /**
-     * @return {@code true} if the parameter can accept {@code null} as a value. Defaults to {@code true}.
-     */
-    boolean nullable() default true;
 
     /**
      * Constant default value - If this parameter isn't explicitly bound, this will be the default value.
